@@ -59,7 +59,7 @@ public class TestClipNEW{
     public static void afterClass() throws Exception {
         System.out.println("HEJ");
         int visitedBranchesCount = 0;
-        try (FileWriter writer = new FileWriter("branch_coverage_report_1_After2AddedTests.txt", true)) { // true to append
+        try (FileWriter writer = new FileWriter("branch_coverage_report_1_After4AddedTests.txt", true)) { // true to append
             for (int i = 0; i < BranchCC.visitedBranch.length; i++) {
                 if (BranchCC.visitedBranch[i]) {
                     writer.write("Branch " + i + " was executed.\n");
@@ -98,6 +98,37 @@ public class TestClipNEW{
 
         assertTrue(BranchCC.visitedBranch[2]);
     }
+
+    @Test
+    public void testGeometryFullyInsideExtent() {
+        //added
+        Point pointGeom = new Point(5, 5);
+        Envelope2D extent = new Envelope2D(0, 0, 10, 10);
+
+        Geometry result = Clipper.clip(pointGeom, extent, 0, 0);
+        assertFalse(result.isEmpty());
+
+        assertTrue(BranchCC.visitedBranch[10] || BranchCC.visitedBranch[5]);
+    }
+
+    @Test
+    public void testEnvelopePartiallyIntersectingExtent() {
+        //added
+        //create an envelope that partially intersects the clipping extent
+        Envelope envelopeGeom = new Envelope(5, 5, 15, 15); // This envelope extends beyond the extent
+        Envelope2D extent = new Envelope2D(0, 0, 10, 10);
+
+        Geometry result = Clipper.clip(envelopeGeom, extent, 0, 0);
+        assertFalse("The clipped geometry should not be empty when the envelope partially intersects the extent", result.isEmpty());
+
+        assertTrue("Branch 7 (Envelope type check) should be visited", BranchCC.visitedBranch[7]);
+        assertTrue("Branch 8 (Envelope intersects extent) should be visited", BranchCC.visitedBranch[8]);
+        assertFalse("Branch 9 (Envelope does not intersect extent) should not be visited", BranchCC.visitedBranch[9]);
+    }
+
+
+
+
 
 
 
