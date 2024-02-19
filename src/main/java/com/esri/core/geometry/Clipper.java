@@ -1133,68 +1133,117 @@ class Clipper {
 	// corner_is_inside);
 	static Geometry clip(Geometry geometry, Envelope2D extent,
 			double tolerance, double densify_dist) {
-		if (geometry.isEmpty())
+		if (geometry.isEmpty()) {
+			BranchCC.visitedBranch[0] = true;
 			return geometry;
+		}
+		else{
+			BranchCC.visitedBranch[1] = true;
 
-		if (extent.isEmpty())
+		}
+
+		if (extent.isEmpty()) {
+			BranchCC.visitedBranch[2] = true;
 			return geometry.createInstance(); // return an empty geometry
+		}
+		else{
+			BranchCC.visitedBranch[3] = true;
+
+		}
 
 		int geomtype = geometry.getType().value();
 
 		// Test firstly the simplest geometry types point and envelope.
 		// After that we'll check the envelope intersection for the optimization
 		if (geomtype == Geometry.Type.Point.value()) {
+			BranchCC.visitedBranch[4] = true;
 			Point2D pt = ((Point) geometry).getXY();
-			if (extent.contains(pt))
+			if (extent.contains(pt)) {
+				BranchCC.visitedBranch[5] = true;
 				return geometry;
-			else
+			}
+			else {
+				BranchCC.visitedBranch[6] = true;
 				return geometry.createInstance(); // return an empty geometry
+			}
 		} else if (geomtype == Geometry.Type.Envelope.value()) {
+			BranchCC.visitedBranch[7] = true;
 			Envelope2D env = new Envelope2D();
 			geometry.queryEnvelope2D(env);
 			if (env.intersect(extent)) {
+				BranchCC.visitedBranch[8] = true;
+
 				Envelope result_env = new Envelope();
 				geometry.copyTo(result_env);
 				result_env.setEnvelope2D(env);
 				return result_env;
-			} else
+			} else {
+				BranchCC.visitedBranch[9] = true;
 				return geometry.createInstance(); // return an empty geometry
+			}
 		}
 
 		// Test the geometry envelope
 		Envelope2D env_2D = new Envelope2D();
 		geometry.queryLooseEnvelope2D(env_2D);
-		if (extent.contains(env_2D))
+		if (extent.contains(env_2D)) {
+			BranchCC.visitedBranch[10] = true;
 			return geometry;// completely inside of bounds
-		if (!extent.isIntersecting(env_2D))
+		}
+		else{
+			BranchCC.visitedBranch[11] = true;
+		}
+		if (!extent.isIntersecting(env_2D)) {
+			BranchCC.visitedBranch[12] = true;
 			return geometry.createInstance();// outside of bounds. return empty
-												// geometry.
+			// geometry.
+		}
+		else{
+			BranchCC.visitedBranch[13] = true;
+		}
 
 		MultiVertexGeometryImpl impl = (MultiVertexGeometryImpl) geometry
 				._getImpl();
 		GeometryAccelerators accel = impl._getAccelerators();
 		if (accel != null) {
+			BranchCC.visitedBranch[14] = true;
 			RasterizedGeometry2D rgeom = accel.getRasterizedGeometry();
 			if (rgeom != null) {
+				BranchCC.visitedBranch[15] = true;
 				RasterizedGeometry2D.HitType hit = rgeom
 						.queryEnvelopeInGeometry(extent);
 				if (hit == RasterizedGeometry2D.HitType.Inside) {
-					if (geomtype != Geometry.Type.Polygon.value())
+					BranchCC.visitedBranch[16] = true;
+					if (geomtype != Geometry.Type.Polygon.value()) {
+						BranchCC.visitedBranch[17] = true;
 						throw GeometryException.GeometryInternalError();
+					}
+					else{
+						BranchCC.visitedBranch[18] = true;
+					}
 
 					Polygon poly = new Polygon(geometry.getDescription());
 					poly.addEnvelope(extent, false);
 					return poly;
 				} else if (hit == RasterizedGeometry2D.HitType.Outside) {
+					BranchCC.visitedBranch[19] = true;
 					return geometry.createInstance();// outside of bounds.
 														// return empty
 														// geometry.
 				}
 			}
+			else{
+				BranchCC.visitedBranch[20] = true;
+			}
+		}
+		else{
+			BranchCC.visitedBranch[21] = true;
 		}
 
 		switch (geomtype) {
+
 		case Geometry.GeometryType.MultiPoint: {
+			BranchCC.visitedBranch[22] = true;
 			MultiPoint multi_point = (MultiPoint) geometry;
 			MultiPoint multi_point_out = null;
 			int npoints = multi_point.getPointCount();
@@ -1207,40 +1256,68 @@ class Clipper {
 			// multipoint.
 			int ipoints0 = 0;
 			for (int ipoints = 0; ipoints < npoints; ipoints++) {
+				BranchCC.visitedBranch[23] = true;
 				Point2D pt = new Point2D();
 				xy.read(2 * ipoints, pt);
 
 				if (!extent.contains(pt)) {// vertex is outside of the envelope
-					if (ipoints0 == 0)
+					BranchCC.visitedBranch[24] = true;
+					if (ipoints0 == 0) {
+						BranchCC.visitedBranch[25] = true;
 						multi_point_out = (MultiPoint) multi_point
 								.createInstance();
+					}
+					else{
+						BranchCC.visitedBranch[26] = true;
+					}
 
-					if (ipoints0 < ipoints)
+					if (ipoints0 < ipoints) {
+						BranchCC.visitedBranch[27] = true;
 						multi_point_out.add(multi_point, ipoints0, ipoints);
+					}
+					else{
+						BranchCC.visitedBranch[28] = true;
+					}
 
 					ipoints0 = ipoints + 1;// ipoints0 contains index of vertex
 											// right after the last clipped out
 											// vertex.
 				}
+				else{
+					BranchCC.visitedBranch[29] = true;
+				}
 			}
 
 			// add the rest of the batch to the result multipoint (only if
 			// something has been already clipped out)
-			if (ipoints0 > 0)
+			if (ipoints0 > 0) {
+				BranchCC.visitedBranch[30] = true;
 				multi_point_out.add(multi_point, ipoints0, npoints);
+			}
+			else{
+				BranchCC.visitedBranch[31] = true;
 
-			if (ipoints0 == 0)
+			}
+
+			if (ipoints0 == 0) {
+				BranchCC.visitedBranch[32] = true;
 				return multi_point;// everything is inside, so return the input
-									// geometry
-			else
+				// geometry
+			}
+			else {
+				BranchCC.visitedBranch[33] = true;
 				return multi_point_out;// clipping has happend, return the
-										// clipped geometry
+				// clipped geometry
+			}
 		}
 		case Geometry.GeometryType.Polygon:
-		case Geometry.GeometryType.Polyline:
-			return clipMultiPath_((MultiPath) geometry, extent, tolerance,
+			BranchCC.visitedBranch[34] = true;
+			case Geometry.GeometryType.Polyline:
+				BranchCC.visitedBranch[35] = true;
+				return clipMultiPath_((MultiPath) geometry, extent, tolerance,
 					densify_dist);
 		default:
+			BranchCC.visitedBranch[36] = true;
 			assert (false);
 			throw GeometryException.GeometryInternalError();
 		}

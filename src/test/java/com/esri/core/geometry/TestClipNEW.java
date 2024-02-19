@@ -51,16 +51,15 @@ public class TestClipNEW{
 
     @BeforeClass
     public static void beforeClass() {
-        BranchCC.visitedBranch = new boolean[36];
+        BranchCC.visitedBranch = new boolean[37];
         // Optional: Reset or prepare anything before each test
     }
 
     @AfterClass
     public static void afterClass() throws Exception {
         System.out.println("HEJ");
-        // Your existing tearDown logic
         int visitedBranchesCount = 0;
-        try (FileWriter writer = new FileWriter("branch_coverage_report_1_TRIAL.txt", true)) { // true to append
+        try (FileWriter writer = new FileWriter("branch_coverage_report_1_firsttry.txt", true)) { // true to append
             for (int i = 0; i < BranchCC.visitedBranch.length; i++) {
                 if (BranchCC.visitedBranch[i]) {
                     writer.write("Branch " + i + " was executed.\n");
