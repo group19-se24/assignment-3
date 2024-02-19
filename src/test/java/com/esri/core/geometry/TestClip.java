@@ -25,21 +25,87 @@
 package com.esri.core.geometry;
 
 import junit.framework.TestCase;
+import org.junit.AfterClass;
 import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+
+
+import java.io.FileWriter;
+import java.io.IOException;
 
 public class TestClip extends TestCase {
 	@Override
 	protected void setUp() throws Exception {
+		//System.out.println("Here");
+		BranchCC.visitedBranch = new boolean[36];
 		super.setUp();
 	}
 
 	@Override
 	protected void tearDown() throws Exception {
+		//System.out.println("afgerclass");
+
+		int visitedBranchesCount = 0;
+		try (FileWriter writer = new FileWriter("branch_coverage_report_PRELIMINARY.txt")) {
+
+			for (int i = 0; i < BranchCC.visitedBranch.length; i++) {
+				if (BranchCC.visitedBranch[i]) {
+					writer.write("Branch " + i + " was executed.\n");
+					visitedBranchesCount++;
+				} else {
+					writer.write("Branch " + i + " was not executed.\n");
+				}
+			}
+			double coveragePercentage = ((double) visitedBranchesCount / BranchCC.visitedBranch.length) * 100;
+			writer.write(String.format("Branch Coverage: %.2f%%\n", coveragePercentage));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
 		super.tearDown();
 	}
 
+	/**@BeforeAll
+	public static void before(){
+		System.out.println("Here");
+		BranchCC.visitedBranch = new boolean[100];
+	}*/
+
+	//@Test
+	//public static void testClipIhate() {
+		//System.out.println("test");
+		// Your test code here
+		// Simulate visiting some branches
+		//Clipper.visitedBranches[0] = true; // Example
+	//}
+
+/*	@AfterClass
+	public static void afterClass() {
+		//System.out.println("afgerclass");
+
+		int visitedBranchesCount = 0;
+		try (FileWriter writer = new FileWriter("branch_coverage_report_PRELIMINARY.txt")) {
+
+			for (int i = 0; i < BranchCC.visitedBranch.length; i++) {
+				if (BranchCC.visitedBranch[i]) {
+					writer.write("Branch " + i + " was executed.\n");
+					visitedBranchesCount++;
+				} else {
+					writer.write("Branch " + i + " was not executed.\n");
+				}
+			}
+			double coveragePercentage = ((double) visitedBranchesCount / BranchCC.visitedBranch.length) * 100;
+			writer.write(String.format("Branch Coverage: %.2f%%\n", coveragePercentage));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}*/
+
+
 	@Test
 	public static void testClipGeometries() {
+		//System.out.println("WHHHAT");
 		// RandomTest();
 		OperatorFactoryLocal engine = OperatorFactoryLocal.getInstance();
 		OperatorClip clipOp = (OperatorClip) engine
