@@ -28,14 +28,14 @@ import junit.framework.TestCase;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+//import org.junit.jupiter.api.AfterAll;
+//import org.junit.jupiter.api.BeforeAll;
+//import org.junit.jupiter.api.AfterAll;
+//import org.junit.jupiter.api.BeforeAll;
 
 import static com.esri.core.geometry.TestClip.*;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+//import static org.junit.jupiter.api.Assertions.assertFalse;
+//import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
 
@@ -60,7 +60,7 @@ public class TestClipNEW{
         System.out.println("HEJ");
         // Your existing tearDown logic
         int visitedBranchesCount = 0;
-        try (FileWriter writer = new FileWriter("branch_coverage_report_1_BEFORETESTS.txt", true)) { // true to append
+        try (FileWriter writer = new FileWriter("branch_coverage_report_1_TRIAL.txt", true)) { // true to append
             for (int i = 0; i < BranchCC.visitedBranch.length; i++) {
                 if (BranchCC.visitedBranch[i]) {
                     writer.write("Branch " + i + " was executed.\n");
