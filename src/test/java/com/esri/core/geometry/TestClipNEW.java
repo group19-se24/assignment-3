@@ -59,7 +59,7 @@ public class TestClipNEW{
     public static void afterClass() throws Exception {
         System.out.println("HEJ");
         int visitedBranchesCount = 0;
-        try (FileWriter writer = new FileWriter("branch_coverage_report_1_Original.txt", true)) { // true to append
+        try (FileWriter writer = new FileWriter("branch_coverage_report_1_After2AddedTests.txt", true)) { // true to append
             for (int i = 0; i < BranchCC.visitedBranch.length; i++) {
                 if (BranchCC.visitedBranch[i]) {
                     writer.write("Branch " + i + " was executed.\n");
@@ -74,7 +74,7 @@ public class TestClipNEW{
             e.printStackTrace();
         }
     }
-/*
+
     @Test
     public void testClipEmptyGeometry() {
         Geometry emptyGeom = new Polygon();
@@ -95,7 +95,7 @@ public class TestClipNEW{
         assertTrue(result.isEmpty());
 
         assertTrue(BranchCC.visitedBranch[2]);
-    }*/
+    }
 
 
 
