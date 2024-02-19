@@ -23,12 +23,16 @@
  */
 package com.esri.core.geometry;
 
+import java.util.HashSet;
+
 class Clipper {
 	Envelope2D m_extent;
 	EditShape m_shape;
 	int m_geometry;
 	int m_vertices_on_extent_index;
 	AttributeStreamOfInt32 m_vertices_on_extent;
+
+	public static HashSet<Integer> coverageSplitSegments_ = new HashSet<>();
 
 	int checkSegmentIntersection_(Envelope2D seg_env, int side,
 			double clip_value) {
@@ -603,19 +607,25 @@ class Clipper {
 		sorted_vertices.reserve(100);
 		for (int path = m_shape.getFirstPath(m_geometry); path != -1; path = m_shape
 				.getNextPath(path)) {
+			coverageSplitSegments_.add(1);
 			int vertex = m_shape.getFirstVertex(path);
 			for (int ivert = 0, nvert = m_shape.getPathSize(path); ivert < nvert; ivert++) {
+				coverageSplitSegments_.add(2);
 				int next_vertex = m_shape.getNextVertex(vertex);
 				m_shape.getXY(vertex, pt);
 				if (b_axis_x ? pt.y == clip_value : pt.x == clip_value) {
+					coverageSplitSegments_.add(3);
 					m_shape.getXY(next_vertex, pt);
 					if (b_axis_x ? pt.y == clip_value : pt.x == clip_value) {
+						coverageSplitSegments_.add(4);
 						if (m_shape.getUserIndex(vertex, usage_index) != 1) {
+							coverageSplitSegments_.add(5);
 							sorted_vertices.add(vertex);
 							m_shape.setUserIndex(vertex, usage_index, 1);
 						}
 
 						if (m_shape.getUserIndex(next_vertex, usage_index) != 1) {
+							coverageSplitSegments_.add(6);
 							sorted_vertices.add(next_vertex);
 							m_shape.setUserIndex(next_vertex, usage_index, 1);
 						}
@@ -627,6 +637,7 @@ class Clipper {
 
 		m_shape.removeUserIndex(usage_index);
 		if (sorted_vertices.size() < 3) {
+			coverageSplitSegments_.add(7);
 			return;
 		}
 
@@ -646,10 +657,13 @@ class Clipper {
 		int node1 = m_shape.createUserIndex();
 		int node2 = m_shape.createUserIndex();
 		for (int index = 0, n = sorted_vertices.size(); index < n; index++) {
+			coverageSplitSegments_.add(8);
 			int vert = sorted_vertices.get(index);
 			m_shape.getXY(vert, pt);
 			if (!pt.isEqual(pt_0)) {
+				coverageSplitSegments_.add(9);
 				if (index_0 == -1) {
+					coverageSplitSegments_.add(10);
 					index_0 = index;
 					pt_0.setCoords(pt);
 					continue;
@@ -657,25 +671,32 @@ class Clipper {
 		          
 				// add new intervals, that started at pt_0
 				for (int i = index_0; i < index; i++) {
+					coverageSplitSegments_.add(11);
 					int v = sorted_vertices.get(i);
 					int nextv = m_shape.getNextVertex(v);
 					int prevv = m_shape.getPrevVertex(v);
 					boolean bAdded = false;
 					if (compareVertices_(v, nextv) < 0) {
+						coverageSplitSegments_.add(12);
 						m_shape.getXY(nextv, pt_tmp);
 						if (b_axis_x ? pt_tmp.y == clip_value
 								: pt_tmp.x == clip_value) {
+							coverageSplitSegments_.add(13);
 							active_intervals.add(v);
 							bAdded = true;
 							m_shape.setUserIndex(v, node2, 1);
 						}
 					}
 					if (compareVertices_(v, prevv) < 0) {
+						coverageSplitSegments_.add(14);
 						m_shape.getXY(prevv, pt_tmp);
 						if (b_axis_x ? pt_tmp.y == clip_value
 								: pt_tmp.x == clip_value) {
-							if (!bAdded)
+							coverageSplitSegments_.add(15);
+							if (!bAdded) {
+								coverageSplitSegments_.add(16);
 								active_intervals.add(v);
+							}
 							m_shape.setUserIndex(v, node1, 1);
 						}
 					}
@@ -683,27 +704,33 @@ class Clipper {
 
 				// Split all active intervals at new point
 				for (int ia = 0, na = active_intervals.size(); ia < na; ia++) {
+					coverageSplitSegments_.add(17);
 					int v = active_intervals.get(ia);
 					int n_1 = m_shape.getUserIndex(v, node1);
 					int n_2 = m_shape.getUserIndex(v, node2);
 					if (n_1 == 1) {
+						coverageSplitSegments_.add(18);
 						int prevv = m_shape.getPrevVertex(v);
 						m_shape.getXY(prevv, pt_1);
 						double[] t = new double[1];
 						t[0] = 0;
 						if (!pt_1.isEqual(pt)) {// Split the active segment
+							coverageSplitSegments_.add(19);
 							double active_segment_length = Point2D
 									.distance(pt_0, pt_1);
 							t[0] = Point2D.distance(pt_1, pt)
 									/ active_segment_length;
 							assert (t[0] >= 0 && t[0] <= 1.0);
-							if (t[0] == 0)
+							if (t[0] == 0) {
+								coverageSplitSegments_.add(20);
 								t[0] = NumberUtils.doubleEps();// some
-																// roundoff
-																// issue.
-																// split
-																// anyway.
+								// roundoff
+								// issue.
+								// split
+								// anyway.
+								}
 							else if (t[0] == 1.0) {
+								coverageSplitSegments_.add(21);
 								t[0] = 1.0 - NumberUtils.doubleEps();// some
 																		// roundoff
 																		// issue.
@@ -721,28 +748,35 @@ class Clipper {
 							m_shape.setUserIndex(v_1, node1, 1);
 							m_shape.setUserIndex(v_1, node2, -1);
 						} else {
+							coverageSplitSegments_.add(22);
 							// The active segment ends at the current point.
 							// We skip it, and it goes away.
 						}
 					}
 					if (n_2 == 1) {
+						coverageSplitSegments_.add(23);
 						int nextv = m_shape.getNextVertex(v);
 						m_shape.getXY(nextv, pt_1);
 						double[] t = new double[1];
 						t[0] = 0;
 						if (!pt_1.isEqual(pt)) {
+							coverageSplitSegments_.add(24);
 							double active_segment_length = Point2D
 									.distance(pt_0, pt_1);
 							t[0] = Point2D.distance(pt_0, pt)
 									/ active_segment_length;
 							assert (t[0] >= 0 && t[0] <= 1.0);
-							if (t[0] == 0)
+							if (t[0] == 0) {
+								coverageSplitSegments_.add(25);
 								t[0] = NumberUtils.doubleEps();// some
-																// roundoff
-																// issue.
-																// split
-																// anyway.
+								// roundoff
+								// issue.
+								// split
+								// anyway.
+
+								}
 							else if (t[0] == 1.0) {
+								coverageSplitSegments_.add(26);
 								t[0] = 1.0 - NumberUtils.doubleEps();// some
 																		// roundoff
 																		// issue.

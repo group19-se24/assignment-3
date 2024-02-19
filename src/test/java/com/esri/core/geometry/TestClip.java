@@ -28,6 +28,10 @@ import junit.framework.TestCase;
 import org.junit.Test;
 
 public class TestClip extends TestCase {
+
+
+    final static int coverageSplitSegments_Goal = 26;
+	static int testCase = 0;
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
@@ -36,6 +40,8 @@ public class TestClip extends TestCase {
 	@Override
 	protected void tearDown() throws Exception {
 		super.tearDown();
+		System.out.println("Have covered in total " + Clipper.coverageSplitSegments_.size()+"/" + coverageSplitSegments_Goal + "="+ Clipper.coverageSplitSegments_.size()*100/coverageSplitSegments_Goal + "% after test case " + ++testCase);
+		System.out.println("The following branches have been visited: " + Clipper.coverageSplitSegments_.toString());
 	}
 
 	@Test
