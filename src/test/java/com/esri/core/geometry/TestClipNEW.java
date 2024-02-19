@@ -77,6 +77,7 @@ public class TestClipNEW{
 
     @Test
     public void testClipEmptyGeometry() {
+        //added
         Geometry emptyGeom = new Polygon();
         assertTrue(emptyGeom.isEmpty());
 
@@ -88,6 +89,7 @@ public class TestClipNEW{
 
     @Test
     public void testClipWithEmptyExtent() {
+        //added
         Point pointGeom = new Point(5, 5);
         Envelope2D emptyExtent = new Envelope2D();
 
