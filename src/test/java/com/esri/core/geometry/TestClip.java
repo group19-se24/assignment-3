@@ -29,6 +29,10 @@ import org.junit.AfterClass;
 import org.junit.Test;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 
 
 import java.io.FileWriter;
@@ -47,7 +51,7 @@ public class TestClip extends TestCase {
 		//System.out.println("afgerclass");
 
 		int visitedBranchesCount = 0;
-		try (FileWriter writer = new FileWriter("branch_coverage_report_PRELIMINARY.txt")) {
+		try (FileWriter writer = new FileWriter("branch_coverage_report_afterTestsNEW.txt")) {
 
 			for (int i = 0; i < BranchCC.visitedBranch.length; i++) {
 				if (BranchCC.visitedBranch[i]) {
@@ -66,7 +70,20 @@ public class TestClip extends TestCase {
 		super.tearDown();
 	}
 
-	/**@BeforeAll
+	@Test
+	public void testClipEmptyGeometry() {
+		Geometry emptyGeom = new Polygon();
+		assertTrue(emptyGeom.isEmpty());
+
+		Geometry result = Clipper.clip(emptyGeom, new Envelope2D(0, 0, 10, 10), 0, 0);
+		assertTrue(result.isEmpty());
+
+		assertTrue(BranchCC.visitedBranch[0]);
+	}
+
+
+	/*
+	@BeforeAll
 	public static void before(){
 		System.out.println("Here");
 		BranchCC.visitedBranch = new boolean[100];
@@ -101,7 +118,6 @@ public class TestClip extends TestCase {
 			e.printStackTrace();
 		}
 	}*/
-
 
 	@Test
 	public static void testClipGeometries() {
@@ -480,4 +496,11 @@ public class TestClip extends TestCase {
 		}
 
 	}
+
+	@AfterClass
+	public static void runAfterAllTests() {
+		System.out.println("PRINTTT");
+	}
+
+
 }
