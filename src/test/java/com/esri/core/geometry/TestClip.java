@@ -27,11 +27,16 @@ package com.esri.core.geometry;
 import junit.framework.TestCase;
 import org.junit.Test;
 
+import java.util.stream.Collectors;
+
 public class TestClip extends TestCase {
 
 
     final static int coverageSplitSegments_Goal = 26;
-	static int testCase = 0;
+    final static int coverageClipPolyLineGoal = 26;
+    final static int coverageClipGoal = 37;
+    final static int coverageFixPathsGoal = 15;
+    final static int coverageClipPolygon2Goal = 60;
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
@@ -40,8 +45,17 @@ public class TestClip extends TestCase {
 	@Override
 	protected void tearDown() throws Exception {
 		super.tearDown();
-		System.out.println("Have covered in total " + Clipper.coverageSplitSegments_.size()+"/" + coverageSplitSegments_Goal + "="+ Clipper.coverageSplitSegments_.size()*100/coverageSplitSegments_Goal + "% after test case " + ++testCase);
-		System.out.println("The following branches have been visited: " + Clipper.coverageSplitSegments_.toString());
+		System.out.println("Have covered in total " + Clipper.coverageSplitSegments_.size()+"/" + coverageSplitSegments_Goal + "="+ Clipper.coverageSplitSegments_.size()*100/coverageSplitSegments_Goal + "% after test case " + this.getName() + "for SplitSegments_");
+		System.out.println("The following branches have been visited for SplitSegments_: " + Clipper.coverageSplitSegments_.stream().sorted().collect(Collectors.toList()));
+		System.out.println("Have covered in total " + Clipper.coverageClipPolyLine.size()+"/" + coverageClipPolyLineGoal + "="+ Clipper.coverageClipPolyLine.size()*100/coverageClipPolyLineGoal + "% after test case " + this.getName() + "for clipPolyLine");
+		System.out.println("The following branches have been visited for clipPolyLine: " + Clipper.coverageClipPolyLine.stream().sorted().collect(Collectors.toList()));
+		System.out.println("Have covered in total " + Clipper.coverageClip.size()+"/" + coverageClipGoal + "="+ Clipper.coverageClip.size()*100/coverageClipGoal + "% after test case " + this.getName() + "for clipPoly");
+		System.out.println("The following branches have been visited for clipPoly: " + Clipper.coverageClip.stream().sorted().collect(Collectors.toList()));
+		System.out.println("Have covered in total " + Clipper.coverageFixPaths.size()+"/" + coverageFixPathsGoal + "="+ Clipper.coverageFixPaths.size()*100/coverageFixPathsGoal + "% after test case " + this.getName() + "for fixPaths");
+		System.out.println("The following branches have been visited for fixPaths: " + Clipper.coverageFixPaths.stream().sorted().collect(Collectors.toList()));
+		System.out.println("Have covered in total " + Clipper.coverageClipPolygon2.size()+"/" + coverageClipPolygon2Goal + "="+ Clipper.coverageClipPolygon2.size()*100/coverageClipPolygon2Goal + "% after test case " + this.getName() + "for clipPolygon2");
+		System.out.println("The following branches have been visited for clipPolygon2: " + Clipper.coverageClipPolygon2.stream().sorted().collect(Collectors.toList()));
+		System.out.println("--------------");
 	}
 
 	@Test

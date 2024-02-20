@@ -33,6 +33,10 @@ class Clipper {
 	AttributeStreamOfInt32 m_vertices_on_extent;
 
 	public static HashSet<Integer> coverageSplitSegments_ = new HashSet<>();
+	public static HashSet<Integer> coverageClipPolyLine = new HashSet<>();
+	public static HashSet<Integer> coverageClip = new HashSet<>();
+	public static HashSet<Integer> coverageFixPaths = new HashSet<>();
+	public static HashSet<Integer> coverageClipPolygon2 = new HashSet<>();
 
 	int checkSegmentIntersection_(Envelope2D seg_env, int side,
 			double clip_value) {
@@ -81,10 +85,22 @@ class Clipper {
 	}
 
 	MultiPath clipPolygon2_(Polygon polygon_in, double tolerance,
-			double densify_dist) {
+							double densify_dist) {
+
+
+		// Branch #0 (Main default branch)
+		coverageClipPolygon2.add(0);
+
 		// If extent is degenerate, return 0.
 		if (m_extent.getWidth() == 0 || m_extent.getHeight() == 0)
+		{
+			// Branch #1
+			coverageClipPolygon2.add(1);
 			return (MultiPath) polygon_in.createInstance();
+		} else {
+			// Branch #2
+			coverageClipPolygon2.add(2);
+		}
 
 		Envelope2D orig_env2D = new Envelope2D();
 		polygon_in.queryLooseEnvelope(orig_env2D);
@@ -106,42 +122,63 @@ class Clipper {
 		// clip the polygon successively by each plane
 		boolean b_all_outside = false;
 		for (int iclip_plane = 0; !b_all_outside && iclip_plane < 4; iclip_plane++) {
+			// Branch #3
+			coverageClipPolygon2.add(3);
 			boolean b_intersects_plane = false;
 			boolean b_axis_x = (iclip_plane & 1) != 0;
 			double clip_value = 0;
 			switch (iclip_plane) {
-			case 0:
-				clip_value = m_extent.xmin;
-				b_intersects_plane = orig_env2D.xmin <= clip_value
-						&& orig_env2D.xmax >= clip_value;
-				assert (b_intersects_plane || clip_value < orig_env2D.xmin);
-				break;
-			case 1:
-				clip_value = m_extent.ymin;
-				b_intersects_plane = orig_env2D.ymin <= clip_value
-						&& orig_env2D.ymax >= clip_value;
-				assert (b_intersects_plane || clip_value < orig_env2D.ymin);
-				break;
-			case 2:
-				clip_value = m_extent.xmax;
-				b_intersects_plane = orig_env2D.xmin <= clip_value
-						&& orig_env2D.xmax >= clip_value;
-				assert (b_intersects_plane || clip_value > orig_env2D.xmax);
-				break;
-			case 3:
-				clip_value = m_extent.ymax;
-				b_intersects_plane = orig_env2D.ymin <= clip_value
-						&& orig_env2D.ymax >= clip_value;
-				assert (b_intersects_plane || clip_value > orig_env2D.ymax);
-				break;
+				case 0:
+					// Branch #4
+					coverageClipPolygon2.add(4);
+					clip_value = m_extent.xmin;
+					b_intersects_plane = orig_env2D.xmin <= clip_value
+							&& orig_env2D.xmax >= clip_value;
+					assert (b_intersects_plane || clip_value < orig_env2D.xmin);
+					break;
+				case 1:
+					// Branch #5
+					coverageClipPolygon2.add(5);
+					clip_value = m_extent.ymin;
+					b_intersects_plane = orig_env2D.ymin <= clip_value
+							&& orig_env2D.ymax >= clip_value;
+					assert (b_intersects_plane || clip_value < orig_env2D.ymin);
+					break;
+				case 2:
+					// Branch #6
+					coverageClipPolygon2.add(6);
+					clip_value = m_extent.xmax;
+					b_intersects_plane = orig_env2D.xmin <= clip_value
+							&& orig_env2D.xmax >= clip_value;
+					assert (b_intersects_plane || clip_value > orig_env2D.xmax);
+					break;
+				case 3:
+					// Branch #7
+					coverageClipPolygon2.add(7);
+					clip_value = m_extent.ymax;
+					b_intersects_plane = orig_env2D.ymin <= clip_value
+							&& orig_env2D.ymax >= clip_value;
+					assert (b_intersects_plane || clip_value > orig_env2D.ymax);
+					break;
+				default:
+					// Branch #8
+					coverageClipPolygon2.add(8);
 			}
 
-			if (!b_intersects_plane)
+			if (!b_intersects_plane) {
+				// Branch #9
+				coverageClipPolygon2.add(9);
 				continue;// Optimize for common case when only few sides of the
-							// clipper envelope intersect the geometry.
+				// clipper envelope intersect the geometry.
+			} else {
+				// Branch #10
+				coverageClipPolygon2.add(10);
+			}
 
 			b_all_outside = true;
 			for (int path = m_shape.getFirstPath(m_geometry); path != -1;) {
+				// Branch #11
+				coverageClipPolygon2.add(11);
 				int inside = -1;
 				int firstinside = -1;
 				int first = m_shape.getFirstVertex(path);
@@ -149,11 +186,16 @@ class Clipper {
 				do {
 					Segment segment = m_shape.getSegment(vertex);
 					if (segment == null) {
+						// Branch #12
+						coverageClipPolygon2.add(12);
 						segment = line;
 						m_shape.getXY(vertex, pt_1);
 						segment.setStartXY(pt_1);
 						m_shape.getXY(m_shape.getNextVertex(vertex), pt_2);
 						segment.setEndXY(pt_2);
+					} else {
+						// Branch #13
+						coverageClipPolygon2.add(13);
 					}
 					segment.queryEnvelope2D(seg_env);
 					int seg_plane_intersection_status = checkSegmentIntersection_(
@@ -163,16 +205,22 @@ class Clipper {
 
 					if (seg_plane_intersection_status == -1) // intersects plane
 					{
+						// Branch #14
+						coverageClipPolygon2.add(14);
 						int count = segment.intersectionWithAxis2D(b_axis_x,
 								clip_value, result_ordinates, parameters);
 						if (count > 0) {
+							// Branch #15
+							coverageClipPolygon2.add(15);
 							split_count = m_shape.splitSegment(vertex,
 									parameters, count);
 						} else {
+							// Branch #16
+							coverageClipPolygon2.add(16);
 							assert (count == 0);// might be -1 when the segment
-												// is almost parallel to the
-												// clip lane. Just to see this
-												// happens.
+							// is almost parallel to the
+							// clip lane. Just to see this
+							// happens.
 							split_count = 0;
 						}
 
@@ -181,49 +229,70 @@ class Clipper {
 						// Also +1 is necessary to check the last segment of the
 						// split
 						split_count += 1;// split_count will never be 0 after
-											// this if-block.
+						// this if-block.
 
 						int split_vert = vertex;
 						int next_split_vert = m_shape.getNextVertex(split_vert);
 						for (int i = 0; i < split_count; i++) {
+							// Branch #17
+							coverageClipPolygon2.add(17);
 							m_shape.getXY(split_vert, pt_1);
 							m_shape.getXY(next_split_vert, pt_2);
 
 							Segment sub_seg = m_shape.getSegment(split_vert);
 							if (sub_seg == null) {
+								// Branch #18
+								coverageClipPolygon2.add(18);
 								sub_seg = line;
 								sub_seg.setStartXY(pt_1);
 								sub_seg.setEndXY(pt_2);
+							} else {
+								// Branch #19
+								coverageClipPolygon2.add(19);
 							}
 
 							sub_seg.queryEnvelope2D(sub_seg_env);
 							int sub_segment_plane_intersection_status = checkSegmentIntersection_(
 									sub_seg_env, iclip_plane, clip_value);
 							if (sub_segment_plane_intersection_status == -1) {
+								// Branch #20
+								coverageClipPolygon2.add(20);
 								// subsegment is intertsecting the plane. We
 								// need to snap one of the endpoints to ensure
 								// no intersection.
 								// TODO: ensure this works for curves. For
 								// curves we have to adjust the curve shape.
 								if (!b_axis_x) {
+									// Branch #22
+									coverageClipPolygon2.add(22);
 									assert ((pt_1.x < clip_value && pt_2.x > clip_value) || (pt_1.x > clip_value && pt_2.x < clip_value));
 									double d_1 = Math.abs(pt_1.x - clip_value);
 									double d_2 = Math.abs(pt_2.x - clip_value);
 									if (d_1 < d_2) {
+										// Branch #23
+										coverageClipPolygon2.add(23);
 										pt_1.x = clip_value;
 										m_shape.setXY(split_vert, pt_1);
 									} else {
+										// Branch #24
+										coverageClipPolygon2.add(24);
 										pt_2.x = clip_value;
 										m_shape.setXY(next_split_vert, pt_2);
 									}
 								} else {
+									// Branch #25
+									coverageClipPolygon2.add(25);
 									assert ((pt_1.y < clip_value && pt_2.y > clip_value) || (pt_1.y > clip_value && pt_2.y < clip_value));
 									double d_1 = Math.abs(pt_1.y - clip_value);
 									double d_2 = Math.abs(pt_2.y - clip_value);
 									if (d_1 < d_2) {
+										// Branch #26
+										coverageClipPolygon2.add(26);
 										pt_1.y = clip_value;
 										m_shape.setXY(split_vert, pt_1);
 									} else {
+										// Branch #27
+										coverageClipPolygon2.add(27);
 										pt_2.y = clip_value;
 										m_shape.setXY(next_split_vert, pt_2);
 									}
@@ -233,39 +302,67 @@ class Clipper {
 								// the segment.
 								sub_seg = m_shape.getSegment(split_vert);
 								if (sub_seg == null) {
+									// Branch #28
+									coverageClipPolygon2.add(28);
 									sub_seg = line;
 									sub_seg.setStartXY(pt_1);
 									sub_seg.setEndXY(pt_2);
+								} else {
+									// Branch #29
+									coverageClipPolygon2.add(29);
 								}
 								sub_seg.queryEnvelope2D(sub_seg_env);
 								sub_segment_plane_intersection_status = checkSegmentIntersection_(
 										sub_seg_env, iclip_plane, clip_value);
+							} else {
+								// Branch #30
+								coverageClipPolygon2.add(30);
 							}
 
 							assert (sub_segment_plane_intersection_status != -1);
 
 							int old_inside = inside;
 							inside = sub_segment_plane_intersection_status;
-							if (firstinside == -1)
+							if (firstinside == -1) {
+								// Branch #31
+								coverageClipPolygon2.add(31);
 								firstinside = inside;
+							} else {
+								// Branch #32
+								coverageClipPolygon2.add(32);
+							}
 
 							// add connections along the clipping plane line
 							if (old_inside == 0 && inside == 1) {
+								// Branch #33
+								coverageClipPolygon2.add(33);
 								// going from outside to inside. Do nothing
 							} else if (old_inside == 1 && inside == 0) {
+								// Branch #34
+								coverageClipPolygon2.add(34);
 								// going from inside to outside
 							} else if (old_inside == 0 && inside == 0) {
+								// Branch #35
+								coverageClipPolygon2.add(35);
 								// staying outside
 								// remember the start point of the outside
 								// segment to be deleted.
 								delete_candidates.add(split_vert); // is a
-																	// candidate
-																	// to be
-																	// deleted
+								// candidate
+								// to be
+								// deleted
+							} else {
+								// Branch #36
+								coverageClipPolygon2.add(36);
 							}
 
 							if (inside == 1) {
+								// Branch #37
+								coverageClipPolygon2.add(37);
 								b_all_outside = false;
+							} else {
+								// Branch #38
+								coverageClipPolygon2.add(38);
 							}
 
 							split_vert = next_split_vert;
@@ -273,67 +370,122 @@ class Clipper {
 							next_split_vert = m_shape
 									.getNextVertex(next_split_vert);
 						}
+					} else {
+						// Branch #39
+						coverageClipPolygon2.add(39);
 					}
 
 					if (split_count == 0) {
+						// Branch #40
+						coverageClipPolygon2.add(40);
 						assert (seg_plane_intersection_status != -1);// cannot
-																		// happen.
+						// happen.
 						int old_inside = inside;
 						inside = seg_plane_intersection_status;
-						if (firstinside == -1)
+						if (firstinside == -1) {
+							// Branch #41
+							coverageClipPolygon2.add(41);
 							firstinside = inside;
+						} else {
+							// Branch #42
+							coverageClipPolygon2.add(42);
+						}
 
 						if (old_inside == 0 && inside == 1) {
+							// Branch #43
+							coverageClipPolygon2.add(43);
 							// going from outside to inside.
 						} else if (old_inside == 1 && inside == 0) {
+							// Branch #44
+							coverageClipPolygon2.add(44);
 							// going from inside to outside
 						} else if (old_inside == 0 && inside == 0) {
+							// Branch #45
+							coverageClipPolygon2.add(45);
 							// remember the start point of the outside segment
 							// to be deleted.
 							delete_candidates.add(vertex); // is a candidate to
-															// be deleted
+							// be deleted
+						}
+						else {
+							// Branch #46
+							coverageClipPolygon2.add(46);
 						}
 
 						if (inside == 1) {
+							// Branch #47
+							coverageClipPolygon2.add(47);
 							b_all_outside = false;
+						} else {
+							// Branch #48
+							coverageClipPolygon2.add(48);
 						}
 
 						next_vertex = m_shape.getNextVertex(vertex);
+					} else {
+						// Branch #49
+						coverageClipPolygon2.add(49);
 					}
 					vertex = next_vertex;
 				} while (vertex != first);
 
 				if (firstinside == 0 && inside == 0) {// first vertex need to be
-														// deleted.
+					// deleted.
+					// Branch #50
+					coverageClipPolygon2.add(50);
 					delete_candidates.add(first); // is a candidate to be
-													// deleted
+					// deleted
+				} else {
+					// Branch #51
+					coverageClipPolygon2.add(51);
 				}
 
 				for (int i = 0, n = delete_candidates.size(); i < n; i++) {
+					// Branch #52
+					coverageClipPolygon2.add(52);
 					int delete_vert = delete_candidates.get(i);
 					m_shape.removeVertex(delete_vert, false);
 				}
 				delete_candidates.clear(false);
 				if (m_shape.getPathSize(path) < 3) {
+					// Branch #53
+					coverageClipPolygon2.add(53);
 					path = m_shape.removePath(path);
 				} else {
+					// Branch #54
+					coverageClipPolygon2.add(54);
 					path = m_shape.getNextPath(path);
 				}
 			}
 		}
 
-		if (b_all_outside)
+		if (b_all_outside) {
+			// Branch #55
+			coverageClipPolygon2.add(55);
 			return (MultiPath) polygon_in.createInstance();
+		} else {
+			// Branch #56
+			coverageClipPolygon2.add(56);
+		}
 
 		// After the clipping, we could have produced unwanted segment overlaps
 		// along the clipping envelope boundary.
 		// Detect and resolve that case if possible.
 		resolveBoundaryOverlaps_();
-		if (densify_dist > 0)
+		if (densify_dist > 0) {
+			// Branch #57
+			coverageClipPolygon2.add(57);
 			densifyAlongClipExtent_(densify_dist);
+		} else {
+			// Branch #58
+			coverageClipPolygon2.add(58);
+		}
+		// Branch #59 (Main default branch exit)
+		coverageClipPolygon2.add(59);
 
 		return (MultiPath) m_shape.getGeometry(m_geometry);
 	}
+
 
 	MultiPath clipPolyline_(Polyline polyline_in, double tolerance) {
 		// Forward decl for java port
@@ -350,36 +502,41 @@ class Clipper {
 			boolean b_axis_x = (iclip_plane & 1) != 0;
 			double clip_value = 0;
 			switch (iclip_plane) {
-			case 0:
-				clip_value = m_extent.xmin;
-				b_intersects_plane = orig_env2D.xmin <= clip_value
-						&& orig_env2D.xmax >= clip_value;
-				assert (b_intersects_plane || clip_value < orig_env2D.xmin);
-				break;
-			case 1:
-				clip_value = m_extent.ymin;
-				b_intersects_plane = orig_env2D.ymin <= clip_value
-						&& orig_env2D.ymax >= clip_value;
-				assert (b_intersects_plane || clip_value < orig_env2D.ymin);
-				break;
-			case 2:
-				clip_value = m_extent.xmax;
-				b_intersects_plane = orig_env2D.xmin <= clip_value
-						&& orig_env2D.xmax >= clip_value;
-				assert (b_intersects_plane || clip_value > orig_env2D.xmax);
-				break;
-			case 3:
-				clip_value = m_extent.ymax;
-				b_intersects_plane = orig_env2D.ymin <= clip_value
-						&& orig_env2D.ymax >= clip_value;
-				assert (b_intersects_plane || clip_value > orig_env2D.ymax);
-				break;
+				case 0:
+					coverageClipPolyLine.add(1);
+					clip_value = m_extent.xmin;
+					b_intersects_plane = orig_env2D.xmin <= clip_value
+							&& orig_env2D.xmax >= clip_value;
+					assert (b_intersects_plane || clip_value < orig_env2D.xmin);
+					break;
+				case 1:
+					coverageClipPolyLine.add(2);
+					clip_value = m_extent.ymin;
+					b_intersects_plane = orig_env2D.ymin <= clip_value
+							&& orig_env2D.ymax >= clip_value;
+					assert (b_intersects_plane || clip_value < orig_env2D.ymin);
+					break;
+				case 2:
+					coverageClipPolyLine.add(3);
+					clip_value = m_extent.xmax;
+					b_intersects_plane = orig_env2D.xmin <= clip_value
+							&& orig_env2D.xmax >= clip_value;
+					assert (b_intersects_plane || clip_value > orig_env2D.xmax);
+					break;
+				case 3:
+					coverageClipPolyLine.add(4);
+					clip_value = m_extent.ymax;
+					b_intersects_plane = orig_env2D.ymin <= clip_value
+							&& orig_env2D.ymax >= clip_value;
+					assert (b_intersects_plane || clip_value > orig_env2D.ymax);
+					break;
 			}
 
-			if (!b_intersects_plane)
+			if (!b_intersects_plane) {
+				coverageClipPolyLine.add(5);
 				continue;// Optimize for common case when only few sides of the
-							// clipper envelope intersect the geometry.
-
+				// clipper envelope intersect the geometry.
+			}
 			MultiPath src_poly = result_poly;
 			result_poly = (MultiPath) polyline_in.createInstance();
 
@@ -389,33 +546,48 @@ class Clipper {
 			Point2D pt_prev;
 			Point2D pt = new Point2D();
 			while (seg_iter.nextPath()) {
+				coverageClipPolyLine.add(6);
 				int inside = -1;
 				boolean b_start_new_path = true;
 				while (seg_iter.hasNextSegment()) {
+					coverageClipPolyLine.add(7);
 					Segment segment = seg_iter.nextSegment();
 					segment.queryEnvelope2D(seg_env);
 					int seg_plane_intersection_status = checkSegmentIntersection_(
 							seg_env, iclip_plane, clip_value);
 					if (seg_plane_intersection_status == -1) // intersects plane
 					{
+						coverageClipPolyLine.add(8);
 						int count = segment.intersectionWithAxis2D(b_axis_x,
 								clip_value, result_ordinates, parameters);
 						if (count > 0) {
+							coverageClipPolyLine.add(9);
+							
 							double t0 = 0.0;
 							pt_prev = segment.getStartXY();
 							for (int i = 0; i <= count; i++) {
+								coverageClipPolyLine.add(10);
+								
 								double t = i < count ? parameters[i] : 1.0;
-								if (t0 == t)
-									continue;
+								if (t0 == t) {
+									coverageClipPolyLine.add(11);
 
+									continue;
+								}
 								segment.cut(t0, t, sub_segment_buffer);
 								Segment sub_seg = sub_segment_buffer.get();
 								sub_seg.setStartXY(pt_prev);
 								if (i < count) {// snap to plane
+									coverageClipPolyLine.add(12);
+									
 									if (b_axis_x) {
+										coverageClipPolyLine.add(13);
+										
 										pt.x = result_ordinates[i];
 										pt.y = clip_value;
 									} else {
+										coverageClipPolyLine.add(14);
+										
 										pt.x = clip_value;
 										pt.y = result_ordinates[i];
 									}
@@ -427,6 +599,8 @@ class Clipper {
 										sub_seg_env, iclip_plane, clip_value);
 
 								if (sub_segment_plane_intersection_status == -1) {
+									coverageClipPolyLine.add(15);
+									
 									// subsegment is intertsecting the plane. We
 									// need to snap one of the endpoints to
 									// ensure no intersection.
@@ -435,28 +609,40 @@ class Clipper {
 									Point2D pt_1 = sub_seg.getStartXY();
 									Point2D pt_2 = sub_seg.getEndXY();
 									if (!b_axis_x) {
+										coverageClipPolyLine.add(16);
+										
 										assert ((pt_1.x < clip_value && pt_2.x > clip_value) || (pt_1.x > clip_value && pt_2.x < clip_value));
 										double d_1 = Math.abs(pt_1.x
 												- clip_value);
 										double d_2 = Math.abs(pt_2.x
 												- clip_value);
 										if (d_1 < d_2) {
+											coverageClipPolyLine.add(17);
+											
 											pt_1.x = clip_value;
 											sub_seg.setStartXY(pt_1);
 										} else {
+											coverageClipPolyLine.add(18);
+											
 											pt_2.x = clip_value;
 											sub_seg.setEndXY(pt_2);
 										}
 									} else {
+										coverageClipPolyLine.add(19);
+										
 										assert ((pt_1.y < clip_value && pt_2.y > clip_value) || (pt_1.y > clip_value && pt_2.y < clip_value));
 										double d_1 = Math.abs(pt_1.y
 												- clip_value);
 										double d_2 = Math.abs(pt_2.y
 												- clip_value);
 										if (d_1 < d_2) {
+											coverageClipPolyLine.add(20);
+											
 											pt_1.y = clip_value;
 											sub_seg.setStartXY(pt_1);
 										} else {
+											coverageClipPolyLine.add(21);
+											
 											pt_2.y = clip_value;
 											sub_seg.setEndXY(pt_2);
 										}
@@ -477,25 +663,36 @@ class Clipper {
 
 								inside = sub_segment_plane_intersection_status;
 								if (inside == 1) {
+									coverageClipPolyLine.add(22);
+									
 									result_poly.addSegment(sub_seg,
 											b_start_new_path);
 									b_start_new_path = false;
-								} else
+								} else {
+									coverageClipPolyLine.add(23);
+
 									b_start_new_path = true;
+								}
 							}
 						}
 					} else {
+						coverageClipPolyLine.add(24);
+						
 						inside = seg_plane_intersection_status;
 						if (inside == 1) {
+							coverageClipPolyLine.add(25);
+							
 							result_poly.addSegment(segment, b_start_new_path);
 							b_start_new_path = false;
-						} else
+						} else {
+							coverageClipPolyLine.add(26);
+
 							b_start_new_path = true;
+						}
 					}
 				}
 			}
 		}
-
 		return result_poly;
 	}
 
@@ -1014,41 +1211,25 @@ class Clipper {
 	}
 
 	void fixPaths_() {
+		coverageFixPaths.add(0);
 		for (int ivert = 0, nvert = m_vertices_on_extent.size(); ivert < nvert; ivert++) {
+
+			coverageFixPaths.add(1);
 			int vertex = m_vertices_on_extent.get(ivert);
-			if (vertex != -1)
+			if (vertex != -1) {
+				coverageFixPaths.add(2);
 				m_shape.setPathToVertex_(vertex, -1);
+			}
 		}
 
 		int path_count = 0;
 		int geometry_size = 0;
 		for (int path = m_shape.getFirstPath(m_geometry); path != -1;) {
 			int first = m_shape.getFirstVertex(path);
-			if (first == -1 || path != m_shape.getPathFromVertex(first)) { // The
-																			// path's
-																			// first
-																			// vertex
-																			// has
-																			// been
-																			// deleted.
-																			// Or
-																			// the
-																			// path
-																			// first
-																			// vertex
-																			// is
-																			// now
-																			// part
-																			// of
-																			// another
-																			// path.
-																			// We
-																			// have
-																			// to
-																			// delete
-																			// such
-																			// path
-																			// object.
+			coverageFixPaths.add(3);
+			if (first == -1 || path != m_shape.getPathFromVertex(first)) {
+				// The path's first vertex has been deleted. Or the path first vertex is now part of another path. We have to delete such path object.
+				coverageFixPaths.add(4);
 				int p = path;
 				path = m_shape.getNextPath(path);
 				m_shape.setFirstVertex_(p, -1);
@@ -1059,17 +1240,20 @@ class Clipper {
 			int vertex = first;
 			int path_size = 0;
 			do {
+				coverageFixPaths.add(5);
 				m_shape.setPathToVertex_(vertex, path);
 				path_size++;
 				vertex = m_shape.getNextVertex(vertex);
 			} while (vertex != first);
 
 			if (path_size <= 2) {
+				coverageFixPaths.add(6);
 				int ind = m_shape.getUserIndex(first,
 						m_vertices_on_extent_index);
 				m_vertices_on_extent.set(ind, -1);
 				int nv = m_shape.removeVertex(first, false);
 				if (path_size == 2) {
+					coverageFixPaths.add(7);
 					ind = m_shape.getUserIndex(nv, m_vertices_on_extent_index);
 					m_vertices_on_extent.set(ind, -1);
 					m_shape.removeVertex(nv, false);
@@ -1090,32 +1274,43 @@ class Clipper {
 		}
 
 		for (int ivert = 0, nvert = m_vertices_on_extent.size(); ivert < nvert; ivert++) {
+			coverageFixPaths.add(8);
 			int vertex = m_vertices_on_extent.get(ivert);
-			if (vertex == -1)
+			if (vertex == -1) {
+				coverageFixPaths.add(9);
 				continue;
+			}
 			int path = m_shape.getPathFromVertex(vertex);
-			if (path != -1)
+			if (path != -1) {
+				coverageFixPaths.add(10);
 				continue;
+			}
 
 			path = m_shape.insertPath(m_geometry, -1);
 			int path_size = 0;
 			int first = vertex;
 			do {
+				coverageFixPaths.add(11);
 				m_shape.setPathToVertex_(vertex, path);
 				path_size++;
 				vertex = m_shape.getNextVertex(vertex);
 			} while (vertex != first);
 
 			if (path_size <= 2) {
+				coverageFixPaths.add(12);
 				int ind = m_shape.getUserIndex(first,
 						m_vertices_on_extent_index);
 				m_vertices_on_extent.set(ind, -1);
 				int nv = m_shape.removeVertex(first, false);
 				if (path_size == 2) {
+					coverageFixPaths.add(13);
 					ind = m_shape.getUserIndex(nv, m_vertices_on_extent_index);
-					if (ind >= 0)
+					if (ind >= 0) {
+						coverageFixPaths.add(14);
 						m_vertices_on_extent.set(ind, -1);
+					}
 					else {
+						coverageFixPaths.add(15);
 						// this vertex is not on the extent.
 					}
 					m_shape.removeVertex(nv, false);
@@ -1149,6 +1344,7 @@ class Clipper {
 		m_shape.setTotalPointCount_(total_point_count);
 	}
 
+
 	static Geometry clipMultiPath_(MultiPath multipath, Envelope2D extent,
 			double tolerance, double densify_dist) {
 		Clipper clipper = new Clipper(extent);
@@ -1166,119 +1362,197 @@ class Clipper {
 	// add_envelope, double tolerance, double densify_dist, int
 	// corner_is_inside);
 	static Geometry clip(Geometry geometry, Envelope2D extent,
-			double tolerance, double densify_dist) {
-		if (geometry.isEmpty())
+						 double tolerance, double densify_dist) {
+		if (geometry.isEmpty()) {
+			coverageClip.add(0);
 			return geometry;
+		}
+		else{
+			coverageClip.add(1);
 
-		if (extent.isEmpty())
+		}
+
+		if (extent.isEmpty()) {
+			coverageClip.add(2) ;
 			return geometry.createInstance(); // return an empty geometry
+		}
+		else{
+			coverageClip.add(3) ;
+
+		}
 
 		int geomtype = geometry.getType().value();
 
 		// Test firstly the simplest geometry types point and envelope.
 		// After that we'll check the envelope intersection for the optimization
 		if (geomtype == Geometry.Type.Point.value()) {
+			coverageClip.add(4) ;
 			Point2D pt = ((Point) geometry).getXY();
-			if (extent.contains(pt))
+			if (extent.contains(pt)) {
+				coverageClip.add(5) ;
 				return geometry;
-			else
+			}
+			else {
+				coverageClip.add(6) ;
 				return geometry.createInstance(); // return an empty geometry
+			}
 		} else if (geomtype == Geometry.Type.Envelope.value()) {
+			coverageClip.add(7) ;
 			Envelope2D env = new Envelope2D();
 			geometry.queryEnvelope2D(env);
 			if (env.intersect(extent)) {
+				coverageClip.add(8) ;
+
 				Envelope result_env = new Envelope();
 				geometry.copyTo(result_env);
 				result_env.setEnvelope2D(env);
 				return result_env;
-			} else
+			} else {
+				coverageClip.add(9) ;
 				return geometry.createInstance(); // return an empty geometry
+			}
 		}
 
 		// Test the geometry envelope
 		Envelope2D env_2D = new Envelope2D();
 		geometry.queryLooseEnvelope2D(env_2D);
-		if (extent.contains(env_2D))
+		if (extent.contains(env_2D)) {
+			coverageClip.add(10) ;
 			return geometry;// completely inside of bounds
-		if (!extent.isIntersecting(env_2D))
+		}
+		else{
+			coverageClip.add(11) ;
+		}
+		if (!extent.isIntersecting(env_2D)) {
+			coverageClip.add(12) ;
 			return geometry.createInstance();// outside of bounds. return empty
-												// geometry.
+			// geometry.
+		}
+		else{
+			coverageClip.add(13) ;
+		}
 
 		MultiVertexGeometryImpl impl = (MultiVertexGeometryImpl) geometry
 				._getImpl();
 		GeometryAccelerators accel = impl._getAccelerators();
 		if (accel != null) {
+			coverageClip.add(14) ;
 			RasterizedGeometry2D rgeom = accel.getRasterizedGeometry();
 			if (rgeom != null) {
+				coverageClip.add(15) ;
 				RasterizedGeometry2D.HitType hit = rgeom
 						.queryEnvelopeInGeometry(extent);
 				if (hit == RasterizedGeometry2D.HitType.Inside) {
-					if (geomtype != Geometry.Type.Polygon.value())
+					coverageClip.add(16) ;
+					if (geomtype != Geometry.Type.Polygon.value()) {
+						coverageClip.add(17) ;
 						throw GeometryException.GeometryInternalError();
+					}
+					else{
+						coverageClip.add(18) ;
+					}
 
 					Polygon poly = new Polygon(geometry.getDescription());
 					poly.addEnvelope(extent, false);
 					return poly;
 				} else if (hit == RasterizedGeometry2D.HitType.Outside) {
+					coverageClip.add(19) ;
 					return geometry.createInstance();// outside of bounds.
-														// return empty
-														// geometry.
+					// return empty
+					// geometry.
 				}
 			}
+			else{
+				coverageClip.add(20) ;
+			}
+		}
+		else{
+			coverageClip.add(21) ;
 		}
 
 		switch (geomtype) {
-		case Geometry.GeometryType.MultiPoint: {
-			MultiPoint multi_point = (MultiPoint) geometry;
-			MultiPoint multi_point_out = null;
-			int npoints = multi_point.getPointCount();
-			AttributeStreamOfDbl xy = (AttributeStreamOfDbl) ((MultiPointImpl) multi_point
-					._getImpl())
-					.getAttributeStreamRef(VertexDescription.Semantics.POSITION);
-			// create the new geometry only if there are points that has been
-			// clipped out.
-			// If all vertices are inside of the envelope, it returns the input
-			// multipoint.
-			int ipoints0 = 0;
-			for (int ipoints = 0; ipoints < npoints; ipoints++) {
-				Point2D pt = new Point2D();
-				xy.read(2 * ipoints, pt);
 
-				if (!extent.contains(pt)) {// vertex is outside of the envelope
-					if (ipoints0 == 0)
-						multi_point_out = (MultiPoint) multi_point
-								.createInstance();
+			case Geometry.GeometryType.MultiPoint: {
+				coverageClip.add(22) ;
+				MultiPoint multi_point = (MultiPoint) geometry;
+				MultiPoint multi_point_out = null;
+				int npoints = multi_point.getPointCount();
+				AttributeStreamOfDbl xy = (AttributeStreamOfDbl) ((MultiPointImpl) multi_point
+						._getImpl())
+						.getAttributeStreamRef(VertexDescription.Semantics.POSITION);
+				// create the new geometry only if there are points that has been
+				// clipped out.
+				// If all vertices are inside of the envelope, it returns the input
+				// multipoint.
+				int ipoints0 = 0;
+				for (int ipoints = 0; ipoints < npoints; ipoints++) {
+					coverageClip.add(23) ;
+					Point2D pt = new Point2D();
+					xy.read(2 * ipoints, pt);
 
-					if (ipoints0 < ipoints)
-						multi_point_out.add(multi_point, ipoints0, ipoints);
+					if (!extent.contains(pt)) {// vertex is outside of the envelope
+						coverageClip.add(24) ;
+						if (ipoints0 == 0) {
+							coverageClip.add(25) ;
+							multi_point_out = (MultiPoint) multi_point
+									.createInstance();
+						}
+						else{
+							coverageClip.add(26) ;
+						}
 
-					ipoints0 = ipoints + 1;// ipoints0 contains index of vertex
-											// right after the last clipped out
-											// vertex.
+						if (ipoints0 < ipoints) {
+							coverageClip.add(27) ;
+							multi_point_out.add(multi_point, ipoints0, ipoints);
+						}
+						else{
+							coverageClip.add(28) ;
+						}
+
+						ipoints0 = ipoints + 1;// ipoints0 contains index of vertex
+						// right after the last clipped out
+						// vertex.
+					}
+					else{
+						coverageClip.add(29) ;
+					}
+				}
+
+				// add the rest of the batch to the result multipoint (only if
+				// something has been already clipped out)
+				if (ipoints0 > 0) {
+					coverageClip.add(30) ;
+					multi_point_out.add(multi_point, ipoints0, npoints);
+				}
+				else{
+					coverageClip.add(31) ;
+
+				}
+
+				if (ipoints0 == 0) {
+					coverageClip.add(32) ;
+					return multi_point;// everything is inside, so return the input
+					// geometry
+				}
+				else {
+					coverageClip.add(33) ;
+					return multi_point_out;// clipping has happend, return the
+					// clipped geometry
 				}
 			}
-
-			// add the rest of the batch to the result multipoint (only if
-			// something has been already clipped out)
-			if (ipoints0 > 0)
-				multi_point_out.add(multi_point, ipoints0, npoints);
-
-			if (ipoints0 == 0)
-				return multi_point;// everything is inside, so return the input
-									// geometry
-			else
-				return multi_point_out;// clipping has happend, return the
-										// clipped geometry
-		}
-		case Geometry.GeometryType.Polygon:
-		case Geometry.GeometryType.Polyline:
-			return clipMultiPath_((MultiPath) geometry, extent, tolerance,
-					densify_dist);
-		default:
-			assert (false);
-			throw GeometryException.GeometryInternalError();
+			case Geometry.GeometryType.Polygon:
+				coverageClip.add(34) ;
+			case Geometry.GeometryType.Polyline:
+				coverageClip.add(35) ;
+				return clipMultiPath_((MultiPath) geometry, extent, tolerance,
+						densify_dist);
+			default:
+				coverageClip.add(36) ;
+				assert (false);
+				throw GeometryException.GeometryInternalError();
 		}
 	}
+
 
 	int compareVertices_(int v_1, int v_2) {
 		Point2D pt_1 = new Point2D();
