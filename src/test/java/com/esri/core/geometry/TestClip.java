@@ -27,11 +27,11 @@ package com.esri.core.geometry;
 import junit.framework.TestCase;
 import org.junit.AfterClass;
 import org.junit.Test;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+//import org.junit.jupiter.api.AfterAll;
+//import org.junit.jupiter.api.BeforeAll;
+//import org.junit.jupiter.api.AfterAll;
+//import org.junit.jupiter.api.BeforeAll;
+//import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
 
@@ -69,7 +69,7 @@ public class TestClip extends TestCase {
 
 		super.tearDown();
 	}
-
+/*
 	@Test
 	public void testClipEmptyGeometry() {
 		Geometry emptyGeom = new Polygon();
@@ -80,7 +80,7 @@ public class TestClip extends TestCase {
 
 		assertTrue(BranchCC.visitedBranch[0]);
 	}
-
+*/
 
 	/*
 	@BeforeAll

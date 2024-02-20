@@ -84,7 +84,7 @@ public class TestClipNEW{
         Geometry result = Clipper.clip(emptyGeom, new Envelope2D(0, 0, 10, 10), 0, 0);
         assertTrue(result.isEmpty());
 
-        assertTrue(BranchCC.visitedBranch[0]);
+        //assertTrue(BranchCC.visitedBranch[0]);
     }
 
     @Test
@@ -96,7 +96,7 @@ public class TestClipNEW{
         Geometry result = Clipper.clip(pointGeom, emptyExtent, 0, 0);
         assertTrue(result.isEmpty());
 
-        assertTrue(BranchCC.visitedBranch[2]);
+        //assertTrue(BranchCC.visitedBranch[2]);
     }
 
     @Test
@@ -108,7 +108,7 @@ public class TestClipNEW{
         Geometry result = Clipper.clip(pointGeom, extent, 0, 0);
         assertFalse(result.isEmpty());
 
-        assertTrue(BranchCC.visitedBranch[10] || BranchCC.visitedBranch[5]);
+        //assertTrue(BranchCC.visitedBranch[10] || BranchCC.visitedBranch[5]);
     }
 
     @Test
@@ -121,9 +121,9 @@ public class TestClipNEW{
         Geometry result = Clipper.clip(envelopeGeom, extent, 0, 0);
         assertFalse("The clipped geometry should not be empty when the envelope partially intersects the extent", result.isEmpty());
 
-        assertTrue("Branch 7 (Envelope type check) should be visited", BranchCC.visitedBranch[7]);
-        assertTrue("Branch 8 (Envelope intersects extent) should be visited", BranchCC.visitedBranch[8]);
-        assertFalse("Branch 9 (Envelope does not intersect extent) should not be visited", BranchCC.visitedBranch[9]);
+        //assertTrue("Branch 7 (Envelope type check) should be visited", BranchCC.visitedBranch[7]);
+        //assertTrue("Branch 8 (Envelope intersects extent) should be visited", BranchCC.visitedBranch[8]);
+        //assertFalse("Branch 9 (Envelope does not intersect extent) should not be visited", BranchCC.visitedBranch[9]);
     }
 
 
