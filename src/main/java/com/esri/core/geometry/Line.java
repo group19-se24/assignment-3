@@ -737,10 +737,8 @@ public final class Line extends Segment implements Serializable {
 	int _intersectLineLineExact(Line line1, Line line2,
 			Point2D[] intersectionPoints, double[] param1, double[] param2) {
 		int counter = 0;
-		// TODO: Unit test with two non-intersecting lines.
 		if (line1.m_xStart == line2.m_xStart
 				&& line1.m_yStart == line2.m_yStart) {
-			// TODO: Unit test with two lines with the same start point.
 			if (param1 != null)// if (param1)
 				param1[counter] = 0.0;
 			if (param2 != null)// if (param2)
@@ -754,7 +752,6 @@ public final class Line extends Segment implements Serializable {
 		}
 
 		if (line1.m_xStart == line2.m_xEnd && line1.m_yStart == line2.m_yEnd) {
-			// TODO: Unit test where line1 start point == line2 end point.
 			if (param1 != null)// if (param1)
 				param1[counter] = 0.0;
 			if (param2 != null)// if (param2)
@@ -768,9 +765,7 @@ public final class Line extends Segment implements Serializable {
 		}
 
 		if (line1.m_xEnd == line2.m_xStart && line1.m_yEnd == line2.m_yStart) {
-			// TODO: Unit test where line 1end == line2 start
 			if (counter == 2) {// both segments a degenerate
-				// TODO: Unit test where both lines degenerates.
 				if (param1 != null)// if (param1)
 				{
 					param1[0] = 0.0;
@@ -805,7 +800,6 @@ public final class Line extends Segment implements Serializable {
 		}
 
 		if (line1.m_xEnd == line2.m_xEnd && line1.m_yEnd == line2.m_yEnd) {
-			// TODO: Unit test where line1 end == line2 end
 			if (counter == 2) {// both segments are degenerate
 				if (param1 != null)// if (param1)
 				{
