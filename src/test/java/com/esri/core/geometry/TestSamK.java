@@ -39,7 +39,8 @@ public class TestSamK {
         // static {
         // BranchCC.visitedBranch = new boolean[36];
         // }
-
+ 
+        // Requirement: Clipping an empty geometry should return an empty geometry
         @Test
         public void testClipEmptyGeometry() {
                 // added
@@ -51,7 +52,8 @@ public class TestSamK {
 
                 // assertTrue(BranchCC.visitedBranch[0]);
         }
-
+ 
+        // Requirement: Clipping any geometry with an empty extent should result in an empty geometry
         @Test
         public void testClipWithEmptyExtent() {
                 // added
@@ -63,7 +65,8 @@ public class TestSamK {
 
                 // assertTrue(BranchCC.visitedBranch[2]);
         }
-
+ 
+        // Requirement: A geometry fully inside the clipping extent should remain unchanged after clipping
         @Test
         public void testGeometryFullyInsideExtent() {
                 // added
@@ -75,7 +78,8 @@ public class TestSamK {
 
                 // assertTrue(BranchCC.visitedBranch[10] || BranchCC.visitedBranch[5]);
         }
-
+ 
+        // Requirement: A envelope partially intersecting the clipping extent should be clipped by its intersection area.
         @Test
         public void testEnvelopePartiallyIntersectingExtent() {
                 // added
