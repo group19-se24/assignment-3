@@ -2,11 +2,14 @@ package com.esri.core.geometry;
 
 import org.junit.Test;
 
-public class appendQouteTest {
+public class TestAppendQuote {
     JsonStringWriter jsw =  new JsonStringWriter();
 
+    /**
+     * Test should pass if it creates a json-file that correctly escapes the \t 
+     */
     @Test
-    public void testAppendQouteWithTabs() {
+    public void testAppendQuoteWithTabs() {
         jsw.startObject();
         jsw.addPairString("cool\tare", "tex\tabs");
         jsw.endObject();
@@ -14,8 +17,11 @@ public class appendQouteTest {
         assert (jsw.getJson().equals(testString));
     }
 
+    /**
+     * Test should pass if it creates a json-file that correctly escapes the \n
+     */
     @Test
-    public void testAppendQouteWithNewlines() {
+    public void testAppendQuoteWithNewlines() {
         jsw.startObject();
         jsw.addPairString("cool\nare", "tex\nabs");
         jsw.endObject();
@@ -23,6 +29,9 @@ public class appendQouteTest {
         assert (jsw.getJson().equals(testString));
     }
 
+    /**
+     * Test should pass if it creates a json-file that correctly escapes two backslashes 
+     */
     @Test
     public void testAppendQouteWithBackslashes() {
         jsw.startObject();
@@ -32,8 +41,11 @@ public class appendQouteTest {
         assert (jsw.getJson().equals(testString));
     }
 
+    /**
+     * Test should pass if it creates a json-file that correctly escapes the \f and the \b
+     */
     @Test
-    public void testAppendQouteWithBAndF() {
+    public void testAppendQuoteWithBAndF() {
         jsw.startObject();
         jsw.addPairString("cool\bare", "tex\fabs");
         jsw.endObject();
@@ -41,8 +53,11 @@ public class appendQouteTest {
         assert (jsw.getJson().equals(testString));
     }
 
+    /**
+     * Test should pass if it creates a json-file that correctly escapes the </ symbol
+     */
     @Test
-    public void testAppendQouteWithForwardPrecission() {
+    public void testAppendQuoteWithForwardPrecission() {
         jsw.startObject();
         jsw.addPairString("cool</are", "tex//abs");
         jsw.endObject();
