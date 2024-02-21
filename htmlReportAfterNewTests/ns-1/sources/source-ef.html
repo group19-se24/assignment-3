@@ -5,7 +5,7 @@
 <html id="htmlId">
 <head>
   <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
-  <title>Coverage Report > ShapeType</title>
+  <title>Coverage Report > WktImportFlags</title>
   <style type="text/css">
     @import "../../css/coverage.css";
     @import "../../css/idea.min.css";
@@ -22,14 +22,14 @@ Current scope:     <a href="../../index.html">all classes</a>
     <a href="../index.html">com.esri.core.geometry</a>
 </div>
 
-<h1>Coverage Summary for Class: ShapeType (com.esri.core.geometry)</h1>
+<h1>Coverage Summary for Class: WktImportFlags (com.esri.core.geometry)</h1>
 
 <table class="coverageStats">
 <tr>
   <th class="name">Class</th>
 </tr>
 <tr>
-  <td class="name">ShapeType</td>
+  <td class="name">WktImportFlags</td>
 </tr>
 
 </table>
@@ -62,36 +62,14 @@ Current scope:     <a href="../../index.html">all classes</a>
 &nbsp;
 &nbsp; email: contracts@esri.com
 &nbsp; */
-&nbsp;
 &nbsp;package com.esri.core.geometry;
 &nbsp;
-&nbsp;interface ShapeType {
-&nbsp;	public static final int ShapeNull = 0;
-&nbsp;	public static final int ShapePoint = 1;
-&nbsp;	public static final int ShapePointM = 21;
-&nbsp;	public static final int ShapePointZM = 11;
-&nbsp;	public static final int ShapePointZ = 9;
-&nbsp;	public static final int ShapeMultiPoint = 8;
-&nbsp;	public static final int ShapeMultiPointM = 28;
-&nbsp;	public static final int ShapeMultiPointZM = 18;
-&nbsp;	public static final int ShapeMultiPointZ = 20;
-&nbsp;	public static final int ShapePolyline = 3;
-&nbsp;	public static final int ShapePolylineM = 23;
-&nbsp;	public static final int ShapePolylineZM = 13;
-&nbsp;	public static final int ShapePolylineZ = 10;
-&nbsp;	public static final int ShapePolygon = 5;
-&nbsp;	public static final int ShapePolygonM = 25;
-&nbsp;	public static final int ShapePolygonZM = 15;
-&nbsp;	public static final int ShapePolygonZ = 19;
-&nbsp;	public static final int ShapeMultiPatchM = 31;
-&nbsp;	public static final int ShapeMultiPatch = 32;
-&nbsp;	public static final int ShapeGeneralPolyline = 50;
-&nbsp;	public static final int ShapeGeneralPolygon = 51;
-&nbsp;	public static final int ShapeGeneralPoint = 52;
-&nbsp;	public static final int ShapeGeneralMultiPoint = 53;
-&nbsp;	public static final int ShapeGeneralMultiPatch = 54;
-&nbsp;	public static final int ShapeTypeLast = 55;
-&nbsp;
+&nbsp;/**
+&nbsp;*Flags used by the OperatorImportFromWkt.
+&nbsp;*/
+&nbsp;public interface WktImportFlags {
+&nbsp;	public static final int wktImportDefaults = 0;//!&lt;Default import flags
+&nbsp;	public static final int wktImportNonTrusted = 2;//!&lt;Pass this flag to the import to indicate the shape can contain non-simple geometry.
 &nbsp;}
 </code>
 </pre>
@@ -116,7 +94,7 @@ Current scope:     <a href="../../index.html">all classes</a>
 
 <div class="footer">
     
-    <div style="float:right;">generated on 2024-02-21 16:04</div>
+    <div style="float:right;">generated on 2024-02-21 16:42</div>
 </div>
 </body>
 </html>

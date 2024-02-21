@@ -5,7 +5,7 @@
 <html id="htmlId">
 <head>
   <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
-  <title>Coverage Report > WkbImportFlags</title>
+  <title>Coverage Report > SegmentFlags</title>
   <style type="text/css">
     @import "../../css/coverage.css";
     @import "../../css/idea.min.css";
@@ -22,14 +22,14 @@ Current scope:     <a href="../../index.html">all classes</a>
     <a href="../index.html">com.esri.core.geometry</a>
 </div>
 
-<h1>Coverage Summary for Class: WkbImportFlags (com.esri.core.geometry)</h1>
+<h1>Coverage Summary for Class: SegmentFlags (com.esri.core.geometry)</h1>
 
 <table class="coverageStats">
 <tr>
   <th class="name">Class</th>
 </tr>
 <tr>
-  <td class="name">WkbImportFlags</td>
+  <td class="name">SegmentFlags</td>
 </tr>
 
 </table>
@@ -65,12 +65,15 @@ Current scope:     <a href="../../index.html">all classes</a>
 &nbsp;
 &nbsp;package com.esri.core.geometry;
 &nbsp;
-&nbsp;/**
-&nbsp;*Flags used by the OperatorImportFromWkb.
-&nbsp;*/
-&nbsp;public interface WkbImportFlags {
-&nbsp;	public static final int wkbImportDefaults = 0;//!&lt;Default import flags
-&nbsp;	public static final int wkbImportNonTrusted = 2;//!&lt;Pass this flag to the import to indicate the shape can contain non-simple geometry.
+&nbsp;interface SegmentFlags {
+&nbsp;	public static final int enumLineSeg = 1;
+&nbsp;	public static final int enumBezierSeg = 2;
+&nbsp;	public static final int enumArcSeg = 4;
+&nbsp;	public static final int enumNonlinearSegmentMask = 6;
+&nbsp;	public static final int enumSegmentMask = 7;
+&nbsp;	public static final int enumDensified = 8; // set for segments that have
+&nbsp;												// been produced from a
+&nbsp;												// densified non-linear segment.
 &nbsp;}
 </code>
 </pre>
@@ -95,7 +98,7 @@ Current scope:     <a href="../../index.html">all classes</a>
 
 <div class="footer">
     
-    <div style="float:right;">generated on 2024-02-21 16:04</div>
+    <div style="float:right;">generated on 2024-02-21 16:42</div>
 </div>
 </body>
 </html>

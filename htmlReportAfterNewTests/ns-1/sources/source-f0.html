@@ -5,7 +5,7 @@
 <html id="htmlId">
 <head>
   <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
-  <title>Coverage Report > WktExportFlags</title>
+  <title>Coverage Report > GeoJsonImportFlags</title>
   <style type="text/css">
     @import "../../css/coverage.css";
     @import "../../css/idea.min.css";
@@ -22,14 +22,14 @@ Current scope:     <a href="../../index.html">all classes</a>
     <a href="../index.html">com.esri.core.geometry</a>
 </div>
 
-<h1>Coverage Summary for Class: WktExportFlags (com.esri.core.geometry)</h1>
+<h1>Coverage Summary for Class: GeoJsonImportFlags (com.esri.core.geometry)</h1>
 
 <table class="coverageStats">
 <tr>
   <th class="name">Class</th>
 </tr>
 <tr>
-  <td class="name">WktExportFlags</td>
+  <td class="name">GeoJsonImportFlags</td>
 </tr>
 
 </table>
@@ -64,27 +64,18 @@ Current scope:     <a href="../../index.html">all classes</a>
 &nbsp; */
 &nbsp;package com.esri.core.geometry;
 &nbsp;
-&nbsp;/**
-&nbsp;*Flags used by the OperatorExportToWkt
-&nbsp;*/
-&nbsp;public interface WktExportFlags {
-&nbsp;	public static final int wktExportDefaults = 0;
-&nbsp;	public static final int wktExportPoint = 1;
-&nbsp;	public static final int wktExportMultiPoint = 2;
-&nbsp;	public static final int wktExportLineString = 4;
-&nbsp;	public static final int wktExportMultiLineString = 8;
-&nbsp;	public static final int wktExportPolygon = 16;
-&nbsp;	public static final int wktExportMultiPolygon = 32;
-&nbsp;	public static final int wktExportStripZs = 64;
-&nbsp;	public static final int wktExportStripMs = 128;
-&nbsp;	public static final int wktExportFailIfNotSimple = 4096;
-&nbsp;	public static final int wktExportPrecision16 = 0x2000;
-&nbsp;	public static final int wktExportPrecision15 = 0x4000;
-&nbsp;	public static final int wktExportPrecision14 = 0x6000;
-&nbsp;	public static final int wktExportPrecision13 = 0x8000;
-&nbsp;	public static final int wktExportPrecision12 = 0xa000;
-&nbsp;	public static final int wktExportPrecision11 = 0xc000;
-&nbsp;	public static final int wktExportPrecision10 = 0xe000;
+&nbsp;public interface GeoJsonImportFlags {
+&nbsp;	public static final int geoJsonImportDefaults = 0;
+&nbsp;	@Deprecated static final int geoJsonImportNonTrusted = 2;
+&nbsp;	/**
+&nbsp;	 * If set, the import will skip CRS.
+&nbsp;	 */
+&nbsp;	public static final int geoJsonImportSkipCRS = 8;
+&nbsp;	/**
+&nbsp;	 * If set, and the geojson does not have a spatial reference, the result geometry will not have one too, otherwise
+&nbsp;	 * it&#39;ll assume WGS84.
+&nbsp;	 */
+&nbsp;	public static final int geoJsonImportNoWGS84Default = 16;	
 &nbsp;}
 </code>
 </pre>
@@ -109,7 +100,7 @@ Current scope:     <a href="../../index.html">all classes</a>
 
 <div class="footer">
     
-    <div style="float:right;">generated on 2024-02-21 16:04</div>
+    <div style="float:right;">generated on 2024-02-21 16:42</div>
 </div>
 </body>
 </html>

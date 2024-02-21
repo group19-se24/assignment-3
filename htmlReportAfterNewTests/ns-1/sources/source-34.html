@@ -52,18 +52,18 @@ Current scope:     <a href="../../index.html">all classes</a>
 </td>
 <td class="coverageStat">
   <span class="percent">
-    68%
+    70%
   </span>
   <span class="absValue">
-    (34/50)
+    (35/50)
   </span>
 </td>
 <td class="coverageStat">
   <span class="percent">
-    67,5%
+    76,9%
   </span>
   <span class="absValue">
-    (324/480)
+    (369/480)
   </span>
 </td>
 </tr>
@@ -110,7 +110,7 @@ Current scope:     <a href="../../index.html">all classes</a>
 &nbsp;
 &nbsp;/**
 &nbsp; * A straight line between a pair of points.
-&nbsp; * 
+&nbsp; *
 &nbsp; */
 <b class="fc">&nbsp;public final class Line extends Segment implements Serializable {</b>
 &nbsp;
@@ -332,19 +332,19 @@ Current scope:     <a href="../../index.html">all classes</a>
 &nbsp;
 <b class="fc">&nbsp;		int interpolation = VertexDescription.getInterpolation(semantics);</b>
 <b class="fc">&nbsp;		switch (interpolation) {</b>
-&nbsp;		case VertexDescription.Interpolation.NONE:
-<b class="fc">&nbsp;			if (t &lt; 0.5)</b>
-<b class="fc">&nbsp;				return getStartAttributeAsDbl(semantics, ordinate);</b>
-&nbsp;			else
-<b class="fc">&nbsp;				return getEndAttributeAsDbl(semantics, ordinate);</b>
-&nbsp;		case VertexDescription.Interpolation.LINEAR: {
-<b class="fc">&nbsp;			double s = getStartAttributeAsDbl(semantics, ordinate);</b>
-<b class="fc">&nbsp;			double e = getEndAttributeAsDbl(semantics, ordinate);</b>
-<b class="fc">&nbsp;			return MathUtils.lerp(s,  e,  t);</b>
-&nbsp;		}
-&nbsp;		case VertexDescription.Interpolation.ANGULAR: {
-<b class="nc">&nbsp;			throw new GeometryException(&quot;not implemented&quot;);</b>
-&nbsp;		}
+&nbsp;			case VertexDescription.Interpolation.NONE:
+<b class="fc">&nbsp;				if (t &lt; 0.5)</b>
+<b class="fc">&nbsp;					return getStartAttributeAsDbl(semantics, ordinate);</b>
+&nbsp;				else
+<b class="fc">&nbsp;					return getEndAttributeAsDbl(semantics, ordinate);</b>
+&nbsp;			case VertexDescription.Interpolation.LINEAR: {
+<b class="fc">&nbsp;				double s = getStartAttributeAsDbl(semantics, ordinate);</b>
+<b class="fc">&nbsp;				double e = getEndAttributeAsDbl(semantics, ordinate);</b>
+<b class="fc">&nbsp;				return MathUtils.lerp(s,  e,  t);</b>
+&nbsp;			}
+&nbsp;			case VertexDescription.Interpolation.ANGULAR: {
+<b class="nc">&nbsp;				throw new GeometryException(&quot;not implemented&quot;);</b>
+&nbsp;			}
 &nbsp;		}
 &nbsp;
 <b class="nc">&nbsp;		throw GeometryException.GeometryInternalError();</b>
@@ -372,7 +372,7 @@ Current scope:     <a href="../../index.html">all classes</a>
 &nbsp;
 &nbsp;	@Override
 &nbsp;	public int intersectionWithAxis2D(boolean b_axis_x, double ordinate,
-&nbsp;			double[] result_ordinates, double[] parameters) {
+&nbsp;									  double[] result_ordinates, double[] parameters) {
 <b class="fc">&nbsp;		if (b_axis_x) {</b>
 <b class="fc">&nbsp;			double a = (m_yEnd - m_yStart);</b>
 &nbsp;
@@ -421,8 +421,8 @@ Current scope:     <a href="../../index.html">all classes</a>
 &nbsp;	// an envelopeDistance can be -1.0 if the corresponding endpoint is properly
 &nbsp;	// inside clipEnv2D.
 &nbsp;	int intersectionWithEnvelope2D(Envelope2D clipEnv2D,
-&nbsp;			boolean includeEnvBoundary, double[] segParams,
-&nbsp;			double[] envelopeDistances) {
+&nbsp;								   boolean includeEnvBoundary, double[] segParams,
+&nbsp;								   double[] envelopeDistances) {
 <b class="nc">&nbsp;		Point2D p1 = getStartXY();</b>
 <b class="nc">&nbsp;		Point2D p2 = getEndXY();</b>
 &nbsp;
@@ -454,16 +454,16 @@ Current scope:     <a href="../../index.html">all classes</a>
 &nbsp;
 &nbsp;	@Override
 &nbsp;	boolean _isIntersectingPoint(Point2D pt, double tolerance,
-&nbsp;			boolean bExcludeExactEndpoints) {
+&nbsp;								 boolean bExcludeExactEndpoints) {
 <b class="fc">&nbsp;		return _intersection(pt, tolerance, bExcludeExactEndpoints) &gt;= 0;// must</b>
-&nbsp;																			// use
-&nbsp;																			// same
-&nbsp;																			// method
-&nbsp;																			// that
-&nbsp;																			// the
-&nbsp;																			// intersection
-&nbsp;																			// routine
-&nbsp;																			// uses.
+&nbsp;		// use
+&nbsp;		// same
+&nbsp;		// method
+&nbsp;		// that
+&nbsp;		// the
+&nbsp;		// intersection
+&nbsp;		// routine
+&nbsp;		// uses.
 &nbsp;	}
 &nbsp;
 &nbsp;	/**
@@ -514,7 +514,7 @@ Current scope:     <a href="../../index.html">all classes</a>
 &nbsp;	}
 &nbsp;
 &nbsp;	double _intersection(Point2D pt, double tolerance,
-&nbsp;			boolean bExcludeExactEndPoints) {
+&nbsp;						 boolean bExcludeExactEndPoints) {
 <b class="fc">&nbsp;		Point2D v = new Point2D();</b>
 <b class="fc">&nbsp;		Point2D start = new Point2D();</b>
 &nbsp;
@@ -555,12 +555,12 @@ Current scope:     <a href="../../index.html">all classes</a>
 <b class="fc">&nbsp;			double projection = relativePoint.dotProduct(v);</b>
 <b class="fc">&nbsp;			double projectionError = 8 * relativePoint._dotProductAbs(v)</b>
 <b class="fc">&nbsp;					* NumberUtils.doubleEps();// See Error Estimation Rules In</b>
-&nbsp;												// Borg.docx
+&nbsp;			// Borg.docx
 <b class="fc">&nbsp;			v.leftPerpendicular();// get left normal to v</b>
 <b class="fc">&nbsp;			double distance = relativePoint.dotProduct(v);</b>
 <b class="fc">&nbsp;			double distanceError = 8 * relativePoint._dotProductAbs(v)</b>
 <b class="fc">&nbsp;					* NumberUtils.doubleEps();// See Error Estimation Rules In</b>
-&nbsp;												// Borg.docx
+&nbsp;			// Borg.docx
 &nbsp;
 <b class="fc">&nbsp;			double perror = Math.max(tolerance, projectionError);</b>
 <b class="fc">&nbsp;			if (projection &lt; -perror || projection &gt; len + perror)</b>
@@ -575,32 +575,32 @@ Current scope:     <a href="../../index.html">all classes</a>
 <b class="fc">&nbsp;				if (Point2D.distance(ptOnLine, pt) &lt;= tolerance) {</b>
 <b class="fc">&nbsp;					if (t &lt; 0.5) {</b>
 <b class="fc">&nbsp;						if (Point2D.distance(ptOnLine, start) &lt;= tolerance)// the</b>
-&nbsp;																			// projected
-&nbsp;																			// point
-&nbsp;																			// is
-&nbsp;																			// close
-&nbsp;																			// to
-&nbsp;																			// the
-&nbsp;																			// start
-&nbsp;																			// point.
-&nbsp;																			// Need
-&nbsp;																			// to
-&nbsp;																			// return
-&nbsp;																			// 0.
+&nbsp;							// projected
+&nbsp;							// point
+&nbsp;							// is
+&nbsp;							// close
+&nbsp;							// to
+&nbsp;							// the
+&nbsp;							// start
+&nbsp;							// point.
+&nbsp;							// Need
+&nbsp;							// to
+&nbsp;							// return
+&nbsp;							// 0.
 <b class="nc">&nbsp;							return 0;</b>
 <b class="fc">&nbsp;					} else if (Point2D.distance(ptOnLine, end2D) &lt;= tolerance)// the</b>
-&nbsp;																				// projected
-&nbsp;																				// point
-&nbsp;																				// is
-&nbsp;																				// close
-&nbsp;																				// to
-&nbsp;																				// the
-&nbsp;																				// end
-&nbsp;																				// point.
-&nbsp;																				// Need
-&nbsp;																				// to
-&nbsp;																				// return
-&nbsp;																				// 1.0.
+&nbsp;						// projected
+&nbsp;						// point
+&nbsp;						// is
+&nbsp;						// close
+&nbsp;						// to
+&nbsp;						// the
+&nbsp;						// end
+&nbsp;						// point.
+&nbsp;						// Need
+&nbsp;						// to
+&nbsp;						// return
+&nbsp;						// 1.0.
 <b class="nc">&nbsp;						return 1.0;</b>
 &nbsp;
 <b class="fc">&nbsp;					return t;</b>
@@ -624,7 +624,7 @@ Current scope:     <a href="../../index.html">all classes</a>
 &nbsp;
 <b class="nc">&nbsp;		return _equalsImpl((Segment)other);</b>
 &nbsp;	}
-&nbsp;	
+&nbsp;
 &nbsp;	@Override
 &nbsp;	public int hashCode() {
 <b class="nc">&nbsp;		return super.hashCode();</b>
@@ -668,12 +668,12 @@ Current scope:     <a href="../../index.html">all classes</a>
 <b class="fc">&nbsp;		v.y = m_yEnd - m_yStart;</b>
 <b class="fc">&nbsp;		if (!_projectionIntersectHelper(other, v, false))</b>
 <b class="fc">&nbsp;			return false; // Both other.Start and other.End projections on</b>
-&nbsp;							// &quot;this&quot; lie to the right of the this.End
+&nbsp;		// &quot;this&quot; lie to the right of the this.End
 &nbsp;
 <b class="fc">&nbsp;		v.negate();</b>
 <b class="fc">&nbsp;		if (!_projectionIntersectHelper(other, v, true))</b>
 <b class="fc">&nbsp;			return false; // Both other.Start and other.End projections on</b>
-&nbsp;							// &quot;this&quot; lie to the left of the this.End
+&nbsp;		// &quot;this&quot; lie to the left of the this.End
 &nbsp;
 <b class="fc">&nbsp;		return true;</b>
 &nbsp;	}
@@ -684,13 +684,13 @@ Current scope:     <a href="../../index.html">all classes</a>
 <b class="fc">&nbsp;		int s12 = line1._side(line2.m_xEnd, line2.m_yEnd);</b>
 <b class="fc">&nbsp;		if (s11 &lt; 0 &amp;&amp; s12 &lt; 0 || s11 &gt; 0 &amp;&amp; s12 &gt; 0)</b>
 <b class="fc">&nbsp;			return false;// no intersection. The line2 lies to one side of an</b>
-&nbsp;							// infinite line passing through line1
+&nbsp;		// infinite line passing through line1
 &nbsp;
 <b class="fc">&nbsp;		int s21 = line2._side(line1.m_xStart, line1.m_yStart);</b>
 <b class="fc">&nbsp;		int s22 = line2._side(line1.m_xEnd, line1.m_yEnd);</b>
 <b class="fc">&nbsp;		if (s21 &lt; 0 &amp;&amp; s22 &lt; 0 || s21 &gt; 0 &amp;&amp; s22 &gt; 0)</b>
 <b class="fc">&nbsp;			return false;// no intersection.The line1 lies to one side of an</b>
-&nbsp;							// infinite line passing through line2
+&nbsp;		// infinite line passing through line2
 &nbsp;
 <b class="fc">&nbsp;		double len1 = line1.calculateLength2D();</b>
 <b class="fc">&nbsp;		double len2 = line2.calculateLength2D();</b>
@@ -767,7 +767,7 @@ Current scope:     <a href="../../index.html">all classes</a>
 &nbsp;	}
 &nbsp;
 &nbsp;	static int _isIntersectingLineLine(Line line1, Line line2,
-&nbsp;			double tolerance, boolean bExcludeExactEndpoints) {
+&nbsp;									   double tolerance, boolean bExcludeExactEndpoints) {
 &nbsp;		// _ASSERT(line1 != line2);
 &nbsp;		// Check for the endpoints.
 &nbsp;		// The bExcludeExactEndpoints is True, means we care only about overlaps
@@ -791,7 +791,7 @@ Current scope:     <a href="../../index.html">all classes</a>
 <b class="fc">&nbsp;			counter++;</b>
 <b class="fc">&nbsp;			if (counter == 2)</b>
 <b class="fc">&nbsp;				return 2; // counter == 2 means both endpoints coincide (Lines</b>
-&nbsp;							// overlap).
+&nbsp;			// overlap).
 <b class="fc">&nbsp;			if (!bExcludeExactEndpoints)</b>
 <b class="fc">&nbsp;				return 1;</b>
 &nbsp;		}
@@ -812,37 +812,78 @@ Current scope:     <a href="../../index.html">all classes</a>
 &nbsp;	}
 &nbsp;
 &nbsp;	int _intersectLineLineExact(Line line1, Line line2,
-&nbsp;			Point2D[] intersectionPoints, double[] param1, double[] param2) {
-<b class="nc">&nbsp;		int counter = 0;</b>
-<b class="nc">&nbsp;		if (line1.m_xStart == line2.m_xStart</b>
+&nbsp;								Point2D[] intersectionPoints, double[] param1, double[] param2) {
+<b class="fc">&nbsp;		int counter = 0;</b>
+&nbsp;		// TODO: Unit test with two non-intersecting lines.
+<b class="fc">&nbsp;		if (line1.m_xStart == line2.m_xStart</b>
 &nbsp;				&amp;&amp; line1.m_yStart == line2.m_yStart) {
-<b class="nc">&nbsp;			if (param1 != null)// if (param1)</b>
-<b class="nc">&nbsp;				param1[counter] = 0.0;</b>
-<b class="nc">&nbsp;			if (param2 != null)// if (param2)</b>
-<b class="nc">&nbsp;				param2[counter] = 0.0;</b>
+&nbsp;			// TODO: Unit test with two lines with the same start point.
+<b class="fc">&nbsp;			if (param1 != null)// if (param1)</b>
+<b class="fc">&nbsp;				param1[counter] = 0.0;</b>
+<b class="fc">&nbsp;			if (param2 != null)// if (param2)</b>
+<b class="fc">&nbsp;				param2[counter] = 0.0;</b>
 &nbsp;
-<b class="nc">&nbsp;			if (intersectionPoints != null)// if (intersectionPoints)</b>
-<b class="nc">&nbsp;				intersectionPoints[counter] = Point2D.construct(line1.m_xStart,</b>
+<b class="fc">&nbsp;			if (intersectionPoints != null)// if (intersectionPoints)</b>
+<b class="fc">&nbsp;				intersectionPoints[counter] = Point2D.construct(line1.m_xStart,</b>
 &nbsp;						line1.m_yStart);
 &nbsp;
-<b class="nc">&nbsp;			counter++;</b>
+<b class="fc">&nbsp;			counter++;</b>
 &nbsp;		}
 &nbsp;
-<b class="nc">&nbsp;		if (line1.m_xStart == line2.m_xEnd &amp;&amp; line1.m_yStart == line2.m_yEnd) {</b>
-<b class="nc">&nbsp;			if (param1 != null)// if (param1)</b>
-<b class="nc">&nbsp;				param1[counter] = 0.0;</b>
-<b class="nc">&nbsp;			if (param2 != null)// if (param2)</b>
-<b class="nc">&nbsp;				param2[counter] = 1.0;</b>
+<b class="fc">&nbsp;		if (line1.m_xStart == line2.m_xEnd &amp;&amp; line1.m_yStart == line2.m_yEnd) {</b>
+&nbsp;			// TODO: Unit test where line1 start point == line2 end point.
+<b class="fc">&nbsp;			if (param1 != null)// if (param1)</b>
+<b class="fc">&nbsp;				param1[counter] = 0.0;</b>
+<b class="fc">&nbsp;			if (param2 != null)// if (param2)</b>
+<b class="fc">&nbsp;				param2[counter] = 1.0;</b>
 &nbsp;
-<b class="nc">&nbsp;			if (intersectionPoints != null)// if (intersectionPoints)</b>
-<b class="nc">&nbsp;				intersectionPoints[counter] = Point2D.construct(line1.m_xStart,</b>
+<b class="fc">&nbsp;			if (intersectionPoints != null)// if (intersectionPoints)</b>
+<b class="fc">&nbsp;				intersectionPoints[counter] = Point2D.construct(line1.m_xStart,</b>
 &nbsp;						line1.m_yStart);
 &nbsp;
-<b class="nc">&nbsp;			counter++;</b>
+<b class="fc">&nbsp;			counter++;</b>
 &nbsp;		}
 &nbsp;
-<b class="nc">&nbsp;		if (line1.m_xEnd == line2.m_xStart &amp;&amp; line1.m_yEnd == line2.m_yStart) {</b>
-<b class="nc">&nbsp;			if (counter == 2) {// both segments a degenerate</b>
+<b class="fc">&nbsp;		if (line1.m_xEnd == line2.m_xStart &amp;&amp; line1.m_yEnd == line2.m_yStart) {</b>
+&nbsp;			// TODO: Unit test where line 1end == line2 start
+<b class="fc">&nbsp;			if (counter == 2) {// both segments a degenerate</b>
+&nbsp;				// TODO: Unit test where both lines degenerates.
+<b class="fc">&nbsp;				if (param1 != null)// if (param1)</b>
+&nbsp;				{
+<b class="fc">&nbsp;					param1[0] = 0.0;</b>
+<b class="fc">&nbsp;					param1[1] = 1.0;</b>
+&nbsp;				}
+<b class="fc">&nbsp;				if (param2 != null)// if (param2)</b>
+&nbsp;				{
+<b class="fc">&nbsp;					param2[0] = 1.0;</b>
+&nbsp;				}
+&nbsp;
+<b class="fc">&nbsp;				if (intersectionPoints != null)// if (intersectionPoints)</b>
+&nbsp;				{
+<b class="fc">&nbsp;					intersectionPoints[0] = Point2D.construct(line1.m_xEnd,</b>
+&nbsp;							line1.m_yEnd);
+<b class="fc">&nbsp;					intersectionPoints[1] = Point2D.construct(line1.m_xEnd,</b>
+&nbsp;							line1.m_yEnd);
+&nbsp;				}
+&nbsp;
+<b class="fc">&nbsp;				return counter;</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			if (param1 != null)// if (param1)</b>
+<b class="fc">&nbsp;				param1[counter] = 1.0;</b>
+<b class="fc">&nbsp;			if (param2 != null)// if (param2)</b>
+<b class="fc">&nbsp;				param2[counter] = 0.0;</b>
+&nbsp;
+<b class="fc">&nbsp;			if (intersectionPoints != null)// if (intersectionPoints)</b>
+<b class="fc">&nbsp;				intersectionPoints[counter] = Point2D.construct(line1.m_xEnd,</b>
+&nbsp;						line1.m_yEnd);
+&nbsp;
+<b class="fc">&nbsp;			counter++;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (line1.m_xEnd == line2.m_xEnd &amp;&amp; line1.m_yEnd == line2.m_yEnd) {</b>
+&nbsp;			// TODO: Unit test where line1 end == line2 end
+<b class="fc">&nbsp;			if (counter == 2) {// both segments are degenerate</b>
 <b class="nc">&nbsp;				if (param1 != null)// if (param1)</b>
 &nbsp;				{
 <b class="nc">&nbsp;					param1[0] = 0.0;</b>
@@ -864,58 +905,23 @@ Current scope:     <a href="../../index.html">all classes</a>
 <b class="nc">&nbsp;				return counter;</b>
 &nbsp;			}
 &nbsp;
-<b class="nc">&nbsp;			if (param1 != null)// if (param1)</b>
-<b class="nc">&nbsp;				param1[counter] = 1.0;</b>
-<b class="nc">&nbsp;			if (param2 != null)// if (param2)</b>
-<b class="nc">&nbsp;				param2[counter] = 0.0;</b>
+<b class="fc">&nbsp;			if (param1 != null)// if (param1)</b>
+<b class="fc">&nbsp;				param1[counter] = 1.0;</b>
+<b class="fc">&nbsp;			if (param2 != null)// if (param2)</b>
+<b class="fc">&nbsp;				param2[counter] = 1.0;</b>
 &nbsp;
-<b class="nc">&nbsp;			if (intersectionPoints != null)// if (intersectionPoints)</b>
-<b class="nc">&nbsp;				intersectionPoints[counter] = Point2D.construct(line1.m_xEnd,</b>
+<b class="fc">&nbsp;			if (intersectionPoints != null)// if (intersectionPoints)</b>
+<b class="fc">&nbsp;				intersectionPoints[counter] = Point2D.construct(line1.m_xEnd,</b>
 &nbsp;						line1.m_yEnd);
-&nbsp;
-<b class="nc">&nbsp;			counter++;</b>
+<b class="fc">&nbsp;			counter++;</b>
 &nbsp;		}
 &nbsp;
-<b class="nc">&nbsp;		if (line1.m_xEnd == line2.m_xEnd &amp;&amp; line1.m_yEnd == line2.m_yEnd) {</b>
-<b class="nc">&nbsp;			if (counter == 2) {// both segments are degenerate</b>
-<b class="nc">&nbsp;				if (param1 != null)// if (param1)</b>
-&nbsp;				{
-<b class="nc">&nbsp;					param1[0] = 0.0;</b>
-<b class="nc">&nbsp;					param1[1] = 1.0;</b>
-&nbsp;				}
-<b class="nc">&nbsp;				if (param2 != null)// if (param2)</b>
-&nbsp;				{
-<b class="nc">&nbsp;					param2[0] = 1.0;</b>
-&nbsp;				}
-&nbsp;
-<b class="nc">&nbsp;				if (intersectionPoints != null)// if (intersectionPoints)</b>
-&nbsp;				{
-<b class="nc">&nbsp;					intersectionPoints[0] = Point2D.construct(line1.m_xEnd,</b>
-&nbsp;							line1.m_yEnd);
-<b class="nc">&nbsp;					intersectionPoints[1] = Point2D.construct(line1.m_xEnd,</b>
-&nbsp;							line1.m_yEnd);
-&nbsp;				}
-&nbsp;
-<b class="nc">&nbsp;				return counter;</b>
-&nbsp;			}
-&nbsp;
-<b class="nc">&nbsp;			if (param1 != null)// if (param1)</b>
-<b class="nc">&nbsp;				param1[counter] = 1.0;</b>
-<b class="nc">&nbsp;			if (param2 != null)// if (param2)</b>
-<b class="nc">&nbsp;				param2[counter] = 1.0;</b>
-&nbsp;
-<b class="nc">&nbsp;			if (intersectionPoints != null)// if (intersectionPoints)</b>
-<b class="nc">&nbsp;				intersectionPoints[counter] = Point2D.construct(line1.m_xEnd,</b>
-&nbsp;						line1.m_yEnd);
-<b class="nc">&nbsp;			counter++;</b>
-&nbsp;		}
-&nbsp;
-<b class="nc">&nbsp;		return counter;</b>
+<b class="fc">&nbsp;		return counter;</b>
 &nbsp;	}
 &nbsp;
 &nbsp;	static int _intersectLineLine(Line line1, Line line2,
-&nbsp;			Point2D[] intersectionPoints, double[] param1, double[] param2,
-&nbsp;			double tolerance) {
+&nbsp;								  Point2D[] intersectionPoints, double[] param1, double[] param2,
+&nbsp;								  double tolerance) {
 &nbsp;		// _ASSERT(!param1 &amp;&amp; !param2 || param1);
 <b class="fc">&nbsp;		int counter = 0;</b>
 &nbsp;		// Test the end points for exact coincidence.
@@ -950,14 +956,14 @@ Current scope:     <a href="../../index.html">all classes</a>
 &nbsp;
 <b class="fc">&nbsp;		if (counter != 2 &amp;&amp; !NumberUtils.isNaN(t21)) {</b>
 <b class="fc">&nbsp;			if (!(t11 == 0 &amp;&amp; t21 == 0) &amp;&amp; !(t12 == 0 &amp;&amp; t21 == 1.0))// the &quot;if&quot;</b>
-&nbsp;																		// makes
-&nbsp;																		// sure
-&nbsp;																		// this
-&nbsp;																		// has
-&nbsp;																		// not
-&nbsp;																		// been
-&nbsp;																		// already
-&nbsp;																		// calculated
+&nbsp;			// makes
+&nbsp;			// sure
+&nbsp;			// this
+&nbsp;			// has
+&nbsp;			// not
+&nbsp;			// been
+&nbsp;			// already
+&nbsp;			// calculated
 &nbsp;			{
 <b class="fc">&nbsp;				if (param1 != null)// if (param1)</b>
 <b class="fc">&nbsp;					param1[counter] = 0;</b>
@@ -973,15 +979,15 @@ Current scope:     <a href="../../index.html">all classes</a>
 &nbsp;
 <b class="fc">&nbsp;		if (counter != 2 &amp;&amp; !NumberUtils.isNaN(t22)) {</b>
 <b class="fc">&nbsp;			if (!(t11 == 1.0 &amp;&amp; t22 == 0) &amp;&amp; !(t12 == 1.0 &amp;&amp; t22 == 1.0))// the</b>
-&nbsp;																			// &quot;if&quot;
-&nbsp;																			// makes
-&nbsp;																			// sure
-&nbsp;																			// this
-&nbsp;																			// has
-&nbsp;																			// not
-&nbsp;																			// been
-&nbsp;																			// already
-&nbsp;																			// calculated
+&nbsp;			// &quot;if&quot;
+&nbsp;			// makes
+&nbsp;			// sure
+&nbsp;			// this
+&nbsp;			// has
+&nbsp;			// not
+&nbsp;			// been
+&nbsp;			// already
+&nbsp;			// calculated
 &nbsp;			{
 <b class="fc">&nbsp;				if (param1 != null)// if (param1)</b>
 <b class="fc">&nbsp;					param1[counter] = 1.0;</b>
@@ -997,22 +1003,22 @@ Current scope:     <a href="../../index.html">all classes</a>
 &nbsp;
 <b class="fc">&nbsp;		if (counter &gt; 0) {</b>
 <b class="fc">&nbsp;			if (counter == 2 &amp;&amp; param1 != null &amp;&amp; param1[0] &gt; param1[1]) {// make</b>
-&nbsp;																			// sure
-&nbsp;																			// the
-&nbsp;																			// intersection
-&nbsp;																			// events
-&nbsp;																			// are
-&nbsp;																			// sorted
-&nbsp;																			// along
-&nbsp;																			// the
-&nbsp;																			// line1
-&nbsp;																			// can&#39;t
-&nbsp;																			// swap
-&nbsp;																			// doulbes
-&nbsp;																			// in
-&nbsp;																			// java
-&nbsp;																			// NumberUtils::Swap(param1[0],
-&nbsp;																			// param1[1]);
+&nbsp;				// sure
+&nbsp;				// the
+&nbsp;				// intersection
+&nbsp;				// events
+&nbsp;				// are
+&nbsp;				// sorted
+&nbsp;				// along
+&nbsp;				// the
+&nbsp;				// line1
+&nbsp;				// can&#39;t
+&nbsp;				// swap
+&nbsp;				// doulbes
+&nbsp;				// in
+&nbsp;				// java
+&nbsp;				// NumberUtils::Swap(param1[0],
+&nbsp;				// param1[1]);
 <b class="fc">&nbsp;				double zeroParam1 = param1[0];</b>
 <b class="fc">&nbsp;				param1[0] = param1[1];</b>
 <b class="fc">&nbsp;				param1[1] = zeroParam1;</b>
@@ -1022,7 +1028,7 @@ Current scope:     <a href="../../index.html">all classes</a>
 <b class="fc">&nbsp;					double zeroParam2 = param2[0];</b>
 <b class="fc">&nbsp;					param2[0] = param2[1];</b>
 <b class="fc">&nbsp;					param2[1] = zeroParam2;// NumberUtils::Swap(ARRAYELEMENT(param2,</b>
-&nbsp;											// 0), ARRAYELEMENT(param2, 1));
+&nbsp;					// 0), ARRAYELEMENT(param2, 1));
 &nbsp;				}
 &nbsp;
 <b class="fc">&nbsp;				if (intersectionPoints != null)// if (intersectionPoints)</b>
@@ -1058,25 +1064,25 @@ Current scope:     <a href="../../index.html">all classes</a>
 &nbsp;
 <b class="fc">&nbsp;		return 1;</b>
 &nbsp;	}
-&nbsp;	
-&nbsp;    @Override
-&nbsp;    public void replaceNaNs(int semantics, double value) {
-<b class="nc">&nbsp;    	addAttribute(semantics);</b>
-<b class="nc">&nbsp;    	if (isEmpty())</b>
-&nbsp;    		return;
-&nbsp;    	
-<b class="nc">&nbsp;    	int ncomps = VertexDescription.getComponentCount(semantics);</b>
-<b class="nc">&nbsp;    	for (int i = 0; i &lt; ncomps; i++) {</b>
-<b class="nc">&nbsp;    		double v = _getAttributeAsDbl(0, semantics, i);</b>
-<b class="nc">&nbsp;    		if (Double.isNaN(v))</b>
-<b class="nc">&nbsp;    			_setAttribute(0, semantics, 0, value);</b>
-&nbsp;    		
-<b class="nc">&nbsp;    		v = _getAttributeAsDbl(1, semantics, i);</b>
-<b class="nc">&nbsp;    		if (Double.isNaN(v))</b>
-<b class="nc">&nbsp;    			_setAttribute(1, semantics, 0, value);</b>
-&nbsp;    	}
-&nbsp;    }
-&nbsp;	
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public void replaceNaNs(int semantics, double value) {
+<b class="nc">&nbsp;		addAttribute(semantics);</b>
+<b class="nc">&nbsp;		if (isEmpty())</b>
+&nbsp;			return;
+&nbsp;
+<b class="nc">&nbsp;		int ncomps = VertexDescription.getComponentCount(semantics);</b>
+<b class="nc">&nbsp;		for (int i = 0; i &lt; ncomps; i++) {</b>
+<b class="nc">&nbsp;			double v = _getAttributeAsDbl(0, semantics, i);</b>
+<b class="nc">&nbsp;			if (Double.isNaN(v))</b>
+<b class="nc">&nbsp;				_setAttribute(0, semantics, 0, value);</b>
+&nbsp;
+<b class="nc">&nbsp;			v = _getAttributeAsDbl(1, semantics, i);</b>
+<b class="nc">&nbsp;			if (Double.isNaN(v))</b>
+<b class="nc">&nbsp;				_setAttribute(1, semantics, 0, value);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
 &nbsp;
 &nbsp;	@Override
 &nbsp;	int getYMonotonicParts(SegmentBuffer[] monotonicSegments) {
@@ -1094,10 +1100,10 @@ Current scope:     <a href="../../index.html">all classes</a>
 &nbsp;	 */
 &nbsp;	@Override
 &nbsp;	public String toString() {
-<b class="fc">&nbsp;		String s = &quot;Line: [&quot; + m_xStart + &quot;, &quot; + m_yStart + &quot;, &quot; + m_xEnd + &quot;, &quot; + m_yEnd +&quot;]&quot;; </b>
+<b class="fc">&nbsp;		String s = &quot;Line: [&quot; + m_xStart + &quot;, &quot; + m_yStart + &quot;, &quot; + m_xEnd + &quot;, &quot; + m_yEnd +&quot;]&quot;;</b>
 <b class="fc">&nbsp;		return s;</b>
 &nbsp;	}
-&nbsp;	
+&nbsp;
 &nbsp;}
 </code>
 </pre>
@@ -1122,7 +1128,7 @@ Current scope:     <a href="../../index.html">all classes</a>
 
 <div class="footer">
     
-    <div style="float:right;">generated on 2024-02-21 16:04</div>
+    <div style="float:right;">generated on 2024-02-21 16:42</div>
 </div>
 </body>
 </html>

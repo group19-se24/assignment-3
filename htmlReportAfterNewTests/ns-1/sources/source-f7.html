@@ -5,7 +5,7 @@
 <html id="htmlId">
 <head>
   <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
-  <title>Coverage Report > GeoJsonImportFlags</title>
+  <title>Coverage Report > PathFlags</title>
   <style type="text/css">
     @import "../../css/coverage.css";
     @import "../../css/idea.min.css";
@@ -22,14 +22,14 @@ Current scope:     <a href="../../index.html">all classes</a>
     <a href="../index.html">com.esri.core.geometry</a>
 </div>
 
-<h1>Coverage Summary for Class: GeoJsonImportFlags (com.esri.core.geometry)</h1>
+<h1>Coverage Summary for Class: PathFlags (com.esri.core.geometry)</h1>
 
 <table class="coverageStats">
 <tr>
   <th class="name">Class</th>
 </tr>
 <tr>
-  <td class="name">GeoJsonImportFlags</td>
+  <td class="name">PathFlags</td>
 </tr>
 
 </table>
@@ -62,20 +62,22 @@ Current scope:     <a href="../../index.html">all classes</a>
 &nbsp;
 &nbsp; email: contracts@esri.com
 &nbsp; */
+&nbsp;
 &nbsp;package com.esri.core.geometry;
 &nbsp;
-&nbsp;public interface GeoJsonImportFlags {
-&nbsp;	public static final int geoJsonImportDefaults = 0;
-&nbsp;	@Deprecated static final int geoJsonImportNonTrusted = 2;
-&nbsp;	/**
-&nbsp;	 * If set, the import will skip CRS.
-&nbsp;	 */
-&nbsp;	public static final int geoJsonImportSkipCRS = 8;
-&nbsp;	/**
-&nbsp;	 * If set, and the geojson does not have a spatial reference, the result geometry will not have one too, otherwise
-&nbsp;	 * it&#39;ll assume WGS84.
-&nbsp;	 */
-&nbsp;	public static final int geoJsonImportNoWGS84Default = 16;	
+&nbsp;interface PathFlags {
+&nbsp;	public static final int enumClosed = 1;
+&nbsp;	public static final int enumHasNonlinearSegments = 2;// set when the given
+&nbsp;															// part has
+&nbsp;															// non-linear
+&nbsp;															// segments
+&nbsp;	public static final int enumOGCStartPolygon = 4;// set at the start of a
+&nbsp;													// Polygon when viewed as an
+&nbsp;													// OGC MultiPolygon
+&nbsp;	public static final int enumCalcMask = 4;// mask of flags that are obtained
+&nbsp;												// by calculation and depend on
+&nbsp;												// the order of MultiPath parts.
+&nbsp;
 &nbsp;}
 </code>
 </pre>
@@ -100,7 +102,7 @@ Current scope:     <a href="../../index.html">all classes</a>
 
 <div class="footer">
     
-    <div style="float:right;">generated on 2024-02-21 16:04</div>
+    <div style="float:right;">generated on 2024-02-21 16:42</div>
 </div>
 </body>
 </html>

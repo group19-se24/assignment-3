@@ -5,7 +5,7 @@
 <html id="htmlId">
 <head>
   <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
-  <title>Coverage Report > SegmentFlags</title>
+  <title>Coverage Report > WkbGeometryType</title>
   <style type="text/css">
     @import "../../css/coverage.css";
     @import "../../css/idea.min.css";
@@ -22,14 +22,14 @@ Current scope:     <a href="../../index.html">all classes</a>
     <a href="../index.html">com.esri.core.geometry</a>
 </div>
 
-<h1>Coverage Summary for Class: SegmentFlags (com.esri.core.geometry)</h1>
+<h1>Coverage Summary for Class: WkbGeometryType (com.esri.core.geometry)</h1>
 
 <table class="coverageStats">
 <tr>
   <th class="name">Class</th>
 </tr>
 <tr>
-  <td class="name">SegmentFlags</td>
+  <td class="name">WkbGeometryType</td>
 </tr>
 
 </table>
@@ -65,15 +65,64 @@ Current scope:     <a href="../../index.html">all classes</a>
 &nbsp;
 &nbsp;package com.esri.core.geometry;
 &nbsp;
-&nbsp;interface SegmentFlags {
-&nbsp;	public static final int enumLineSeg = 1;
-&nbsp;	public static final int enumBezierSeg = 2;
-&nbsp;	public static final int enumArcSeg = 4;
-&nbsp;	public static final int enumNonlinearSegmentMask = 6;
-&nbsp;	public static final int enumSegmentMask = 7;
-&nbsp;	public static final int enumDensified = 8; // set for segments that have
-&nbsp;												// been produced from a
-&nbsp;												// densified non-linear segment.
+&nbsp;interface WkbGeometryType {
+&nbsp;	public static final int wkbPoint = 1;
+&nbsp;
+&nbsp;	public static final int wkbPointZ = 1001;
+&nbsp;
+&nbsp;	public static final int wkbPointM = 2001;
+&nbsp;
+&nbsp;	public static final int wkbPointZM = 3001;
+&nbsp;
+&nbsp;	public static final int wkbLineString = 2;
+&nbsp;
+&nbsp;	public static final int wkbLineStringZ = 1002;
+&nbsp;
+&nbsp;	public static final int wkbLineStringM = 2002;
+&nbsp;
+&nbsp;	public static final int wkbLineStringZM = 3002;
+&nbsp;
+&nbsp;	public static final int wkbPolygon = 3;
+&nbsp;
+&nbsp;	public static final int wkbPolygonZ = 1003;
+&nbsp;
+&nbsp;	public static final int wkbPolygonM = 2003;
+&nbsp;
+&nbsp;	public static final int wkbPolygonZM = 3003;
+&nbsp;
+&nbsp;	public static final int wkbMultiPoint = 4;
+&nbsp;
+&nbsp;	public static final int wkbMultiPointZ = 1004;
+&nbsp;
+&nbsp;	public static final int wkbMultiPointM = 2004;
+&nbsp;
+&nbsp;	public static final int wkbMultiPointZM = 3004;
+&nbsp;
+&nbsp;	public static final int wkbMultiLineString = 5;
+&nbsp;
+&nbsp;	public static final int wkbMultiLineStringZ = 1005;
+&nbsp;
+&nbsp;	public static final int wkbMultiLineStringM = 2005;
+&nbsp;
+&nbsp;	public static final int wkbMultiLineStringZM = 3005;
+&nbsp;
+&nbsp;	public static final int wkbMultiPolygon = 6;
+&nbsp;
+&nbsp;	public static final int wkbMultiPolygonZ = 1006;
+&nbsp;
+&nbsp;	public static final int wkbMultiPolygonM = 2006;
+&nbsp;
+&nbsp;	public static final int wkbMultiPolygonZM = 3006;
+&nbsp;
+&nbsp;	public static final int wkbGeometryCollection = 7;
+&nbsp;
+&nbsp;	public static final int wkbGeometryCollectionZ = 1007;
+&nbsp;
+&nbsp;	public static final int wkbGeometryCollectionM = 2007;
+&nbsp;
+&nbsp;	public static final int wkbGeometryCollectionZM = 3007;
+&nbsp;
+&nbsp;	public static final int wkbMultiPatch = 8;
 &nbsp;}
 </code>
 </pre>
@@ -98,7 +147,7 @@ Current scope:     <a href="../../index.html">all classes</a>
 
 <div class="footer">
     
-    <div style="float:right;">generated on 2024-02-21 16:04</div>
+    <div style="float:right;">generated on 2024-02-21 16:42</div>
 </div>
 </body>
 </html>

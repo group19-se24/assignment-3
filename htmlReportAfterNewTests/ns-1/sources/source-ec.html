@@ -5,7 +5,7 @@
 <html id="htmlId">
 <head>
   <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
-  <title>Coverage Report > ShapeModifiers</title>
+  <title>Coverage Report > WkbImportFlags</title>
   <style type="text/css">
     @import "../../css/coverage.css";
     @import "../../css/idea.min.css";
@@ -22,14 +22,14 @@ Current scope:     <a href="../../index.html">all classes</a>
     <a href="../index.html">com.esri.core.geometry</a>
 </div>
 
-<h1>Coverage Summary for Class: ShapeModifiers (com.esri.core.geometry)</h1>
+<h1>Coverage Summary for Class: WkbImportFlags (com.esri.core.geometry)</h1>
 
 <table class="coverageStats">
 <tr>
   <th class="name">Class</th>
 </tr>
 <tr>
-  <td class="name">ShapeModifiers</td>
+  <td class="name">WkbImportFlags</td>
 </tr>
 
 </table>
@@ -65,22 +65,12 @@ Current scope:     <a href="../../index.html">all classes</a>
 &nbsp;
 &nbsp;package com.esri.core.geometry;
 &nbsp;
-&nbsp;interface ShapeModifiers {
-&nbsp;	public static final int ShapeHasZs = 0x80000000;
-&nbsp;	public static final int ShapeHasMs = 0x40000000;
-&nbsp;	public static final int ShapeHasCurves = 0x20000000;
-&nbsp;	public static final int ShapeHasIDs = 0x10000000;
-&nbsp;	public static final int ShapeHasNormals = 0x08000000;
-&nbsp;	public static final int ShapeHasTextures = 0x04000000;
-&nbsp;	public static final int ShapeHasPartIDs = 0x02000000;
-&nbsp;	public static final int ShapeHasMaterials = 0x01000000;
-&nbsp;	public static final int ShapeIsCompressed = 0x00800000;
-&nbsp;	public static final int ShapeModifierMask = 0xFF000000;
-&nbsp;	public static final int ShapeMultiPatchModifierMask = 0x0F00000;
-&nbsp;	public static final int ShapeBasicTypeMask = 0x000000FF;
-&nbsp;	public static final int ShapeBasicModifierMask = 0xC0000000;
-&nbsp;	public static final int ShapeNonBasicModifierMask = 0x3F000000;
-&nbsp;	public static final int ShapeExtendedModifierMask = 0xDD000000;
+&nbsp;/**
+&nbsp;*Flags used by the OperatorImportFromWkb.
+&nbsp;*/
+&nbsp;public interface WkbImportFlags {
+&nbsp;	public static final int wkbImportDefaults = 0;//!&lt;Default import flags
+&nbsp;	public static final int wkbImportNonTrusted = 2;//!&lt;Pass this flag to the import to indicate the shape can contain non-simple geometry.
 &nbsp;}
 </code>
 </pre>
@@ -105,7 +95,7 @@ Current scope:     <a href="../../index.html">all classes</a>
 
 <div class="footer">
     
-    <div style="float:right;">generated on 2024-02-21 16:04</div>
+    <div style="float:right;">generated on 2024-02-21 16:42</div>
 </div>
 </body>
 </html>
