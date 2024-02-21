@@ -3,6 +3,10 @@ package com.esri.core.geometry;
 import org.junit.Assert;
 import org.junit.Test;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+
+
 public class TestIntersectLineLineExact {
     @Test
     public void noIntersectionsWhenNonIntersectingLines() {
@@ -12,7 +16,10 @@ public class TestIntersectLineLineExact {
         double[] param1 = new double[2];
         double[] param2 = new double[2];
         int numIntersections = line1._intersectLineLineExact(line1, line2, intersectionPoints, param1, param2);
-        Assert.assertEquals(0L, (long)numIntersections);
+
+        assertNull(intersectionPoints[0]);
+        assertNull(intersectionPoints[1]);
+        assertEquals(0, numIntersections);
     }
 
     @Test
@@ -23,7 +30,10 @@ public class TestIntersectLineLineExact {
         double[] param1 = new double[2];
         double[] param2 = new double[2];
         int numIntersections = line1._intersectLineLineExact(line1, line2, intersectionPoints, param1, param2);
-        Assert.assertEquals(1, numIntersections);
+
+        assertEquals(param1[0],0.0,0.00001);
+        assertEquals(param2[0],0.0,0.00001);
+        assertEquals(1, numIntersections);
     }
 
     @Test
@@ -34,7 +44,13 @@ public class TestIntersectLineLineExact {
         double[] param1 = new double[2];
         double[] param2 = new double[2];
         int numIntersections = line1._intersectLineLineExact(line1, line2, intersectionPoints, param1, param2);
-        Assert.assertEquals(1, numIntersections);
+
+        assertEquals(intersectionPoints[0].x, 0.0, 0.00001);
+        assertEquals(intersectionPoints[0].y, 0.0, 0.00001);
+        assertNull(intersectionPoints[1]);
+        assertEquals(param1[0],1.0,0.00001);
+        assertEquals(param2[0],1.0,0.00001);
+        assertEquals(1, numIntersections);
     }
 
     @Test
@@ -45,7 +61,16 @@ public class TestIntersectLineLineExact {
         double[] param1 = new double[2];
         double[] param2 = new double[2];
         int numIntersections = line1._intersectLineLineExact(line1, line2, intersectionPoints, param1, param2);
-        Assert.assertEquals(2, numIntersections);
+
+        assertEquals(intersectionPoints[0].x, 2.0, 0.00001);
+        assertEquals(intersectionPoints[0].y, 2.0, 0.00001);
+        assertEquals(intersectionPoints[1].x, 0.0, 0.00001);
+        assertEquals(intersectionPoints[1].y, 0.0, 0.00001);
+        assertEquals(param1[0],0.0,0.00001);
+        assertEquals(param1[1],1.0,0.00001);
+        assertEquals(param2[0],1.0,0.00001);
+        assertEquals(param2[1],0.0,0.00001);
+        assertEquals(2, numIntersections);
     }
 
     @Test
@@ -56,7 +81,16 @@ public class TestIntersectLineLineExact {
         double[] param1 = new double[2];
         double[] param2 = new double[2];
         int numIntersections = line1._intersectLineLineExact(line1, line2, intersectionPoints, param1, param2);
-        Assert.assertEquals(2, numIntersections);
+
+        assertEquals(intersectionPoints[0].x, 0.0, 0.00001);
+        assertEquals(intersectionPoints[0].y, 0.0, 0.00001);
+        assertEquals(intersectionPoints[1].x, 0.0, 0.00001);
+        assertEquals(intersectionPoints[1].y, 0.0, 0.00001);
+        assertEquals(param1[0],0.0,0.00001);
+        assertEquals(param1[1],1.0,0.00001);
+        assertEquals(param2[0],1.0,0.00001);
+        assertEquals(param2[1],1.0,0.00001);
+        assertEquals(2, numIntersections);
     }
 
     @Test
@@ -67,6 +101,15 @@ public class TestIntersectLineLineExact {
         double[] param1 = new double[2];
         double[] param2 = new double[2];
         int numIntersections = line1._intersectLineLineExact(line1, line2, intersectionPoints, param1, param2);
-        Assert.assertEquals(2, numIntersections);
+
+        assertEquals(intersectionPoints[0].x, 0.0, 0.00001);
+        assertEquals(intersectionPoints[0].y, 0.0, 0.00001);
+        assertEquals(intersectionPoints[1].x, 1.0, 0.00001);
+        assertEquals(intersectionPoints[1].y, 1.0, 0.00001);
+        assertEquals(param1[0],0.0,0.00001);
+        assertEquals(param1[1],1.0,0.00001);
+        assertEquals(param2[0],1.0,0.00001);
+        assertEquals(param2[1],0.0,0.00001);
+        assertEquals(2, numIntersections);
     }
 }
