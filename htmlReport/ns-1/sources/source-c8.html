@@ -1,0 +1,834 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > RingOrientationFixer</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.esri.core.geometry</a>
+</div>
+
+<h1>Coverage Summary for Class: RingOrientationFixer (com.esri.core.geometry)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">RingOrientationFixer</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (9/9)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    97,4%
+  </span>
+  <span class="absValue">
+    (304/312)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">RingOrientationFixer$Edges</td>
+<td class="coverageStat">
+  <span class="percent">
+    83,3%
+  </span>
+  <span class="absValue">
+    (10/12)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    86%
+  </span>
+  <span class="absValue">
+    (37/43)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">RingOrientationFixer$RingOrientationTestComparator</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (4/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    89,8%
+  </span>
+  <span class="absValue">
+    (44/49)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    92%
+  </span>
+  <span class="absValue">
+    (23/25)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    95,3%
+  </span>
+  <span class="absValue">
+    (385/404)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; Copyright 1995-2015 Esri
+&nbsp;
+&nbsp;   Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp;   you may not use this file except in compliance with the License.
+&nbsp;   You may obtain a copy of the License at
+&nbsp;
+&nbsp;       http://www.apache.org/licenses/LICENSE-2.0
+&nbsp;
+&nbsp;   Unless required by applicable law or agreed to in writing, software
+&nbsp;   distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp;   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp;   See the License for the specific language governing permissions and
+&nbsp;   limitations under the License.
+&nbsp;
+&nbsp; For additional information, contact:
+&nbsp; Environmental Systems Research Institute, Inc.
+&nbsp; Attn: Contracts Dept
+&nbsp; 380 New York Street
+&nbsp; Redlands, California, USA 92373
+&nbsp;
+&nbsp; email: contracts@esri.com
+&nbsp; */
+&nbsp;package com.esri.core.geometry;
+&nbsp;
+<b class="fc">&nbsp;class RingOrientationFixer {</b>
+&nbsp;	EditShape m_shape;
+&nbsp;	Treap m_AET;
+&nbsp;	double m_y_scanline;
+&nbsp;	int m_geometry;
+&nbsp;	int m_unknown_ring_orientation_count;
+&nbsp;	IndexMultiDCList m_sorted_vertices;
+&nbsp;	AttributeStreamOfInt32 m_unknown_nodes;
+&nbsp;	int m_node_1_user_index;
+&nbsp;	int m_node_2_user_index;
+&nbsp;	int m_path_orientation_index;
+&nbsp;	int m_path_parentage_index;
+&nbsp;	boolean m_fixSelfTangency;
+&nbsp;
+&nbsp;	static final class Edges {
+&nbsp;		EditShape m_shape;
+&nbsp;		AttributeStreamOfInt32 m_end_1_nodes;
+&nbsp;		AttributeStreamOfInt32 m_end_2_nodes;
+&nbsp;		AttributeStreamOfInt8 m_directions;
+<b class="fc">&nbsp;		Point2D pt_1 = new Point2D();</b>
+<b class="fc">&nbsp;		Point2D pt_2 = new Point2D();</b>
+&nbsp;		int m_first_free;
+&nbsp;
+&nbsp;		boolean getDirection_(int index) {
+<b class="nc">&nbsp;			return m_shape.getNextVertex(getEnd1(index)) == getEnd2(index);</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		int getEnd_(int index) {
+<b class="nc">&nbsp;			int v_1 = getEnd1(index);</b>
+<b class="nc">&nbsp;			int v_2 = getEnd2(index);</b>
+<b class="nc">&nbsp;			if (m_shape.getNextVertex(v_1) == v_2)</b>
+<b class="nc">&nbsp;				return v_2;</b>
+&nbsp;			else
+<b class="nc">&nbsp;				return v_1;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		Edges(EditShape shape) {</b>
+<b class="fc">&nbsp;			m_shape = shape;</b>
+<b class="fc">&nbsp;			m_first_free = -1;</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		Segment getSegment(int index) {
+<b class="fc">&nbsp;			return m_shape.getSegment(getStart(index));</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		// True if the start vertex is the lower point of the edge.
+&nbsp;		boolean isBottomUp(int index) {
+<b class="fc">&nbsp;			int v_1 = getEnd1(index);</b>
+<b class="fc">&nbsp;			int v_2 = getEnd2(index);</b>
+<b class="fc">&nbsp;			if (m_shape.getPrevVertex(v_1) == v_2) {</b>
+<b class="fc">&nbsp;				int temp = v_1;</b>
+<b class="fc">&nbsp;				v_1 = v_2;</b>
+<b class="fc">&nbsp;				v_2 = temp;</b>
+&nbsp;			}
+<b class="fc">&nbsp;			m_shape.getXY(v_1, pt_1);</b>
+<b class="fc">&nbsp;			m_shape.getXY(v_2, pt_2);</b>
+<b class="fc">&nbsp;			return pt_1.y &lt; pt_2.y;</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		int getStart(int index) {
+<b class="fc">&nbsp;			int v_1 = getEnd1(index);</b>
+<b class="fc">&nbsp;			int v_2 = getEnd2(index);</b>
+<b class="fc">&nbsp;			return (m_shape.getNextVertex(v_1) == v_2) ? v_1 : v_2;</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		int getEnd1(int index) {
+<b class="fc">&nbsp;			return m_end_1_nodes.get(index);</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		int getEnd2(int index) {
+<b class="fc">&nbsp;			return m_end_2_nodes.get(index);</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		void freeEdge(int edge) {
+<b class="fc">&nbsp;			m_end_1_nodes.set(edge, m_first_free);</b>
+<b class="fc">&nbsp;			m_first_free = edge;</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		int newEdge(int vertex) {
+<b class="fc">&nbsp;			if (m_first_free != -1) {</b>
+<b class="fc">&nbsp;				int index = m_first_free;</b>
+<b class="fc">&nbsp;				m_first_free = m_end_1_nodes.get(index);</b>
+<b class="fc">&nbsp;				m_end_1_nodes.set(index, vertex);</b>
+<b class="fc">&nbsp;				m_end_2_nodes.set(index, m_shape.getNextVertex(vertex));</b>
+<b class="fc">&nbsp;				return index;</b>
+<b class="fc">&nbsp;			} else if (m_end_1_nodes == null) {</b>
+<b class="fc">&nbsp;				m_end_1_nodes = new AttributeStreamOfInt32(0);</b>
+<b class="fc">&nbsp;				m_end_2_nodes = new AttributeStreamOfInt32(0);</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			int index = m_end_1_nodes.size();</b>
+<b class="fc">&nbsp;			m_end_1_nodes.add(vertex);</b>
+<b class="fc">&nbsp;			m_end_2_nodes.add(m_shape.getNextVertex(vertex));</b>
+<b class="fc">&nbsp;			return index;</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		EditShape getShape() {
+<b class="fc">&nbsp;			return m_shape;</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		int getPath(int index) {
+<b class="fc">&nbsp;			return m_shape.getPathFromVertex(getEnd1(index));</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	Edges m_edges;
+&nbsp;
+<b class="fc">&nbsp;	class RingOrientationTestComparator extends Treap.Comparator {</b>
+&nbsp;		RingOrientationFixer m_helper;
+&nbsp;		Line m_line_1;
+&nbsp;		Line m_line_2;
+&nbsp;		int m_left_elm;
+&nbsp;		double m_leftx;
+&nbsp;		Segment m_seg_1;
+&nbsp;
+<b class="fc">&nbsp;		RingOrientationTestComparator(RingOrientationFixer helper) {</b>
+<b class="fc">&nbsp;			m_helper = helper;</b>
+<b class="fc">&nbsp;			m_line_1 = new Line();</b>
+<b class="fc">&nbsp;			m_line_2 = new Line();</b>
+<b class="fc">&nbsp;			m_leftx = 0;</b>
+<b class="fc">&nbsp;			m_seg_1 = null;</b>
+<b class="fc">&nbsp;			m_left_elm = -1;</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		@Override
+&nbsp;		int compare(Treap treap, int left, int node) {
+<b class="fc">&nbsp;			int right = treap.getElement(node);</b>
+<b class="fc">&nbsp;			RingOrientationFixer.Edges edges = m_helper.m_edges;</b>
+&nbsp;			double x_1;
+<b class="fc">&nbsp;			if (m_left_elm == left)</b>
+<b class="fc">&nbsp;				x_1 = m_leftx;</b>
+&nbsp;			else {
+<b class="fc">&nbsp;				m_seg_1 = edges.getSegment(left);</b>
+<b class="fc">&nbsp;				if (m_seg_1 == null) {</b>
+<b class="fc">&nbsp;					EditShape shape = edges.getShape();</b>
+<b class="fc">&nbsp;					shape.queryLineConnector(edges.getStart(left), m_line_1);</b>
+<b class="fc">&nbsp;					m_seg_1 = m_line_1;</b>
+<b class="fc">&nbsp;					x_1 = m_line_1.intersectionOfYMonotonicWithAxisX(</b>
+<b class="fc">&nbsp;							m_helper.m_y_scanline, 0);</b>
+<b class="fc">&nbsp;				} else</b>
+<b class="nc">&nbsp;					x_1 = m_seg_1.intersectionOfYMonotonicWithAxisX(</b>
+<b class="nc">&nbsp;							m_helper.m_y_scanline, 0);</b>
+&nbsp;
+<b class="fc">&nbsp;				m_leftx = x_1;</b>
+<b class="fc">&nbsp;				m_left_elm = left;</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			Segment seg_2 = edges.getSegment(right);</b>
+&nbsp;			double x2;
+<b class="fc">&nbsp;			if (seg_2 == null) {</b>
+<b class="fc">&nbsp;				EditShape shape = edges.getShape();</b>
+<b class="fc">&nbsp;				shape.queryLineConnector(edges.getStart(right), m_line_2);</b>
+<b class="fc">&nbsp;				seg_2 = m_line_2;</b>
+<b class="fc">&nbsp;				x2 = m_line_2.intersectionOfYMonotonicWithAxisX(</b>
+<b class="fc">&nbsp;						m_helper.m_y_scanline, 0);</b>
+<b class="fc">&nbsp;			} else</b>
+<b class="nc">&nbsp;				x2 = seg_2.intersectionOfYMonotonicWithAxisX(</b>
+<b class="nc">&nbsp;						m_helper.m_y_scanline, 0);</b>
+&nbsp;
+<b class="fc">&nbsp;			if (x_1 == x2) {</b>
+<b class="fc">&nbsp;				boolean bStartLower1 = edges.isBottomUp(left);</b>
+<b class="fc">&nbsp;				boolean bStartLower2 = edges.isBottomUp(right);</b>
+&nbsp;
+&nbsp;				// apparently these edges originate from same vertex and the
+&nbsp;				// scanline is on the vertex. move scanline a little.
+<b class="fc">&nbsp;				double y1 = !bStartLower1 ? m_seg_1.getStartY() : m_seg_1</b>
+<b class="fc">&nbsp;						.getEndY();</b>
+<b class="fc">&nbsp;				double y2 = !bStartLower2 ? seg_2.getStartY() : seg_2.getEndY();</b>
+<b class="fc">&nbsp;				double miny = Math.min(y1, y2);</b>
+<b class="fc">&nbsp;				double y = (miny + m_helper.m_y_scanline) * 0.5;</b>
+<b class="fc">&nbsp;				if (y == m_helper.m_y_scanline) {</b>
+&nbsp;					// assert(0);//ST: not a bug. just curious to see this
+&nbsp;					// happens.
+<b class="nc">&nbsp;					y = miny; // apparently, one of the segments is almost</b>
+&nbsp;								// horizontal line.
+&nbsp;				}
+<b class="fc">&nbsp;				x_1 = m_seg_1.intersectionOfYMonotonicWithAxisX(y, 0);</b>
+<b class="fc">&nbsp;				x2 = seg_2.intersectionOfYMonotonicWithAxisX(y, 0);</b>
+<b class="fc">&nbsp;				assert (x_1 != x2);</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			return x_1 &lt; x2 ? -1 : (x_1 &gt; x2 ? 1 : 0);</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		void reset() {
+<b class="fc">&nbsp;			m_left_elm = -1;</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	RingOrientationTestComparator m_sweep_comparator;
+&nbsp;
+<b class="fc">&nbsp;	RingOrientationFixer() {</b>
+<b class="fc">&nbsp;		m_AET = new Treap();</b>
+<b class="fc">&nbsp;		m_AET.disableBalancing();</b>
+<b class="fc">&nbsp;		m_sweep_comparator = new RingOrientationTestComparator(this);</b>
+<b class="fc">&nbsp;		m_AET.setComparator(m_sweep_comparator);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	boolean fixRingOrientation_() {
+<b class="fc">&nbsp;		boolean bFound = false;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (m_fixSelfTangency)</b>
+<b class="fc">&nbsp;			bFound = fixRingSelfTangency_();</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (m_shape.getPathCount(m_geometry) == 1) {</b>
+<b class="fc">&nbsp;			int path = m_shape.getFirstPath(m_geometry);</b>
+<b class="fc">&nbsp;			double area = m_shape.getRingArea(path);</b>
+<b class="fc">&nbsp;			m_shape.setExterior(path, true);</b>
+<b class="fc">&nbsp;			if (area &lt; 0) {</b>
+<b class="fc">&nbsp;				int first = m_shape.getFirstVertex(path);</b>
+<b class="fc">&nbsp;				m_shape.reverseRingInternal_(first);</b>
+<b class="fc">&nbsp;				m_shape.setLastVertex_(path, m_shape.getPrevVertex(first));// fix</b>
+&nbsp;																			// last
+&nbsp;																			// after
+&nbsp;																			// the
+&nbsp;																			// reverse
+<b class="fc">&nbsp;				return true;</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			return false;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		m_path_orientation_index = m_shape.createPathUserIndex();// used to</b>
+&nbsp;																	// store
+&nbsp;																	// discovered
+&nbsp;																	// orientation
+&nbsp;																	// (3 -
+&nbsp;																	// extrior,
+&nbsp;																	// 2 -
+&nbsp;																	// interior)
+<b class="fc">&nbsp;		m_path_parentage_index = m_shape.createPathUserIndex();// used to</b>
+&nbsp;																// resolve OGC
+&nbsp;																// order
+<b class="fc">&nbsp;		for (int path = m_shape.getFirstPath(m_geometry); path != -1; path = m_shape</b>
+<b class="fc">&nbsp;				.getNextPath(path)) {</b>
+<b class="fc">&nbsp;			m_shape.setPathUserIndex(path, m_path_orientation_index, 0);</b>
+<b class="fc">&nbsp;			m_shape.setPathUserIndex(path, m_path_parentage_index, -1);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		AttributeStreamOfInt32 bunch = new AttributeStreamOfInt32(0);</b>
+<b class="fc">&nbsp;		m_y_scanline = NumberUtils.TheNaN;</b>
+<b class="fc">&nbsp;		Point2D pt = new Point2D();</b>
+<b class="fc">&nbsp;		m_unknown_ring_orientation_count = m_shape.getPathCount(m_geometry);</b>
+<b class="fc">&nbsp;		m_node_1_user_index = m_shape.createUserIndex();</b>
+<b class="fc">&nbsp;		m_node_2_user_index = m_shape.createUserIndex();</b>
+<b class="fc">&nbsp;		for (int ivertex = m_sorted_vertices.getFirst(m_sorted_vertices</b>
+<b class="fc">&nbsp;				.getFirstList()); ivertex != -1; ivertex = m_sorted_vertices</b>
+<b class="fc">&nbsp;				.getNext(ivertex)) {</b>
+<b class="fc">&nbsp;			int vertex = m_sorted_vertices.getData(ivertex);</b>
+<b class="fc">&nbsp;			m_shape.getXY(vertex, pt);</b>
+<b class="fc">&nbsp;			if (pt.y != m_y_scanline &amp;&amp; bunch.size() != 0) {</b>
+<b class="fc">&nbsp;				bFound |= processBunchForRingOrientationTest_(bunch);</b>
+<b class="fc">&nbsp;				m_sweep_comparator.reset();</b>
+<b class="fc">&nbsp;				bunch.clear(false);</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			bunch.add(vertex);// all vertices that have same y are added to the</b>
+&nbsp;								// bunch
+<b class="fc">&nbsp;			m_y_scanline = pt.y;</b>
+<b class="fc">&nbsp;			if (m_unknown_ring_orientation_count == 0)</b>
+<b class="fc">&nbsp;				break;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (m_unknown_ring_orientation_count &gt; 0) {</b>
+<b class="nc">&nbsp;			bFound |= processBunchForRingOrientationTest_(bunch);</b>
+<b class="nc">&nbsp;			bunch.clear(false);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		m_shape.removeUserIndex(m_node_1_user_index);</b>
+<b class="fc">&nbsp;		m_shape.removeUserIndex(m_node_2_user_index);</b>
+&nbsp;
+&nbsp;		// dbg_verify_ring_orientation_();//debug
+&nbsp;
+<b class="fc">&nbsp;		for (int path = m_shape.getFirstPath(m_geometry); path != -1;) {</b>
+<b class="fc">&nbsp;			if (m_shape.getPathUserIndex(path, m_path_orientation_index) == 3) {// exterior</b>
+<b class="fc">&nbsp;				m_shape.setExterior(path, true);</b>
+<b class="fc">&nbsp;				int afterPath = path;</b>
+<b class="fc">&nbsp;				for (int nextHole = m_shape.getPathUserIndex(path,</b>
+<b class="fc">&nbsp;						m_path_parentage_index); nextHole != -1;) {</b>
+<b class="fc">&nbsp;					int p = m_shape.getPathUserIndex(nextHole,</b>
+<b class="fc">&nbsp;							m_path_parentage_index);</b>
+<b class="fc">&nbsp;					m_shape.movePath(m_geometry,</b>
+<b class="fc">&nbsp;							m_shape.getNextPath(afterPath), nextHole);</b>
+<b class="fc">&nbsp;					afterPath = nextHole;</b>
+<b class="fc">&nbsp;					nextHole = p;</b>
+&nbsp;				}
+<b class="fc">&nbsp;				path = m_shape.getNextPath(afterPath);</b>
+<b class="fc">&nbsp;			} else {</b>
+<b class="fc">&nbsp;				m_shape.setExterior(path, false);</b>
+<b class="fc">&nbsp;				path = m_shape.getNextPath(path);</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		m_shape.removePathUserIndex(m_path_orientation_index);</b>
+<b class="fc">&nbsp;		m_shape.removePathUserIndex(m_path_parentage_index);</b>
+&nbsp;
+<b class="fc">&nbsp;		return bFound;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	boolean processBunchForRingOrientationTest_(AttributeStreamOfInt32 bunch) {
+<b class="fc">&nbsp;		return processBunchForRingOrientationTestOddEven_(bunch);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	boolean processBunchForRingOrientationTestOddEven_(
+&nbsp;			AttributeStreamOfInt32 bunch) {
+<b class="fc">&nbsp;		boolean bModified = false;</b>
+<b class="fc">&nbsp;		if (m_edges == null)</b>
+<b class="fc">&nbsp;			m_edges = new Edges(m_shape);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (m_unknown_nodes == null) {</b>
+<b class="fc">&nbsp;			m_unknown_nodes = new AttributeStreamOfInt32(0);</b>
+<b class="fc">&nbsp;			m_unknown_nodes.reserve(16);</b>
+<b class="fc">&nbsp;		} else {</b>
+<b class="fc">&nbsp;			m_unknown_nodes.clear(false);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		processBunchForRingOrientationRemoveEdges_(bunch);</b>
+&nbsp;
+&nbsp;		// add edges that come into scope
+<b class="fc">&nbsp;		for (int i = 0, n = bunch.size(); i &lt; n; i++) {</b>
+<b class="fc">&nbsp;			int vertex = bunch.get(i);</b>
+<b class="fc">&nbsp;			if (vertex == -1)</b>
+<b class="fc">&nbsp;				continue;</b>
+<b class="fc">&nbsp;			insertEdge_(vertex, -1);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		for (int i = 0; i &lt; m_unknown_nodes.size()</b>
+<b class="fc">&nbsp;				&amp;&amp; m_unknown_ring_orientation_count &gt; 0; i++) {</b>
+<b class="fc">&nbsp;			int aetNode = m_unknown_nodes.get(i);</b>
+<b class="fc">&nbsp;			int edge = m_AET.getElement(aetNode);</b>
+<b class="fc">&nbsp;			int path = m_edges.getPath(edge);</b>
+<b class="fc">&nbsp;			int orientation = m_shape.getPathUserIndex(path,</b>
+<b class="fc">&nbsp;					m_path_orientation_index);</b>
+<b class="fc">&nbsp;			int prevPath = -1;</b>
+<b class="fc">&nbsp;			if (orientation == 0) {</b>
+<b class="fc">&nbsp;				int node = m_AET.getPrev(aetNode);</b>
+<b class="fc">&nbsp;				int prevNode = aetNode;</b>
+<b class="fc">&nbsp;				boolean odd_even = false;</b>
+&nbsp;				// find the leftmost edge for which the ring orientation is
+&nbsp;				// known
+<b class="fc">&nbsp;				while (node != Treap.nullNode()) {</b>
+<b class="fc">&nbsp;					int edge1 = m_AET.getElement(node);</b>
+<b class="fc">&nbsp;					int path1 = m_edges.getPath(edge1);</b>
+<b class="fc">&nbsp;					int orientation1 = m_shape.getPathUserIndex(path1,</b>
+<b class="fc">&nbsp;							m_path_orientation_index);</b>
+<b class="fc">&nbsp;					if (orientation1 != 0) {</b>
+<b class="fc">&nbsp;						prevPath = path1;</b>
+<b class="fc">&nbsp;						break;</b>
+&nbsp;					}
+<b class="fc">&nbsp;					prevNode = node;</b>
+<b class="fc">&nbsp;					node = m_AET.getPrev(node);</b>
+&nbsp;				}
+<b class="fc">&nbsp;				if (node == Treap.nullNode()) {// if no edges have ring</b>
+&nbsp;												// orientation known, then start
+&nbsp;												// from the left most and it has
+&nbsp;												// to be exterior ring.
+<b class="fc">&nbsp;					odd_even = true;</b>
+<b class="fc">&nbsp;					node = prevNode;</b>
+<b class="fc">&nbsp;				} else {</b>
+<b class="fc">&nbsp;					int edge1 = m_AET.getElement(node);</b>
+<b class="fc">&nbsp;					odd_even = m_edges.isBottomUp(edge1);</b>
+<b class="fc">&nbsp;					node = m_AET.getNext(node);</b>
+<b class="fc">&nbsp;					odd_even = !odd_even;</b>
+&nbsp;				}
+&nbsp;
+&nbsp;				do {
+<b class="fc">&nbsp;					int edge1 = m_AET.getElement(node);</b>
+<b class="fc">&nbsp;					int path1 = m_edges.getPath(edge1);</b>
+<b class="fc">&nbsp;					int orientation1 = m_shape.getPathUserIndex(path1,</b>
+<b class="fc">&nbsp;							m_path_orientation_index);</b>
+<b class="fc">&nbsp;					if (orientation1 == 0) {</b>
+<b class="fc">&nbsp;						if (odd_even != m_edges.isBottomUp(edge1)) {</b>
+<b class="fc">&nbsp;							int first = m_shape.getFirstVertex(path1);</b>
+<b class="fc">&nbsp;							m_shape.reverseRingInternal_(first);</b>
+<b class="fc">&nbsp;							m_shape.setLastVertex_(path1,</b>
+<b class="fc">&nbsp;									m_shape.getPrevVertex(first));</b>
+<b class="fc">&nbsp;							bModified = true;</b>
+&nbsp;						}
+&nbsp;
+<b class="fc">&nbsp;						m_shape.setPathUserIndex(path1,</b>
+<b class="fc">&nbsp;								m_path_orientation_index, odd_even ? 3 : 2);</b>
+<b class="fc">&nbsp;						if (!odd_even) {// link the holes into the linked list</b>
+&nbsp;										// to mantain the OGC order.
+<b class="fc">&nbsp;							int lastHole = m_shape.getPathUserIndex(prevPath,</b>
+<b class="fc">&nbsp;									m_path_parentage_index);</b>
+<b class="fc">&nbsp;							m_shape.setPathUserIndex(prevPath,</b>
+<b class="fc">&nbsp;									m_path_parentage_index, path1);</b>
+<b class="fc">&nbsp;							m_shape.setPathUserIndex(path1,</b>
+<b class="fc">&nbsp;									m_path_parentage_index, lastHole);</b>
+&nbsp;						}
+&nbsp;
+<b class="fc">&nbsp;						m_unknown_ring_orientation_count--;</b>
+<b class="fc">&nbsp;						if (m_unknown_ring_orientation_count == 0)</b>
+<b class="fc">&nbsp;							return bModified;</b>
+&nbsp;					}
+&nbsp;
+<b class="fc">&nbsp;					prevPath = path1;</b>
+<b class="fc">&nbsp;					prevNode = node;</b>
+<b class="fc">&nbsp;					node = m_AET.getNext(node);</b>
+<b class="fc">&nbsp;					odd_even = !odd_even;</b>
+<b class="fc">&nbsp;				} while (prevNode != aetNode);</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return bModified;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void processBunchForRingOrientationRemoveEdges_(AttributeStreamOfInt32 bunch) {
+&nbsp;		// remove all nodes that go out of scope
+<b class="fc">&nbsp;		for (int i = 0, n = bunch.size(); i &lt; n; i++) {</b>
+<b class="fc">&nbsp;			int vertex = bunch.get(i);</b>
+<b class="fc">&nbsp;			int node1 = m_shape.getUserIndex(vertex, m_node_1_user_index);</b>
+<b class="fc">&nbsp;			int node2 = m_shape.getUserIndex(vertex, m_node_2_user_index);</b>
+<b class="fc">&nbsp;			if (node1 != -1) {</b>
+<b class="fc">&nbsp;				int edge = m_AET.getElement(node1);</b>
+<b class="fc">&nbsp;				m_edges.freeEdge(edge);</b>
+<b class="fc">&nbsp;				m_shape.setUserIndex(vertex, m_node_1_user_index, -1);</b>
+&nbsp;			}
+<b class="fc">&nbsp;			if (node2 != -1) {</b>
+<b class="fc">&nbsp;				int edge = m_AET.getElement(node2);</b>
+<b class="fc">&nbsp;				m_edges.freeEdge(edge);</b>
+<b class="fc">&nbsp;				m_shape.setUserIndex(vertex, m_node_2_user_index, -1);</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			int reused_node = -1;</b>
+<b class="fc">&nbsp;			if (node1 != -1 &amp;&amp; node2 != -1) {// terminating vertex</b>
+<b class="fc">&nbsp;				m_AET.deleteNode(node1, -1);</b>
+<b class="fc">&nbsp;				m_AET.deleteNode(node2, -1);</b>
+<b class="fc">&nbsp;				bunch.set(i, -1);</b>
+<b class="fc">&nbsp;			} else</b>
+<b class="fc">&nbsp;				reused_node = node1 != -1 ? node1 : node2;</b>
+&nbsp;
+<b class="fc">&nbsp;			if (reused_node != -1) {// this vertex is a part of vertical chain.</b>
+&nbsp;									// Sorted order in AET did not change, so
+&nbsp;									// reuse the AET node.
+<b class="fc">&nbsp;				if (!insertEdge_(vertex, reused_node))</b>
+<b class="fc">&nbsp;					m_AET.deleteNode(reused_node, -1);// horizontal edge was not</b>
+&nbsp;														// inserted
+<b class="fc">&nbsp;				bunch.set(i, -1);</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	boolean insertEdge_(int vertex, int reused_node) {
+<b class="fc">&nbsp;		Point2D pt_1 = new Point2D();</b>
+<b class="fc">&nbsp;		Point2D pt_2 = new Point2D();</b>
+<b class="fc">&nbsp;		m_shape.getXY(vertex, pt_1);</b>
+<b class="fc">&nbsp;		int next = m_shape.getNextVertex(vertex);</b>
+<b class="fc">&nbsp;		m_shape.getXY(next, pt_2);</b>
+<b class="fc">&nbsp;		boolean b_res = false;</b>
+<b class="fc">&nbsp;		if (pt_1.y &lt; pt_2.y) {</b>
+<b class="fc">&nbsp;			b_res = true;</b>
+<b class="fc">&nbsp;			int edge = m_edges.newEdge(vertex);</b>
+&nbsp;			int aetNode;
+<b class="fc">&nbsp;			if (reused_node == -1)</b>
+<b class="fc">&nbsp;				aetNode = m_AET.addElement(edge, -1);</b>
+&nbsp;			else {
+<b class="fc">&nbsp;				aetNode = reused_node;</b>
+<b class="fc">&nbsp;				m_AET.setElement(aetNode, edge);</b>
+&nbsp;			}
+<b class="fc">&nbsp;			int node = m_shape.getUserIndex(next, m_node_1_user_index);</b>
+<b class="fc">&nbsp;			if (node == -1)</b>
+<b class="fc">&nbsp;				m_shape.setUserIndex(next, m_node_1_user_index, aetNode);</b>
+&nbsp;			else
+<b class="fc">&nbsp;				m_shape.setUserIndex(next, m_node_2_user_index, aetNode);</b>
+&nbsp;
+<b class="fc">&nbsp;			int path = m_shape.getPathFromVertex(vertex);</b>
+<b class="fc">&nbsp;			if (m_shape.getPathUserIndex(path, m_path_orientation_index) == 0) {</b>
+<b class="fc">&nbsp;				m_unknown_nodes.add(aetNode);</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		int prev = m_shape.getPrevVertex(vertex);</b>
+<b class="fc">&nbsp;		m_shape.getXY(prev, pt_2);</b>
+<b class="fc">&nbsp;		if (pt_1.y &lt; pt_2.y) {</b>
+<b class="fc">&nbsp;			b_res = true;</b>
+<b class="fc">&nbsp;			int edge = m_edges.newEdge(prev);</b>
+&nbsp;			int aetNode;
+<b class="fc">&nbsp;			if (reused_node == -1)</b>
+<b class="fc">&nbsp;				aetNode = m_AET.addElement(edge, -1);</b>
+&nbsp;			else {
+<b class="fc">&nbsp;				aetNode = reused_node;</b>
+<b class="fc">&nbsp;				m_AET.setElement(aetNode, edge);</b>
+&nbsp;			}
+<b class="fc">&nbsp;			int node = m_shape.getUserIndex(prev, m_node_1_user_index);</b>
+<b class="fc">&nbsp;			if (node == -1)</b>
+<b class="fc">&nbsp;				m_shape.setUserIndex(prev, m_node_1_user_index, aetNode);</b>
+&nbsp;			else
+<b class="fc">&nbsp;				m_shape.setUserIndex(prev, m_node_2_user_index, aetNode);</b>
+&nbsp;
+<b class="fc">&nbsp;			int path = m_shape.getPathFromVertex(vertex);</b>
+<b class="fc">&nbsp;			if (m_shape.getPathUserIndex(path, m_path_orientation_index) == 0) {</b>
+<b class="fc">&nbsp;				m_unknown_nodes.add(aetNode);</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return b_res;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	static boolean execute(EditShape shape, int geometry,
+&nbsp;			IndexMultiDCList sorted_vertices, boolean fixSelfTangency) {
+<b class="fc">&nbsp;		RingOrientationFixer fixer = new RingOrientationFixer();</b>
+<b class="fc">&nbsp;		fixer.m_shape = shape;</b>
+<b class="fc">&nbsp;		fixer.m_geometry = geometry;</b>
+<b class="fc">&nbsp;		fixer.m_sorted_vertices = sorted_vertices;</b>
+<b class="fc">&nbsp;		fixer.m_fixSelfTangency = fixSelfTangency;</b>
+<b class="fc">&nbsp;		return fixer.fixRingOrientation_();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	boolean fixRingSelfTangency_() {
+<b class="fc">&nbsp;		AttributeStreamOfInt32 self_tangent_paths = new AttributeStreamOfInt32(</b>
+<b class="fc">&nbsp;				0);</b>
+<b class="fc">&nbsp;		AttributeStreamOfInt32 self_tangency_clusters = new AttributeStreamOfInt32(</b>
+<b class="fc">&nbsp;				0);</b>
+<b class="fc">&nbsp;		int tangent_path_first_vertex_index = -1;</b>
+<b class="fc">&nbsp;		int tangent_vertex_cluster_index = -1;</b>
+<b class="fc">&nbsp;		Point2D pt_prev = new Point2D();</b>
+<b class="fc">&nbsp;		pt_prev.setNaN();</b>
+<b class="fc">&nbsp;		int prev_vertex = -1;</b>
+<b class="fc">&nbsp;		int old_path = -1;</b>
+<b class="fc">&nbsp;		int current_cluster = -1;</b>
+<b class="fc">&nbsp;		Point2D pt = new Point2D();</b>
+<b class="fc">&nbsp;		for (int ivertex = m_sorted_vertices.getFirst(m_sorted_vertices</b>
+<b class="fc">&nbsp;				.getFirstList()); ivertex != -1; ivertex = m_sorted_vertices</b>
+<b class="fc">&nbsp;				.getNext(ivertex)) {</b>
+<b class="fc">&nbsp;			int vertex = m_sorted_vertices.getData(ivertex);</b>
+<b class="fc">&nbsp;			m_shape.getXY(vertex, pt);</b>
+<b class="fc">&nbsp;			int path = m_shape.getPathFromVertex(vertex);</b>
+<b class="fc">&nbsp;			if (pt_prev.isEqual(pt) &amp;&amp; old_path == path) {</b>
+<b class="fc">&nbsp;				if (tangent_vertex_cluster_index == -1) {</b>
+<b class="fc">&nbsp;					tangent_path_first_vertex_index = m_shape</b>
+<b class="fc">&nbsp;							.createPathUserIndex();</b>
+<b class="fc">&nbsp;					tangent_vertex_cluster_index = m_shape.createUserIndex();</b>
+&nbsp;				}
+&nbsp;
+<b class="fc">&nbsp;				if (current_cluster == -1) {</b>
+<b class="fc">&nbsp;					current_cluster = self_tangency_clusters.size();</b>
+<b class="fc">&nbsp;					m_shape.setUserIndex(prev_vertex,</b>
+<b class="fc">&nbsp;							tangent_vertex_cluster_index, current_cluster);</b>
+<b class="fc">&nbsp;					self_tangency_clusters.add(1);</b>
+<b class="fc">&nbsp;					int p = m_shape.getPathUserIndex(path,</b>
+<b class="fc">&nbsp;							tangent_path_first_vertex_index);</b>
+<b class="fc">&nbsp;					if (p == -1) {</b>
+<b class="fc">&nbsp;						m_shape.setPathUserIndex(path,</b>
+<b class="fc">&nbsp;								tangent_path_first_vertex_index, prev_vertex);</b>
+<b class="fc">&nbsp;						self_tangent_paths.add(path);</b>
+&nbsp;					}
+&nbsp;				}
+&nbsp;
+<b class="fc">&nbsp;				m_shape.setUserIndex(vertex, tangent_vertex_cluster_index,</b>
+<b class="fc">&nbsp;						current_cluster);</b>
+<b class="fc">&nbsp;				self_tangency_clusters</b>
+<b class="fc">&nbsp;						.setLast(self_tangency_clusters.getLast() + 1);</b>
+<b class="fc">&nbsp;			} else {</b>
+<b class="fc">&nbsp;				current_cluster = -1;</b>
+<b class="fc">&nbsp;				pt_prev.setCoords(pt);</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			prev_vertex = vertex;</b>
+<b class="fc">&nbsp;			old_path = path;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (self_tangent_paths.size() == 0)</b>
+<b class="fc">&nbsp;			return false;</b>
+&nbsp;
+&nbsp;		// Now self_tangent_paths contains list of clusters of tangency for each
+&nbsp;		// path.
+&nbsp;		// The clusters contains list of clusters and for each cluster it
+&nbsp;		// contains a list of vertices.
+<b class="fc">&nbsp;		AttributeStreamOfInt32 vertex_stack = new AttributeStreamOfInt32(0);</b>
+<b class="fc">&nbsp;		AttributeStreamOfInt32 cluster_stack = new AttributeStreamOfInt32(0);</b>
+&nbsp;
+<b class="fc">&nbsp;		for (int ipath = 0, npath = self_tangent_paths.size(); ipath &lt; npath; ipath++) {</b>
+<b class="fc">&nbsp;			int path = self_tangent_paths.get(ipath);</b>
+<b class="fc">&nbsp;			int first_vertex = m_shape.getPathUserIndex(path,</b>
+<b class="fc">&nbsp;					tangent_path_first_vertex_index);</b>
+<b class="fc">&nbsp;			int cluster = m_shape.getUserIndex(first_vertex,</b>
+<b class="fc">&nbsp;					tangent_vertex_cluster_index);</b>
+<b class="fc">&nbsp;			vertex_stack.clear(false);</b>
+<b class="fc">&nbsp;			cluster_stack.clear(false);</b>
+<b class="fc">&nbsp;			vertex_stack.add(first_vertex);</b>
+<b class="fc">&nbsp;			cluster_stack.add(cluster);</b>
+&nbsp;
+<b class="fc">&nbsp;			for (int vertex = m_shape.getNextVertex(first_vertex); vertex != first_vertex; vertex = m_shape</b>
+<b class="fc">&nbsp;					.getNextVertex(vertex)) {</b>
+<b class="fc">&nbsp;				int vertex_to = vertex;</b>
+<b class="fc">&nbsp;				int cluster_to = m_shape.getUserIndex(vertex_to,</b>
+<b class="fc">&nbsp;						tangent_vertex_cluster_index);</b>
+<b class="fc">&nbsp;				if (cluster_to != -1) {</b>
+<b class="fc">&nbsp;					if (cluster_stack.size() == 0) {</b>
+<b class="nc">&nbsp;						cluster_stack.add(cluster_to);</b>
+<b class="nc">&nbsp;						vertex_stack.add(vertex_to);</b>
+<b class="nc">&nbsp;						continue;</b>
+&nbsp;					}
+&nbsp;
+<b class="fc">&nbsp;					if (cluster_stack.getLast() == cluster_to) {</b>
+<b class="fc">&nbsp;						int vertex_from = vertex_stack.getLast();</b>
+&nbsp;
+&nbsp;						// peel the loop from path
+<b class="fc">&nbsp;						int from_next = m_shape.getNextVertex(vertex_from);</b>
+<b class="fc">&nbsp;						int from_prev = m_shape.getPrevVertex(vertex_from);</b>
+<b class="fc">&nbsp;						int to_next = m_shape.getNextVertex(vertex_to);</b>
+<b class="fc">&nbsp;						int to_prev = m_shape.getPrevVertex(vertex_to);</b>
+&nbsp;
+<b class="fc">&nbsp;						m_shape.setNextVertex_(vertex_from, to_next);</b>
+<b class="fc">&nbsp;						m_shape.setPrevVertex_(to_next, vertex_from);</b>
+&nbsp;
+<b class="fc">&nbsp;						m_shape.setNextVertex_(vertex_to, from_next);</b>
+<b class="fc">&nbsp;						m_shape.setPrevVertex_(from_next, vertex_to);</b>
+&nbsp;
+&nbsp;						// vertex_from is left in the path we are processing,
+&nbsp;						// while the vertex_to is in the loop being teared off.
+<b class="fc">&nbsp;						boolean[] first_vertex_correction_requied = new boolean[] { false };</b>
+<b class="fc">&nbsp;						int new_path = m_shape.insertClosedPath_(m_geometry,</b>
+<b class="fc">&nbsp;								-1, from_next, m_shape.getFirstVertex(path),</b>
+<b class="fc">&nbsp;								first_vertex_correction_requied);</b>
+&nbsp;
+<b class="fc">&nbsp;						m_shape.setUserIndex(vertex,</b>
+<b class="fc">&nbsp;								tangent_vertex_cluster_index, -1);</b>
+&nbsp;
+&nbsp;						// Fix the path after peeling if the peeled loop had the
+&nbsp;						// first path vertex in it
+&nbsp;
+<b class="fc">&nbsp;						if (first_vertex_correction_requied[0]) {</b>
+<b class="nc">&nbsp;							m_shape.setFirstVertex_(path, to_next);</b>
+&nbsp;						}
+&nbsp;
+<b class="fc">&nbsp;						int path_size = m_shape.getPathSize(path);</b>
+<b class="fc">&nbsp;						int new_path_size = m_shape.getPathSize(new_path);</b>
+<b class="fc">&nbsp;						path_size -= new_path_size;</b>
+<b class="fc">&nbsp;						assert (path_size &gt;= 3);</b>
+<b class="fc">&nbsp;						m_shape.setPathSize_(path, path_size);</b>
+&nbsp;
+<b class="fc">&nbsp;						self_tangency_clusters.set(cluster_to,</b>
+<b class="fc">&nbsp;								self_tangency_clusters.get(cluster_to) - 1);</b>
+<b class="fc">&nbsp;						if (self_tangency_clusters.get(cluster_to) == 1) {</b>
+<b class="fc">&nbsp;							self_tangency_clusters.set(cluster_to, 0);</b>
+<b class="fc">&nbsp;							cluster_stack.removeLast();</b>
+<b class="fc">&nbsp;							vertex_stack.removeLast();</b>
+&nbsp;						} else {
+&nbsp;							// this cluster has more than two vertices in it.
+&nbsp;						}
+&nbsp;
+<b class="fc">&nbsp;						first_vertex = vertex_from;// reset the counter to</b>
+&nbsp;													// ensure we find all loops.
+<b class="fc">&nbsp;						vertex = vertex_from;</b>
+<b class="fc">&nbsp;					} else {</b>
+<b class="nc">&nbsp;						vertex_stack.add(vertex);</b>
+<b class="nc">&nbsp;						cluster_stack.add(cluster_to);</b>
+&nbsp;					}
+&nbsp;				}
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		m_shape.removePathUserIndex(tangent_path_first_vertex_index);</b>
+<b class="fc">&nbsp;		m_shape.removeUserIndex(tangent_vertex_cluster_index);</b>
+<b class="fc">&nbsp;		return true;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-02-21 15:02</div>
+</div>
+</body>
+</html>

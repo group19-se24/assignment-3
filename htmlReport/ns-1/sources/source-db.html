@@ -1,0 +1,807 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > SweepComparator</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.esri.core.geometry</a>
+</div>
+
+<h1>Coverage Summary for Class: SweepComparator (com.esri.core.geometry)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">SweepComparator</td>
+<td class="coverageStat">
+  <span class="percent">
+    82,8%
+  </span>
+  <span class="absValue">
+    (24/29)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    70,7%
+  </span>
+  <span class="absValue">
+    (241/341)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">SweepComparator$SimpleEdge</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (8/8)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    83,3%
+  </span>
+  <span class="absValue">
+    (25/30)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    71,3%
+  </span>
+  <span class="absValue">
+    (249/349)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; Copyright 1995-2015 Esri
+&nbsp;
+&nbsp;   Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp;   you may not use this file except in compliance with the License.
+&nbsp;   You may obtain a copy of the License at
+&nbsp;
+&nbsp;       http://www.apache.org/licenses/LICENSE-2.0
+&nbsp;
+&nbsp;   Unless required by applicable law or agreed to in writing, software
+&nbsp;   distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp;   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp;   See the License for the specific language governing permissions and
+&nbsp;   limitations under the License.
+&nbsp;
+&nbsp; For additional information, contact:
+&nbsp; Environmental Systems Research Institute, Inc.
+&nbsp; Attn: Contracts Dept
+&nbsp; 380 New York Street
+&nbsp; Redlands, California, USA 92373
+&nbsp;
+&nbsp; email: contracts@esri.com
+&nbsp; */
+&nbsp;/*
+&nbsp; * To change this template, choose Tools | Templates
+&nbsp; * and open the template in the editor.
+&nbsp; */
+&nbsp;package com.esri.core.geometry;
+&nbsp;
+&nbsp;import java.util.ArrayList;
+&nbsp;
+<b class="fc">&nbsp;class SweepComparator extends Treap.Comparator {</b>
+&nbsp;	static final class SimpleEdge {
+&nbsp;		int m_value;
+&nbsp;		Line m_line;
+&nbsp;		Segment m_segment;
+&nbsp;		Envelope1D m_env;
+&nbsp;		double m_dxdy;
+&nbsp;		boolean m_b_horizontal;
+&nbsp;		boolean m_b_curve;
+&nbsp;
+<b class="fc">&nbsp;		SimpleEdge() {</b>
+<b class="fc">&nbsp;			m_value = -1;</b>
+<b class="fc">&nbsp;			m_line = new Line();</b>
+<b class="fc">&nbsp;			m_dxdy = 55555555;</b>
+<b class="fc">&nbsp;			m_b_horizontal = false;</b>
+<b class="fc">&nbsp;			m_b_curve = false;</b>
+&nbsp;
+<b class="fc">&nbsp;			m_env = new Envelope1D();</b>
+<b class="fc">&nbsp;			m_env.setCoordsNoNaN_(0, 0);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	private EditShape m_shape;
+&nbsp;	boolean m_b_intersection_detected;
+&nbsp;	NonSimpleResult m_non_simple_result;
+&nbsp;	// Index 1 corresponds to the left segments, index 2 - right, e.g. m_line_1,
+&nbsp;	// m_line_2
+&nbsp;	SimpleEdge m_temp_simple_edge_1;
+&nbsp;	SimpleEdge m_temp_simple_edge_2;
+&nbsp;
+&nbsp;	int m_prev_1;
+&nbsp;	int m_prev_2;
+&nbsp;	int m_vertex_1;
+&nbsp;	int m_vertex_2;
+&nbsp;	int m_current_node;
+&nbsp;	double m_prevx_1;
+&nbsp;	double m_prevx_2;
+&nbsp;	double m_prev_y;
+&nbsp;	double m_prev_x;
+&nbsp;	double m_sweep_y;
+&nbsp;	double m_sweep_x;
+&nbsp;	double m_tolerance;
+&nbsp;	double m_tolerance_10;
+&nbsp;	boolean m_b_is_simple;
+&nbsp;
+&nbsp;	ArrayList&lt;SimpleEdge&gt; m_simple_edges_cache;
+&nbsp;	ArrayList&lt;SimpleEdge&gt; m_simple_edges_recycle;
+&nbsp;	ArrayList&lt;SimpleEdge&gt; m_simple_edges_buffer;
+&nbsp;
+&nbsp;	// Returns a cached edge for the given value. May return NULL.
+&nbsp;	SimpleEdge tryGetCachedEdge_(int value) {
+<b class="fc">&nbsp;		SimpleEdge se = m_simple_edges_cache.get((value &amp; NumberUtils.intMax())</b>
+<b class="fc">&nbsp;				% m_simple_edges_cache.size());</b>
+<b class="fc">&nbsp;		if (se != null) {</b>
+<b class="fc">&nbsp;			if (se.m_value == value)</b>
+<b class="fc">&nbsp;				return se;</b>
+&nbsp;			else {
+&nbsp;				// int i = 0;
+&nbsp;				// cache collision
+&nbsp;			}
+&nbsp;		}
+<b class="fc">&nbsp;		return null;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Removes cached edge from the cache for the given value.
+&nbsp;	void tryDeleteCachedEdge_(int value) {
+<b class="fc">&nbsp;		int ind = (value &amp; NumberUtils.intMax()) % m_simple_edges_cache.size();</b>
+<b class="fc">&nbsp;		SimpleEdge se = m_simple_edges_cache.get(ind);</b>
+<b class="fc">&nbsp;		if (se != null &amp;&amp; se.m_value == value) {// this value is cached</b>
+<b class="fc">&nbsp;			m_simple_edges_recycle.add(se);</b>
+<b class="fc">&nbsp;			m_simple_edges_cache.set(ind, null);</b>
+&nbsp;		} else {
+&nbsp;			// The value has not been cached
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	// Creates a cached edge. May fail and return NULL.
+&nbsp;	SimpleEdge tryCreateCachedEdge_(int value) {
+<b class="fc">&nbsp;		int ind = (value &amp; NumberUtils.intMax()) % m_simple_edges_cache.size();</b>
+<b class="fc">&nbsp;		SimpleEdge se = m_simple_edges_cache.get(ind);</b>
+<b class="fc">&nbsp;		if (se == null) {</b>
+<b class="fc">&nbsp;			if (m_simple_edges_recycle.isEmpty()) {</b>
+&nbsp;				// assert(m_simple_edges_buffer.size() &lt;
+&nbsp;				// m_simple_edges_buffer.capacity());//should never happen
+&nbsp;				// assert(m_simple_edges_buffer.size() &lt;
+&nbsp;				// m_simple_edges_cache.size());//should never happen
+<b class="fc">&nbsp;				m_simple_edges_buffer.add(new SimpleEdge());</b>
+<b class="fc">&nbsp;				se = m_simple_edges_buffer</b>
+<b class="fc">&nbsp;						.get(m_simple_edges_buffer.size() - 1);</b>
+<b class="fc">&nbsp;			} else {</b>
+<b class="fc">&nbsp;				se = m_simple_edges_recycle</b>
+<b class="fc">&nbsp;						.get(m_simple_edges_recycle.size() - 1);</b>
+<b class="fc">&nbsp;				m_simple_edges_recycle</b>
+<b class="fc">&nbsp;						.remove(m_simple_edges_recycle.size() - 1);</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			se.m_value = value;</b>
+<b class="fc">&nbsp;			m_simple_edges_cache.set(ind, se);</b>
+<b class="fc">&nbsp;			return se;</b>
+&nbsp;		} else {
+<b class="fc">&nbsp;			assert (se.m_value != value);// do not call TryCreateCachedEdge</b>
+&nbsp;											// twice.
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return null;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void initSimpleEdge_(SweepComparator.SimpleEdge se, int vertex) {
+<b class="fc">&nbsp;		se.m_segment = m_shape.getSegment(vertex);</b>
+<b class="fc">&nbsp;		se.m_b_curve = se.m_segment != null;</b>
+<b class="fc">&nbsp;		if (!se.m_b_curve) {</b>
+<b class="fc">&nbsp;			m_shape.queryLineConnector(vertex, se.m_line);</b>
+<b class="fc">&nbsp;			se.m_segment = se.m_line;</b>
+<b class="fc">&nbsp;			se.m_env.setCoordsNoNaN_(se.m_line.getStartX(), se.m_line.getEndX());</b>
+<b class="fc">&nbsp;			se.m_env.vmax += m_tolerance;</b>
+<b class="fc">&nbsp;			se.m_line.orientBottomUp_();</b>
+<b class="fc">&nbsp;			se.m_b_horizontal = se.m_line.getEndY() == se.m_line.getStartY();</b>
+<b class="fc">&nbsp;			if (!se.m_b_horizontal) {</b>
+<b class="fc">&nbsp;				se.m_dxdy = (se.m_line.getEndX() - se.m_line.getStartX())</b>
+<b class="fc">&nbsp;						/ (se.m_line.getEndY() - se.m_line.getStartY());</b>
+&nbsp;			}
+&nbsp;		} else {
+&nbsp;			// se.m_segment = se.m_segment_sptr.get();
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	// Compares seg_1 and seg_2 x coordinates of intersection with the line
+&nbsp;	// parallel to axis x, passing through the coordinate y.
+&nbsp;	// If segments intersect not at the endpoint, the m_b_intersection_detected
+&nbsp;	// is set.
+&nbsp;	int compareTwoSegments_(Segment seg_1, Segment seg_2) {
+<b class="nc">&nbsp;		int res = seg_1._isIntersecting(seg_2, m_tolerance, true);</b>
+<b class="nc">&nbsp;		if (res != 0) {</b>
+<b class="nc">&nbsp;			if (res == 2)</b>
+<b class="nc">&nbsp;				return errorCoincident();</b>
+&nbsp;			else
+<b class="nc">&nbsp;				return errorCracking();</b>
+&nbsp;		}
+&nbsp;
+<b class="nc">&nbsp;		Point2D start_1 = seg_1.getStartXY();</b>
+<b class="nc">&nbsp;		Point2D end1 = seg_1.getEndXY();</b>
+<b class="nc">&nbsp;		Point2D start2 = seg_2.getStartXY();</b>
+<b class="nc">&nbsp;		Point2D end2 = seg_2.getEndXY();</b>
+<b class="nc">&nbsp;		Point2D ptSweep = new Point2D();</b>
+<b class="nc">&nbsp;		ptSweep.setCoords(m_sweep_x, m_sweep_y);</b>
+<b class="nc">&nbsp;		if (start_1.isEqual(start2) &amp;&amp; m_sweep_y == start_1.y) {</b>
+<b class="nc">&nbsp;			assert (start_1.compare(end1) &lt; 0 &amp;&amp; start2.compare(end2) &lt; 0);</b>
+<b class="nc">&nbsp;			if (end1.compare(end2) &lt; 0)</b>
+<b class="nc">&nbsp;				ptSweep.setCoords(end1);</b>
+&nbsp;			else
+<b class="nc">&nbsp;				ptSweep.setCoords(end2);</b>
+<b class="nc">&nbsp;		} else if (start_1.isEqual(end2) &amp;&amp; m_sweep_y == start_1.y) {</b>
+<b class="nc">&nbsp;			assert (start_1.compare(end1) &lt; 0 &amp;&amp; start2.compare(end2) &gt; 0);</b>
+<b class="nc">&nbsp;			if (end1.compare(start2) &lt; 0)</b>
+<b class="nc">&nbsp;				ptSweep.setCoords(end1);</b>
+&nbsp;			else
+<b class="nc">&nbsp;				ptSweep.setCoords(start2);</b>
+<b class="nc">&nbsp;		} else if (start2.isEqual(end1) &amp;&amp; m_sweep_y == start2.y) {</b>
+<b class="nc">&nbsp;			assert (end1.compare(start_1) &lt; 0 &amp;&amp; start2.compare(end2) &lt; 0);</b>
+<b class="nc">&nbsp;			if (start_1.compare(end2) &lt; 0)</b>
+<b class="nc">&nbsp;				ptSweep.setCoords(start_1);</b>
+&nbsp;			else
+<b class="nc">&nbsp;				ptSweep.setCoords(end2);</b>
+<b class="nc">&nbsp;		} else if (end1.isEqual(end2) &amp;&amp; m_sweep_y == end1.y) {</b>
+<b class="nc">&nbsp;			assert (start_1.compare(end1) &gt; 0 &amp;&amp; start2.compare(end2) &gt; 0);</b>
+<b class="nc">&nbsp;			if (start_1.compare(start2) &lt; 0)</b>
+<b class="nc">&nbsp;				ptSweep.setCoords(start_1);</b>
+&nbsp;			else
+<b class="nc">&nbsp;				ptSweep.setCoords(start2);</b>
+&nbsp;		}
+&nbsp;
+<b class="nc">&nbsp;		double xleft = seg_1.intersectionOfYMonotonicWithAxisX(ptSweep.y,</b>
+<b class="nc">&nbsp;				ptSweep.x);</b>
+<b class="nc">&nbsp;		double xright = seg_2.intersectionOfYMonotonicWithAxisX(ptSweep.y,</b>
+<b class="nc">&nbsp;				ptSweep.x);</b>
+<b class="nc">&nbsp;		assert (xleft != xright);</b>
+<b class="nc">&nbsp;		return xleft &lt; xright ? -1 : 1;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	int compareNonHorizontal_(SimpleEdge line_1, SimpleEdge line_2) {
+<b class="fc">&nbsp;		if (line_1.m_line.getStartY() == line_2.m_line.getStartY()</b>
+<b class="fc">&nbsp;				&amp;&amp; line_1.m_line.getStartX() == line_2.m_line.getStartX()) {// connected</b>
+&nbsp;																			// at
+&nbsp;																			// the
+&nbsp;																			// start
+&nbsp;																			// V
+&nbsp;																			// shape
+<b class="fc">&nbsp;			if (line_1.m_line.getEndY() == line_2.m_line.getEndY()</b>
+<b class="fc">&nbsp;					&amp;&amp; line_1.m_line.getEndX() == line_2.m_line.getEndX()) {// connected</b>
+&nbsp;																			// at
+&nbsp;																			// another
+&nbsp;																			// end
+&nbsp;																			// also
+<b class="fc">&nbsp;				if (m_b_is_simple)</b>
+<b class="nc">&nbsp;					return errorCoincident();</b>
+<b class="fc">&nbsp;				return 0;</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			return compareNonHorizontalUpperEnd_(line_1, line_2);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (line_1.m_line.getEndY() == line_2.m_line.getEndY()</b>
+<b class="fc">&nbsp;				&amp;&amp; line_1.m_line.getEndX() == line_2.m_line.getEndX()) {</b>
+&nbsp;			// the case of upside-down V.
+<b class="fc">&nbsp;			return compareNonHorizontalLowerEnd_(line_1, line_2);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		int lower = compareNonHorizontalLowerEnd_(line_1, line_2);</b>
+<b class="fc">&nbsp;		int upper = compareNonHorizontalUpperEnd_(line_1, line_2);</b>
+<b class="fc">&nbsp;		if (lower &lt; 0 &amp;&amp; upper &lt; 0)</b>
+<b class="fc">&nbsp;			return -1;</b>
+<b class="fc">&nbsp;		if (lower &gt; 0 &amp;&amp; upper &gt; 0)</b>
+<b class="fc">&nbsp;			return 1;</b>
+&nbsp;
+<b class="fc">&nbsp;		return errorCracking();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	int compareHorizontal1Case1_(Line line_1, Line line_2) {
+&nbsp;		// line_2 goes up and line_1 is horizontal connected at the start going
+&nbsp;		// to the right.
+<b class="fc">&nbsp;		if (line_1.getEndX() &gt; line_2.getEndX()) {</b>
+&nbsp;			// /
+&nbsp;			// /
+&nbsp;			// +------------------
+<b class="fc">&nbsp;			if (line_2.getEndX() &gt; line_2.getStartX()</b>
+<b class="fc">&nbsp;					&amp;&amp; line_2.getEndY() - line_2.getStartY() &lt; 2 * m_tolerance</b>
+<b class="nc">&nbsp;					&amp;&amp; line_1._isIntersectingPoint(line_2.getEndXY(),</b>
+<b class="nc">&nbsp;							m_tolerance, true))</b>
+<b class="nc">&nbsp;				return errorCracking();</b>
+&nbsp;		} else {
+&nbsp;			// /
+&nbsp;			// /
+&nbsp;			// /
+&nbsp;			// +--
+<b class="fc">&nbsp;			assert (line_2.getEndX() - line_2.getStartX() != 0);</b>
+&nbsp;			// Note: line_2 cannot be vertical here
+&nbsp;			// Avoid expensive is_intersecting_ by providing a simple estimate.
+<b class="fc">&nbsp;			double dydx = (line_2.getEndY() - line_2.getStartY())</b>
+<b class="fc">&nbsp;					/ (line_2.getEndX() - line_2.getStartX());</b>
+<b class="fc">&nbsp;			double d = dydx * (line_1.getEndX() - line_1.getStartX());</b>
+<b class="fc">&nbsp;			if (d &lt; m_tolerance_10</b>
+<b class="nc">&nbsp;					&amp;&amp; line_2._isIntersectingPoint(line_1.getEndXY(),</b>
+<b class="nc">&nbsp;							m_tolerance, true))</b>
+<b class="nc">&nbsp;				return errorCracking();</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return 1;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	int compareHorizontal1Case2_(Line line_1, Line line_2) {
+&nbsp;		// -----------------+
+&nbsp;		// /
+&nbsp;		// /
+&nbsp;		// /
+&nbsp;		// line_2 goes up and below line_1. line_1 is horizontal connected at
+&nbsp;		// the end to the line_2 end.
+<b class="fc">&nbsp;		if (line_1.getStartX() &lt; line_2.getStartX()) {</b>
+<b class="fc">&nbsp;			if (line_2.getEndX() &gt; line_2.getStartX()</b>
+<b class="fc">&nbsp;					&amp;&amp; line_2.getEndY() - line_2.getStartY() &lt; 2 * m_tolerance</b>
+<b class="nc">&nbsp;					&amp;&amp; line_1._isIntersectingPoint(line_2.getEndXY(),</b>
+<b class="nc">&nbsp;							m_tolerance, true))</b>
+<b class="nc">&nbsp;				return errorCracking();</b>
+&nbsp;		} else {
+&nbsp;			// --+
+&nbsp;			// /
+&nbsp;			// /
+&nbsp;			// /
+&nbsp;			// Avoid expensive is_intersecting_ by providing a simple estimate.
+<b class="fc">&nbsp;			double dydx = (line_2.getEndY() - line_2.getStartY())</b>
+<b class="fc">&nbsp;					/ (line_2.getEndX() - line_2.getStartX());</b>
+<b class="fc">&nbsp;			double d = dydx * (line_1.getStartX() - line_1.getEndX());</b>
+<b class="fc">&nbsp;			if (d &lt; m_tolerance_10</b>
+<b class="fc">&nbsp;					&amp;&amp; line_2._isIntersectingPoint(line_1.getStartXY(),</b>
+<b class="fc">&nbsp;							m_tolerance, true))</b>
+<b class="nc">&nbsp;				return errorCracking();</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return -1;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	int compareHorizontal1Case3_(Line line_1, Line line_2) {
+<b class="fc">&nbsp;		Point2D v0 = new Point2D();</b>
+<b class="fc">&nbsp;		v0.sub(line_2.getEndXY(), line_2.getStartXY());</b>
+<b class="fc">&nbsp;		v0.rightPerpendicular();</b>
+<b class="fc">&nbsp;		v0.normalize();</b>
+<b class="fc">&nbsp;		Point2D v_1 = new Point2D();</b>
+<b class="fc">&nbsp;		v_1.sub(line_1.getStartXY(), line_2.getStartXY());</b>
+<b class="fc">&nbsp;		Point2D v_2 = new Point2D();</b>
+<b class="fc">&nbsp;		v_2.sub(line_1.getEndXY(), line_2.getStartXY());</b>
+<b class="fc">&nbsp;		double d_1 = v_1.dotProduct(v0);</b>
+<b class="fc">&nbsp;		double d_2 = v_2.dotProduct(v0);</b>
+&nbsp;
+<b class="fc">&nbsp;		double ad1 = Math.abs(d_1);</b>
+<b class="fc">&nbsp;		double ad2 = Math.abs(d_2);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (ad1 &lt; ad2) {</b>
+<b class="fc">&nbsp;			if (ad1 &lt; m_tolerance_10</b>
+<b class="fc">&nbsp;					&amp;&amp; line_2._isIntersectingPoint(line_1.getStartXY(),</b>
+<b class="fc">&nbsp;							m_tolerance, true))</b>
+<b class="fc">&nbsp;				return errorCracking();</b>
+&nbsp;		} else {
+<b class="fc">&nbsp;			if (ad2 &lt; m_tolerance_10</b>
+<b class="nc">&nbsp;					&amp;&amp; line_2._isIntersectingPoint(line_1.getEndXY(),</b>
+<b class="nc">&nbsp;							m_tolerance, true))</b>
+<b class="nc">&nbsp;				return errorCracking();</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (d_1 &lt; 0 &amp;&amp; d_2 &lt; 0)</b>
+<b class="fc">&nbsp;			return -1;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (d_1 &gt; 0 &amp;&amp; d_2 &gt; 0)</b>
+<b class="fc">&nbsp;			return 1;</b>
+&nbsp;
+<b class="fc">&nbsp;		return errorCracking();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	int compareHorizontal1_(Line line_1, Line line_2) {
+&nbsp;		// Two most important cases of connecting edges
+<b class="fc">&nbsp;		if (line_1.getStartY() == line_2.getStartY()</b>
+<b class="fc">&nbsp;				&amp;&amp; line_1.getStartX() == line_2.getStartX()) {</b>
+<b class="fc">&nbsp;			return compareHorizontal1Case1_(line_1, line_2);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (line_1.getEndY() == line_2.getEndY()</b>
+<b class="fc">&nbsp;				&amp;&amp; line_1.getEndX() == line_2.getEndX()) {</b>
+<b class="fc">&nbsp;			return compareHorizontal1Case2_(line_1, line_2);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return compareHorizontal1Case3_(line_1, line_2);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	int compareHorizontal2_(Line line_1, Line line_2) {
+<b class="fc">&nbsp;		if (line_1.getEndY() == line_2.getEndY()</b>
+<b class="fc">&nbsp;				&amp;&amp; line_1.getEndX() == line_2.getEndX()</b>
+<b class="fc">&nbsp;				&amp;&amp; line_1.getStartY() == line_2.getStartY()</b>
+<b class="fc">&nbsp;				&amp;&amp; line_1.getStartX() == line_2.getStartX()) {// both lines</b>
+&nbsp;																// coincide
+<b class="fc">&nbsp;			if (m_b_is_simple)</b>
+<b class="nc">&nbsp;				return errorCoincident();</b>
+<b class="fc">&nbsp;			return 0;</b>
+&nbsp;		} else
+<b class="fc">&nbsp;			return errorCracking();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	int compareNonHorizontalLowerEnd_(SimpleEdge line_1, SimpleEdge line_2) {
+<b class="fc">&nbsp;		int sign = 1;</b>
+<b class="fc">&nbsp;		if (line_1.m_line.getStartY() &lt; line_2.m_line.getStartY()) {</b>
+<b class="fc">&nbsp;			sign = -1;</b>
+<b class="fc">&nbsp;			SimpleEdge tmp = line_1;</b>
+<b class="fc">&nbsp;			line_1 = line_2;</b>
+<b class="fc">&nbsp;			line_2 = tmp;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		Line l1 = line_1.m_line;</b>
+<b class="fc">&nbsp;		Line l2 = line_2.m_line;</b>
+&nbsp;		// Now line_1 has Start point higher than line_2 startpoint.
+<b class="fc">&nbsp;		double x_1 = l1.getStartX() - l2.getStartX();</b>
+<b class="fc">&nbsp;		double x2 = line_2.m_dxdy * (l1.getStartY() - l2.getStartY());</b>
+<b class="fc">&nbsp;		double tol = m_tolerance_10;</b>
+<b class="fc">&nbsp;		if (x_1 &lt; x2 - tol)</b>
+<b class="fc">&nbsp;			return -sign;</b>
+<b class="fc">&nbsp;		else if (x_1 &gt; x2 + tol)</b>
+<b class="fc">&nbsp;			return sign;</b>
+&nbsp;		else // Possible problem
+&nbsp;		{
+<b class="fc">&nbsp;			if (l2._isIntersectingPoint(l1.getStartXY(), m_tolerance, true))</b>
+<b class="fc">&nbsp;				return errorCracking();</b>
+<b class="nc">&nbsp;			return x_1 &lt; x2 ? -sign : sign;</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	int compareNonHorizontalUpperEnd_(SimpleEdge line_1, SimpleEdge line_2) {
+<b class="fc">&nbsp;		int sign = 1;</b>
+<b class="fc">&nbsp;		if (line_2.m_line.getEndY() &lt; line_1.m_line.getEndY()) {</b>
+<b class="fc">&nbsp;			sign = -1;</b>
+<b class="fc">&nbsp;			SimpleEdge tmp = line_1;</b>
+<b class="fc">&nbsp;			line_1 = line_2;</b>
+<b class="fc">&nbsp;			line_2 = tmp;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		Line l1 = line_1.m_line;</b>
+<b class="fc">&nbsp;		Line l2 = line_2.m_line;</b>
+&nbsp;		// Now line_1 has End point lower than line_2 endpoint.
+<b class="fc">&nbsp;		double x_1 = l1.getEndX() - l2.getStartX();</b>
+<b class="fc">&nbsp;		double x2 = line_2.m_dxdy * (l1.getEndY() - l2.getStartY());</b>
+<b class="fc">&nbsp;		double tol = m_tolerance_10;</b>
+<b class="fc">&nbsp;		if (x_1 &lt; x2 - tol)</b>
+<b class="fc">&nbsp;			return -sign;</b>
+<b class="fc">&nbsp;		else if (x_1 &gt; x2 + tol)</b>
+<b class="fc">&nbsp;			return sign;</b>
+&nbsp;		else // Possible problem
+&nbsp;		{
+<b class="fc">&nbsp;			if (l2._isIntersectingPoint(l1.getEndXY(), m_tolerance, true))</b>
+<b class="fc">&nbsp;				return errorCracking();</b>
+<b class="nc">&nbsp;			return x_1 &lt; x2 ? -sign : sign;</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	int errorCoincident() {// two segments coincide.
+<b class="nc">&nbsp;		m_b_intersection_detected = true;</b>
+<b class="nc">&nbsp;		assert (m_b_is_simple);</b>
+<b class="nc">&nbsp;		NonSimpleResult.Reason reason = NonSimpleResult.Reason.CrossOver;</b>
+<b class="nc">&nbsp;		m_non_simple_result = new NonSimpleResult(reason, m_vertex_1,</b>
+<b class="nc">&nbsp;				m_vertex_2);</b>
+<b class="nc">&nbsp;		return -1;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	int errorCracking() {// cracking error
+<b class="fc">&nbsp;		m_b_intersection_detected = true;</b>
+<b class="fc">&nbsp;		if (m_b_is_simple) {// only report the reason in IsSimple. Do not do</b>
+&nbsp;							// that for regular cracking.
+<b class="fc">&nbsp;			NonSimpleResult.Reason reason = NonSimpleResult.Reason.Cracking;</b>
+<b class="fc">&nbsp;			m_non_simple_result = new NonSimpleResult(reason, m_vertex_1,</b>
+<b class="fc">&nbsp;					m_vertex_2);</b>
+<b class="fc">&nbsp;		} else {// reset cached data after detected intersection</b>
+<b class="fc">&nbsp;			m_prev_1 = -1;</b>
+<b class="fc">&nbsp;			m_prev_2 = -1;</b>
+<b class="fc">&nbsp;			m_vertex_1 = -1;</b>
+<b class="fc">&nbsp;			m_vertex_2 = -1;</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return -1;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	int compareSegments_(int left, int right, SimpleEdge segLeft,
+&nbsp;			SimpleEdge segRight) {
+<b class="nc">&nbsp;		if (m_b_intersection_detected)</b>
+<b class="nc">&nbsp;			return -1;</b>
+&nbsp;
+<b class="nc">&nbsp;		boolean sameY = m_prev_y == m_sweep_y &amp;&amp; m_prev_x == m_sweep_x;</b>
+&nbsp;		double xleft;
+<b class="nc">&nbsp;		if (sameY &amp;&amp; left == m_prev_1)</b>
+<b class="nc">&nbsp;			xleft = m_prevx_1;</b>
+&nbsp;		else {
+<b class="nc">&nbsp;			xleft = NumberUtils.NaN();</b>
+<b class="nc">&nbsp;			m_prev_1 = -1;</b>
+&nbsp;		}
+&nbsp;		double xright;
+<b class="nc">&nbsp;		if (sameY &amp;&amp; right == m_prev_2)</b>
+<b class="nc">&nbsp;			xright = m_prevx_2;</b>
+&nbsp;		else {
+<b class="nc">&nbsp;			xright = NumberUtils.NaN();</b>
+<b class="nc">&nbsp;			m_prev_2 = -1;</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		// Quickly compare x projections.
+<b class="nc">&nbsp;		Envelope1D envLeft = segLeft.m_segment.queryInterval(</b>
+<b class="nc">&nbsp;				VertexDescription.Semantics.POSITION, 0);</b>
+<b class="nc">&nbsp;		Envelope1D envRight = segRight.m_segment.queryInterval(</b>
+<b class="nc">&nbsp;				VertexDescription.Semantics.POSITION, 0);</b>
+<b class="nc">&nbsp;		if (envLeft.vmax &lt; envRight.vmin)</b>
+<b class="nc">&nbsp;			return -1;</b>
+<b class="nc">&nbsp;		if (envRight.vmax &lt; envLeft.vmin)</b>
+<b class="nc">&nbsp;			return 1;</b>
+&nbsp;
+<b class="nc">&nbsp;		m_prev_y = m_sweep_y;</b>
+<b class="nc">&nbsp;		m_prev_x = m_sweep_x;</b>
+&nbsp;
+&nbsp;		// Now do intersection with the sweep line (it is a line parallel to the
+&nbsp;		// axis x.)
+<b class="nc">&nbsp;		if (NumberUtils.isNaN(xleft)) {</b>
+<b class="nc">&nbsp;			m_prev_1 = left;</b>
+<b class="nc">&nbsp;			double x = segLeft.m_segment.intersectionOfYMonotonicWithAxisX(</b>
+<b class="nc">&nbsp;					m_sweep_y, m_sweep_x);</b>
+<b class="nc">&nbsp;			xleft = x;</b>
+<b class="nc">&nbsp;			m_prevx_1 = x;</b>
+&nbsp;		}
+<b class="nc">&nbsp;		if (NumberUtils.isNaN(xright)) {</b>
+<b class="nc">&nbsp;			m_prev_2 = right;</b>
+<b class="nc">&nbsp;			double x = segRight.m_segment.intersectionOfYMonotonicWithAxisX(</b>
+<b class="nc">&nbsp;					m_sweep_y, m_sweep_x);</b>
+<b class="nc">&nbsp;			xright = x;</b>
+<b class="nc">&nbsp;			m_prevx_2 = x;</b>
+&nbsp;		}
+&nbsp;
+<b class="nc">&nbsp;		if (Math.abs(xleft - xright) &lt;= m_tolerance) {</b>
+&nbsp;			// special processing as we cannot decide in a simple way.
+<b class="nc">&nbsp;			return compareTwoSegments_(segLeft.m_segment, segRight.m_segment);</b>
+&nbsp;		} else {
+<b class="nc">&nbsp;			return xleft &lt; xright ? -1 : xleft &gt; xright ? 1 : 0;</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	SweepComparator(EditShape shape, double tol, boolean bIsSimple) {
+<b class="fc">&nbsp;		super(true);</b>
+<b class="fc">&nbsp;		m_shape = shape;</b>
+<b class="fc">&nbsp;		m_sweep_y = NumberUtils.TheNaN;</b>
+<b class="fc">&nbsp;		m_sweep_x = 0;</b>
+<b class="fc">&nbsp;		m_prev_x = 0;</b>
+<b class="fc">&nbsp;		m_prev_y = NumberUtils.TheNaN;</b>
+<b class="fc">&nbsp;		m_tolerance = tol;</b>
+<b class="fc">&nbsp;		m_tolerance_10 = 10 * tol;</b>
+<b class="fc">&nbsp;		m_prevx_2 = NumberUtils.TheNaN;</b>
+<b class="fc">&nbsp;		m_prevx_1 = NumberUtils.TheNaN;</b>
+<b class="fc">&nbsp;		m_b_intersection_detected = false;</b>
+<b class="fc">&nbsp;		m_prev_1 = -1;</b>
+<b class="fc">&nbsp;		m_prev_2 = -1;</b>
+<b class="fc">&nbsp;		m_vertex_1 = -1;</b>
+<b class="fc">&nbsp;		m_vertex_2 = -1;</b>
+<b class="fc">&nbsp;		m_current_node = -1;</b>
+<b class="fc">&nbsp;		m_b_is_simple = bIsSimple;</b>
+<b class="fc">&nbsp;		m_temp_simple_edge_1 = new SimpleEdge();</b>
+<b class="fc">&nbsp;		m_temp_simple_edge_2 = new SimpleEdge();</b>
+&nbsp;
+<b class="fc">&nbsp;		int s = Math.min(shape.getTotalPointCount() * 3 / 2,</b>
+<b class="fc">&nbsp;				(int) (67 /* SIMPLEDGE_CACHESIZE */));</b>
+<b class="fc">&nbsp;		int cache_size = Math.min((int) 7, s);</b>
+&nbsp;		// m_simple_edges_buffer.reserve(cache_size);//must be reserved and
+&nbsp;		// never grow beyond reserved size
+&nbsp;
+<b class="fc">&nbsp;		m_simple_edges_buffer = new ArrayList&lt;SimpleEdge&gt;();</b>
+<b class="fc">&nbsp;		m_simple_edges_recycle = new ArrayList&lt;SimpleEdge&gt;();</b>
+<b class="fc">&nbsp;		m_simple_edges_cache = new ArrayList&lt;SimpleEdge&gt;();</b>
+&nbsp;
+<b class="fc">&nbsp;		for (int i = 0; i &lt; cache_size; i++)</b>
+<b class="fc">&nbsp;			m_simple_edges_cache.add(null);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Makes the comparator to forget about the last detected intersection.
+&nbsp;	// Need to be called after the intersection has been resolved.
+&nbsp;	void clearIntersectionDetectedFlag() {
+<b class="fc">&nbsp;		m_b_intersection_detected = false;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Returns True if there has been intersection detected during compare call.
+&nbsp;	// Once intersection is detected subsequent calls to compare method do
+&nbsp;	// nothing until clear_intersection_detected_flag is called.
+&nbsp;	boolean intersectionDetected() {
+<b class="fc">&nbsp;		return m_b_intersection_detected;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Returns the node at which the intersection has been detected
+&nbsp;	int getLastComparedNode() {
+<b class="fc">&nbsp;		return m_current_node;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// When used in IsSimple (see corresponding parameter in ctor), returns the
+&nbsp;	// reason of non-simplicity
+&nbsp;	NonSimpleResult getResult() {
+<b class="fc">&nbsp;		return m_non_simple_result;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Sets new sweep line position.
+&nbsp;	void setSweepY(double y, double x) {
+&nbsp;		// _ASSERT(m_sweep_y != y || m_sweep_x != x);
+<b class="fc">&nbsp;		m_sweep_y = y;</b>
+<b class="fc">&nbsp;		m_sweep_x = x;</b>
+<b class="fc">&nbsp;		m_prev_1 = -1;</b>
+<b class="fc">&nbsp;		m_prev_2 = -1;</b>
+<b class="fc">&nbsp;		m_vertex_1 = -1;</b>
+<b class="fc">&nbsp;		m_vertex_2 = -1;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// The compare method. Compares x values of the edge given by its origin
+&nbsp;	// (elm) and the edge in the sweep structure and checks them for
+&nbsp;	// intersection at the same time.
+&nbsp;	@Override
+&nbsp;	int compare(Treap treap, int left, int node) {
+&nbsp;		// Compares two segments on a sweep line passing through m_sweep_y,
+&nbsp;		// m_sweep_x.
+<b class="fc">&nbsp;		if (m_b_intersection_detected)</b>
+<b class="fc">&nbsp;			return -1;</b>
+&nbsp;
+<b class="fc">&nbsp;		int right = treap.getElement(node);</b>
+<b class="fc">&nbsp;		m_current_node = node;</b>
+<b class="fc">&nbsp;		return compareSegments(left, left, right, right);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	int compareSegments(int leftElm, int left_vertex, int right_elm,
+&nbsp;			int right_vertex) {
+<b class="fc">&nbsp;		SimpleEdge edgeLeft = tryGetCachedEdge_(leftElm);</b>
+<b class="fc">&nbsp;		if (edgeLeft == null) {</b>
+<b class="fc">&nbsp;			if (m_vertex_1 == left_vertex)</b>
+<b class="fc">&nbsp;				edgeLeft = m_temp_simple_edge_1;</b>
+&nbsp;			else {
+<b class="fc">&nbsp;				m_vertex_1 = left_vertex;</b>
+<b class="fc">&nbsp;				edgeLeft = tryCreateCachedEdge_(leftElm);</b>
+<b class="fc">&nbsp;				if (edgeLeft == null) {</b>
+<b class="fc">&nbsp;					edgeLeft = m_temp_simple_edge_1;</b>
+<b class="fc">&nbsp;					m_temp_simple_edge_1.m_value = leftElm;</b>
+&nbsp;				}
+<b class="fc">&nbsp;				initSimpleEdge_(edgeLeft, left_vertex);</b>
+&nbsp;			}
+<b class="fc">&nbsp;		} else</b>
+<b class="fc">&nbsp;			m_vertex_1 = left_vertex;</b>
+&nbsp;
+<b class="fc">&nbsp;		SimpleEdge edgeRight = tryGetCachedEdge_(right_elm);</b>
+<b class="fc">&nbsp;		if (edgeRight == null) {</b>
+<b class="fc">&nbsp;			if (m_vertex_2 == right_vertex)</b>
+<b class="fc">&nbsp;				edgeRight = m_temp_simple_edge_2;</b>
+&nbsp;			else {
+<b class="fc">&nbsp;				m_vertex_2 = right_vertex;</b>
+<b class="fc">&nbsp;				edgeRight = tryCreateCachedEdge_(right_elm);</b>
+<b class="fc">&nbsp;				if (edgeRight == null) {</b>
+<b class="fc">&nbsp;					edgeRight = m_temp_simple_edge_2;</b>
+<b class="fc">&nbsp;					m_temp_simple_edge_2.m_value = right_elm;</b>
+&nbsp;				}
+<b class="fc">&nbsp;				initSimpleEdge_(edgeRight, right_vertex);</b>
+&nbsp;			}
+<b class="fc">&nbsp;		} else</b>
+<b class="fc">&nbsp;			m_vertex_2 = right_vertex;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (edgeLeft.m_b_curve || edgeRight.m_b_curve)</b>
+<b class="nc">&nbsp;			return compareSegments_(left_vertex, right_vertex, edgeLeft,</b>
+<b class="nc">&nbsp;					edgeRight);</b>
+&nbsp;
+&nbsp;		// Usually we work with lines, so process them in the fastest way.
+&nbsp;		// First check - assume segments are far apart. compare x intervals
+<b class="fc">&nbsp;		if (edgeLeft.m_env.vmax &lt; edgeRight.m_env.vmin)</b>
+<b class="fc">&nbsp;			return -1;</b>
+<b class="fc">&nbsp;		if (edgeRight.m_env.vmax &lt; edgeLeft.m_env.vmin)</b>
+<b class="fc">&nbsp;			return 1;</b>
+&nbsp;
+&nbsp;		// compare case by case.
+<b class="fc">&nbsp;		int kind = edgeLeft.m_b_horizontal ? 1 : 0;</b>
+<b class="fc">&nbsp;		kind |= edgeRight.m_b_horizontal ? 2 : 0;</b>
+<b class="fc">&nbsp;		if (kind == 0)// both segments are non-horizontal</b>
+<b class="fc">&nbsp;			return compareNonHorizontal_(edgeLeft, edgeRight);</b>
+<b class="fc">&nbsp;		else if (kind == 1) // line_1 horizontal, line_2 is not</b>
+<b class="fc">&nbsp;			return compareHorizontal1_(edgeLeft.m_line, edgeRight.m_line);</b>
+<b class="fc">&nbsp;		else if (kind == 2) // line_2 horizontal, line_1 is not</b>
+<b class="fc">&nbsp;			return compareHorizontal1_(edgeRight.m_line, edgeLeft.m_line) * -1;</b>
+&nbsp;		else
+&nbsp;			// if (kind == 3) //both horizontal
+<b class="fc">&nbsp;			return compareHorizontal2_(edgeLeft.m_line, edgeRight.m_line);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	void onDelete(int elm) {
+<b class="fc">&nbsp;		tryDeleteCachedEdge_(elm);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	void onSet(int oldelm) {
+<b class="nc">&nbsp;		tryDeleteCachedEdge_(oldelm);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	void onEndSearch(int elm) {
+<b class="nc">&nbsp;		tryDeleteCachedEdge_(elm);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	void onAddUniqueElementFailed(int elm) {
+<b class="fc">&nbsp;		tryDeleteCachedEdge_(elm);</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-02-21 15:02</div>
+</div>
+</body>
+</html>

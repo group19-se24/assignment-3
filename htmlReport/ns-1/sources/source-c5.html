@@ -1,0 +1,711 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > RasterizedGeometry2DImpl</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.esri.core.geometry</a>
+</div>
+
+<h1>Coverage Summary for Class: RasterizedGeometry2DImpl (com.esri.core.geometry)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">RasterizedGeometry2DImpl</td>
+<td class="coverageStat">
+  <span class="percent">
+    75%
+  </span>
+  <span class="absValue">
+    (15/20)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    70,4%
+  </span>
+  <span class="absValue">
+    (216/307)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">RasterizedGeometry2DImpl$ScanCallbackImpl</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (4/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (15/15)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    79,2%
+  </span>
+  <span class="absValue">
+    (19/24)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    71,7%
+  </span>
+  <span class="absValue">
+    (231/322)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; Copyright 1995-2013 Esri
+&nbsp;
+&nbsp;   Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp;   you may not use this file except in compliance with the License.
+&nbsp;   You may obtain a copy of the License at
+&nbsp;
+&nbsp;       http://www.apache.org/licenses/LICENSE-2.0
+&nbsp;
+&nbsp;   Unless required by applicable law or agreed to in writing, software
+&nbsp;   distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp;   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp;   See the License for the specific language governing permissions and
+&nbsp;   limitations under the License.
+&nbsp;
+&nbsp; For additional information, contact:
+&nbsp; Environmental Systems Research Institute, Inc.
+&nbsp; Attn: Contracts Dept
+&nbsp; 380 New York Street
+&nbsp; Redlands, California, USA 92373
+&nbsp;
+&nbsp; email: contracts@esri.com
+&nbsp; */
+&nbsp;
+&nbsp;package com.esri.core.geometry;
+&nbsp;
+&nbsp;import java.io.FileOutputStream;
+&nbsp;import java.io.IOException;
+&nbsp;import java.nio.ByteBuffer;
+&nbsp;import java.nio.ByteOrder;
+&nbsp;
+&nbsp;import static com.esri.core.geometry.SizeOf.SIZE_OF_RASTERIZED_GEOMETRY_2D_IMPL;
+&nbsp;import static com.esri.core.geometry.SizeOf.SIZE_OF_SCAN_CALLBACK_IMPL;
+&nbsp;import static com.esri.core.geometry.SizeOf.sizeOfIntArray;
+&nbsp;
+&nbsp;final class RasterizedGeometry2DImpl extends RasterizedGeometry2D {
+&nbsp;	int[] m_bitmap;
+&nbsp;	int m_scanLineSize;
+&nbsp;	int m_width;
+&nbsp;	double m_dx;
+&nbsp;	double m_dy;
+&nbsp;	double m_x0;
+&nbsp;	double m_y0;
+&nbsp;	double m_toleranceXY;
+&nbsp;	double m_stroke_half_widthX_pix;
+&nbsp;	double m_stroke_half_widthY_pix;
+&nbsp;	double m_stroke_half_width;
+&nbsp;
+&nbsp;	Envelope2D m_geomEnv;// envelope of the raster in world coordinates
+&nbsp;	Transformation2D m_transform;
+&nbsp;	int m_dbgTestCount;
+&nbsp;	SimpleRasterizer m_rasterizer;
+&nbsp;	ScanCallbackImpl m_callback;
+&nbsp;
+&nbsp;	class ScanCallbackImpl implements SimpleRasterizer.ScanCallback {
+&nbsp;		int[] m_bitmap;
+&nbsp;		int m_scanlineWidth;
+&nbsp;		int m_color;
+&nbsp;
+<b class="fc">&nbsp;		public ScanCallbackImpl(int[] bitmap, int scanlineWidth) {</b>
+<b class="fc">&nbsp;			m_scanlineWidth = scanlineWidth;</b>
+<b class="fc">&nbsp;			m_bitmap = bitmap;</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		public void setColor(SimpleRasterizer rasterizer, int color) {
+<b class="fc">&nbsp;			if (m_color != color)</b>
+<b class="fc">&nbsp;				rasterizer.flush();</b>
+&nbsp;			
+<b class="fc">&nbsp;			m_color = color;// set new color</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		@Override
+&nbsp;		public void drawScan(int[] scans, int scanCount3) {
+<b class="fc">&nbsp;			for (int i = 0; i &lt; scanCount3; ) {</b>
+<b class="fc">&nbsp;				int x0 = scans[i++];</b>
+<b class="fc">&nbsp;				int x1 = scans[i++];</b>
+<b class="fc">&nbsp;				int y = scans[i++];</b>
+&nbsp;	
+<b class="fc">&nbsp;				int scanlineStart = y * m_scanlineWidth;</b>
+<b class="fc">&nbsp;				for (int xx = x0; xx &lt; x1; xx++) {</b>
+<b class="fc">&nbsp;					m_bitmap[scanlineStart + (xx &gt;&gt; 4)] |= m_color &lt;&lt; ((xx &amp; 15) * 2);// 2</b>
+&nbsp;					// bit
+&nbsp;					// per
+&nbsp;					// color
+&nbsp;			}
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+&nbsp;		/**
+&nbsp;		 * Returns an estimate of this object size in bytes.
+&nbsp;		 *
+&nbsp;		 * @return Returns an estimate of this object size in bytes.
+&nbsp;		 */
+&nbsp;		public long estimateMemorySize()
+&nbsp;		{
+<b class="fc">&nbsp;			return SIZE_OF_SCAN_CALLBACK_IMPL +</b>
+<b class="fc">&nbsp;					(m_bitmap != null ? sizeOfIntArray(m_bitmap.length) : 0);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	void fillMultiPath(SimpleRasterizer rasterizer, Transformation2D trans, MultiPathImpl polygon, boolean isWinding) {
+<b class="fc">&nbsp;		SegmentIteratorImpl segIter = polygon.querySegmentIterator();</b>
+<b class="fc">&nbsp;		Point2D p1 = new Point2D();</b>
+<b class="fc">&nbsp;		Point2D p2 = new Point2D();</b>
+<b class="fc">&nbsp;		while (segIter.nextPath()) {</b>
+<b class="fc">&nbsp;			while (segIter.hasNextSegment()) {</b>
+<b class="fc">&nbsp;				Segment seg = segIter.nextSegment();</b>
+<b class="fc">&nbsp;				if (seg.getType() != Geometry.Type.Line)</b>
+<b class="nc">&nbsp;					throw GeometryException.GeometryInternalError(); // TODO:</b>
+&nbsp;				// densify
+&nbsp;				// the
+&nbsp;				// segment
+&nbsp;				// here
+<b class="fc">&nbsp;				trans.transform(seg.getStartXY(), p1);</b>
+<b class="fc">&nbsp;				trans.transform(seg.getEndXY(), p2);</b>
+<b class="fc">&nbsp;				m_rasterizer.addEdge(p1.x, p1.y, p2.x, p2.y);</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		m_rasterizer.renderEdges(isWinding ? SimpleRasterizer.WINDING : SimpleRasterizer.EVEN_ODD);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	void fillPoints(SimpleRasterizer rasterizer, MultiPointImpl geom, double stroke_half_width) {
+<b class="nc">&nbsp;		throw GeometryException.GeometryInternalError();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void fillConvexPolygon(SimpleRasterizer rasterizer, Point2D[] fan, int len) {
+<b class="nc">&nbsp;		for (int i = 1, n = len; i &lt; n; i++) {</b>
+<b class="nc">&nbsp;			rasterizer.addEdge(fan[i-1].x, fan[i-1].y, fan[i].x, fan[i].y);</b>
+&nbsp;		}
+<b class="nc">&nbsp;		rasterizer.addEdge(fan[len-1].x, fan[len-1].y, fan[0].x, fan[0].y);</b>
+<b class="nc">&nbsp;		m_rasterizer.renderEdges(SimpleRasterizer.EVEN_ODD);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void fillEnvelope(SimpleRasterizer rasterizer, Envelope2D envIn) {
+<b class="nc">&nbsp;		rasterizer.fillEnvelope(envIn);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	void strokeDrawPolyPath(SimpleRasterizer rasterizer,
+&nbsp;			MultiPathImpl polyPath, double tol) {
+&nbsp;
+<b class="fc">&nbsp;		Point2D[] fan = new Point2D[4];</b>
+<b class="fc">&nbsp;		for (int i = 0; i &lt; fan.length; i++)</b>
+<b class="fc">&nbsp;			fan[i] = new Point2D();</b>
+&nbsp;
+<b class="fc">&nbsp;		SegmentIteratorImpl segIter = polyPath.querySegmentIterator();</b>
+<b class="fc">&nbsp;		double strokeHalfWidth = m_transform.transform(tol) + 1.5;</b>
+&nbsp;
+<b class="fc">&nbsp;		Point2D ptStart = new Point2D();</b>
+<b class="fc">&nbsp;		Point2D ptEnd = new Point2D();</b>
+<b class="fc">&nbsp;		Point2D prev_start = new Point2D();</b>
+<b class="fc">&nbsp;		Point2D prev_end = new Point2D();</b>
+<b class="fc">&nbsp;		double[] helper_xy_10_elm = new double[10];</b>
+<b class="fc">&nbsp;		Envelope2D segEnv = new Envelope2D();</b>
+<b class="fc">&nbsp;		Point2D ptOld = new Point2D();</b>
+<b class="fc">&nbsp;		double extraWidth = 0;</b>
+<b class="fc">&nbsp;		while (segIter.nextPath()) {</b>
+<b class="fc">&nbsp;			boolean hasFan = false;</b>
+<b class="fc">&nbsp;			boolean first = true;</b>
+<b class="fc">&nbsp;			ptOld.setCoords(0, 0);</b>
+<b class="fc">&nbsp;			while (segIter.hasNextSegment()) {</b>
+<b class="fc">&nbsp;				Segment seg = segIter.nextSegment();</b>
+<b class="fc">&nbsp;				ptStart.x = seg.getStartX();</b>
+<b class="fc">&nbsp;				ptStart.y = seg.getStartY();</b>
+<b class="fc">&nbsp;				ptEnd.x = seg.getEndX();</b>
+<b class="fc">&nbsp;				ptEnd.y = seg.getEndY();</b>
+<b class="fc">&nbsp;				segEnv.setEmpty();</b>
+<b class="fc">&nbsp;				segEnv.merge(ptStart.x, ptStart.y);</b>
+<b class="fc">&nbsp;				segEnv.mergeNE(ptEnd.x, ptEnd.y);</b>
+<b class="fc">&nbsp;				if (!m_geomEnv.isIntersectingNE(segEnv)) {</b>
+<b class="nc">&nbsp;					if (hasFan) {</b>
+<b class="nc">&nbsp;						rasterizer.startAddingEdges();</b>
+<b class="nc">&nbsp;						rasterizer.addSegmentStroke(prev_start.x, prev_start.y,</b>
+<b class="nc">&nbsp;								prev_end.x, prev_end.y, strokeHalfWidth + extraWidth, false,</b>
+<b class="nc">&nbsp;								helper_xy_10_elm);</b>
+<b class="nc">&nbsp;						rasterizer.renderEdges(SimpleRasterizer.EVEN_ODD);</b>
+<b class="nc">&nbsp;						hasFan = false;</b>
+<b class="nc">&nbsp;						extraWidth = 0.0;</b>
+&nbsp;					}
+&nbsp;
+<b class="nc">&nbsp;					first = true;</b>
+<b class="nc">&nbsp;					continue;</b>
+&nbsp;				}
+&nbsp;
+<b class="fc">&nbsp;				m_transform.transform(ptEnd, ptEnd);</b>
+&nbsp;
+<b class="fc">&nbsp;				if (first) {</b>
+<b class="fc">&nbsp;					m_transform.transform(ptStart, ptStart);</b>
+<b class="fc">&nbsp;					ptOld.setCoords(ptStart);</b>
+<b class="fc">&nbsp;					first = false;</b>
+<b class="fc">&nbsp;				} else {</b>
+<b class="fc">&nbsp;					ptStart.setCoords(ptOld);</b>
+&nbsp;				}
+&nbsp;
+<b class="fc">&nbsp;				prev_start.setCoords(ptStart);</b>
+<b class="fc">&nbsp;				prev_end.setCoords(ptEnd);</b>
+&nbsp;
+<b class="fc">&nbsp;				rasterizer.startAddingEdges();</b>
+<b class="fc">&nbsp;				hasFan = !rasterizer.addSegmentStroke(prev_start.x,</b>
+<b class="fc">&nbsp;						prev_start.y, prev_end.x, prev_end.y, strokeHalfWidth + extraWidth,</b>
+<b class="fc">&nbsp;						true, helper_xy_10_elm);</b>
+<b class="fc">&nbsp;				rasterizer.renderEdges(SimpleRasterizer.EVEN_ODD);</b>
+<b class="fc">&nbsp;				if (!hasFan) {</b>
+<b class="fc">&nbsp;					ptOld.setCoords(prev_end);</b>
+<b class="fc">&nbsp;					extraWidth = 0.0;</b>
+<b class="fc">&nbsp;				}</b>
+&nbsp;				else {
+&nbsp;					//track length of skipped segment to add it to the stroke width for the next edge.
+<b class="fc">&nbsp;					extraWidth = Math.max(extraWidth, Point2D.distance(prev_start, prev_end));</b>
+&nbsp;				}
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			if (hasFan) {</b>
+<b class="fc">&nbsp;				rasterizer.startAddingEdges();</b>
+<b class="fc">&nbsp;				hasFan = !rasterizer.addSegmentStroke(prev_start.x,</b>
+<b class="fc">&nbsp;						prev_start.y, prev_end.x, prev_end.y, strokeHalfWidth + extraWidth,</b>
+<b class="fc">&nbsp;						false, helper_xy_10_elm);</b>
+<b class="fc">&nbsp;				rasterizer.renderEdges(SimpleRasterizer.EVEN_ODD);</b>
+<b class="fc">&nbsp;				extraWidth = 0.0;</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	int worldToPixX(double x) {
+<b class="fc">&nbsp;		return (int) (x * m_dx + m_x0);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	int worldToPixY(double y) {
+<b class="fc">&nbsp;		return (int) (y * m_dy + m_y0);</b>
+&nbsp;	}
+&nbsp;
+<b class="fc">&nbsp;	RasterizedGeometry2DImpl(Geometry geom, double toleranceXY,</b>
+&nbsp;			int rasterSizeBytes) {
+&nbsp;		// //_ASSERT(CanUseAccelerator(geom));
+<b class="fc">&nbsp;		init((MultiVertexGeometryImpl) geom._getImpl(), toleranceXY,</b>
+<b class="fc">&nbsp;				rasterSizeBytes);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	static RasterizedGeometry2DImpl createImpl(Geometry geom,
+&nbsp;			double toleranceXY, int rasterSizeBytes) {
+<b class="fc">&nbsp;		RasterizedGeometry2DImpl rgImpl = new RasterizedGeometry2DImpl(geom,</b>
+<b class="fc">&nbsp;				toleranceXY, rasterSizeBytes);</b>
+&nbsp;
+<b class="fc">&nbsp;		return rgImpl;</b>
+&nbsp;	}
+&nbsp;
+<b class="fc">&nbsp;	private RasterizedGeometry2DImpl(MultiVertexGeometryImpl geom,</b>
+&nbsp;			double toleranceXY, int rasterSizeBytes) {
+<b class="fc">&nbsp;		init(geom, toleranceXY, rasterSizeBytes);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	static RasterizedGeometry2DImpl createImpl(MultiVertexGeometryImpl geom,
+&nbsp;			double toleranceXY, int rasterSizeBytes) {
+<b class="fc">&nbsp;		RasterizedGeometry2DImpl rgImpl = new RasterizedGeometry2DImpl(geom,</b>
+<b class="fc">&nbsp;				toleranceXY, rasterSizeBytes);</b>
+<b class="fc">&nbsp;		return rgImpl;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	void init(MultiVertexGeometryImpl geom, double toleranceXY,
+&nbsp;			int rasterSizeBytes) {
+&nbsp;		// _ASSERT(CanUseAccelerator(geom));
+<b class="fc">&nbsp;		m_width = Math.max((int) (Math.sqrt(rasterSizeBytes) * 2 + 0.5), 64);</b>
+<b class="fc">&nbsp;		m_scanLineSize = (m_width * 2 + 31) / 32; // 2 bits per pixel</b>
+<b class="fc">&nbsp;		m_geomEnv = new Envelope2D();</b>
+&nbsp;
+<b class="fc">&nbsp;		m_toleranceXY = toleranceXY;</b>
+&nbsp;
+&nbsp;		// calculate bitmap size
+<b class="fc">&nbsp;		int size = 0;</b>
+<b class="fc">&nbsp;		int width = m_width;</b>
+<b class="fc">&nbsp;		int scanLineSize = m_scanLineSize;</b>
+<b class="fc">&nbsp;		while (width &gt;= 8) {</b>
+<b class="fc">&nbsp;			size += width * scanLineSize;</b>
+<b class="fc">&nbsp;			width /= 2;</b>
+<b class="fc">&nbsp;			scanLineSize = (width * 2 + 31) / 32;</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		// allocate the bitmap, that contains the base and the mip-levels
+<b class="fc">&nbsp;		m_bitmap = new int[size];</b>
+<b class="fc">&nbsp;		for (int i = 0; i &lt; size; i++)</b>
+<b class="fc">&nbsp;			m_bitmap[i] = 0;</b>
+&nbsp;
+<b class="fc">&nbsp;		m_rasterizer = new SimpleRasterizer();</b>
+<b class="fc">&nbsp;		ScanCallbackImpl callback = new ScanCallbackImpl(m_bitmap,</b>
+<b class="fc">&nbsp;				m_scanLineSize);</b>
+<b class="fc">&nbsp;		m_callback = callback;</b>
+<b class="fc">&nbsp;		m_rasterizer.setup(m_width, m_width, callback);</b>
+<b class="fc">&nbsp;		geom.queryEnvelope2D(m_geomEnv);</b>
+<b class="fc">&nbsp;		if (m_geomEnv.getWidth() &gt; m_width * m_geomEnv.getHeight()</b>
+<b class="fc">&nbsp;				|| m_geomEnv.getHeight() &gt; m_geomEnv.getWidth() * m_width) {</b>
+&nbsp;			// the geometry is thin and the rasterizer is not needed.
+&nbsp;		}
+<b class="fc">&nbsp;		m_geomEnv.inflate(toleranceXY, toleranceXY);</b>
+<b class="fc">&nbsp;		Envelope2D worldEnv = new Envelope2D();</b>
+&nbsp;
+<b class="fc">&nbsp;		Envelope2D pixEnv = Envelope2D</b>
+<b class="fc">&nbsp;				.construct(1, 1, m_width - 2, m_width - 2);</b>
+&nbsp;
+<b class="fc">&nbsp;		double minWidth = toleranceXY * pixEnv.getWidth(); // min width is such</b>
+&nbsp;		// that the size of
+&nbsp;		// one pixel is
+&nbsp;		// equal to the
+&nbsp;		// tolerance
+<b class="fc">&nbsp;		double minHeight = toleranceXY * pixEnv.getHeight();</b>
+&nbsp;
+<b class="fc">&nbsp;		worldEnv.setCoords(m_geomEnv.getCenter(),</b>
+<b class="fc">&nbsp;				Math.max(minWidth, m_geomEnv.getWidth()),</b>
+<b class="fc">&nbsp;				Math.max(minHeight, m_geomEnv.getHeight()));</b>
+&nbsp;
+<b class="fc">&nbsp;		m_stroke_half_widthX_pix = worldEnv.getWidth() / pixEnv.getWidth();</b>
+<b class="fc">&nbsp;		m_stroke_half_widthY_pix = worldEnv.getHeight() / pixEnv.getHeight();</b>
+&nbsp;
+&nbsp;		// The stroke half width. Later it will be inflated to account for
+&nbsp;		// pixels size.
+<b class="fc">&nbsp;		m_stroke_half_width = m_toleranceXY;</b>
+&nbsp;
+<b class="fc">&nbsp;		m_transform = new Transformation2D();</b>
+<b class="fc">&nbsp;		m_transform.initializeFromRect(worldEnv, pixEnv);// geom to pixels</b>
+&nbsp;
+<b class="fc">&nbsp;		switch (geom.getType().value()) {</b>
+&nbsp;		case Geometry.GeometryType.MultiPoint:
+<b class="nc">&nbsp;			callback.setColor(m_rasterizer, 2);</b>
+<b class="nc">&nbsp;			fillPoints(m_rasterizer, (MultiPointImpl) geom, m_stroke_half_width);</b>
+<b class="nc">&nbsp;			break;</b>
+&nbsp;		case Geometry.GeometryType.Polyline:
+<b class="fc">&nbsp;			callback.setColor(m_rasterizer, 2);</b>
+<b class="fc">&nbsp;			strokeDrawPolyPath(m_rasterizer, (MultiPathImpl) geom._getImpl(),</b>
+<b class="fc">&nbsp;					m_stroke_half_width);</b>
+<b class="fc">&nbsp;			break;</b>
+&nbsp;		case Geometry.GeometryType.Polygon: {
+<b class="fc">&nbsp;			boolean isWinding = false;// NOTE: change when winding is supported</b>
+<b class="fc">&nbsp;			callback.setColor(m_rasterizer, 1);</b>
+<b class="fc">&nbsp;			fillMultiPath(m_rasterizer, m_transform, (MultiPathImpl) geom, isWinding);</b>
+<b class="fc">&nbsp;			callback.setColor(m_rasterizer, 2);</b>
+<b class="fc">&nbsp;			strokeDrawPolyPath(m_rasterizer, (MultiPathImpl) geom._getImpl(),</b>
+<b class="fc">&nbsp;					m_stroke_half_width);</b>
+&nbsp;		}
+&nbsp;			break;
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		m_dx = m_transform.xx;</b>
+<b class="fc">&nbsp;		m_dy = m_transform.yy;</b>
+<b class="fc">&nbsp;		m_x0 = m_transform.xd;</b>
+<b class="fc">&nbsp;		m_y0 = m_transform.yd;</b>
+<b class="fc">&nbsp;		buildLevels();</b>
+&nbsp;		//dbgSaveToBitmap(&quot;c:/temp/_dbg.bmp&quot;);
+&nbsp;	}
+&nbsp;
+&nbsp;	boolean tryRenderAsSmallEnvelope_(Envelope2D env) {
+<b class="nc">&nbsp;		if (!env.isIntersecting(m_geomEnv))</b>
+<b class="nc">&nbsp;			return true;</b>
+&nbsp;
+<b class="nc">&nbsp;		Envelope2D envPix = new Envelope2D();</b>
+<b class="nc">&nbsp;		envPix.setCoords(env);</b>
+<b class="nc">&nbsp;		m_transform.transform(env);</b>
+<b class="nc">&nbsp;		double strokeHalfWidthPixX = m_stroke_half_widthX_pix;</b>
+<b class="nc">&nbsp;		double strokeHalfWidthPixY = m_stroke_half_widthY_pix;</b>
+<b class="nc">&nbsp;		if (envPix.getWidth() &gt; 2 * strokeHalfWidthPixX + 1</b>
+<b class="nc">&nbsp;				|| envPix.getHeight() &gt; 2 * strokeHalfWidthPixY + 1)</b>
+<b class="nc">&nbsp;			return false;</b>
+&nbsp;
+&nbsp;		// This envelope is too narrow/small, so that it can be just drawn as a
+&nbsp;		// rectangle using only boundary color.
+&nbsp;
+<b class="nc">&nbsp;		envPix.inflate(strokeHalfWidthPixX, strokeHalfWidthPixY);</b>
+<b class="nc">&nbsp;		envPix.xmax += 1.0;</b>
+<b class="nc">&nbsp;		envPix.ymax += 1.0;// take into account that it does not draw right and</b>
+&nbsp;		// bottom edges.
+&nbsp;
+<b class="nc">&nbsp;		m_callback.setColor(m_rasterizer, 2);</b>
+<b class="nc">&nbsp;		fillEnvelope(m_rasterizer, envPix);</b>
+<b class="nc">&nbsp;		return true;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void buildLevels() {
+<b class="fc">&nbsp;		m_rasterizer.flush();</b>
+<b class="fc">&nbsp;		int iStart = 0;</b>
+<b class="fc">&nbsp;		int iStartNext = m_width * m_scanLineSize;</b>
+<b class="fc">&nbsp;		int width = m_width;</b>
+<b class="fc">&nbsp;		int widthNext = m_width / 2;</b>
+<b class="fc">&nbsp;		int scanLineSize = m_scanLineSize;</b>
+<b class="fc">&nbsp;		int scanLineSizeNext = (widthNext * 2 + 31) / 32;</b>
+<b class="fc">&nbsp;		while (width &gt; 8) {</b>
+<b class="fc">&nbsp;			for (int iy = 0; iy &lt; widthNext; iy++) {</b>
+<b class="fc">&nbsp;				int iysrc1 = iy * 2;</b>
+<b class="fc">&nbsp;				int iysrc2 = iy * 2 + 1;</b>
+<b class="fc">&nbsp;				for (int ix = 0; ix &lt; widthNext; ix++) {</b>
+<b class="fc">&nbsp;					int ixsrc1 = ix * 2;</b>
+<b class="fc">&nbsp;					int ixsrc2 = ix * 2 + 1;</b>
+<b class="fc">&nbsp;					int divix1 = ixsrc1 &gt;&gt; 4;</b>
+<b class="fc">&nbsp;					int modix1 = (ixsrc1 &amp; 15) * 2;</b>
+<b class="fc">&nbsp;					int divix2 = ixsrc2 &gt;&gt; 4;</b>
+<b class="fc">&nbsp;					int modix2 = (ixsrc2 &amp; 15) * 2;</b>
+<b class="fc">&nbsp;					int res = (m_bitmap[iStart + scanLineSize * iysrc1 + divix1] &gt;&gt; modix1) &amp; 3;</b>
+<b class="fc">&nbsp;					res |= (m_bitmap[iStart + scanLineSize * iysrc1 + divix2] &gt;&gt; modix2) &amp; 3;</b>
+<b class="fc">&nbsp;					res |= (m_bitmap[iStart + scanLineSize * iysrc2 + divix1] &gt;&gt; modix1) &amp; 3;</b>
+<b class="fc">&nbsp;					res |= (m_bitmap[iStart + scanLineSize * iysrc2 + divix2] &gt;&gt; modix2) &amp; 3;</b>
+<b class="fc">&nbsp;					int divixDst = ix &gt;&gt; 4;</b>
+<b class="fc">&nbsp;					int modixDst = (ix &amp; 15) * 2;</b>
+<b class="fc">&nbsp;					m_bitmap[iStartNext + scanLineSizeNext * iy + divixDst] |= res &lt;&lt; modixDst;</b>
+&nbsp;				}
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			width = widthNext;</b>
+<b class="fc">&nbsp;			scanLineSize = scanLineSizeNext;</b>
+<b class="fc">&nbsp;			iStart = iStartNext;</b>
+<b class="fc">&nbsp;			widthNext = width / 2;</b>
+<b class="fc">&nbsp;			scanLineSizeNext = (widthNext * 2 + 31) / 32;</b>
+<b class="fc">&nbsp;			iStartNext = iStart + scanLineSize * width;</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public HitType queryPointInGeometry(double x, double y) {
+<b class="fc">&nbsp;		if (!m_geomEnv.contains(x, y))</b>
+<b class="fc">&nbsp;			return HitType.Outside;</b>
+&nbsp;		
+<b class="fc">&nbsp;		int ix = worldToPixX(x);</b>
+<b class="fc">&nbsp;		int iy = worldToPixY(y);</b>
+<b class="fc">&nbsp;		if (ix &lt; 0 || ix &gt;= m_width || iy &lt; 0 || iy &gt;= m_width)</b>
+<b class="nc">&nbsp;			return HitType.Outside;</b>
+<b class="fc">&nbsp;		int divix = ix &gt;&gt; 4;</b>
+<b class="fc">&nbsp;		int modix = (ix &amp; 15) * 2;</b>
+<b class="fc">&nbsp;		int res = (m_bitmap[m_scanLineSize * iy + divix] &gt;&gt; modix) &amp; 3;</b>
+<b class="fc">&nbsp;		if (res == 0)</b>
+<b class="fc">&nbsp;			return HitType.Outside;</b>
+<b class="fc">&nbsp;		else if (res == 1)</b>
+<b class="fc">&nbsp;			return HitType.Inside;</b>
+&nbsp;		else
+<b class="fc">&nbsp;			return HitType.Border;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public HitType queryEnvelopeInGeometry(Envelope2D env) {
+<b class="fc">&nbsp;		if (!env.intersect(m_geomEnv))</b>
+<b class="nc">&nbsp;			return HitType.Outside;</b>
+&nbsp;		
+<b class="fc">&nbsp;		int ixmin = worldToPixX(env.xmin);</b>
+<b class="fc">&nbsp;		int ixmax = worldToPixX(env.xmax);</b>
+<b class="fc">&nbsp;		int iymin = worldToPixY(env.ymin);</b>
+<b class="fc">&nbsp;		int iymax = worldToPixY(env.ymax);</b>
+<b class="fc">&nbsp;		if (ixmin &lt; 0)</b>
+<b class="nc">&nbsp;			ixmin = 0;</b>
+<b class="fc">&nbsp;		if (iymin &lt; 0)</b>
+<b class="nc">&nbsp;			iymin = 0;</b>
+<b class="fc">&nbsp;		if (ixmax &gt;= m_width)</b>
+<b class="nc">&nbsp;			ixmax = m_width - 1;</b>
+<b class="fc">&nbsp;		if (iymax &gt;= m_width)</b>
+<b class="nc">&nbsp;			iymax = m_width - 1;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (ixmin &gt; ixmax || iymin &gt; iymax)</b>
+<b class="nc">&nbsp;			return HitType.Outside;</b>
+&nbsp;
+<b class="fc">&nbsp;		int area = Math.max(ixmax - ixmin, 1) * Math.max(iymax - iymin, 1);</b>
+<b class="fc">&nbsp;		int iStart = 0;</b>
+<b class="fc">&nbsp;		int scanLineSize = m_scanLineSize;</b>
+<b class="fc">&nbsp;		int width = m_width;</b>
+<b class="fc">&nbsp;		int res = 0;</b>
+<b class="fc">&nbsp;		while (true) {</b>
+<b class="fc">&nbsp;			if (area &lt; 32 || width &lt; 16) {</b>
+<b class="fc">&nbsp;				for (int iy = iymin; iy &lt;= iymax; iy++) {</b>
+<b class="fc">&nbsp;					for (int ix = ixmin; ix &lt;= ixmax; ix++) {</b>
+<b class="fc">&nbsp;						int divix = ix &gt;&gt; 4;</b>
+<b class="fc">&nbsp;						int modix = (ix &amp; 15) * 2;</b>
+<b class="fc">&nbsp;						res = (m_bitmap[iStart + scanLineSize * iy + divix] &gt;&gt; modix) &amp; 3; // read</b>
+&nbsp;						// two
+&nbsp;						// bit
+&nbsp;						// color.
+<b class="fc">&nbsp;						if (res &gt; 1)</b>
+<b class="fc">&nbsp;							return HitType.Border;</b>
+&nbsp;					}
+&nbsp;				}
+&nbsp;
+<b class="fc">&nbsp;				if (res == 0)</b>
+<b class="fc">&nbsp;					return HitType.Outside;</b>
+<b class="fc">&nbsp;				else if (res == 1)</b>
+<b class="fc">&nbsp;					return HitType.Inside;</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			iStart += scanLineSize * width;</b>
+<b class="fc">&nbsp;			width /= 2;</b>
+<b class="fc">&nbsp;			scanLineSize = (width * 2 + 31) / 32;</b>
+<b class="fc">&nbsp;			ixmin /= 2;</b>
+<b class="fc">&nbsp;			iymin /= 2;</b>
+<b class="fc">&nbsp;			ixmax /= 2;</b>
+<b class="fc">&nbsp;			iymax /= 2;</b>
+<b class="fc">&nbsp;			area = Math.max(ixmax - ixmin, 1) * Math.max(iymax - iymin, 1);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public double getToleranceXY() {
+<b class="fc">&nbsp;		return m_toleranceXY;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public int getRasterSize() {
+<b class="fc">&nbsp;		return m_width * m_scanLineSize;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public boolean dbgSaveToBitmap(String fileName) {
+&nbsp;		try {
+<b class="nc">&nbsp;			FileOutputStream outfile = new FileOutputStream(fileName);</b>
+&nbsp;
+<b class="nc">&nbsp;			int height = m_width;</b>
+<b class="nc">&nbsp;			int width = m_width;</b>
+<b class="nc">&nbsp;			int sz = 14 + 40 + 4 * m_width * height;</b>
+&nbsp;			// Write the BITMAPFILEHEADER
+<b class="nc">&nbsp;			ByteBuffer byteBuffer = ByteBuffer.allocate(sz);</b>
+<b class="nc">&nbsp;			byteBuffer.order(ByteOrder.LITTLE_ENDIAN);</b>
+&nbsp;			// byteBuffer.put((byte) &#39;M&#39;);
+<b class="nc">&nbsp;			byteBuffer.put((byte) 66);</b>
+<b class="nc">&nbsp;			byteBuffer.put((byte) 77);</b>
+&nbsp;			// fwrite(&quot;BM&quot;, 1, 2, f); //bfType
+<b class="nc">&nbsp;			byteBuffer.putInt(sz);</b>
+&nbsp;			// fwrite(&amp;sz, 1, 4, f);//bfSize
+<b class="nc">&nbsp;			short zero16 = 0;</b>
+<b class="nc">&nbsp;			byteBuffer.putShort(zero16);</b>
+&nbsp;			// fwrite(&amp;zero16, 1, 2, f);//bfReserved1
+<b class="nc">&nbsp;			byteBuffer.putShort(zero16);</b>
+&nbsp;			// fwrite(&amp;zero16, 1, 2, f);//bfReserved2
+<b class="nc">&nbsp;			int offset = 14 + 40;</b>
+<b class="nc">&nbsp;			byteBuffer.putInt(offset);</b>
+&nbsp;			// fwrite(&amp;offset, 1, 4, f);//bfOffBits
+&nbsp;
+&nbsp;			// Write the BITMAPINFOHEADER
+<b class="nc">&nbsp;			int biSize = 40;</b>
+<b class="nc">&nbsp;			int biWidth = width;</b>
+<b class="nc">&nbsp;			int biHeight = -height;</b>
+<b class="nc">&nbsp;			short biPlanes = 1;</b>
+<b class="nc">&nbsp;			short biBitCount = 32;</b>
+<b class="nc">&nbsp;			int biCompression = 0;</b>
+<b class="nc">&nbsp;			int biSizeImage = 4 * width * height;</b>
+<b class="nc">&nbsp;			int biXPelsPerMeter = 0;</b>
+<b class="nc">&nbsp;			int biYPelsPerMeter = 0;</b>
+<b class="nc">&nbsp;			int biClrUsed = 0;</b>
+<b class="nc">&nbsp;			int biClrImportant = 0;</b>
+<b class="nc">&nbsp;			byteBuffer.putInt(biSize);</b>
+<b class="nc">&nbsp;			byteBuffer.putInt(biWidth);</b>
+<b class="nc">&nbsp;			byteBuffer.putInt(biHeight);</b>
+<b class="nc">&nbsp;			byteBuffer.putShort(biPlanes);</b>
+<b class="nc">&nbsp;			byteBuffer.putShort(biBitCount);</b>
+<b class="nc">&nbsp;			byteBuffer.putInt(biCompression);</b>
+<b class="nc">&nbsp;			byteBuffer.putInt(biSizeImage);</b>
+<b class="nc">&nbsp;			byteBuffer.putInt(biXPelsPerMeter);</b>
+<b class="nc">&nbsp;			byteBuffer.putInt(biYPelsPerMeter);</b>
+<b class="nc">&nbsp;			byteBuffer.putInt(biClrUsed);</b>
+<b class="nc">&nbsp;			byteBuffer.putInt(biClrImportant);</b>
+&nbsp;
+<b class="nc">&nbsp;			int colors[] = { 0xFFFFFFFF, 0xFF000000, 0xFFFF0000, 0xFF00FF00 };</b>
+&nbsp;			// int32_t* rgb4 = (int32_t*)malloc(biSizeImage);
+<b class="nc">&nbsp;			for (int y = 0; y &lt; height; y++) {</b>
+<b class="nc">&nbsp;				int scanlineIn = y * ((width * 2 + 31) / 32);</b>
+&nbsp;
+<b class="nc">&nbsp;				for (int x = 0; x &lt; width; x++) {</b>
+<b class="nc">&nbsp;					int res = (m_bitmap[scanlineIn + (x &gt;&gt; 4)] &gt;&gt; ((x &amp; 15) * 2)) &amp; 3;</b>
+<b class="nc">&nbsp;					byteBuffer.putInt(colors[res]);</b>
+&nbsp;				}
+&nbsp;			}
+&nbsp;
+<b class="nc">&nbsp;			byte[] b = byteBuffer.array();</b>
+<b class="nc">&nbsp;			outfile.write(b);</b>
+<b class="nc">&nbsp;			outfile.close();</b>
+<b class="nc">&nbsp;			return true;</b>
+<b class="nc">&nbsp;		} catch (IOException ex) {</b>
+<b class="nc">&nbsp;			return false;</b>
+&nbsp;
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public long estimateMemorySize()
+&nbsp;	{
+<b class="fc">&nbsp;		return SIZE_OF_RASTERIZED_GEOMETRY_2D_IMPL +</b>
+<b class="fc">&nbsp;				(m_geomEnv != null ? m_geomEnv.estimateMemorySize() : 0) +</b>
+<b class="fc">&nbsp;				(m_transform != null ? m_transform.estimateMemorySize(): 0) +</b>
+<b class="fc">&nbsp;				(m_rasterizer != null ? m_rasterizer.estimateMemorySize(): 0) +</b>
+<b class="fc">&nbsp;				(m_callback != null ? m_callback.estimateMemorySize(): 0);</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-02-21 15:02</div>
+</div>
+</body>
+</html>

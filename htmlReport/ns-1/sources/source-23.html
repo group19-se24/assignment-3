@@ -1,0 +1,1012 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > GeometryEngine</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.esri.core.geometry</a>
+</div>
+
+<h1>Coverage Summary for Class: GeometryEngine (com.esri.core.geometry)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">GeometryEngine</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    70,7%
+  </span>
+  <span class="absValue">
+    (29/41)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    61,8%
+  </span>
+  <span class="absValue">
+    (123/199)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; Copyright 1995-2018 Esri
+&nbsp;
+&nbsp;   Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp;   you may not use this file except in compliance with the License.
+&nbsp;   You may obtain a copy of the License at
+&nbsp;
+&nbsp;       http://www.apache.org/licenses/LICENSE-2.0
+&nbsp;
+&nbsp;   Unless required by applicable law or agreed to in writing, software
+&nbsp;   distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp;   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp;   See the License for the specific language governing permissions and
+&nbsp;   limitations under the License.
+&nbsp;
+&nbsp; For additional information, contact:
+&nbsp; Environmental Systems Research Institute, Inc.
+&nbsp; Attn: Contracts Dept
+&nbsp; 380 New York Street
+&nbsp; Redlands, California, USA 92373
+&nbsp;
+&nbsp; email: contracts@esri.com
+&nbsp; */
+&nbsp;
+&nbsp;package com.esri.core.geometry;
+&nbsp;
+&nbsp;import java.io.IOException;
+&nbsp;import java.nio.ByteBuffer;
+&nbsp;import java.nio.ByteOrder;
+&nbsp;import java.util.ArrayList;
+&nbsp;
+&nbsp;import com.fasterxml.jackson.core.JsonParser;
+&nbsp;
+&nbsp;/**
+&nbsp; * Provides services that operate on geometry instances. The methods of GeometryEngine class call corresponding OperatorXXX classes.
+&nbsp; * Consider using OperatorXXX classes directly as they often provide more functionality and better performance. For example, some Operators accept
+&nbsp; * GeometryCursor class that could be implemented to wrap a feature cursor and make it feed geometries directly into an Operator.
+&nbsp; * Also, some operators provide a way to accelerate an operation by using Operator.accelerateGeometry method. 
+&nbsp; */
+<b class="nc">&nbsp;public class GeometryEngine {</b>
+&nbsp;
+<b class="fc">&nbsp;	private static OperatorFactoryLocal factory = OperatorFactoryLocal</b>
+<b class="fc">&nbsp;			.getInstance();</b>
+&nbsp;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Imports the MapGeometry from its JSON representation. M and Z values are
+&nbsp;	 * not imported from JSON representation.
+&nbsp;	 * 
+&nbsp;	 * See OperatorImportFromJson.
+&nbsp;	 * 
+&nbsp;	 * @param json
+&nbsp;	 *            The JSON representation of the geometry (with spatial
+&nbsp;	 *            reference).
+&nbsp;	 * @return The MapGeometry instance containing the imported geometry and its
+&nbsp;	 *         spatial reference.
+&nbsp;	 */
+&nbsp;	public static MapGeometry jsonToGeometry(JsonParser json) {
+<b class="fc">&nbsp;		MapGeometry geom = OperatorImportFromJson.local().execute(Geometry.Type.Unknown, new JsonParserReader(json));</b>
+<b class="fc">&nbsp;		return geom;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Imports the MapGeometry from its JSON representation. M and Z values are
+&nbsp;	 * not imported from JSON representation.
+&nbsp;	 * 
+&nbsp;	 * See OperatorImportFromJson.
+&nbsp;	 * 
+&nbsp;	 * @param json
+&nbsp;	 *            The JSON representation of the geometry (with spatial
+&nbsp;	 *            reference).
+&nbsp;	 * @return The MapGeometry instance containing the imported geometry and its
+&nbsp;	 *         spatial reference.
+&nbsp;	 */
+&nbsp;	public static MapGeometry jsonToGeometry(JsonReader json) {
+<b class="fc">&nbsp;		MapGeometry geom = OperatorImportFromJson.local().execute(Geometry.Type.Unknown, json);</b>
+<b class="fc">&nbsp;		return geom;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Imports the MapGeometry from its JSON representation. M and Z values are
+&nbsp;	 * not imported from JSON representation.
+&nbsp;	 * 
+&nbsp;	 * See OperatorImportFromJson.
+&nbsp;	 * 
+&nbsp;	 * @param json
+&nbsp;	 *            The JSON representation of the geometry (with spatial
+&nbsp;	 *            reference).
+&nbsp;	 * @return The MapGeometry instance containing the imported geometry and its
+&nbsp;	 *         spatial reference.
+&nbsp;	 */
+&nbsp;	public static MapGeometry jsonToGeometry(String json) {
+<b class="fc">&nbsp;		MapGeometry geom = OperatorImportFromJson.local().execute(Geometry.Type.Unknown, json);</b>
+<b class="fc">&nbsp;		return geom;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Exports the specified geometry instance to it&#39;s JSON representation.
+&nbsp;	 * 
+&nbsp;	 * See OperatorExportToJson.
+&nbsp;	 * 
+&nbsp;	 * @see GeometryEngine#geometryToJson(SpatialReference spatialiReference,
+&nbsp;	 *      Geometry geometry)
+&nbsp;	 * @param wkid
+&nbsp;	 *            The spatial reference Well Known ID to be used for the JSON
+&nbsp;	 *            representation.
+&nbsp;	 * @param geometry
+&nbsp;	 *            The geometry to be exported to JSON.
+&nbsp;	 * @return The JSON representation of the specified Geometry.
+&nbsp;	 */
+&nbsp;	public static String geometryToJson(int wkid, Geometry geometry) {
+<b class="fc">&nbsp;		return GeometryEngine.geometryToJson(</b>
+<b class="fc">&nbsp;				wkid &gt; 0 ? SpatialReference.create(wkid) : null, geometry);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Exports the specified geometry instance to it&#39;s JSON representation. M
+&nbsp;	 * and Z values are not imported from JSON representation.
+&nbsp;	 * 
+&nbsp;	 * See OperatorExportToJson.
+&nbsp;	 * 
+&nbsp;	 * @param spatialReference
+&nbsp;	 *            The spatial reference of associated object.
+&nbsp;	 * @param geometry
+&nbsp;	 *            The geometry.
+&nbsp;	 * @return The JSON representation of the specified geometry.
+&nbsp;	 */
+&nbsp;	public static String geometryToJson(SpatialReference spatialReference,
+&nbsp;			Geometry geometry) {
+<b class="fc">&nbsp;		OperatorExportToJson exporter = (OperatorExportToJson) factory</b>
+<b class="fc">&nbsp;				.getOperator(Operator.Type.ExportToJson);</b>
+&nbsp;
+<b class="fc">&nbsp;		return exporter.execute(spatialReference, geometry);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;    public static String geometryToGeoJson(Geometry geometry) {
+<b class="fc">&nbsp;        OperatorExportToGeoJson exporter = (OperatorExportToGeoJson) factory</b>
+<b class="fc">&nbsp;                .getOperator(Operator.Type.ExportToGeoJson);</b>
+&nbsp;
+<b class="fc">&nbsp;        return exporter.execute(geometry);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Imports the MapGeometry from its JSON representation. M and Z values are
+&nbsp;	 * not imported from JSON representation.
+&nbsp;	 * 
+&nbsp;	 * See OperatorImportFromJson.
+&nbsp;	 * 
+&nbsp;	 * @param json
+&nbsp;	 *            The JSON representation of the geometry (with spatial
+&nbsp;	 *            reference).
+&nbsp;	 * @return The MapGeometry instance containing the imported geometry and its
+&nbsp;	 *         spatial reference.
+&nbsp;	 */
+&nbsp;	public static MapGeometry geoJsonToGeometry(String json, int importFlags, Geometry.Type type) {
+<b class="fc">&nbsp;		MapGeometry geom = OperatorImportFromGeoJson.local().execute(importFlags, type, json, null);</b>
+<b class="fc">&nbsp;		return geom;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Exports the specified geometry instance to its GeoJSON representation.
+&nbsp;	 *
+&nbsp;	 * See OperatorExportToGeoJson.
+&nbsp;	 *
+&nbsp;	 * @see GeometryEngine#geometryToGeoJson(SpatialReference spatialReference,
+&nbsp;	 *      Geometry geometry)
+&nbsp;	 *
+&nbsp;	 * @param wkid
+&nbsp;	 *            The spatial reference Well Known ID to be used for the GeoJSON
+&nbsp;	 *            representation.
+&nbsp;	 * @param geometry
+&nbsp;	 *            The geometry to be exported to GeoJSON.
+&nbsp;	 * @return The GeoJSON representation of the specified geometry.
+&nbsp;	 */
+&nbsp;	public static String geometryToGeoJson(int wkid, Geometry geometry) {
+<b class="nc">&nbsp;		return GeometryEngine.geometryToGeoJson(wkid &gt; 0 ? SpatialReference.create(wkid) : null, geometry);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Exports the specified geometry instance to it&#39;s JSON representation.
+&nbsp;	 *
+&nbsp;	 * See OperatorImportFromGeoJson.
+&nbsp;	 *
+&nbsp;	 * @param spatialReference
+&nbsp;	 *            The spatial reference of associated object.
+&nbsp;	 * @param geometry
+&nbsp;	 *            The geometry.
+&nbsp;	 * @return The GeoJSON representation of the specified geometry.
+&nbsp;	 */
+&nbsp;	public static String geometryToGeoJson(SpatialReference spatialReference, Geometry geometry) {
+<b class="fc">&nbsp;		OperatorExportToGeoJson exporter = (OperatorExportToGeoJson) factory.getOperator(Operator.Type.ExportToGeoJson);</b>
+&nbsp;
+<b class="fc">&nbsp;		return exporter.execute(spatialReference, geometry);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Imports geometry from the ESRI shape file format.
+&nbsp;	 * 
+&nbsp;	 * See OperatorImportFromESRIShape.
+&nbsp;	 * 
+&nbsp;	 * @param esriShapeBuffer
+&nbsp;	 *            The buffer containing geometry in the ESRI shape file format.
+&nbsp;	 * @param geometryType
+&nbsp;	 *            The required type of the Geometry to be imported. Use
+&nbsp;	 *            Geometry.Type.Unknown if the geometry type needs to be
+&nbsp;	 *            determined from the buffer content.
+&nbsp;	 * @return The geometry or null if the buffer contains null shape.
+&nbsp;	 * @throws GeometryException
+&nbsp;	 *             when the geometryType is not Geometry.Type.Unknown and the
+&nbsp;	 *             buffer contains geometry that cannot be converted to the
+&nbsp;	 *             given geometryType. or the buffer is corrupt. Another
+&nbsp;	 *             exception possible is IllegalArgumentsException.
+&nbsp;	 */
+&nbsp;	public static Geometry geometryFromEsriShape(byte[] esriShapeBuffer,
+&nbsp;			Geometry.Type geometryType) {
+<b class="fc">&nbsp;		OperatorImportFromESRIShape op = (OperatorImportFromESRIShape) factory</b>
+<b class="fc">&nbsp;				.getOperator(Operator.Type.ImportFromESRIShape);</b>
+<b class="fc">&nbsp;		return op</b>
+<b class="fc">&nbsp;				.execute(</b>
+<b class="fc">&nbsp;						ShapeImportFlags.ShapeImportNonTrusted,</b>
+<b class="fc">&nbsp;						geometryType,</b>
+<b class="fc">&nbsp;						ByteBuffer.wrap(esriShapeBuffer).order(</b>
+<b class="fc">&nbsp;								ByteOrder.LITTLE_ENDIAN));</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Exports geometry to the ESRI shape file format.
+&nbsp;	 * 
+&nbsp;	 * See OperatorExportToESRIShape.
+&nbsp;	 * 
+&nbsp;	 * @param geometry
+&nbsp;	 *            The geometry to export. (null value is not allowed)
+&nbsp;	 * @return Array containing the exported ESRI shape file.
+&nbsp;	 */
+&nbsp;	public static byte[] geometryToEsriShape(Geometry geometry) {
+<b class="fc">&nbsp;		if (geometry == null)</b>
+<b class="nc">&nbsp;			throw new IllegalArgumentException();</b>
+<b class="fc">&nbsp;		OperatorExportToESRIShape op = (OperatorExportToESRIShape) factory</b>
+<b class="fc">&nbsp;				.getOperator(Operator.Type.ExportToESRIShape);</b>
+<b class="fc">&nbsp;		return op.execute(0, geometry).array();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Imports a geometry from a WKT string.
+&nbsp;	 * 
+&nbsp;	 * See OperatorImportFromWkt.
+&nbsp;	 * 
+&nbsp;	 * @param wkt The string containing the geometry in WKT format.
+&nbsp;	 * @param importFlags Use the {@link WktImportFlags} interface.
+&nbsp;	 * @param geometryType The required type of the Geometry to be imported. Use Geometry.Type.Unknown if the geometry type needs to be determined from the WKT context.
+&nbsp;	 * @return The geometry.
+&nbsp;	 * @throws GeometryException when the geometryType is not Geometry.Type.Unknown and the WKT contains a geometry that cannot be converted to the given geometryType.
+&nbsp;	 * @throws IllegalArgumentException if an error is found while parsing the WKT string.
+&nbsp;	 */
+&nbsp;	public static Geometry geometryFromWkt(String wkt, int importFlags,
+&nbsp;			Geometry.Type geometryType) {
+<b class="fc">&nbsp;		OperatorImportFromWkt op = (OperatorImportFromWkt) factory</b>
+<b class="fc">&nbsp;				.getOperator(Operator.Type.ImportFromWkt);</b>
+<b class="fc">&nbsp;		return op.execute(importFlags, geometryType, wkt, null);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Exports a geometry to a string in WKT format.
+&nbsp;	 * 
+&nbsp;	 * See OperatorExportToWkt.
+&nbsp;	 * 
+&nbsp;	 * @param geometry The geometry to export. (null value is not allowed)
+&nbsp;	 * @param exportFlags Use the {@link WktExportFlags} interface.
+&nbsp;	 * @return A String containing the exported geometry in WKT format.
+&nbsp;	 */
+&nbsp;	public static String geometryToWkt(Geometry geometry, int exportFlags) {
+<b class="fc">&nbsp;		OperatorExportToWkt op = (OperatorExportToWkt) factory</b>
+<b class="fc">&nbsp;				.getOperator(Operator.Type.ExportToWkt);</b>
+<b class="fc">&nbsp;		return op.execute(exportFlags, geometry, null);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Constructs a new geometry by union an array of geometries. All inputs
+&nbsp;	 * must be of the same type of geometries and share one spatial reference.
+&nbsp;	 * 
+&nbsp;	 * See OperatorUnion.
+&nbsp;	 * 
+&nbsp;	 * @param geometries
+&nbsp;	 *            The geometries to union.
+&nbsp;	 * @param spatialReference
+&nbsp;	 *            The spatial reference of the geometries.
+&nbsp;	 * @return The geometry object representing the resultant union.
+&nbsp;	 */
+&nbsp;	public static Geometry union(Geometry[] geometries,
+&nbsp;			SpatialReference spatialReference) {
+<b class="nc">&nbsp;		OperatorUnion op = (OperatorUnion) factory</b>
+<b class="nc">&nbsp;				.getOperator(Operator.Type.Union);</b>
+&nbsp;
+<b class="nc">&nbsp;		SimpleGeometryCursor inputGeometries = new SimpleGeometryCursor(</b>
+<b class="nc">&nbsp;				geometries);</b>
+<b class="nc">&nbsp;		GeometryCursor result = op.execute(inputGeometries, spatialReference,</b>
+<b class="nc">&nbsp;				null);</b>
+<b class="nc">&nbsp;		return result.next();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Creates the difference of two geometries. The dimension of geometry2 has
+&nbsp;	 * to be equal to or greater than that of geometry1.
+&nbsp;	 * 
+&nbsp;	 * See OperatorDifference.
+&nbsp;	 * 
+&nbsp;	 * @param geometry1
+&nbsp;	 *            The geometry being subtracted.
+&nbsp;	 * @param substractor
+&nbsp;	 *            The geometry object to subtract from.
+&nbsp;	 * @param spatialReference
+&nbsp;	 *            The spatial reference of the geometries.
+&nbsp;	 * @return The geometry of the differences.
+&nbsp;	 */
+&nbsp;	public static Geometry difference(Geometry geometry1, Geometry substractor,
+&nbsp;			SpatialReference spatialReference) {
+<b class="fc">&nbsp;		OperatorDifference op = (OperatorDifference) factory</b>
+<b class="fc">&nbsp;				.getOperator(Operator.Type.Difference);</b>
+<b class="fc">&nbsp;		Geometry result = op.execute(geometry1, substractor, spatialReference,</b>
+<b class="fc">&nbsp;				null);</b>
+<b class="fc">&nbsp;		return result;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Creates the symmetric difference of two geometries.
+&nbsp;	 * 
+&nbsp;	 * See OperatorSymmetricDifference.
+&nbsp;	 * 
+&nbsp;	 * @param leftGeometry
+&nbsp;	 *            is one of the Geometry instances in the XOR operation.
+&nbsp;	 * @param rightGeometry
+&nbsp;	 *            is one of the Geometry instances in the XOR operation.
+&nbsp;	 * @param spatialReference
+&nbsp;	 *            The spatial reference of the geometries.
+&nbsp;	 * @return Returns the result of the symmetric difference.
+&nbsp;	 */
+&nbsp;	public static Geometry symmetricDifference(Geometry leftGeometry,
+&nbsp;			Geometry rightGeometry, SpatialReference spatialReference) {
+<b class="fc">&nbsp;		OperatorSymmetricDifference op = (OperatorSymmetricDifference) factory</b>
+<b class="fc">&nbsp;				.getOperator(Operator.Type.SymmetricDifference);</b>
+<b class="fc">&nbsp;		Geometry result = op.execute(leftGeometry, rightGeometry,</b>
+<b class="fc">&nbsp;				spatialReference, null);</b>
+<b class="fc">&nbsp;		return result;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Indicates if two geometries are equal.
+&nbsp;	 * 
+&nbsp;	 * See OperatorEquals.
+&nbsp;	 * 
+&nbsp;	 * @param geometry1
+&nbsp;	 *            Geometry.
+&nbsp;	 * @param geometry2
+&nbsp;	 *            Geometry.
+&nbsp;	 * @param spatialReference
+&nbsp;	 *            The spatial reference of the geometries.
+&nbsp;	 * @return TRUE if both geometry objects are equal.
+&nbsp;	 */
+&nbsp;	public static boolean equals(Geometry geometry1, Geometry geometry2,
+&nbsp;			SpatialReference spatialReference) {
+<b class="fc">&nbsp;		OperatorEquals op = (OperatorEquals) factory</b>
+<b class="fc">&nbsp;				.getOperator(Operator.Type.Equals);</b>
+<b class="fc">&nbsp;		boolean result = op.execute(geometry1, geometry2, spatialReference,</b>
+<b class="fc">&nbsp;				null);</b>
+<b class="fc">&nbsp;		return result;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * See OperatorDisjoint.
+&nbsp;	 * 
+&nbsp;	 */
+&nbsp;	public static boolean disjoint(Geometry geometry1, Geometry geometry2,
+&nbsp;			SpatialReference spatialReference) {
+<b class="fc">&nbsp;		OperatorDisjoint op = (OperatorDisjoint) factory</b>
+<b class="fc">&nbsp;				.getOperator(Operator.Type.Disjoint);</b>
+<b class="fc">&nbsp;		boolean result = op.execute(geometry1, geometry2, spatialReference,</b>
+<b class="fc">&nbsp;				null);</b>
+<b class="fc">&nbsp;		return result;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Constructs the set-theoretic intersection between an array of geometries
+&nbsp;	 * and another geometry.
+&nbsp;	 * 
+&nbsp;	 * See OperatorIntersection (also for dimension specific intersection).
+&nbsp;	 * 
+&nbsp;	 * @param inputGeometries
+&nbsp;	 *            An array of geometry objects.
+&nbsp;	 * @param geometry
+&nbsp;	 *            The geometry object.
+&nbsp;	 * @return Any array of geometry objects showing the intersection.
+&nbsp;	 */
+&nbsp;	static Geometry[] intersect(Geometry[] inputGeometries, Geometry geometry,
+&nbsp;			SpatialReference spatialReference) {
+<b class="nc">&nbsp;		OperatorIntersection op = (OperatorIntersection) factory</b>
+<b class="nc">&nbsp;				.getOperator(Operator.Type.Intersection);</b>
+<b class="nc">&nbsp;		SimpleGeometryCursor inputGeometriesCursor = new SimpleGeometryCursor(</b>
+<b class="nc">&nbsp;				inputGeometries);</b>
+<b class="nc">&nbsp;		SimpleGeometryCursor intersectorCursor = new SimpleGeometryCursor(</b>
+<b class="nc">&nbsp;				geometry);</b>
+<b class="nc">&nbsp;		GeometryCursor result = op.execute(inputGeometriesCursor,</b>
+<b class="nc">&nbsp;				intersectorCursor, spatialReference, null);</b>
+&nbsp;
+<b class="nc">&nbsp;		ArrayList&lt;Geometry&gt; resultGeoms = new ArrayList&lt;Geometry&gt;();</b>
+&nbsp;		Geometry g;
+<b class="nc">&nbsp;		while ((g = result.next()) != null) {</b>
+<b class="nc">&nbsp;			resultGeoms.add(g);</b>
+&nbsp;		}
+&nbsp;
+<b class="nc">&nbsp;		Geometry[] resultarr = resultGeoms.toArray(new Geometry[0]);</b>
+<b class="nc">&nbsp;		return resultarr;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Creates a geometry through intersection between two geometries.
+&nbsp;	 * 
+&nbsp;	 * See OperatorIntersection.
+&nbsp;	 * 
+&nbsp;	 * @param geometry1
+&nbsp;	 *            The first geometry.
+&nbsp;	 * @param intersector
+&nbsp;	 *            The geometry to intersect the first geometry.
+&nbsp;	 * @param spatialReference
+&nbsp;	 *            The spatial reference of the geometries.
+&nbsp;	 * @return The geometry created through intersection.
+&nbsp;	 */
+&nbsp;	public static Geometry intersect(Geometry geometry1, Geometry intersector,
+&nbsp;			SpatialReference spatialReference) {
+<b class="fc">&nbsp;		OperatorIntersection op = (OperatorIntersection) factory</b>
+<b class="fc">&nbsp;				.getOperator(Operator.Type.Intersection);</b>
+<b class="fc">&nbsp;		Geometry result = op.execute(geometry1, intersector, spatialReference,</b>
+<b class="fc">&nbsp;				null);</b>
+<b class="fc">&nbsp;		return result;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Indicates if one geometry is within another geometry.
+&nbsp;	 * 
+&nbsp;	 * See OperatorWithin.
+&nbsp;	 * 
+&nbsp;	 * @param geometry1
+&nbsp;	 *            The base geometry that is tested for within relationship to
+&nbsp;	 *            the other geometry.
+&nbsp;	 * @param geometry2
+&nbsp;	 *            The comparison geometry that is tested for the contains
+&nbsp;	 *            relationship to the other geometry.
+&nbsp;	 * @param spatialReference
+&nbsp;	 *            The spatial reference of the geometries.
+&nbsp;	 * @return TRUE if the first geometry is within the other geometry.
+&nbsp;	 */
+&nbsp;	public static boolean within(Geometry geometry1, Geometry geometry2,
+&nbsp;			SpatialReference spatialReference) {
+<b class="nc">&nbsp;		OperatorWithin op = (OperatorWithin) factory</b>
+<b class="nc">&nbsp;				.getOperator(Operator.Type.Within);</b>
+<b class="nc">&nbsp;		boolean result = op.execute(geometry1, geometry2, spatialReference,</b>
+<b class="nc">&nbsp;				null);</b>
+<b class="nc">&nbsp;		return result;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Indicates if one geometry contains another geometry.
+&nbsp;	 * 
+&nbsp;	 * See OperatorContains.
+&nbsp;	 * 
+&nbsp;	 * @param geometry1
+&nbsp;	 *            The geometry that is tested for the contains relationship to
+&nbsp;	 *            the other geometry..
+&nbsp;	 * @param geometry2
+&nbsp;	 *            The geometry that is tested for within relationship to the
+&nbsp;	 *            other geometry.
+&nbsp;	 * @param spatialReference
+&nbsp;	 *            The spatial reference of the geometries.
+&nbsp;	 * @return TRUE if geometry1 contains geometry2.
+&nbsp;	 */
+&nbsp;	public static boolean contains(Geometry geometry1, Geometry geometry2,
+&nbsp;			SpatialReference spatialReference) {
+<b class="fc">&nbsp;		OperatorContains op = (OperatorContains) factory</b>
+<b class="fc">&nbsp;				.getOperator(Operator.Type.Contains);</b>
+<b class="fc">&nbsp;		boolean result = op.execute(geometry1, geometry2, spatialReference,</b>
+<b class="fc">&nbsp;				null);</b>
+<b class="fc">&nbsp;		return result;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Indicates if one geometry crosses another geometry.
+&nbsp;	 * 
+&nbsp;	 * See OperatorCrosses.
+&nbsp;	 * 
+&nbsp;	 * @param geometry1
+&nbsp;	 *            The geometry to cross.
+&nbsp;	 * @param geometry2
+&nbsp;	 *            The geometry being crossed.
+&nbsp;	 * @param spatialReference
+&nbsp;	 *            The spatial reference of the geometries.
+&nbsp;	 * @return TRUE if geometry1 crosses geometry2.
+&nbsp;	 */
+&nbsp;	public static boolean crosses(Geometry geometry1, Geometry geometry2,
+&nbsp;			SpatialReference spatialReference) {
+<b class="nc">&nbsp;		OperatorCrosses op = (OperatorCrosses) factory</b>
+<b class="nc">&nbsp;				.getOperator(Operator.Type.Crosses);</b>
+<b class="nc">&nbsp;		boolean result = op.execute(geometry1, geometry2, spatialReference,</b>
+<b class="nc">&nbsp;				null);</b>
+<b class="nc">&nbsp;		return result;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Indicates if one geometry touches another geometry.
+&nbsp;	 * 
+&nbsp;	 * See OperatorTouches.
+&nbsp;	 * 
+&nbsp;	 * @param geometry1
+&nbsp;	 *            The geometry to touch.
+&nbsp;	 * @param geometry2
+&nbsp;	 *            The geometry to be touched.
+&nbsp;	 * @param spatialReference
+&nbsp;	 *            The spatial reference of the geometries.
+&nbsp;	 * @return TRUE if geometry1 touches geometry2.
+&nbsp;	 */
+&nbsp;	public static boolean touches(Geometry geometry1, Geometry geometry2,
+&nbsp;			SpatialReference spatialReference) {
+<b class="fc">&nbsp;		OperatorTouches op = (OperatorTouches) factory</b>
+<b class="fc">&nbsp;				.getOperator(Operator.Type.Touches);</b>
+<b class="fc">&nbsp;		boolean result = op.execute(geometry1, geometry2, spatialReference,</b>
+<b class="fc">&nbsp;				null);</b>
+<b class="fc">&nbsp;		return result;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Indicates if one geometry overlaps another geometry.
+&nbsp;	 * 
+&nbsp;	 * See OperatorOverlaps.
+&nbsp;	 * 
+&nbsp;	 * @param geometry1
+&nbsp;	 *            The geometry to overlap.
+&nbsp;	 * @param geometry2
+&nbsp;	 *            The geometry to be overlapped.
+&nbsp;	 * @param spatialReference
+&nbsp;	 *            The spatial reference of the geometries.
+&nbsp;	 * @return TRUE if geometry1 overlaps geometry2.
+&nbsp;	 */
+&nbsp;	public static boolean overlaps(Geometry geometry1, Geometry geometry2,
+&nbsp;			SpatialReference spatialReference) {
+<b class="nc">&nbsp;		OperatorOverlaps op = (OperatorOverlaps) factory</b>
+<b class="nc">&nbsp;				.getOperator(Operator.Type.Overlaps);</b>
+<b class="nc">&nbsp;		boolean result = op.execute(geometry1, geometry2, spatialReference,</b>
+<b class="nc">&nbsp;				null);</b>
+<b class="nc">&nbsp;		return result;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Indicates if the given relation holds for the two geometries.
+&nbsp;	 * 
+&nbsp;	 * See OperatorRelate.
+&nbsp;	 * 
+&nbsp;	 * @param geometry1
+&nbsp;	 *            The first geometry for the relation.
+&nbsp;	 * @param geometry2
+&nbsp;	 *            The second geometry for the relation.
+&nbsp;	 * @param spatialReference
+&nbsp;	 *            The spatial reference of the geometries.
+&nbsp;	 * @param relation
+&nbsp;	 *            The DE-9IM relation.
+&nbsp;	 * @return TRUE if the given relation holds between geometry1 and geometry2.
+&nbsp;	 */
+&nbsp;	public static boolean relate(Geometry geometry1, Geometry geometry2,
+&nbsp;			SpatialReference spatialReference, String relation) {
+<b class="fc">&nbsp;		OperatorRelate op = (OperatorRelate) factory</b>
+<b class="fc">&nbsp;				.getOperator(Operator.Type.Relate);</b>
+<b class="fc">&nbsp;		boolean result = op.execute(geometry1, geometry2, spatialReference,</b>
+<b class="fc">&nbsp;				relation, null);</b>
+<b class="fc">&nbsp;		return result;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Calculates the 2D planar distance between two geometries.
+&nbsp;	 * 
+&nbsp;	 * See OperatorDistance.
+&nbsp;	 * 
+&nbsp;	 * @param geometry1
+&nbsp;	 *            Geometry.
+&nbsp;	 * @param geometry2
+&nbsp;	 *            Geometry.
+&nbsp;	 * @param spatialReference
+&nbsp;	 *            The spatial reference of the geometries. This parameter is not
+&nbsp;	 *            used and can be null.
+&nbsp;	 * @return The distance between the two geometries.
+&nbsp;	 */
+&nbsp;	public static double distance(Geometry geometry1, Geometry geometry2,
+&nbsp;			SpatialReference spatialReference) {
+<b class="fc">&nbsp;		OperatorDistance op = (OperatorDistance) factory</b>
+<b class="fc">&nbsp;				.getOperator(Operator.Type.Distance);</b>
+<b class="fc">&nbsp;		double result = op.execute(geometry1, geometry2, null);</b>
+<b class="fc">&nbsp;		return result;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Calculates the clipped geometry from a target geometry using an envelope.
+&nbsp;	 * 
+&nbsp;	 * See OperatorClip.
+&nbsp;	 * 
+&nbsp;	 * @param geometry
+&nbsp;	 *            The geometry to be clipped.
+&nbsp;	 * @param envelope
+&nbsp;	 *            The envelope used to clip.
+&nbsp;	 * @param spatialReference
+&nbsp;	 *            The spatial reference of the geometries.
+&nbsp;	 * @return The geometry created by clipping.
+&nbsp;	 */
+&nbsp;	public static Geometry clip(Geometry geometry, Envelope envelope,
+&nbsp;			SpatialReference spatialReference) {
+<b class="nc">&nbsp;		OperatorClip op = (OperatorClip) factory</b>
+<b class="nc">&nbsp;				.getOperator(Operator.Type.Clip);</b>
+<b class="nc">&nbsp;		Geometry result = op.execute(geometry, Envelope2D.construct(</b>
+<b class="nc">&nbsp;				envelope.getXMin(), envelope.getYMin(), envelope.getXMax(),</b>
+<b class="nc">&nbsp;				envelope.getYMax()), spatialReference, null);</b>
+<b class="nc">&nbsp;		return result;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Calculates the cut geometry from a target geometry using a polyline. For
+&nbsp;	 * Polylines, all left cuts will be grouped together in the first Geometry,
+&nbsp;	 * Right cuts and coincident cuts are grouped in the second Geometry, and
+&nbsp;	 * each undefined cut, along with any uncut parts, are output as separate
+&nbsp;	 * Polylines. For Polygons, all left cuts are grouped in the first Polygon,
+&nbsp;	 * all right cuts are in the second Polygon, and each undefined cut, along
+&nbsp;	 * with any left-over parts after cutting, are output as a separate Polygon.
+&nbsp;	 * If there were no cuts then the array will be empty. An undefined cut will
+&nbsp;	 * only be produced if a left cut or right cut was produced, and there was a
+&nbsp;	 * part left over after cutting or a cut is bounded to the left and right of
+&nbsp;	 * the cutter.
+&nbsp;	 * 
+&nbsp;	 * See OperatorCut.
+&nbsp;	 * 
+&nbsp;	 * @param cuttee
+&nbsp;	 *            The geometry to be cut.
+&nbsp;	 * @param cutter
+&nbsp;	 *            The polyline to cut the geometry.
+&nbsp;	 * @param spatialReference
+&nbsp;	 *            The spatial reference of the geometries.
+&nbsp;	 * @return An array of geometries created from cutting.
+&nbsp;	 */
+&nbsp;	public static Geometry[] cut(Geometry cuttee, Polyline cutter,
+&nbsp;			SpatialReference spatialReference) {
+<b class="fc">&nbsp;		if (cuttee == null || cutter == null)</b>
+<b class="nc">&nbsp;			return null;</b>
+&nbsp;
+<b class="fc">&nbsp;		OperatorCut op = (OperatorCut) factory.getOperator(Operator.Type.Cut);</b>
+<b class="fc">&nbsp;		GeometryCursor cursor = op.execute(true, cuttee, cutter,</b>
+<b class="fc">&nbsp;				spatialReference, null);</b>
+<b class="fc">&nbsp;		ArrayList&lt;Geometry&gt; cutsList = new ArrayList&lt;Geometry&gt;();</b>
+&nbsp;
+&nbsp;		Geometry geometry;
+<b class="fc">&nbsp;		while ((geometry = cursor.next()) != null) {</b>
+<b class="fc">&nbsp;			if (!geometry.isEmpty()) {</b>
+<b class="fc">&nbsp;				cutsList.add(geometry);</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return cutsList.toArray(new Geometry[0]);</b>
+&nbsp;	}
+&nbsp;	/**
+&nbsp;	 * Calculates a buffer polygon for each geometry at each of the 
+&nbsp;	 * corresponding specified distances.  It is assumed that all geometries have
+&nbsp;	 * the same spatial reference. There is an option to union the 
+&nbsp;	 * returned geometries.
+&nbsp;	 * 
+&nbsp;	 * See OperatorBuffer.
+&nbsp;	 * 
+&nbsp;	 * @param geometries An array of geometries to be buffered.
+&nbsp;	 * @param spatialReference The spatial reference of the geometries.
+&nbsp;	 * @param distances The corresponding distances for the input geometries to be buffered.
+&nbsp;	 * @param toUnionResults TRUE if all geometries buffered at a given distance are to be unioned into a single polygon.
+&nbsp;	 * @return The buffer of the geometries.
+&nbsp;	 */
+&nbsp;	public static Polygon[] buffer(Geometry[] geometries,
+&nbsp;			SpatialReference spatialReference, double[] distances,
+&nbsp;			boolean toUnionResults) {
+&nbsp;		// initially assume distances are in unit of spatial reference
+<b class="nc">&nbsp;		double[] bufferDistances = distances;</b>
+&nbsp;
+<b class="nc">&nbsp;		OperatorBuffer op = (OperatorBuffer) factory</b>
+<b class="nc">&nbsp;				.getOperator(Operator.Type.Buffer);</b>
+&nbsp;
+<b class="nc">&nbsp;		if (toUnionResults) {</b>
+<b class="nc">&nbsp;			SimpleGeometryCursor inputGeometriesCursor = new SimpleGeometryCursor(</b>
+<b class="nc">&nbsp;					geometries);</b>
+<b class="nc">&nbsp;			GeometryCursor result = op.execute(inputGeometriesCursor,</b>
+<b class="nc">&nbsp;					spatialReference, bufferDistances, toUnionResults, null);</b>
+&nbsp;
+<b class="nc">&nbsp;			ArrayList&lt;Polygon&gt; resultGeoms = new ArrayList&lt;Polygon&gt;();</b>
+&nbsp;			Geometry g;
+<b class="nc">&nbsp;			while ((g = result.next()) != null) {</b>
+<b class="nc">&nbsp;				resultGeoms.add((Polygon) g);</b>
+&nbsp;			}
+<b class="nc">&nbsp;			Polygon[] buffers = resultGeoms.toArray(new Polygon[0]);</b>
+<b class="nc">&nbsp;			return buffers;</b>
+&nbsp;		} else {
+<b class="nc">&nbsp;			Polygon[] buffers = new Polygon[geometries.length];</b>
+<b class="nc">&nbsp;			for (int i = 0; i &lt; geometries.length; i++) {</b>
+<b class="nc">&nbsp;				buffers[i] = (Polygon) op.execute(geometries[i],</b>
+<b class="nc">&nbsp;						spatialReference, bufferDistances[i], null);</b>
+&nbsp;			}
+<b class="nc">&nbsp;			return buffers;</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Calculates a buffer polygon of the geometry as specified by the 
+&nbsp;	 * distance input. The buffer is implemented in the xy-plane.
+&nbsp;	 * 
+&nbsp;	 * See OperatorBuffer
+&nbsp;	 * 
+&nbsp;	 * @param geometry Geometry to be buffered.
+&nbsp;	 * @param spatialReference The spatial reference of the geometry.
+&nbsp;	 * @param distance The specified distance for buffer. Same units as the spatial reference.
+&nbsp;	 * @return The buffer polygon at the specified distances.
+&nbsp;	 */
+&nbsp;	public static Polygon buffer(Geometry geometry,
+&nbsp;			SpatialReference spatialReference, double distance) {
+<b class="nc">&nbsp;		double bufferDistance = distance;</b>
+&nbsp;
+<b class="nc">&nbsp;		OperatorBuffer op = (OperatorBuffer) factory</b>
+<b class="nc">&nbsp;				.getOperator(Operator.Type.Buffer);</b>
+<b class="nc">&nbsp;		Geometry result = op.execute(geometry, spatialReference,</b>
+<b class="nc">&nbsp;				bufferDistance, null);</b>
+<b class="nc">&nbsp;		return (Polygon) result;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Calculates the convex hull geometry.
+&nbsp;	 * 
+&nbsp;	 * See OperatorConvexHull.
+&nbsp;	 * 
+&nbsp;	 * @param geometry The input geometry.
+&nbsp;	 * @return Returns the convex hull.
+&nbsp;	 * 
+&nbsp;	 *            For a Point - returns the same point. For an Envelope -
+&nbsp;	 *            returns the same envelope. For a MultiPoint - If the point
+&nbsp;	 *            count is one, returns the same multipoint. If the point count
+&nbsp;	 *            is two, returns a polyline of the points. Otherwise computes
+&nbsp;	 *            and returns the convex hull polygon. For a Segment - returns a
+&nbsp;	 *            polyline consisting of the segment. For a Polyline - If
+&nbsp;	 *            consists of only one segment, returns the same polyline.
+&nbsp;	 *            Otherwise computes and returns the convex hull polygon. For a
+&nbsp;	 *            Polygon - If more than one path, or if the path isn&#39;t already
+&nbsp;	 *            convex, computes and returns the convex hull polygon.
+&nbsp;	 *            Otherwise returns the same polygon.
+&nbsp;	 */
+&nbsp;	public static Geometry convexHull(Geometry geometry) {
+<b class="nc">&nbsp;		OperatorConvexHull op = (OperatorConvexHull) factory</b>
+<b class="nc">&nbsp;				.getOperator(Operator.Type.ConvexHull);</b>
+<b class="nc">&nbsp;		return op.execute(geometry, null);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Calculates the convex hull.
+&nbsp;	 * 
+&nbsp;	 * See OperatorConvexHull
+&nbsp;	 * 
+&nbsp;	 * @param geometries
+&nbsp;	 *            The input geometry array.
+&nbsp;	 * @param b_merge
+&nbsp;	 *            Put true if you want the convex hull of all the geometries in
+&nbsp;	 *            the array combined. Put false if you want the convex hull of
+&nbsp;	 *            each geometry in the array individually.
+&nbsp;	 * @return Returns an array of convex hulls. If b_merge is true, the result
+&nbsp;	 *         will be a one element array consisting of the merged convex hull.
+&nbsp;	 */
+&nbsp;	public static Geometry[] convexHull(Geometry[] geometries, boolean b_merge) {
+<b class="fc">&nbsp;		OperatorConvexHull op = (OperatorConvexHull) factory</b>
+<b class="fc">&nbsp;				.getOperator(Operator.Type.ConvexHull);</b>
+<b class="fc">&nbsp;		SimpleGeometryCursor simple_cursor = new SimpleGeometryCursor(</b>
+<b class="fc">&nbsp;				geometries);</b>
+<b class="fc">&nbsp;		GeometryCursor cursor = op.execute(simple_cursor, b_merge, null);</b>
+&nbsp;
+<b class="fc">&nbsp;		ArrayList&lt;Geometry&gt; resultGeoms = new ArrayList&lt;Geometry&gt;();</b>
+&nbsp;		Geometry g;
+<b class="fc">&nbsp;		while ((g = cursor.next()) != null) {</b>
+<b class="fc">&nbsp;			resultGeoms.add(g);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		Geometry[] output = new Geometry[resultGeoms.size()];</b>
+&nbsp;
+<b class="fc">&nbsp;		for (int i = 0; i &lt; resultGeoms.size(); i++)</b>
+<b class="fc">&nbsp;			output[i] = resultGeoms.get(i);</b>
+&nbsp;
+<b class="fc">&nbsp;		return output;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Finds the coordinate of the geometry which is closest to the specified
+&nbsp;	 * point.
+&nbsp;	 *
+&nbsp;	 * See OperatorProximity2D.
+&nbsp;	 * 
+&nbsp;	 * @param inputPoint
+&nbsp;	 *            The point to find the nearest coordinate in the geometry for.
+&nbsp;	 * @param geometry
+&nbsp;	 *            The geometry to consider.
+&nbsp;	 * @return Proximity2DResult containing the nearest coordinate.
+&nbsp;	 */
+&nbsp;	public static Proximity2DResult getNearestCoordinate(Geometry geometry,
+&nbsp;			Point inputPoint, boolean bTestPolygonInterior) {
+&nbsp;
+<b class="fc">&nbsp;		OperatorProximity2D proximity = (OperatorProximity2D) factory</b>
+<b class="fc">&nbsp;				.getOperator(com.esri.core.geometry.Operator.Type.Proximity2D);</b>
+<b class="fc">&nbsp;		Proximity2DResult result = proximity.getNearestCoordinate(geometry,</b>
+<b class="fc">&nbsp;				inputPoint, bTestPolygonInterior);</b>
+<b class="fc">&nbsp;		return result;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Finds nearest vertex on the geometry which is closed to the specified
+&nbsp;	 * point.
+&nbsp;	 * 
+&nbsp;	 * See OperatorProximity2D.
+&nbsp;	 * 
+&nbsp;	 * @param inputPoint
+&nbsp;	 *            The point to find the nearest vertex of the geometry for.
+&nbsp;	 * @param geometry
+&nbsp;	 *            The geometry to consider.
+&nbsp;	 * @return Proximity2DResult containing the nearest vertex.
+&nbsp;	 */
+&nbsp;	public static Proximity2DResult getNearestVertex(Geometry geometry,
+&nbsp;			Point inputPoint) {
+<b class="fc">&nbsp;		OperatorProximity2D proximity = (OperatorProximity2D) factory</b>
+<b class="fc">&nbsp;				.getOperator(com.esri.core.geometry.Operator.Type.Proximity2D);</b>
+<b class="fc">&nbsp;		Proximity2DResult result = proximity.getNearestVertex(geometry,</b>
+<b class="fc">&nbsp;				inputPoint);</b>
+<b class="fc">&nbsp;		return result;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Finds all vertices in the given distance from the specified point, sorted
+&nbsp;	 * from the closest to the furthest.
+&nbsp;	 * 
+&nbsp;	 * See OperatorProximity2D.
+&nbsp;	 * 
+&nbsp;	 * @param inputPoint
+&nbsp;	 *            The point to start from.
+&nbsp;	 * @param geometry
+&nbsp;	 *            The geometry to consider.
+&nbsp;	 * @param searchRadius
+&nbsp;	 *            The search radius.
+&nbsp;	 * @param maxVertexCountToReturn
+&nbsp;	 *            The maximum number number of vertices to return.
+&nbsp;	 * @return Proximity2DResult containing the array of nearest vertices.
+&nbsp;	 */
+&nbsp;	public static Proximity2DResult[] getNearestVertices(Geometry geometry,
+&nbsp;			Point inputPoint, double searchRadius, int maxVertexCountToReturn) {
+<b class="fc">&nbsp;		OperatorProximity2D proximity = (OperatorProximity2D) factory</b>
+<b class="fc">&nbsp;				.getOperator(com.esri.core.geometry.Operator.Type.Proximity2D);</b>
+&nbsp;
+<b class="fc">&nbsp;		Proximity2DResult[] results = proximity.getNearestVertices(geometry,</b>
+<b class="fc">&nbsp;				inputPoint, searchRadius, maxVertexCountToReturn);</b>
+&nbsp;
+<b class="fc">&nbsp;		return results;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Performs the simplify operation on the geometry.
+&nbsp;	 *
+&nbsp;	 * See OperatorSimplify and See OperatorSimplifyOGC.
+&nbsp;	 * 
+&nbsp;	 * @param geometry
+&nbsp;	 *            The geometry to be simplified.
+&nbsp;	 * @param spatialReference
+&nbsp;	 *            The spatial reference of the geometry to be simplified.
+&nbsp;	 * @return The simplified geometry.
+&nbsp;	 */
+&nbsp;	public static Geometry simplify(Geometry geometry,
+&nbsp;			SpatialReference spatialReference) {
+<b class="fc">&nbsp;		OperatorSimplify op = (OperatorSimplify) factory</b>
+<b class="fc">&nbsp;				.getOperator(Operator.Type.Simplify);</b>
+<b class="fc">&nbsp;		Geometry result = op.execute(geometry, spatialReference, false, null);</b>
+<b class="fc">&nbsp;		return result;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Checks if the Geometry is simple.
+&nbsp;	 * 
+&nbsp;	 * See OperatorSimplify.
+&nbsp;	 * 
+&nbsp;	 * @param geometry
+&nbsp;	 *            The geometry to be checked.
+&nbsp;	 * @param spatialReference
+&nbsp;	 *            The spatial reference of the geometry.
+&nbsp;	 * @return TRUE if the geometry is simple.
+&nbsp;	 */
+&nbsp;	static boolean isSimple(Geometry geometry, SpatialReference spatialReference) {
+<b class="nc">&nbsp;		OperatorSimplify op = (OperatorSimplify) factory</b>
+<b class="nc">&nbsp;				.getOperator(Operator.Type.Simplify);</b>
+<b class="nc">&nbsp;		boolean result = op.isSimpleAsFeature(geometry, spatialReference, null);</b>
+<b class="nc">&nbsp;		return result;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * A geodesic distance is the shortest distance between any two points on the earth&#39;s surface when the earth&#39;s
+&nbsp;	 * surface is approximated by a spheroid. The function returns the shortest distance between two points on the
+&nbsp;	 * WGS84 spheroid.    
+&nbsp;	 * @param ptFrom The &quot;from&quot; point: long, lat in degrees.
+&nbsp;	 * @param ptTo The &quot;to&quot; point: long, lat in degrees.
+&nbsp;	 * @return The geodesic distance between two points in meters.
+&nbsp;	 */
+&nbsp;	public static double geodesicDistanceOnWGS84(Point ptFrom, Point ptTo) {
+<b class="fc">&nbsp;		return SpatialReferenceImpl.geodesicDistanceOnWGS84Impl(ptFrom, ptTo);</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-02-21 15:02</div>
+</div>
+</body>
+</html>

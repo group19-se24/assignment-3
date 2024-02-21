@@ -1,0 +1,2545 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > EditShape</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.esri.core.geometry</a>
+</div>
+
+<h1>Coverage Summary for Class: EditShape (com.esri.core.geometry)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">EditShape</td>
+<td class="coverageStat">
+  <span class="percent">
+    85,4%
+  </span>
+  <span class="absValue">
+    (123/144)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    76,2%
+  </span>
+  <span class="absValue">
+    (837/1099)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">EditShape$EditShapeBucketSortHelper</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (4/4)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">EditShape$PathFlags_</td>
+  </tr>
+  <tr>
+    <td class="name">EditShape$SimplificatorVertexComparerX</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/3)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">EditShape$SimplificatorVertexComparerY</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/3)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">EditShape$VertexIterator</td>
+<td class="coverageStat">
+  <span class="percent">
+    88,9%
+  </span>
+  <span class="absValue">
+    (8/9)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    86,8%
+  </span>
+  <span class="absValue">
+    (46/53)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    85%
+  </span>
+  <span class="absValue">
+    (136/160)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    76,6%
+  </span>
+  <span class="absValue">
+    (890/1162)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; Copyright 1995-2015 Esri
+&nbsp;
+&nbsp;   Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp;   you may not use this file except in compliance with the License.
+&nbsp;   You may obtain a copy of the License at
+&nbsp;
+&nbsp;       http://www.apache.org/licenses/LICENSE-2.0
+&nbsp;
+&nbsp;   Unless required by applicable law or agreed to in writing, software
+&nbsp;   distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp;   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp;   See the License for the specific language governing permissions and
+&nbsp;   limitations under the License.
+&nbsp;
+&nbsp; For additional information, contact:
+&nbsp; Environmental Systems Research Institute, Inc.
+&nbsp; Attn: Contracts Dept
+&nbsp; 380 New York Street
+&nbsp; Redlands, California, USA 92373
+&nbsp;
+&nbsp; email: contracts@esri.com
+&nbsp; */
+&nbsp;package com.esri.core.geometry;
+&nbsp;
+&nbsp;import java.util.ArrayList;
+&nbsp;
+&nbsp;import com.esri.core.geometry.Geometry.GeometryType;
+&nbsp;
+&nbsp;/**
+&nbsp; * A helper geometry structure that can store MultiPoint, Polyline, Polygon
+&nbsp; * geometries in linked lists. It allows constant time manipulation of geometry
+&nbsp; * vertices.
+&nbsp; */
+<b class="fc">&nbsp;final class EditShape {</b>
+&nbsp;	interface PathFlags_ {
+&nbsp;		static final int closedPath = 1;
+&nbsp;		static final int exteriorPath = 2;
+&nbsp;		static final int ringAreaValid = 4;
+&nbsp;	}
+&nbsp;
+&nbsp;	private int m_geometryCount;
+&nbsp;	private int m_path_count;
+&nbsp;	private int m_point_count;
+&nbsp;	private int m_first_geometry;
+&nbsp;	private int m_last_geometry;
+&nbsp;
+&nbsp;	private StridedIndexTypeCollection m_vertex_index_list;
+&nbsp;
+&nbsp;	// ****************Vertex Data******************
+&nbsp;	private MultiPoint m_vertices_mp; // vertex coordinates are stored here
+&nbsp;	// Attribute_stream_of_index_type::SPtr m_indexRemap;
+&nbsp;	private MultiPointImpl m_vertices; // Internals of m_vertices_mp
+&nbsp;	AttributeStreamOfDbl m_xy_stream; // The xy stream of the m_vertices.
+&nbsp;	VertexDescription m_vertex_description;// a shortcut to the vertex
+&nbsp;											// description.
+&nbsp;	boolean m_b_has_attributes; // a short cut to know if we have something in
+&nbsp;								// addition to x and y.
+&nbsp;
+&nbsp;	ArrayList&lt;Segment&gt; m_segments;// may be NULL if all segments a Lines,
+&nbsp;									// otherwise contains NULLs for Line
+&nbsp;									// segments. Curves are not NULL.
+&nbsp;	AttributeStreamOfDbl m_weights;// may be NULL if no weights are provided.
+&nbsp;									// NULL weights assumes weight value of 1.
+&nbsp;	ArrayList&lt;AttributeStreamOfInt32&gt; m_indices;// user indices are here
+&nbsp;	// ****************End Vertex Data**************
+&nbsp;	StridedIndexTypeCollection m_path_index_list; // doubly connected list. Path
+&nbsp;													// index into the Path Data
+&nbsp;													// arrays, Prev path, next
+&nbsp;													// path.
+&nbsp;	// ******************Path Data******************
+&nbsp;	AttributeStreamOfDbl m_path_areas;
+&nbsp;	AttributeStreamOfDbl m_path_lengths;
+&nbsp;	// Block_array&lt;Envelope::SPtr&gt;::SPtr m_path_envelopes;
+&nbsp;	ArrayList&lt;AttributeStreamOfInt32&gt; m_pathindices;// path user indices are
+&nbsp;													// here
+&nbsp;	// *****************End Path Data***************
+&nbsp;	StridedIndexTypeCollection m_geometry_index_list;
+&nbsp;	ArrayList&lt;AttributeStreamOfInt32&gt; m_geometry_indices;// geometry user
+&nbsp;															// indices are here
+&nbsp;
+&nbsp;	// *********** Helpers for Bucket sort**************
+&nbsp;	static class EditShapeBucketSortHelper extends ClassicSort {
+&nbsp;		EditShape m_shape;
+&nbsp;
+<b class="fc">&nbsp;		EditShapeBucketSortHelper(EditShape shape) {</b>
+<b class="fc">&nbsp;			m_shape = shape;</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		@Override
+&nbsp;		public void userSort(int begin, int end, AttributeStreamOfInt32 indices) {
+<b class="fc">&nbsp;			m_shape.sortVerticesSimpleByYHelper_(indices, begin, end);</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		@Override
+&nbsp;		public double getValue(int index) {
+<b class="fc">&nbsp;			return m_shape.getY(index);</b>
+&nbsp;		}
+&nbsp;	};
+&nbsp;
+&nbsp;	BucketSort m_bucket_sort;
+&nbsp;
+&nbsp;	// Envelope::SPtr m_envelope; //the BBOX for all attributes
+&nbsp;	Point m_helper_point; // a helper point for intermediate operations
+&nbsp;
+&nbsp;	Segment getSegmentFromIndex_(int vindex) {
+<b class="fc">&nbsp;		return m_segments != null ? m_segments.get(vindex) : null;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void setSegmentToIndex_(int vindex, Segment seg) {
+<b class="fc">&nbsp;		if (m_segments == null) {</b>
+<b class="fc">&nbsp;			if (seg == null)</b>
+&nbsp;				return;
+<b class="nc">&nbsp;			m_segments = new ArrayList&lt;Segment&gt;();</b>
+<b class="nc">&nbsp;			for (int i = 0, n = m_vertices.getPointCount(); i &lt; n; i++)</b>
+<b class="nc">&nbsp;				m_segments.add(null);</b>
+&nbsp;		}
+<b class="nc">&nbsp;		m_segments.set(vindex, seg);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void setPrevPath_(int path, int prev) {
+<b class="fc">&nbsp;		m_path_index_list.setField(path, 1, prev);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void setNextPath_(int path, int next) {
+<b class="fc">&nbsp;		m_path_index_list.setField(path, 2, next);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void setPathFlags_(int path, int flags) {
+<b class="fc">&nbsp;		m_path_index_list.setField(path, 6, flags);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	int getPathFlags_(int path) {
+<b class="fc">&nbsp;		return m_path_index_list.getField(path, 6);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void setPathGeometry_(int path, int geom) {
+<b class="fc">&nbsp;		m_path_index_list.setField(path, 7, geom);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	int getPathIndex_(int path) {
+<b class="fc">&nbsp;		return m_path_index_list.getField(path, 0);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void setNextGeometry_(int geom, int next) {
+<b class="fc">&nbsp;		m_geometry_index_list.setField(geom, 1, next);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void setPrevGeometry_(int geom, int prev) {
+<b class="fc">&nbsp;		m_geometry_index_list.setField(geom, 0, prev);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	int getGeometryIndex_(int geom) {
+<b class="fc">&nbsp;		return m_geometry_index_list.getField(geom, 7);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	int getFirstPath_(int geom) {
+<b class="nc">&nbsp;		return m_geometry_index_list.getField(geom, 3);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void setFirstPath_(int geom, int firstPath) {
+<b class="fc">&nbsp;		m_geometry_index_list.setField(geom, 3, firstPath);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void setLastPath_(int geom, int path) {
+<b class="fc">&nbsp;		m_geometry_index_list.setField(geom, 4, path);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	int newGeometry_(int gt) {
+&nbsp;		// Index_type index = m_first_free_geometry;
+<b class="fc">&nbsp;		if (m_geometry_index_list == null)</b>
+<b class="fc">&nbsp;			m_geometry_index_list = new StridedIndexTypeCollection(8);</b>
+&nbsp;
+<b class="fc">&nbsp;		int index = m_geometry_index_list.newElement();</b>
+&nbsp;		// m_geometry_index_list.set(index + 0, -1);//prev
+&nbsp;		// m_geometry_index_list.set(index + 1, -1);//next
+<b class="fc">&nbsp;		m_geometry_index_list.setField(index, 2, gt);// Geometry_type</b>
+&nbsp;		// m_geometry_index_list.set(index + 3, -1);//first path
+&nbsp;		// m_geometry_index_list.set(index + 4, -1);//last path
+<b class="fc">&nbsp;		m_geometry_index_list.setField(index, 5, 0);// point count</b>
+<b class="fc">&nbsp;		m_geometry_index_list.setField(index, 6, 0);// path count</b>
+<b class="fc">&nbsp;		m_geometry_index_list.setField(index, 7,</b>
+<b class="fc">&nbsp;				m_geometry_index_list.elementToIndex(index));// geometry index</b>
+&nbsp;
+<b class="fc">&nbsp;		return index;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void freeGeometry_(int geom) {
+<b class="nc">&nbsp;		m_geometry_index_list.deleteElement(geom);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	int newPath_(int geom) {
+<b class="fc">&nbsp;		if (m_path_index_list == null) {</b>
+<b class="fc">&nbsp;			m_path_index_list = new StridedIndexTypeCollection(8);</b>
+<b class="fc">&nbsp;			m_vertex_index_list = new StridedIndexTypeCollection(5);</b>
+<b class="fc">&nbsp;			m_path_areas = new AttributeStreamOfDbl(0);</b>
+<b class="fc">&nbsp;			m_path_lengths = new AttributeStreamOfDbl(0);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		int index = m_path_index_list.newElement();</b>
+<b class="fc">&nbsp;		int pindex = m_path_index_list.elementToIndex(index);</b>
+<b class="fc">&nbsp;		m_path_index_list.setField(index, 0, pindex);// size</b>
+&nbsp;		// m_path_index_list.set(index + 1, -1);//prev
+&nbsp;		// m_path_index_list.set(index + 2, -1);//next
+<b class="fc">&nbsp;		m_path_index_list.setField(index, 3, 0);// size</b>
+&nbsp;		// m_path_index_list.set(index + 4, -1);//first vertex handle
+&nbsp;		// m_path_index_list.set(index + 5, -1);//last vertex handle
+<b class="fc">&nbsp;		m_path_index_list.setField(index, 6, 0);// path flags</b>
+<b class="fc">&nbsp;		setPathGeometry_(index, geom);</b>
+<b class="fc">&nbsp;		if (pindex &gt;= m_path_areas.size()) {</b>
+<b class="fc">&nbsp;			int sz = pindex &lt; 16 ? 16 : (pindex * 3) / 2;</b>
+<b class="fc">&nbsp;			m_path_areas.resize(sz);</b>
+<b class="fc">&nbsp;			m_path_lengths.resize(sz);</b>
+&nbsp;			// if (m_path_envelopes)
+&nbsp;			// m_path_envelopes.resize(sz);
+&nbsp;		}
+<b class="fc">&nbsp;		m_path_areas.set(pindex, 0);</b>
+<b class="fc">&nbsp;		m_path_lengths.set(pindex, 0);</b>
+&nbsp;		// if (m_path_envelopes)
+&nbsp;		// m_path_envelopes.set(pindex, nullptr);
+&nbsp;
+<b class="fc">&nbsp;		m_path_count++;</b>
+<b class="fc">&nbsp;		return index;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void freePath_(int path) {
+<b class="fc">&nbsp;		m_path_index_list.deleteElement(path);</b>
+<b class="fc">&nbsp;		m_path_count--;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void freeVertex_(int vertex) {
+<b class="fc">&nbsp;		m_vertex_index_list.deleteElement(vertex);</b>
+<b class="fc">&nbsp;		m_point_count--;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	int newVertex_(int vindex) {
+<b class="fc">&nbsp;		assert (vindex &gt;= 0 || vindex == -1);// vindex is not a handle</b>
+&nbsp;
+<b class="fc">&nbsp;		if (m_path_index_list == null) {</b>
+<b class="nc">&nbsp;			m_path_index_list = new StridedIndexTypeCollection(8);</b>
+<b class="nc">&nbsp;			m_vertex_index_list = new StridedIndexTypeCollection(5);</b>
+<b class="nc">&nbsp;			m_path_areas = new AttributeStreamOfDbl(0);</b>
+<b class="nc">&nbsp;			m_path_lengths = new AttributeStreamOfDbl(0);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		int index = m_vertex_index_list.newElement();</b>
+<b class="fc">&nbsp;		int vi = vindex &gt;= 0 ? vindex : m_vertex_index_list</b>
+<b class="fc">&nbsp;				.elementToIndex(index);</b>
+<b class="fc">&nbsp;		m_vertex_index_list.setField(index, 0, vi);</b>
+<b class="fc">&nbsp;		if (vindex &lt; 0) {</b>
+<b class="fc">&nbsp;			if (vi &gt;= m_vertices.getPointCount()) {</b>
+<b class="fc">&nbsp;				int sz = vi &lt; 16 ? 16 : (vi * 3) / 2;</b>
+&nbsp;				// m_vertices.reserveRounded(sz);
+<b class="fc">&nbsp;				m_vertices.resize(sz);</b>
+<b class="fc">&nbsp;				if (m_segments != null) {</b>
+<b class="nc">&nbsp;					for (int i = 0; i &lt; sz; i++)</b>
+<b class="nc">&nbsp;						m_segments.add(null);</b>
+&nbsp;				}
+&nbsp;
+<b class="fc">&nbsp;				if (m_weights != null)</b>
+<b class="fc">&nbsp;					m_weights.resize(sz);</b>
+&nbsp;
+<b class="fc">&nbsp;				m_xy_stream = (AttributeStreamOfDbl) m_vertices</b>
+<b class="fc">&nbsp;						.getAttributeStreamRef(VertexDescription.Semantics.POSITION);</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			m_vertices.setXY(vi, -1e38, -1e38);</b>
+&nbsp;
+<b class="fc">&nbsp;			if (m_segments != null)</b>
+<b class="nc">&nbsp;				m_segments.set(vi, null);</b>
+&nbsp;
+<b class="fc">&nbsp;			if (m_weights != null)</b>
+<b class="fc">&nbsp;				m_weights.write(vi, 1.0);</b>
+&nbsp;		} else {
+&nbsp;			// We do not set vertices or segments here, because we assume those
+&nbsp;			// are set correctly already.
+&nbsp;			// We only here to create linked list of indices on existing vertex
+&nbsp;			// value.
+&nbsp;			// m_segments-&gt;set(m_point_count, nullptr);
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		m_vertex_index_list.setField(index, 4, vi * 2);</b>
+<b class="fc">&nbsp;		m_point_count++;</b>
+<b class="fc">&nbsp;		return index;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void free_vertex_(int vertex) {
+<b class="nc">&nbsp;		m_vertex_index_list.deleteElement(vertex);</b>
+<b class="nc">&nbsp;		m_point_count--;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	int insertVertex_(int path, int before, Point point) {
+<b class="fc">&nbsp;		int prev = before != -1 ? getPrevVertex(before) : getLastVertex(path);</b>
+<b class="fc">&nbsp;		int next = prev != -1 ? getNextVertex(prev) : -1;</b>
+&nbsp;
+<b class="fc">&nbsp;		int vertex = newVertex_(point == null ? m_point_count : -1);</b>
+<b class="fc">&nbsp;		int vindex = getVertexIndex(vertex);</b>
+<b class="fc">&nbsp;		if (point != null)</b>
+<b class="fc">&nbsp;			m_vertices.setPointByVal(vindex, point);</b>
+&nbsp;
+<b class="fc">&nbsp;		setPathToVertex_(vertex, path);</b>
+<b class="fc">&nbsp;		setNextVertex_(vertex, next);</b>
+<b class="fc">&nbsp;		setPrevVertex_(vertex, prev);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (next != -1)</b>
+<b class="fc">&nbsp;			setPrevVertex_(next, vertex);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (prev != -1)</b>
+<b class="fc">&nbsp;			setNextVertex_(prev, vertex);</b>
+&nbsp;
+<b class="fc">&nbsp;		boolean b_closed = isClosedPath(path);</b>
+<b class="fc">&nbsp;		int first = getFirstVertex(path);</b>
+<b class="fc">&nbsp;		if (before == -1)</b>
+<b class="fc">&nbsp;			setLastVertex_(path, vertex);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (before == first)</b>
+<b class="fc">&nbsp;			setFirstVertex_(path, vertex);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (b_closed &amp;&amp; next == -1) {</b>
+<b class="fc">&nbsp;			setNextVertex_(vertex, vertex);</b>
+<b class="fc">&nbsp;			setPrevVertex_(vertex, vertex);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		setPathSize_(path, getPathSize(path) + 1);</b>
+<b class="fc">&nbsp;		int geometry = getGeometryFromPath(path);</b>
+<b class="fc">&nbsp;		setGeometryVertexCount_(geometry, getPointCount(geometry) + 1);</b>
+&nbsp;
+<b class="fc">&nbsp;		return vertex;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	Point getHelperPoint_() {
+<b class="fc">&nbsp;		if (m_helper_point == null)</b>
+<b class="fc">&nbsp;			m_helper_point = new Point(m_vertices.getDescription());</b>
+<b class="fc">&nbsp;		return m_helper_point;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	void setFillRule(int geom, int rule) {
+<b class="fc">&nbsp;	      int t = m_geometry_index_list.getField(geom, 2);</b>
+<b class="fc">&nbsp;	      t &amp;= ~(0x8000000);</b>
+<b class="fc">&nbsp;	      t |= rule == Polygon.FillRule.enumFillRuleWinding ? 0x8000000 : 0;</b>
+<b class="fc">&nbsp;	      m_geometry_index_list.setField(geom, 2, t);//fill rule combined with geometry type</b>
+&nbsp;	}
+&nbsp;
+&nbsp;    int getFillRule(int geom) {
+<b class="fc">&nbsp;      int t = m_geometry_index_list.getField(geom, 2);</b>
+<b class="fc">&nbsp;      return (t &amp; 0x8000000) != 0 ? Polygon.FillRule.enumFillRuleWinding : Polygon.FillRule.enumFillRuleOddEven;</b>
+&nbsp;    }
+&nbsp;    
+&nbsp;	int addMultiPath_(MultiPath multi_path) {
+<b class="fc">&nbsp;		int newgeom = createGeometry(multi_path.getType(),</b>
+<b class="fc">&nbsp;				multi_path.getDescription());</b>
+<b class="fc">&nbsp;		if (multi_path.getType() == Geometry.Type.Polygon)</b>
+<b class="fc">&nbsp;			setFillRule(newgeom, ((Polygon)multi_path).getFillRule());</b>
+&nbsp;		
+<b class="fc">&nbsp;		appendMultiPath_(newgeom, multi_path);</b>
+<b class="fc">&nbsp;		return newgeom;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	int addMultiPoint_(MultiPoint multi_point) {
+<b class="fc">&nbsp;		int newgeometry = createGeometry(multi_point.getType(),</b>
+<b class="fc">&nbsp;				multi_point.getDescription());</b>
+<b class="fc">&nbsp;		appendMultiPoint_(newgeometry, multi_point);</b>
+<b class="fc">&nbsp;		return newgeometry;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void appendMultiPath_(int dstGeom, MultiPath multi_path) {
+<b class="fc">&nbsp;		MultiPathImpl mp_impl = (MultiPathImpl) multi_path._getImpl();</b>
+&nbsp;		// m_vertices-&gt;reserve_rounded(m_vertices-&gt;get_point_count() +
+&nbsp;		// mp_impl-&gt;get_point_count());//ensure reallocation happens by blocks
+&nbsp;		// so that already allocated vertices do not get reallocated.
+<b class="fc">&nbsp;		m_vertices_mp.add(multi_path, 0, mp_impl.getPointCount());</b>
+<b class="fc">&nbsp;		m_xy_stream = (AttributeStreamOfDbl) m_vertices</b>
+<b class="fc">&nbsp;				.getAttributeStreamRef(VertexDescription.Semantics.POSITION);</b>
+<b class="fc">&nbsp;		boolean b_some_segments = m_segments != null</b>
+<b class="nc">&nbsp;				&amp;&amp; mp_impl.getSegmentFlagsStreamRef() != null;</b>
+&nbsp;
+<b class="fc">&nbsp;		for (int ipath = 0, npath = mp_impl.getPathCount(); ipath &lt; npath; ipath++) {</b>
+<b class="fc">&nbsp;			if (mp_impl.getPathSize(ipath) &lt; 2) // CR249862 - Clipping geometry</b>
+&nbsp;												// which has empty part produces
+&nbsp;												// a crash
+<b class="nc">&nbsp;				continue;</b>
+&nbsp;
+<b class="fc">&nbsp;			int path = insertPath(dstGeom, -1);</b>
+<b class="fc">&nbsp;			setClosedPath(path, mp_impl.isClosedPath(ipath));</b>
+<b class="fc">&nbsp;			for (int ivertex = mp_impl.getPathStart(ipath), iend = mp_impl</b>
+<b class="fc">&nbsp;					.getPathEnd(ipath); ivertex &lt; iend; ivertex++) {</b>
+<b class="fc">&nbsp;				int vertex = insertVertex_(path, -1, null);</b>
+<b class="fc">&nbsp;				if (b_some_segments) {</b>
+<b class="nc">&nbsp;					int vindex = getVertexIndex(vertex);</b>
+<b class="nc">&nbsp;					if ((mp_impl.getSegmentFlags(ivertex) &amp; (byte) SegmentFlags.enumLineSeg) != 0) {</b>
+<b class="nc">&nbsp;						setSegmentToIndex_(vindex, null);</b>
+<b class="nc">&nbsp;					} else {</b>
+<b class="nc">&nbsp;						SegmentBuffer seg_buffer = new SegmentBuffer();</b>
+<b class="nc">&nbsp;						mp_impl.getSegment(ivertex, seg_buffer, true);</b>
+<b class="nc">&nbsp;						setSegmentToIndex_(vindex, seg_buffer.get());</b>
+&nbsp;					}
+&nbsp;				}
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+&nbsp;		// {//debug
+&nbsp;		// #ifdef DEBUG
+&nbsp;		// for (Index_type geometry = get_first_geometry(); geometry != -1;
+&nbsp;		// geometry = get_next_geometry(geometry))
+&nbsp;		// {
+&nbsp;		// for (Index_type path = get_first_path(geometry); path != -1; path =
+&nbsp;		// get_next_path(path))
+&nbsp;		// {
+&nbsp;		// Index_type first = get_first_vertex(path);
+&nbsp;		// Index_type v = first;
+&nbsp;		// for (get_next_vertex(v); v != first; v = get_next_vertex(v))
+&nbsp;		// {
+&nbsp;		// assert(get_next_vertex(get_prev_vertex(v)) == v);
+&nbsp;		// }
+&nbsp;		// }
+&nbsp;		// }
+&nbsp;		// #endif
+&nbsp;		// }
+&nbsp;	}
+&nbsp;
+&nbsp;	void appendMultiPoint_(int dstGeom, MultiPoint multi_point) {
+&nbsp;		// m_vertices-&gt;reserve_rounded(m_vertices-&gt;get_point_count() +
+&nbsp;		// multi_point.get_point_count());//ensure reallocation happens by
+&nbsp;		// blocks so that already allocated vertices do not get reallocated.
+<b class="fc">&nbsp;		m_vertices_mp.add(multi_point, 0, multi_point.getPointCount());</b>
+<b class="fc">&nbsp;		m_xy_stream = (AttributeStreamOfDbl) m_vertices</b>
+<b class="fc">&nbsp;				.getAttributeStreamRef(VertexDescription.Semantics.POSITION);</b>
+&nbsp;
+<b class="fc">&nbsp;		int path = insertPath(dstGeom, -1);</b>
+<b class="fc">&nbsp;		for (int ivertex = 0, iend = multi_point.getPointCount(); ivertex &lt; iend; ivertex++) {</b>
+<b class="fc">&nbsp;			insertVertex_(path, -1, null);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	void splitSegmentForward_(int origin_vertex,
+&nbsp;			SegmentIntersector intersector, int intersector_index) {
+<b class="fc">&nbsp;		int last_vertex = getNextVertex(origin_vertex);</b>
+<b class="fc">&nbsp;		if (last_vertex == -1)</b>
+<b class="nc">&nbsp;			throw GeometryException.GeometryInternalError();</b>
+<b class="fc">&nbsp;		Point point = getHelperPoint_();</b>
+<b class="fc">&nbsp;		int path = getPathFromVertex(origin_vertex);</b>
+<b class="fc">&nbsp;		int vertex = origin_vertex;</b>
+<b class="fc">&nbsp;		for (int i = 0, n = intersector</b>
+<b class="fc">&nbsp;				.getResultSegmentCount(intersector_index); i &lt; n; i++) {</b>
+<b class="fc">&nbsp;			int vindex = getVertexIndex(vertex);</b>
+<b class="fc">&nbsp;			int next_vertex = getNextVertex(vertex);</b>
+<b class="fc">&nbsp;			Segment seg = intersector.getResultSegment(intersector_index, i);</b>
+&nbsp;
+<b class="fc">&nbsp;			if (i == 0) {</b>
+<b class="fc">&nbsp;				seg.queryStart(point);</b>
+&nbsp;				// #ifdef DEBUG
+&nbsp;				// Point2D pt = new Point2D();
+&nbsp;				// getXY(vertex, pt);
+&nbsp;				// assert(Point2D.distance(point.getXY(), pt) &lt;=
+&nbsp;				// intersector.get_tolerance_());
+&nbsp;				// #endif
+<b class="fc">&nbsp;				setPoint(vertex, point);</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			if (seg.getType().value() == Geometry.GeometryType.Line)</b>
+<b class="fc">&nbsp;				setSegmentToIndex_(vindex, null);</b>
+&nbsp;			else
+<b class="nc">&nbsp;				setSegmentToIndex_(vindex, (Segment) Geometry._clone(seg));</b>
+&nbsp;
+<b class="fc">&nbsp;			seg.queryEnd(point);</b>
+<b class="fc">&nbsp;			if (i &lt; n - 1) {</b>
+<b class="fc">&nbsp;				int inserted_vertex = insertVertex_(path, next_vertex, point);</b>
+<b class="fc">&nbsp;				vertex = inserted_vertex;</b>
+<b class="fc">&nbsp;			} else {</b>
+&nbsp;				// #ifdef DEBUG
+&nbsp;				// Point_2D pt;
+&nbsp;				// get_xy(last_vertex, pt);
+&nbsp;				// assert(Point_2D::distance(point-&gt;get_xy(), pt) &lt;=
+&nbsp;				// intersector.getTolerance_());
+&nbsp;				// #endif
+<b class="fc">&nbsp;				setPoint(last_vertex, point);</b>
+<b class="fc">&nbsp;				assert (last_vertex == next_vertex);</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	void splitSegmentBackward_(int origin_vertex,
+&nbsp;			SegmentIntersector intersector, int intersector_index) {
+<b class="fc">&nbsp;		int last_vertex = getNextVertex(origin_vertex);</b>
+<b class="fc">&nbsp;		if (last_vertex == -1)</b>
+<b class="nc">&nbsp;			throw GeometryException.GeometryInternalError();</b>
+&nbsp;		
+<b class="fc">&nbsp;		Point point = getHelperPoint_();</b>
+<b class="fc">&nbsp;		int path = getPathFromVertex(origin_vertex);</b>
+<b class="fc">&nbsp;		int vertex = origin_vertex;</b>
+<b class="fc">&nbsp;		for (int i = 0, n = intersector</b>
+<b class="fc">&nbsp;				.getResultSegmentCount(intersector_index); i &lt; n; i++) {</b>
+<b class="fc">&nbsp;			int vindex = getVertexIndex(vertex);</b>
+<b class="fc">&nbsp;			int next_vertex = getNextVertex(vertex);</b>
+<b class="fc">&nbsp;			Segment seg = intersector.getResultSegment(intersector_index, n - i</b>
+<b class="fc">&nbsp;					- 1);</b>
+&nbsp;
+<b class="fc">&nbsp;			if (i == 0) {</b>
+<b class="fc">&nbsp;				seg.queryEnd(point);</b>
+&nbsp;				// #ifdef DEBUG
+&nbsp;				// Point2D pt = new Point2D();
+&nbsp;				// getXY(vertex, pt);
+&nbsp;				// assert(Point2D.distance(point.getXY(), pt) &lt;=
+&nbsp;				// intersector.getTolerance_());
+&nbsp;				// #endif
+<b class="fc">&nbsp;				setPoint(vertex, point);</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			if (seg.getType().value() == Geometry.GeometryType.Line)</b>
+<b class="fc">&nbsp;				setSegmentToIndex_(vindex, null);</b>
+&nbsp;			else
+<b class="nc">&nbsp;				setSegmentToIndex_(vindex, (Segment) Geometry._clone(seg));</b>
+&nbsp;
+<b class="fc">&nbsp;			seg.queryStart(point);</b>
+<b class="fc">&nbsp;			if (i &lt; n - 1) {</b>
+<b class="fc">&nbsp;				int inserted_vertex = insertVertex_(path, next_vertex, point);</b>
+<b class="fc">&nbsp;				vertex = inserted_vertex;</b>
+<b class="fc">&nbsp;			} else {</b>
+&nbsp;				// #ifdef DEBUG
+&nbsp;				// Point2D pt = new Point2D();
+&nbsp;				// getXY(last_vertex, pt);
+&nbsp;				// assert(Point2D.distance(point.getXY(), pt) &lt;=
+&nbsp;				// intersector.getTolerance_());
+&nbsp;				// #endif
+<b class="fc">&nbsp;				setPoint(last_vertex, point);</b>
+<b class="fc">&nbsp;				assert (last_vertex == next_vertex);</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+<b class="fc">&nbsp;	EditShape() {</b>
+<b class="fc">&nbsp;		m_path_count = 0;</b>
+<b class="fc">&nbsp;		m_first_geometry = -1;</b>
+<b class="fc">&nbsp;		m_last_geometry = -1;</b>
+<b class="fc">&nbsp;		m_point_count = 0;</b>
+<b class="fc">&nbsp;		m_geometryCount = 0;</b>
+<b class="fc">&nbsp;		m_b_has_attributes = false;</b>
+<b class="fc">&nbsp;		m_vertices = null;</b>
+<b class="fc">&nbsp;		m_xy_stream = null;</b>
+<b class="fc">&nbsp;		m_vertex_description = null;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Total point count in all geometries
+&nbsp;	int getTotalPointCount() {
+<b class="fc">&nbsp;		return m_point_count;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Returns envelope of all coordinates.
+&nbsp;	Envelope2D getEnvelope2D() {
+<b class="fc">&nbsp;		Envelope2D env = new Envelope2D();</b>
+<b class="fc">&nbsp;		env.setEmpty();</b>
+<b class="fc">&nbsp;		VertexIterator vert_iter = queryVertexIterator();</b>
+<b class="fc">&nbsp;		Point2D pt = new Point2D();</b>
+<b class="fc">&nbsp;		boolean b_first = true;</b>
+<b class="fc">&nbsp;		for (int ivertex = vert_iter.next(); ivertex != -1; ivertex = vert_iter</b>
+<b class="fc">&nbsp;				.next()) {</b>
+<b class="fc">&nbsp;			getXY(ivertex, pt);</b>
+<b class="fc">&nbsp;			if (b_first)</b>
+<b class="fc">&nbsp;				env.merge(pt.x, pt.y);</b>
+&nbsp;			else
+<b class="fc">&nbsp;				env.mergeNE(pt.x, pt.y);</b>
+&nbsp;
+<b class="fc">&nbsp;			b_first = false;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return env;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Returns geometry count in the edit shape
+&nbsp;	int getGeometryCount() {
+<b class="nc">&nbsp;		return m_geometryCount;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Adds a Geometry to the Edit_shape
+&nbsp;	int addGeometry(Geometry geometry) {
+<b class="fc">&nbsp;		Geometry.Type gt = geometry.getType();</b>
+<b class="fc">&nbsp;		if (Geometry.isMultiPath(gt.value()))</b>
+<b class="fc">&nbsp;			return addMultiPath_((MultiPath) geometry);</b>
+<b class="fc">&nbsp;		if (gt == Geometry.Type.MultiPoint)</b>
+<b class="fc">&nbsp;			return addMultiPoint_((MultiPoint) geometry);</b>
+&nbsp;
+<b class="nc">&nbsp;		throw GeometryException.GeometryInternalError();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Append a Geometry to the given geometry of the Edit_shape
+&nbsp;	void appendGeometry(int dstGeometry, Geometry srcGeometry) {
+<b class="fc">&nbsp;		Geometry.Type gt = srcGeometry.getType();</b>
+<b class="fc">&nbsp;		if (Geometry.isMultiPath(gt.value())) {</b>
+<b class="fc">&nbsp;			appendMultiPath_(dstGeometry, (MultiPath) srcGeometry);</b>
+&nbsp;			return;
+<b class="fc">&nbsp;		} else if (gt.value() == Geometry.GeometryType.MultiPoint) {</b>
+<b class="fc">&nbsp;			appendMultiPoint_(dstGeometry, (MultiPoint) srcGeometry);</b>
+&nbsp;			return;
+&nbsp;		}
+&nbsp;
+<b class="nc">&nbsp;		throw GeometryException.GeometryInternalError();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Adds a path
+&nbsp;	int addPathFromMultiPath(MultiPath multi_path, int ipath, boolean as_polygon) {
+<b class="fc">&nbsp;		int newgeom = createGeometry(as_polygon ? Geometry.Type.Polygon</b>
+<b class="nc">&nbsp;				: Geometry.Type.Polyline, multi_path.getDescription());</b>
+&nbsp;
+<b class="fc">&nbsp;		MultiPathImpl mp_impl = (MultiPathImpl) multi_path._getImpl();</b>
+<b class="fc">&nbsp;		if (multi_path.getPathSize(ipath) &lt; 2)</b>
+<b class="nc">&nbsp;			return newgeom; //return empty geometry</b>
+&nbsp;
+&nbsp;		// m_vertices-&gt;reserve_rounded(m_vertices-&gt;get_point_count() +
+&nbsp;		// multi_path.get_path_size(ipath));//ensure reallocation happens by
+&nbsp;		// blocks so that already allocated vertices do not get reallocated.
+<b class="fc">&nbsp;		m_vertices_mp.add(multi_path, multi_path.getPathStart(ipath),</b>
+<b class="fc">&nbsp;				mp_impl.getPathEnd(ipath));</b>
+<b class="fc">&nbsp;		m_xy_stream = (AttributeStreamOfDbl) m_vertices</b>
+<b class="fc">&nbsp;				.getAttributeStreamRef(VertexDescription.Semantics.POSITION);</b>
+&nbsp;
+<b class="fc">&nbsp;		int path = insertPath(newgeom, -1);</b>
+<b class="fc">&nbsp;		setClosedPath(path, mp_impl.isClosedPath(ipath) || as_polygon);</b>
+&nbsp;
+<b class="fc">&nbsp;		boolean b_some_segments = m_segments != null</b>
+<b class="nc">&nbsp;				&amp;&amp; mp_impl.getSegmentFlagsStreamRef() != null;</b>
+&nbsp;
+<b class="fc">&nbsp;		for (int ivertex = mp_impl.getPathStart(ipath), iend = mp_impl</b>
+<b class="fc">&nbsp;				.getPathEnd(ipath); ivertex &lt; iend; ivertex++) {</b>
+<b class="fc">&nbsp;			int vertex = insertVertex_(path, -1, null);</b>
+<b class="fc">&nbsp;			if (b_some_segments) {</b>
+<b class="nc">&nbsp;				int vindex = getVertexIndex(vertex);</b>
+<b class="nc">&nbsp;				if ((mp_impl.getSegmentFlags(ivertex) &amp; SegmentFlags.enumLineSeg) != 0) {</b>
+<b class="nc">&nbsp;					setSegmentToIndex_(vindex, null);</b>
+<b class="nc">&nbsp;				} else {</b>
+<b class="nc">&nbsp;					SegmentBuffer seg_buffer = new SegmentBuffer();</b>
+<b class="nc">&nbsp;					mp_impl.getSegment(ivertex, seg_buffer, true);</b>
+<b class="nc">&nbsp;					setSegmentToIndex_(vindex, seg_buffer.get());</b>
+&nbsp;				}
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return newgeom;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Extracts a geometry from the Edit_shape. The method creates a new
+&nbsp;	// Geometry instance and initializes it with the Edit_shape data for the
+&nbsp;	// given geometry.
+&nbsp;	Geometry getGeometry(int geometry) {
+<b class="fc">&nbsp;		int gt = getGeometryType(geometry);</b>
+<b class="fc">&nbsp;		Geometry geom = InternalUtils.createGeometry(gt,</b>
+<b class="fc">&nbsp;				m_vertices_mp.getDescription());</b>
+<b class="fc">&nbsp;		int point_count = getPointCount(geometry);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (point_count == 0)</b>
+<b class="fc">&nbsp;			return geom;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (Geometry.isMultiPath(gt)) {</b>
+<b class="fc">&nbsp;			MultiPathImpl mp_impl = (MultiPathImpl) geom._getImpl();</b>
+<b class="fc">&nbsp;			int path_count = getPathCount(geometry);</b>
+<b class="fc">&nbsp;			AttributeStreamOfInt32 parts = (AttributeStreamOfInt32) (AttributeStreamBase</b>
+<b class="fc">&nbsp;					.createIndexStream(path_count + 1));</b>
+<b class="fc">&nbsp;			AttributeStreamOfInt8 pathFlags = (AttributeStreamOfInt8) (AttributeStreamBase</b>
+<b class="fc">&nbsp;					.createByteStream(path_count + 1, (byte) 0));</b>
+<b class="fc">&nbsp;			VertexDescription description = geom.getDescription();</b>
+&nbsp;
+<b class="fc">&nbsp;			for (int iattrib = 0, nattrib = description.getAttributeCount(); iattrib &lt; nattrib; iattrib++) {</b>
+<b class="fc">&nbsp;				int semantics = description.getSemantics(iattrib);</b>
+<b class="fc">&nbsp;				int ncomps = VertexDescription.getComponentCount(semantics);</b>
+<b class="fc">&nbsp;				AttributeStreamBase dst_stream = AttributeStreamBase</b>
+<b class="fc">&nbsp;						.createAttributeStreamWithSemantics(semantics,</b>
+<b class="fc">&nbsp;								point_count);</b>
+<b class="fc">&nbsp;				AttributeStreamBase src_stream = m_vertices</b>
+<b class="fc">&nbsp;						.getAttributeStreamRef(semantics);</b>
+<b class="fc">&nbsp;				int dst_index = 0;</b>
+<b class="fc">&nbsp;				int ipath = 0;</b>
+<b class="fc">&nbsp;				int nvert = 0;</b>
+<b class="fc">&nbsp;				for (int path = getFirstPath(geometry); path != -1; path = getNextPath(path)) {</b>
+<b class="fc">&nbsp;					byte flag_mask = 0;</b>
+<b class="fc">&nbsp;					if (isClosedPath(path)) {</b>
+<b class="fc">&nbsp;						flag_mask |= (byte) PathFlags.enumClosed;</b>
+<b class="fc">&nbsp;					} else {</b>
+<b class="fc">&nbsp;						assert (gt != Geometry.GeometryType.Polygon);</b>
+&nbsp;					}
+&nbsp;
+<b class="fc">&nbsp;					if (isExterior(path)) {</b>
+<b class="fc">&nbsp;						flag_mask |= (byte) PathFlags.enumOGCStartPolygon;</b>
+&nbsp;					}
+&nbsp;
+<b class="fc">&nbsp;					if (flag_mask != 0)</b>
+<b class="fc">&nbsp;						pathFlags.setBits(ipath, flag_mask);</b>
+&nbsp;
+<b class="fc">&nbsp;					int path_size = getPathSize(path);</b>
+<b class="fc">&nbsp;					parts.write(ipath++, nvert);</b>
+<b class="fc">&nbsp;					nvert += path_size;</b>
+<b class="fc">&nbsp;					if (semantics == VertexDescription.Semantics.POSITION) {</b>
+<b class="fc">&nbsp;						AttributeStreamOfDbl src_stream_dbl = (AttributeStreamOfDbl) (src_stream);</b>
+<b class="fc">&nbsp;						AttributeStreamOfDbl dst_stream_dbl = (AttributeStreamOfDbl) (dst_stream);</b>
+<b class="fc">&nbsp;						Point2D pt = new Point2D();</b>
+<b class="fc">&nbsp;						for (int vertex = getFirstVertex(path); dst_index &lt; nvert; vertex = getNextVertex(vertex), dst_index++) {</b>
+<b class="fc">&nbsp;							int src_index = getVertexIndex(vertex);</b>
+<b class="fc">&nbsp;							src_stream_dbl.read(src_index * 2, pt);</b>
+<b class="fc">&nbsp;							dst_stream_dbl.write(dst_index * 2, pt);</b>
+&nbsp;						}
+<b class="fc">&nbsp;					} else {</b>
+<b class="fc">&nbsp;						for (int vertex = getFirstVertex(path); dst_index &lt; nvert; vertex = getNextVertex(vertex), dst_index++) {</b>
+<b class="fc">&nbsp;							int src_index = getVertexIndex(vertex);</b>
+<b class="fc">&nbsp;							for (int icomp = 0; icomp &lt; ncomps; icomp++) {</b>
+<b class="fc">&nbsp;								double d = src_stream.readAsDbl(src_index</b>
+<b class="fc">&nbsp;										* ncomps + icomp);</b>
+<b class="fc">&nbsp;								dst_stream.writeAsDbl(dst_index * ncomps</b>
+<b class="fc">&nbsp;										+ icomp, d);</b>
+&nbsp;							}
+&nbsp;						}
+&nbsp;					}
+&nbsp;				}
+&nbsp;
+<b class="fc">&nbsp;				assert (nvert == point_count);// Inconsistent content in the</b>
+&nbsp;												// Edit_shape. Please, fix.
+<b class="fc">&nbsp;				assert (ipath == path_count);</b>
+<b class="fc">&nbsp;				mp_impl.setAttributeStreamRef(semantics, dst_stream);</b>
+<b class="fc">&nbsp;				parts.write(path_count, point_count);</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			mp_impl.setPathFlagsStreamRef(pathFlags);</b>
+<b class="fc">&nbsp;			mp_impl.setPathStreamRef(parts);</b>
+<b class="fc">&nbsp;			mp_impl.notifyModified(MultiVertexGeometryImpl.DirtyFlags.DirtyAll);</b>
+<b class="fc">&nbsp;		} else if (gt == Geometry.GeometryType.MultiPoint) {</b>
+<b class="fc">&nbsp;			MultiPointImpl mp_impl = (MultiPointImpl) geom._getImpl();</b>
+<b class="fc">&nbsp;			VertexDescription description = geom.getDescription();</b>
+&nbsp;			// mp_impl.reserve(point_count);
+<b class="fc">&nbsp;			mp_impl.resize(point_count);</b>
+&nbsp;
+<b class="fc">&nbsp;			for (int iattrib = 0, nattrib = description.getAttributeCount(); iattrib &lt; nattrib; iattrib++) {</b>
+<b class="fc">&nbsp;				int semantics = description.getSemantics(iattrib);</b>
+<b class="fc">&nbsp;				int ncomps = VertexDescription.getComponentCount(semantics);</b>
+<b class="fc">&nbsp;				AttributeStreamBase dst_stream = mp_impl</b>
+<b class="fc">&nbsp;						.getAttributeStreamRef(semantics);</b>
+&nbsp;				// std::shared_ptr&lt;Attribute_stream_base&gt; dst_stream =
+&nbsp;				// Attribute_stream_base::create_attribute_stream(semantics,
+&nbsp;				// point_count);
+<b class="fc">&nbsp;				AttributeStreamBase src_stream = m_vertices</b>
+<b class="fc">&nbsp;						.getAttributeStreamRef(semantics);</b>
+<b class="fc">&nbsp;				int dst_index = 0;</b>
+<b class="fc">&nbsp;				assert (getPathCount(geometry) == 1);</b>
+<b class="fc">&nbsp;				int path = getFirstPath(geometry);</b>
+<b class="fc">&nbsp;				int path_size = getPathSize(path);</b>
+<b class="fc">&nbsp;				for (int vertex = getFirstVertex(path); dst_index &lt; path_size; vertex = getNextVertex(vertex), dst_index++) {</b>
+<b class="fc">&nbsp;					int src_index = getVertexIndex(vertex);</b>
+<b class="fc">&nbsp;					for (int icomp = 0; icomp &lt; ncomps; icomp++) {</b>
+<b class="fc">&nbsp;						double d = src_stream.readAsDbl(src_index * ncomps</b>
+<b class="fc">&nbsp;								+ icomp);</b>
+<b class="fc">&nbsp;						dst_stream.writeAsDbl(dst_index * ncomps + icomp, d);</b>
+&nbsp;					}
+&nbsp;				}
+&nbsp;
+<b class="fc">&nbsp;				mp_impl.setAttributeStreamRef(semantics, dst_stream);</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			mp_impl.notifyModified(MultiVertexGeometryImpl.DirtyFlags.DirtyAll);</b>
+<b class="fc">&nbsp;		} else {</b>
+<b class="nc">&nbsp;			assert (false);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return geom;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// create a new empty geometry of the given type
+&nbsp;	int createGeometry(Geometry.Type geometry_type) {
+<b class="fc">&nbsp;		return createGeometry(geometry_type,</b>
+<b class="fc">&nbsp;				VertexDescriptionDesignerImpl.getDefaultDescriptor2D());</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Deletes existing geometry from the edit shape and returns the next one.
+&nbsp;	int removeGeometry(int geometry) {
+<b class="nc">&nbsp;		for (int path = getFirstPath(geometry); path != -1; path = removePath(path)) {</b>
+&nbsp;			// removing paths in a loop
+&nbsp;		}
+&nbsp;
+<b class="nc">&nbsp;		int prev = getPrevGeometry(geometry);</b>
+<b class="nc">&nbsp;		int next = getNextGeometry(geometry);</b>
+<b class="nc">&nbsp;		if (prev != -1)</b>
+<b class="nc">&nbsp;			setNextGeometry_(prev, next);</b>
+&nbsp;		else {
+<b class="nc">&nbsp;			m_first_geometry = next;</b>
+&nbsp;		}
+<b class="nc">&nbsp;		if (next != -1)</b>
+<b class="nc">&nbsp;			setPrevGeometry_(next, prev);</b>
+&nbsp;		else {
+<b class="nc">&nbsp;			m_last_geometry = prev;</b>
+&nbsp;		}
+&nbsp;
+<b class="nc">&nbsp;		freeGeometry_(geometry);</b>
+<b class="nc">&nbsp;		return next;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// create a new empty geometry of the given type and attribute set.
+&nbsp;	int createGeometry(Geometry.Type geometry_type,
+&nbsp;			VertexDescription description) {
+<b class="fc">&nbsp;		int newgeom = newGeometry_(geometry_type.value());</b>
+<b class="fc">&nbsp;		if (m_vertices == null) {</b>
+<b class="fc">&nbsp;			m_vertices_mp = new MultiPoint(description);</b>
+<b class="fc">&nbsp;			m_vertices = (MultiPointImpl) m_vertices_mp._getImpl();</b>
+<b class="fc">&nbsp;		} else</b>
+<b class="fc">&nbsp;			m_vertices_mp.mergeVertexDescription(description);</b>
+&nbsp;
+<b class="fc">&nbsp;		m_vertex_description = m_vertices_mp.getDescription();// this</b>
+&nbsp;																// description
+&nbsp;																// will be a
+&nbsp;																// merge of
+&nbsp;																// existing
+&nbsp;																// description
+&nbsp;																// and the
+&nbsp;																// description
+&nbsp;																// of the
+&nbsp;																// multi_path
+<b class="fc">&nbsp;		m_b_has_attributes = m_vertex_description.getAttributeCount() &gt; 1;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (m_first_geometry == -1) {</b>
+<b class="fc">&nbsp;			m_first_geometry = newgeom;</b>
+<b class="fc">&nbsp;			m_last_geometry = newgeom;</b>
+<b class="fc">&nbsp;		} else {</b>
+<b class="fc">&nbsp;			setPrevGeometry_(newgeom, m_last_geometry);</b>
+<b class="fc">&nbsp;			setNextGeometry_(m_last_geometry, newgeom);</b>
+<b class="fc">&nbsp;			m_last_geometry = newgeom;</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return newgeom;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Returns the first geometry in the Edit_shape.
+&nbsp;	int getFirstGeometry() {
+<b class="fc">&nbsp;		return m_first_geometry;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Returns the next geometry in the Edit_shape. Returns -1 when there are no
+&nbsp;	// more geometries.
+&nbsp;	int getNextGeometry(int geom) {
+<b class="fc">&nbsp;		return m_geometry_index_list.getField(geom, 1);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Returns the previous geometry in the Edit_shape. Returns -1 when there
+&nbsp;	// are no more geometries.
+&nbsp;	int getPrevGeometry(int geom) {
+<b class="nc">&nbsp;		return m_geometry_index_list.getField(geom, 0);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Returns the type of the Geometry.
+&nbsp;	int getGeometryType(int geom) {
+<b class="fc">&nbsp;		return m_geometry_index_list.getField(geom, 2) &amp; 0x7FFFFFFF;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Sets value to the given user index on a geometry.
+&nbsp;	void setGeometryUserIndex(int geom, int index, int value) {
+<b class="fc">&nbsp;		AttributeStreamOfInt32 stream = m_geometry_indices.get(index);</b>
+<b class="fc">&nbsp;		int pindex = getGeometryIndex_(geom);</b>
+<b class="fc">&nbsp;		if (pindex &gt;= stream.size())</b>
+<b class="fc">&nbsp;			stream.resize(Math.max((int) (pindex * 1.25), (int) 16), -1);</b>
+<b class="fc">&nbsp;		stream.write(pindex, value);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Returns the value of the given user index of a geometry
+&nbsp;	int getGeometryUserIndex(int geom, int index) {
+<b class="fc">&nbsp;		int pindex = getGeometryIndex_(geom);</b>
+<b class="fc">&nbsp;		AttributeStreamOfInt32 stream = m_geometry_indices.get(index);</b>
+<b class="fc">&nbsp;		if (pindex &lt; stream.size())</b>
+<b class="fc">&nbsp;			return stream.read(pindex);</b>
+&nbsp;		else
+<b class="nc">&nbsp;			return -1;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Creates new user index on a geometry. The geometry index allows to store
+&nbsp;	// an integer user value on the geometry.
+&nbsp;	// Until set_geometry_user_index is called for a given geometry, the index
+&nbsp;	// stores -1 for that geometry.
+&nbsp;	int createGeometryUserIndex() {
+<b class="fc">&nbsp;		if (m_geometry_indices == null)</b>
+<b class="fc">&nbsp;			m_geometry_indices = new ArrayList&lt;AttributeStreamOfInt32&gt;(4);</b>
+&nbsp;
+&nbsp;		// Try getting existing index. Use linear search. We do not expect many
+&nbsp;		// indices to be created.
+<b class="fc">&nbsp;		for (int i = 0; i &lt; m_geometry_indices.size(); i++) {</b>
+<b class="fc">&nbsp;			if (m_geometry_indices.get(i) == null) {</b>
+<b class="fc">&nbsp;				m_geometry_indices.set(i,</b>
+<b class="fc">&nbsp;						(AttributeStreamOfInt32) AttributeStreamBase</b>
+<b class="fc">&nbsp;								.createIndexStream(0));</b>
+<b class="fc">&nbsp;				return i;</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		m_geometry_indices.add((AttributeStreamOfInt32) AttributeStreamBase</b>
+<b class="fc">&nbsp;				.createIndexStream(0));</b>
+<b class="fc">&nbsp;		return m_geometry_indices.size() - 1;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Removes the geometry user index.
+&nbsp;	void removeGeometryUserIndex(int index) {
+<b class="fc">&nbsp;		m_geometry_indices.set(index, null);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Returns the first path of the geometry.
+&nbsp;	int getFirstPath(int geometry) {
+<b class="fc">&nbsp;		return m_geometry_index_list.getField(geometry, 3);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Returns the first path of the geometry.
+&nbsp;	int getLastPath(int geometry) {
+<b class="fc">&nbsp;		return m_geometry_index_list.getField(geometry, 4);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Point count in a geometry
+&nbsp;	int getPointCount(int geom) {
+<b class="fc">&nbsp;		return m_geometry_index_list.getField(geom, 5);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Path count in a geometry
+&nbsp;	int getPathCount(int geom) {
+<b class="fc">&nbsp;		return m_geometry_index_list.getField(geom, 6);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Filters degenerate segments in all multipath geometries
+&nbsp;	// Returns 1 if a non-zero length segment has been removed. -1, if only zero
+&nbsp;	// length segments have been removed.
+&nbsp;	// 0 if no segments have been removed.
+&nbsp;	// When b_remove_last_vertices and the result path is &lt; 3 for polygon or &lt; 2
+&nbsp;	// for polyline, it&#39;ll be removed.
+&nbsp;	int filterClosePoints(double tolerance, boolean b_remove_last_vertices, boolean only_polygons) {
+<b class="fc">&nbsp;		int res = 0;</b>
+<b class="fc">&nbsp;		for (int geometry = getFirstGeometry(); geometry != -1; geometry = getNextGeometry(geometry)) {</b>
+<b class="fc">&nbsp;			int gt = getGeometryType(geometry);</b>
+<b class="fc">&nbsp;			if (!Geometry.isMultiPath(gt))</b>
+<b class="fc">&nbsp;				continue;</b>
+<b class="fc">&nbsp;			if (only_polygons &amp;&amp; gt != GeometryType.Polygon)</b>
+<b class="fc">&nbsp;				continue;</b>
+&nbsp;
+<b class="fc">&nbsp;			boolean b_polygon = getGeometryType(geometry) == Geometry.GeometryType.Polygon;</b>
+&nbsp;
+<b class="fc">&nbsp;			for (int path = getFirstPath(geometry); path != -1;) {</b>
+&nbsp;				// We go from the start to the half of the path first, then we
+&nbsp;				// go from the end to the half of the path.
+<b class="fc">&nbsp;				int vertex_counter = 0;</b>
+<b class="fc">&nbsp;				for (int vertex = getFirstVertex(path); vertex_counter &lt; getPathSize(path) / 2;) {</b>
+<b class="fc">&nbsp;					int next = getNextVertex(vertex);</b>
+<b class="fc">&nbsp;					if (next == -1)</b>
+<b class="nc">&nbsp;						break;</b>
+<b class="fc">&nbsp;					int vindex = getVertexIndex(vertex);</b>
+<b class="fc">&nbsp;					Segment seg = getSegmentFromIndex_(vindex);</b>
+<b class="fc">&nbsp;					double length = 0;</b>
+<b class="fc">&nbsp;					if (seg != null) {</b>
+<b class="nc">&nbsp;						length = seg.calculateLength2D();</b>
+<b class="nc">&nbsp;					} else {</b>
+<b class="fc">&nbsp;						int vindex_next = getVertexIndex(next);</b>
+<b class="fc">&nbsp;						length = m_vertices._getShortestDistance(vindex,</b>
+<b class="fc">&nbsp;								vindex_next);</b>
+&nbsp;					}
+&nbsp;
+<b class="fc">&nbsp;					if (length &lt;= tolerance) {</b>
+<b class="fc">&nbsp;						if (length == 0) {</b>
+<b class="fc">&nbsp;							if (res == 0)</b>
+<b class="fc">&nbsp;								res = -1;</b>
+<b class="fc">&nbsp;						} else</b>
+<b class="fc">&nbsp;							res = 1;</b>
+&nbsp;
+<b class="fc">&nbsp;						if (next != getLastVertex(path)) {</b>
+<b class="fc">&nbsp;							transferAllDataToTheVertex(next, vertex);</b>
+<b class="fc">&nbsp;							removeVertex(next, true);</b>
+&nbsp;						}
+<b class="fc">&nbsp;					} else {</b>
+<b class="fc">&nbsp;						vertex = getNextVertex(vertex);</b>
+&nbsp;					}
+<b class="fc">&nbsp;					vertex_counter++;</b>
+&nbsp;				}
+&nbsp;
+<b class="fc">&nbsp;				int first_vertex = getFirstVertex(path);</b>
+<b class="fc">&nbsp;				for (int vertex = isClosedPath(path) ? first_vertex</b>
+<b class="fc">&nbsp;						: getLastVertex(path); getPathSize(path) &gt; 0;) {</b>
+<b class="fc">&nbsp;					int prev = getPrevVertex(vertex);</b>
+<b class="fc">&nbsp;					if (prev != -1) {</b>
+<b class="fc">&nbsp;						int vindex_prev = getVertexIndex(prev);</b>
+<b class="fc">&nbsp;						Segment seg = getSegmentFromIndex_(vindex_prev);</b>
+<b class="fc">&nbsp;						double length = 0;</b>
+<b class="fc">&nbsp;						if (seg != null) {</b>
+<b class="nc">&nbsp;							length = seg.calculateLength2D();</b>
+<b class="nc">&nbsp;						} else {</b>
+<b class="fc">&nbsp;							int vindex = getVertexIndex(vertex);</b>
+<b class="fc">&nbsp;							length = m_vertices._getShortestDistance(vindex,</b>
+<b class="fc">&nbsp;									vindex_prev);</b>
+&nbsp;						}
+&nbsp;
+<b class="fc">&nbsp;						if (length &lt;= tolerance) {</b>
+<b class="fc">&nbsp;							if (length == 0) {</b>
+<b class="fc">&nbsp;								if (res == 0)</b>
+<b class="fc">&nbsp;									res = -1;</b>
+<b class="fc">&nbsp;							} else</b>
+<b class="fc">&nbsp;								res = 1;</b>
+&nbsp;
+<b class="fc">&nbsp;							transferAllDataToTheVertex(prev, vertex);</b>
+<b class="fc">&nbsp;							removeVertex(prev, false);</b>
+<b class="fc">&nbsp;							if (first_vertex == prev)</b>
+<b class="fc">&nbsp;								first_vertex = getFirstVertex(path);</b>
+<b class="fc">&nbsp;						} else {</b>
+<b class="fc">&nbsp;							vertex = getPrevVertex(vertex);</b>
+<b class="fc">&nbsp;							if (vertex == first_vertex)</b>
+<b class="fc">&nbsp;								break;</b>
+&nbsp;						}
+&nbsp;					} else {
+<b class="fc">&nbsp;						removeVertex(vertex, true);// remove the last vertex in</b>
+&nbsp;													// the path
+<b class="fc">&nbsp;						if (res == 0)</b>
+<b class="nc">&nbsp;							res = -1;</b>
+<b class="nc">&nbsp;						break;</b>
+&nbsp;					}
+&nbsp;				}
+&nbsp;
+<b class="fc">&nbsp;				int path_size = getPathSize(path);</b>
+<b class="fc">&nbsp;				if (b_remove_last_vertices</b>
+<b class="fc">&nbsp;						&amp;&amp; (b_polygon ? path_size &lt; 3 : path_size &lt; 2)) {</b>
+<b class="fc">&nbsp;					path = removePath(path);</b>
+<b class="fc">&nbsp;					res = path_size &gt; 0 ? 1 : (res == 0 ? -1 : res);</b>
+<b class="fc">&nbsp;				} else</b>
+<b class="fc">&nbsp;					path = getNextPath(path);</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return res;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Checks if there are degenerate segments in any of multipath geometries
+&nbsp;	boolean hasDegenerateSegments(double tolerance) {
+<b class="nc">&nbsp;		for (int geometry = getFirstGeometry(); geometry != -1; geometry = getNextGeometry(geometry)) {</b>
+<b class="nc">&nbsp;			if (!Geometry.isMultiPath(getGeometryType(geometry)))</b>
+<b class="nc">&nbsp;				continue;</b>
+&nbsp;
+<b class="nc">&nbsp;			boolean b_polygon = getGeometryType(geometry) == Geometry.GeometryType.Polygon;</b>
+&nbsp;
+<b class="nc">&nbsp;			for (int path = getFirstPath(geometry); path != -1;) {</b>
+<b class="nc">&nbsp;				int path_size = getPathSize(path);</b>
+<b class="nc">&nbsp;				if (b_polygon ? path_size &lt; 3 : path_size &lt; 2)</b>
+<b class="nc">&nbsp;					return true;</b>
+&nbsp;
+<b class="nc">&nbsp;				int vertex = getFirstVertex(path);</b>
+<b class="nc">&nbsp;				for (int index = 0; index &lt; path_size; index++) {</b>
+<b class="nc">&nbsp;					int next = getNextVertex(vertex);</b>
+<b class="nc">&nbsp;					if (next == -1)</b>
+<b class="nc">&nbsp;						break;</b>
+<b class="nc">&nbsp;					int vindex = getVertexIndex(vertex);</b>
+<b class="nc">&nbsp;					Segment seg = getSegmentFromIndex_(vindex);</b>
+<b class="nc">&nbsp;					double length = 0;</b>
+<b class="nc">&nbsp;					if (seg != null) {</b>
+<b class="nc">&nbsp;						length = seg.calculateLength2D();</b>
+<b class="nc">&nbsp;					} else {</b>
+<b class="nc">&nbsp;						int vindex_next = getVertexIndex(next);</b>
+<b class="nc">&nbsp;						length = m_vertices._getShortestDistance(vindex,</b>
+<b class="nc">&nbsp;								vindex_next);</b>
+&nbsp;					}
+&nbsp;
+<b class="nc">&nbsp;					if (length &lt;= tolerance)</b>
+<b class="nc">&nbsp;						return true;</b>
+&nbsp;
+<b class="nc">&nbsp;					vertex = next;</b>
+&nbsp;				}
+&nbsp;
+<b class="nc">&nbsp;				path = getNextPath(path);</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="nc">&nbsp;		return false;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void transferAllDataToTheVertex(int from_vertex, int to_vertex) {
+<b class="fc">&nbsp;		int vindexFrom = getVertexIndex(from_vertex);</b>
+<b class="fc">&nbsp;		int vindexTo = getVertexIndex(to_vertex);</b>
+<b class="fc">&nbsp;		if (m_weights != null) {</b>
+<b class="fc">&nbsp;			double weight = m_weights.read(vindexFrom);</b>
+<b class="fc">&nbsp;			m_weights.write(vindexTo, weight);</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		if (m_b_has_attributes) {
+&nbsp;			// TODO: implement copying of attributes with exception of x and y
+&nbsp;			//
+&nbsp;			// for (int i = 0, nattrib = 0; i &lt; nattrib; i++)
+&nbsp;			// {
+&nbsp;			// m_vertices-&gt;get_attribute
+&nbsp;			// }
+&nbsp;		}
+&nbsp;		// Copy user index data
+<b class="fc">&nbsp;		if (m_indices != null) {</b>
+<b class="fc">&nbsp;			for (int i = 0, n = (int) m_indices.size(); i &lt; n; i++) {</b>
+<b class="fc">&nbsp;				if (m_indices.get(i) != null) {</b>
+<b class="fc">&nbsp;					int value = getUserIndex(from_vertex, i);</b>
+<b class="fc">&nbsp;					if (value != -1)</b>
+<b class="fc">&nbsp;						setUserIndex(to_vertex, i, value);</b>
+&nbsp;				}
+&nbsp;			}
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	// Splits segment originating from the origingVertex split_count times at
+&nbsp;	// splitScalar points and inserts new vertices into the shape.
+&nbsp;	// The split is not done, when the splitScalar[i] is 0 or 1, or is equal to
+&nbsp;	// the splitScalar[i - 1].
+&nbsp;	// Returns the number of splits actually happend (0 if no splits have
+&nbsp;	// happend).
+&nbsp;	int splitSegment(int origin_vertex, double[] split_scalars, int split_count) {
+<b class="fc">&nbsp;		int actual_splits = 0;</b>
+<b class="fc">&nbsp;		int next_vertex = getNextVertex(origin_vertex);</b>
+<b class="fc">&nbsp;		if (next_vertex == -1)</b>
+<b class="nc">&nbsp;			throw GeometryException.GeometryInternalError();</b>
+&nbsp;
+<b class="fc">&nbsp;		int vindex = getVertexIndex(origin_vertex);</b>
+<b class="fc">&nbsp;		int vindex_next = getVertexIndex(next_vertex);</b>
+<b class="fc">&nbsp;		Segment seg = getSegmentFromIndex_(vindex);</b>
+<b class="fc">&nbsp;		double seg_length = seg == null ? m_vertices._getShortestDistance(</b>
+<b class="fc">&nbsp;				vindex, vindex_next) : seg.calculateLength2D();</b>
+<b class="fc">&nbsp;		double told = 0.0;</b>
+<b class="fc">&nbsp;		for (int i = 0; i &lt; split_count; i++) {</b>
+<b class="fc">&nbsp;			double t = split_scalars[i];</b>
+<b class="fc">&nbsp;			if (told &lt; t &amp;&amp; t &lt; 1.0) {</b>
+<b class="fc">&nbsp;				double f = t;</b>
+<b class="fc">&nbsp;				if (seg != null) {</b>
+<b class="nc">&nbsp;					f = seg_length &gt; 0 ? seg._calculateSubLength(t)</b>
+<b class="nc">&nbsp;							/ seg_length : 0.0;</b>
+&nbsp;				}
+&nbsp;
+<b class="fc">&nbsp;				m_vertices._interpolateTwoVertices(vindex, vindex_next, f,</b>
+<b class="fc">&nbsp;						getHelperPoint_());// use this call mainly to</b>
+&nbsp;											// interpolate the attributes. XYs
+&nbsp;											// are interpolated incorrectly for
+&nbsp;											// curves and are recalculated when
+&nbsp;											// segment is cut below.
+<b class="fc">&nbsp;				int inserted_vertex = insertVertex_(</b>
+<b class="fc">&nbsp;						getPathFromVertex(origin_vertex), next_vertex,</b>
+<b class="fc">&nbsp;						getHelperPoint_());</b>
+<b class="fc">&nbsp;				actual_splits++;</b>
+<b class="fc">&nbsp;				if (seg != null) {</b>
+<b class="nc">&nbsp;					Segment subseg = seg.cut(told, t);</b>
+<b class="nc">&nbsp;					int prev_vertex = getPrevVertex(inserted_vertex);</b>
+<b class="nc">&nbsp;					int vindex_prev = getVertexIndex(prev_vertex);</b>
+<b class="nc">&nbsp;					setSegmentToIndex_(vindex_prev, subseg);</b>
+<b class="nc">&nbsp;					setXY(inserted_vertex, subseg.getEndXY()); // fix XY</b>
+&nbsp;																// coordinates
+&nbsp;																// to be
+&nbsp;																// parameter
+&nbsp;																// based
+&nbsp;																// (interpolate_two_vertices_)
+<b class="nc">&nbsp;					if (i == split_count - 1 || split_scalars[i + 1] == 1.0) {// last</b>
+&nbsp;																				// chance
+&nbsp;																				// to
+&nbsp;																				// set
+&nbsp;																				// last
+&nbsp;																				// split
+&nbsp;																				// segment
+&nbsp;																				// here:
+<b class="nc">&nbsp;						Segment subseg_end = seg.cut(t, 1.0);</b>
+<b class="nc">&nbsp;						setSegmentToIndex_(vindex_prev, subseg_end);</b>
+&nbsp;					}
+&nbsp;				}
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return actual_splits;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// interpolates the attributes for the specified path between from_vertex
+&nbsp;	// and to_vertex
+&nbsp;	void interpolateAttributesForClosedPath(int path, int from_vertex,
+&nbsp;			int to_vertex) {
+<b class="nc">&nbsp;		assert (isClosedPath(path));</b>
+&nbsp;
+<b class="nc">&nbsp;		if (!m_b_has_attributes)</b>
+&nbsp;			return;
+&nbsp;
+<b class="nc">&nbsp;		double sub_length = calculateSubLength2D(path, from_vertex, to_vertex);</b>
+&nbsp;
+<b class="nc">&nbsp;		if (sub_length == 0.0)</b>
+&nbsp;			return;
+&nbsp;
+<b class="nc">&nbsp;		int nattr = m_vertex_description.getAttributeCount();</b>
+&nbsp;
+<b class="nc">&nbsp;		for (int iattr = 1; iattr &lt; nattr; iattr++) {</b>
+<b class="nc">&nbsp;			int semantics = m_vertex_description.getSemantics(iattr);</b>
+&nbsp;
+<b class="nc">&nbsp;			int interpolation = VertexDescription.getInterpolation(semantics);</b>
+<b class="nc">&nbsp;			if (interpolation == VertexDescription.Interpolation.ANGULAR)</b>
+<b class="nc">&nbsp;				continue;</b>
+&nbsp;
+<b class="nc">&nbsp;			int components = VertexDescription.getComponentCount(semantics);</b>
+&nbsp;
+<b class="nc">&nbsp;			for (int ordinate = 0; ordinate &lt; components; ordinate++)</b>
+<b class="nc">&nbsp;				interpolateAttributesForClosedPath_(semantics, path,</b>
+<b class="nc">&nbsp;						from_vertex, to_vertex, sub_length, ordinate);</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		return;
+&nbsp;	}
+&nbsp;
+&nbsp;	// calculates the length for the specified path between from_vertex and
+&nbsp;	// to_vertex
+&nbsp;	double calculateSubLength2D(int path, int from_vertex, int to_vertex) {
+<b class="nc">&nbsp;		int shape_from_index = getVertexIndex(from_vertex);</b>
+<b class="nc">&nbsp;		int shape_to_index = getVertexIndex(to_vertex);</b>
+&nbsp;
+<b class="nc">&nbsp;		if (shape_from_index &lt; 0 || shape_to_index &gt; getTotalPointCount() - 1)</b>
+<b class="nc">&nbsp;			throw new IllegalArgumentException(&quot;invalid call&quot;);</b>
+&nbsp;
+<b class="nc">&nbsp;		if (shape_from_index &gt; shape_to_index) {</b>
+<b class="nc">&nbsp;			if (!isClosedPath(path))</b>
+<b class="nc">&nbsp;				throw new IllegalArgumentException(</b>
+<b class="nc">&nbsp;						&quot;cannot iterate across an open path&quot;);</b>
+&nbsp;		}
+&nbsp;
+<b class="nc">&nbsp;		double sub_length = 0.0;</b>
+&nbsp;
+<b class="nc">&nbsp;		for (int vertex = from_vertex; vertex != to_vertex; vertex = getNextVertex(vertex)) {</b>
+<b class="nc">&nbsp;			int vertex_index = getVertexIndex(vertex);</b>
+<b class="nc">&nbsp;			Segment segment = getSegmentFromIndex_(vertex_index);</b>
+<b class="nc">&nbsp;			if (segment != null) {</b>
+<b class="nc">&nbsp;				sub_length += segment.calculateLength2D();</b>
+<b class="nc">&nbsp;			} else {</b>
+<b class="nc">&nbsp;				int next_vertex_index = getVertexIndex(getNextVertex(vertex));</b>
+<b class="nc">&nbsp;				sub_length += m_vertices._getShortestDistance(vertex_index,</b>
+<b class="nc">&nbsp;						next_vertex_index);</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="nc">&nbsp;		return sub_length;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// set_point modifies the vertex and associated segments.
+&nbsp;	void setPoint(int vertex, Point new_coord) {
+<b class="fc">&nbsp;		int vindex = getVertexIndex(vertex);</b>
+<b class="fc">&nbsp;		m_vertices.setPointByVal(vindex, new_coord);</b>
+<b class="fc">&nbsp;		Segment seg = getSegmentFromIndex_(vindex);</b>
+<b class="fc">&nbsp;		if (seg != null) {</b>
+<b class="nc">&nbsp;			seg.setStart(new_coord);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		int prev = getPrevVertex(vertex);</b>
+<b class="fc">&nbsp;		if (prev != -1) {</b>
+<b class="fc">&nbsp;			int vindex_p = getVertexIndex(prev);</b>
+<b class="fc">&nbsp;			Segment seg_p = getSegmentFromIndex_(vindex_p);</b>
+<b class="fc">&nbsp;			if (seg_p != null) {</b>
+<b class="nc">&nbsp;				seg.setEnd(new_coord);</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	// Queries point for a given vertex.
+&nbsp;	void queryPoint(int vertex, Point point) {
+<b class="fc">&nbsp;		int vindex = getVertexIndex(vertex);</b>
+<b class="fc">&nbsp;		m_vertices.getPointByVal(vindex, point);</b>
+&nbsp;		// assert(getXY(vertex) == point.getXY());
+&nbsp;	}
+&nbsp;
+&nbsp;	// set_xy modifies the vertex and associated segments.
+&nbsp;	void setXY(int vertex, Point2D new_coord) {
+<b class="fc">&nbsp;		setXY(vertex, new_coord.x, new_coord.y);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// set_xy modifies the vertex and associated segments.
+&nbsp;	void setXY(int vertex, double new_x, double new_y) {
+<b class="fc">&nbsp;		int vindex = getVertexIndex(vertex);</b>
+<b class="fc">&nbsp;		m_vertices.setXY(vindex, new_x, new_y);</b>
+<b class="fc">&nbsp;		Segment seg = getSegmentFromIndex_(vindex);</b>
+<b class="fc">&nbsp;		if (seg != null) {</b>
+<b class="nc">&nbsp;			seg.setStartXY(new_x, new_y);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		int prev = getPrevVertex(vertex);</b>
+<b class="fc">&nbsp;		if (prev != -1) {</b>
+<b class="fc">&nbsp;			int vindex_p = getVertexIndex(prev);</b>
+<b class="fc">&nbsp;			Segment seg_p = getSegmentFromIndex_(vindex_p);</b>
+<b class="fc">&nbsp;			if (seg_p != null) {</b>
+<b class="nc">&nbsp;				seg.setEndXY(new_x, new_y);</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	Point2D getXY(int vertex) {
+<b class="fc">&nbsp;		Point2D pt = new Point2D();</b>
+<b class="fc">&nbsp;		int vindex = getVertexIndex(vertex);</b>
+<b class="fc">&nbsp;		pt.setCoords(m_vertices.getXY(vindex));</b>
+<b class="fc">&nbsp;		return pt;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Returns the coordinates of the vertex.
+&nbsp;	void getXY(int vertex, Point2D ptOut) {
+<b class="fc">&nbsp;		int vindex = getVertexIndex(vertex);</b>
+<b class="fc">&nbsp;		ptOut.setCoords(m_vertices.getXY(vindex));</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void getXYWithIndex(int index, Point2D ptOut) {
+<b class="fc">&nbsp;		m_xy_stream.read(2 * index, ptOut);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Gets the attribute for the given semantics and ordinate.
+&nbsp;	double getAttributeAsDbl(int semantics, int vertex, int ordinate) {
+<b class="nc">&nbsp;		return m_vertices.getAttributeAsDbl(semantics, getVertexIndex(vertex),</b>
+<b class="nc">&nbsp;				ordinate);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Sets the attribute for the given semantics and ordinate.
+&nbsp;	void setAttribute(int semantics, int vertex, int ordinate, double value) {
+<b class="nc">&nbsp;		m_vertices.setAttribute(semantics, getVertexIndex(vertex), ordinate,</b>
+<b class="nc">&nbsp;				value);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Sets the attribute for the given semantics and ordinate.
+&nbsp;	void setAttribute(int semantics, int vertex, int ordinate, int value) {
+<b class="nc">&nbsp;		m_vertices.setAttribute(semantics, getVertexIndex(vertex), ordinate,</b>
+<b class="nc">&nbsp;				value);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Returns a reference to the vertex description
+&nbsp;	VertexDescription getVertexDescription() {
+<b class="fc">&nbsp;		return m_vertex_description;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	int getMinPathVertexY(int path) {
+<b class="nc">&nbsp;		int first_vert = getFirstVertex(path);</b>
+<b class="nc">&nbsp;		int minv = first_vert;</b>
+<b class="nc">&nbsp;		int vert = getNextVertex(first_vert);</b>
+<b class="nc">&nbsp;		while (vert != -1 &amp;&amp; vert != first_vert) {</b>
+<b class="nc">&nbsp;			if (compareVerticesSimpleY_(vert, minv) &lt; 0)</b>
+<b class="nc">&nbsp;				minv = vert;</b>
+<b class="nc">&nbsp;			vert = getNextVertex(vert);</b>
+&nbsp;		}
+<b class="nc">&nbsp;		return minv;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Returns an index value for the vertex inside of the underlying array of
+&nbsp;	// vertices.
+&nbsp;	// This index is for the use with the get_xy_with_index. get_xy is
+&nbsp;	// equivalent to calling get_vertex_index and get_xy_with_index.
+&nbsp;	int getVertexIndex(int vertex) {
+<b class="fc">&nbsp;		return m_vertex_index_list.getField(vertex, 0);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Returns the y coordinate of the vertex.
+&nbsp;	double getY(int vertex) {
+<b class="fc">&nbsp;		Point2D pt = new Point2D();</b>
+<b class="fc">&nbsp;		getXY(vertex, pt);</b>
+<b class="fc">&nbsp;		return pt.y;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// returns True if xy coordinates at vertices are equal.
+&nbsp;	boolean isEqualXY(int vertex_1, int vertex_2) {
+<b class="fc">&nbsp;		int vindex1 = getVertexIndex(vertex_1);</b>
+<b class="fc">&nbsp;		int vindex2 = getVertexIndex(vertex_2);</b>
+<b class="fc">&nbsp;		return m_vertices.getXY(vindex1).isEqual(m_vertices.getXY(vindex2));</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// returns True if xy coordinates at vertices are equal.
+&nbsp;	boolean isEqualXY(int vertex, Point2D pt) {
+<b class="fc">&nbsp;		int vindex = getVertexIndex(vertex);</b>
+<b class="fc">&nbsp;		return m_vertices.getXY(vindex).isEqual(pt);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Sets weight to the vertex. Weight is used by clustering and cracking.
+&nbsp;	void setWeight(int vertex, double weight) {
+<b class="fc">&nbsp;		if (weight &lt; 1.0)</b>
+<b class="nc">&nbsp;			weight = 1.0;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (m_weights == null) {</b>
+<b class="fc">&nbsp;			if (weight == 1.0)</b>
+&nbsp;				return;
+&nbsp;
+<b class="fc">&nbsp;			m_weights = (AttributeStreamOfDbl) (AttributeStreamBase</b>
+<b class="fc">&nbsp;					.createDoubleStream(m_vertices.getPointCount(), 1.0));</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		int vindex = getVertexIndex(vertex);</b>
+<b class="fc">&nbsp;		if (vindex &gt;= m_weights.size()) {</b>
+<b class="nc">&nbsp;			m_weights.resize(vindex + 1, 1.0);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		m_weights.write(vindex, weight);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	double getWeight(int vertex) {
+<b class="fc">&nbsp;		int vindex = getVertexIndex(vertex);</b>
+<b class="fc">&nbsp;		if (m_weights == null || vindex &gt;= m_weights.size())</b>
+<b class="fc">&nbsp;			return 1.0;</b>
+&nbsp;		
+<b class="fc">&nbsp;		return m_weights.read(vindex);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Removes associated weights
+&nbsp;	void removeWeights() {
+<b class="nc">&nbsp;		m_weights = null;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Sets value to the given user index.
+&nbsp;	void setUserIndex(int vertex, int index, int value) {
+&nbsp;		// CHECKVERTEXHANDLE(vertex);
+<b class="fc">&nbsp;		AttributeStreamOfInt32 stream = m_indices.get(index);</b>
+&nbsp;		// assert(get_prev_vertex(vertex) != -0x7eadbeaf);//using deleted vertex
+<b class="fc">&nbsp;		int vindex = getVertexIndex(vertex);</b>
+<b class="fc">&nbsp;		if (stream.size() &lt; m_vertices.getPointCount())</b>
+<b class="fc">&nbsp;			stream.resize(m_vertices.getPointCount(), -1);</b>
+<b class="fc">&nbsp;		stream.write(vindex, value);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	int getUserIndex(int vertex, int index) {
+&nbsp;		// CHECKVERTEXHANDLE(vertex);
+<b class="fc">&nbsp;		int vindex = getVertexIndex(vertex);</b>
+<b class="fc">&nbsp;		AttributeStreamOfInt32 stream = m_indices.get(index);</b>
+<b class="fc">&nbsp;		if (vindex &lt; stream.size()) {</b>
+<b class="fc">&nbsp;			int val = stream.read(vindex);</b>
+<b class="fc">&nbsp;			return val;</b>
+&nbsp;		} else
+<b class="fc">&nbsp;			return -1;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Creates new user index. The index have random values. The index allows to
+&nbsp;	// store an integer user value on the vertex.
+&nbsp;	int createUserIndex() {
+<b class="fc">&nbsp;		if (m_indices == null)</b>
+<b class="fc">&nbsp;			m_indices = new ArrayList&lt;AttributeStreamOfInt32&gt;(0);</b>
+&nbsp;
+&nbsp;		// Try getting existing index. Use linear search. We do not expect many
+&nbsp;		// indices to be created.
+<b class="fc">&nbsp;		for (int i = 0; i &lt; m_indices.size(); i++) {</b>
+<b class="fc">&nbsp;			if (m_indices.get(i) == null) {</b>
+<b class="fc">&nbsp;				m_indices.set(i, (AttributeStreamOfInt32) AttributeStreamBase</b>
+<b class="fc">&nbsp;						.createIndexStream(0, -1));</b>
+<b class="fc">&nbsp;				return i;</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		m_indices.add((AttributeStreamOfInt32) AttributeStreamBase</b>
+<b class="fc">&nbsp;				.createIndexStream(0, -1));</b>
+<b class="fc">&nbsp;		return m_indices.size() - 1;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Removes the user index.
+&nbsp;	void removeUserIndex(int index) {
+<b class="fc">&nbsp;		m_indices.set(index, null);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Returns segment, connecting currentVertex and next vertex. Returns NULL
+&nbsp;	// if it is a Line.
+&nbsp;	Segment getSegment(int vertex) {
+<b class="fc">&nbsp;		if (m_segments != null) {</b>
+<b class="nc">&nbsp;			int vindex = getVertexIndex(vertex);</b>
+<b class="nc">&nbsp;			return m_segments.get(vindex);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return null;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Returns a straight line that connects this and next vertices. No
+&nbsp;	// attributes. Returns false if no next vertex exists (end of polyline
+&nbsp;	// part).
+&nbsp;	// Can be used together with get_segment.
+&nbsp;	boolean queryLineConnector(int vertex, Line line) {
+<b class="fc">&nbsp;		int next = getNextVertex(vertex);</b>
+<b class="fc">&nbsp;		if (next == -1)</b>
+<b class="fc">&nbsp;			return false;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (!m_b_has_attributes) {</b>
+<b class="fc">&nbsp;			Point2D pt = new Point2D();</b>
+<b class="fc">&nbsp;			getXY(vertex, pt);</b>
+<b class="fc">&nbsp;			line.setStartXY(pt);</b>
+<b class="fc">&nbsp;			getXY(next, pt);</b>
+<b class="fc">&nbsp;			line.setEndXY(pt);</b>
+<b class="fc">&nbsp;		} else {</b>
+<b class="fc">&nbsp;			Point pt = new Point();</b>
+<b class="fc">&nbsp;			queryPoint(vertex, pt);</b>
+<b class="fc">&nbsp;			line.setStart(pt);</b>
+<b class="fc">&nbsp;			queryPoint(next, pt);</b>
+<b class="fc">&nbsp;			line.setEnd(pt);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return true;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Inserts an empty path before the given one. If before_path is -1, adds
+&nbsp;	// path at the end.
+&nbsp;	int insertPath(int geometry, int before_path) {
+<b class="fc">&nbsp;		int prev = -1;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (before_path != -1) {</b>
+<b class="nc">&nbsp;			if (geometry != getGeometryFromPath(before_path))</b>
+<b class="nc">&nbsp;				throw GeometryException.GeometryInternalError();</b>
+&nbsp;
+<b class="nc">&nbsp;			prev = getPrevPath(before_path);</b>
+<b class="nc">&nbsp;		} else</b>
+<b class="fc">&nbsp;			prev = getLastPath(geometry);</b>
+&nbsp;
+<b class="fc">&nbsp;		int newpath = newPath_(geometry);</b>
+<b class="fc">&nbsp;		if (before_path != -1)</b>
+<b class="nc">&nbsp;			setPrevPath_(before_path, newpath);</b>
+&nbsp;
+<b class="fc">&nbsp;		setNextPath_(newpath, before_path);</b>
+<b class="fc">&nbsp;		setPrevPath_(newpath, prev);</b>
+<b class="fc">&nbsp;		if (prev != -1)</b>
+<b class="fc">&nbsp;			setNextPath_(prev, newpath);</b>
+&nbsp;		else
+<b class="fc">&nbsp;			setFirstPath_(geometry, newpath);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (before_path == -1)</b>
+<b class="fc">&nbsp;			setLastPath_(geometry, newpath);</b>
+&nbsp;
+<b class="fc">&nbsp;		setGeometryPathCount_(geometry, getPathCount(geometry) + 1);</b>
+<b class="fc">&nbsp;		return newpath;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;    int insertClosedPath_(int geometry, int before_path, int first_vertex, int checked_vertex, boolean[] contains_checked_vertex)
+&nbsp;    {
+<b class="fc">&nbsp;      int path = insertPath(geometry, -1);</b>
+<b class="fc">&nbsp;      int path_size = 0;</b>
+<b class="fc">&nbsp;      int vertex = first_vertex;</b>
+<b class="fc">&nbsp;      boolean contains = false;</b>
+&nbsp;      
+<b class="fc">&nbsp;      while(true)</b>
+&nbsp;      {
+<b class="fc">&nbsp;        if (vertex == checked_vertex)</b>
+<b class="fc">&nbsp;          contains = true;</b>
+&nbsp;        
+<b class="fc">&nbsp;        setPathToVertex_(vertex, path);</b>
+<b class="fc">&nbsp;        path_size++;</b>
+<b class="fc">&nbsp;        int next = getNextVertex(vertex);</b>
+<b class="fc">&nbsp;        assert(getNextVertex(getPrevVertex(vertex)) == vertex);</b>
+<b class="fc">&nbsp;        if (next == first_vertex)</b>
+<b class="fc">&nbsp;          break;</b>
+&nbsp;
+<b class="fc">&nbsp;        vertex = next;</b>
+&nbsp;      }
+&nbsp;
+<b class="fc">&nbsp;      setClosedPath(path, true);</b>
+<b class="fc">&nbsp;      setPathSize_(path, path_size);</b>
+<b class="fc">&nbsp;      if (contains)</b>
+<b class="fc">&nbsp;        first_vertex = checked_vertex;</b>
+&nbsp;
+<b class="fc">&nbsp;      setFirstVertex_(path, first_vertex);</b>
+<b class="fc">&nbsp;      setLastVertex_(path, getPrevVertex(first_vertex));</b>
+<b class="fc">&nbsp;      setRingAreaValid_(path, false);</b>
+&nbsp;      
+<b class="fc">&nbsp;      if (contains_checked_vertex != null) {</b>
+<b class="fc">&nbsp;    	  contains_checked_vertex[0] = contains;</b>
+&nbsp;      }
+&nbsp;      
+<b class="fc">&nbsp;      return path;</b>
+&nbsp;    }
+&nbsp;	
+&nbsp;
+&nbsp;	// Removes a path, gets rid of all its vertices, and returns the next one
+&nbsp;	int removePath(int path) {
+<b class="fc">&nbsp;		int prev = getPrevPath(path);</b>
+<b class="fc">&nbsp;		int next = getNextPath(path);</b>
+<b class="fc">&nbsp;		int geometry = getGeometryFromPath(path);</b>
+<b class="fc">&nbsp;		if (prev != -1)</b>
+<b class="fc">&nbsp;			setNextPath_(prev, next);</b>
+&nbsp;		else {
+<b class="fc">&nbsp;			setFirstPath_(geometry, next);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (next != -1)</b>
+<b class="fc">&nbsp;			setPrevPath_(next, prev);</b>
+&nbsp;		else {
+<b class="fc">&nbsp;			setLastPath_(geometry, prev);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		clearPath(path);</b>
+&nbsp;
+<b class="fc">&nbsp;		setGeometryPathCount_(geometry, getPathCount(geometry) - 1);</b>
+<b class="fc">&nbsp;		freePath_(path);</b>
+<b class="fc">&nbsp;		return next;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Clears all vertices from the path
+&nbsp;	void clearPath(int path) {
+<b class="fc">&nbsp;		int first_vertex = getFirstVertex(path);</b>
+<b class="fc">&nbsp;		if (first_vertex != -1) {</b>
+&nbsp;			// TODO: can ve do this in one shot?
+<b class="fc">&nbsp;			int vertex = first_vertex;</b>
+<b class="fc">&nbsp;			for (int i = 0, n = getPathSize(path); i &lt; n; i++) {</b>
+<b class="fc">&nbsp;				int v = vertex;</b>
+<b class="fc">&nbsp;				vertex = getNextVertex(vertex);</b>
+<b class="fc">&nbsp;				freeVertex_(v);</b>
+&nbsp;			}
+<b class="fc">&nbsp;			int geometry = getGeometryFromPath(path);</b>
+<b class="fc">&nbsp;			setGeometryVertexCount_(geometry, getPointCount(geometry)</b>
+<b class="fc">&nbsp;					- getPathSize(path));</b>
+&nbsp;		}
+<b class="fc">&nbsp;		setPathSize_(path, 0);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Returns the next path (-1 if there are no more paths in the geometry).
+&nbsp;	int getNextPath(int currentPath) {
+<b class="fc">&nbsp;		return m_path_index_list.getField(currentPath, 2);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Returns the previous path (-1 if there are no more paths in the
+&nbsp;	// geometry).
+&nbsp;	int getPrevPath(int currentPath) {
+<b class="fc">&nbsp;		return m_path_index_list.getField(currentPath, 1);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Returns the number of vertices in the path.
+&nbsp;	int getPathSize(int path) {
+<b class="fc">&nbsp;		return m_path_index_list.getField(path, 3);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Returns True if the path is closed.
+&nbsp;	boolean isClosedPath(int path) {
+<b class="fc">&nbsp;		return (getPathFlags_(path) &amp; PathFlags_.closedPath) != 0;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Makes path closed. Closed paths are circular lists. get_next_vertex
+&nbsp;	// always succeeds
+&nbsp;	void setClosedPath(int path, boolean b_yes_no) {
+<b class="fc">&nbsp;		if (isClosedPath(path) == b_yes_no)</b>
+&nbsp;			return;
+<b class="fc">&nbsp;		if (getPathSize(path) &gt; 0) {</b>
+<b class="fc">&nbsp;			int first = getFirstVertex(path);</b>
+<b class="fc">&nbsp;			int last = getLastVertex(path);</b>
+<b class="fc">&nbsp;			if (b_yes_no) {</b>
+&nbsp;				// make a circular list
+<b class="fc">&nbsp;				setNextVertex_(last, first);</b>
+<b class="fc">&nbsp;				setPrevVertex_(first, last);</b>
+&nbsp;				// set segment to NULL (just in case)
+<b class="fc">&nbsp;				int vindex = getVertexIndex(last);</b>
+<b class="fc">&nbsp;				setSegmentToIndex_(vindex, null);</b>
+<b class="fc">&nbsp;			} else {</b>
+<b class="nc">&nbsp;				setNextVertex_(last, -1);</b>
+<b class="nc">&nbsp;				setPrevVertex_(first, -1);</b>
+<b class="nc">&nbsp;				int vindex = getVertexIndex(last);</b>
+<b class="nc">&nbsp;				setSegmentToIndex_(vindex, null);</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		int oldflags = getPathFlags_(path);</b>
+<b class="fc">&nbsp;		int flags = (oldflags | (int) PathFlags_.closedPath)</b>
+<b class="fc">&nbsp;				- (int) PathFlags_.closedPath;// clear the bit;</b>
+<b class="fc">&nbsp;		setPathFlags_(path, flags</b>
+<b class="fc">&nbsp;				| (b_yes_no ? (int) PathFlags_.closedPath : 0));</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Closes all paths of the geometry (has to be a polyline or polygon).
+&nbsp;	void closeAllPaths(int geometry) {
+<b class="nc">&nbsp;		if (getGeometryType(geometry) == Geometry.GeometryType.Polygon)</b>
+&nbsp;			return;
+<b class="nc">&nbsp;		if (!Geometry.isLinear(getGeometryType(geometry)))</b>
+<b class="nc">&nbsp;			throw GeometryException.GeometryInternalError();</b>
+&nbsp;
+<b class="nc">&nbsp;		for (int path = getFirstPath(geometry); path != -1; path = getNextPath(path)) {</b>
+<b class="nc">&nbsp;			setClosedPath(path, true);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	// Returns geometry from path
+&nbsp;	int getGeometryFromPath(int path) {
+<b class="fc">&nbsp;		return m_path_index_list.getField(path, 7);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Returns True if the path is exterior.
+&nbsp;	boolean isExterior(int path) {
+<b class="fc">&nbsp;		return (getPathFlags_(path) &amp; PathFlags_.exteriorPath) != 0;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Sets exterior flag
+&nbsp;	void setExterior(int path, boolean b_yes_no) {
+<b class="fc">&nbsp;		int oldflags = getPathFlags_(path);</b>
+<b class="fc">&nbsp;		int flags = (oldflags | (int) PathFlags_.exteriorPath)</b>
+<b class="fc">&nbsp;				- (int) PathFlags_.exteriorPath;// clear the bit;</b>
+<b class="fc">&nbsp;		setPathFlags_(path, flags</b>
+<b class="fc">&nbsp;				| (b_yes_no ? (int) PathFlags_.exteriorPath : 0));</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Returns the ring area
+&nbsp;	double getRingArea(int path) {
+<b class="fc">&nbsp;		if (isRingAreaValid_(path))</b>
+<b class="fc">&nbsp;			return m_path_areas.get(getPathIndex_(path));</b>
+&nbsp;
+<b class="fc">&nbsp;		Line line = new Line();</b>
+<b class="fc">&nbsp;		int vertex = getFirstVertex(path);</b>
+<b class="fc">&nbsp;		if (vertex == -1)</b>
+<b class="nc">&nbsp;			return 0;</b>
+<b class="fc">&nbsp;		Point2D pt0 = new Point2D();</b>
+<b class="fc">&nbsp;		getXY(vertex, pt0);</b>
+<b class="fc">&nbsp;		double area = 0;</b>
+<b class="fc">&nbsp;		for (int i = 0, n = getPathSize(path); i &lt; n; i++, vertex = getNextVertex(vertex)) {</b>
+<b class="fc">&nbsp;			Segment seg = getSegment(vertex);</b>
+<b class="fc">&nbsp;			if (seg == null) {</b>
+<b class="fc">&nbsp;				if (!queryLineConnector(vertex, line))</b>
+<b class="nc">&nbsp;					continue;</b>
+&nbsp;
+<b class="fc">&nbsp;				seg = line;</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			double a = seg._calculateArea2DHelper(pt0.x, pt0.y);</b>
+<b class="fc">&nbsp;			area += a;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		setRingAreaValid_(path, true);</b>
+<b class="fc">&nbsp;		m_path_areas.set(getPathIndex_(path), area);</b>
+&nbsp;
+<b class="fc">&nbsp;		return area;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Sets value to the given user index on a path.
+&nbsp;	void setPathUserIndex(int path, int index, int value) {
+<b class="fc">&nbsp;		AttributeStreamOfInt32 stream = m_pathindices.get(index);</b>
+<b class="fc">&nbsp;		int pindex = getPathIndex_(path);</b>
+<b class="fc">&nbsp;		if (stream.size() &lt; m_path_areas.size())</b>
+<b class="fc">&nbsp;			stream.resize(m_path_areas.size(), -1);</b>
+<b class="fc">&nbsp;		stream.write(pindex, value);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Returns the value of the given user index of a path
+&nbsp;	int getPathUserIndex(int path, int index) {
+<b class="fc">&nbsp;		int pindex = getPathIndex_(path);</b>
+<b class="fc">&nbsp;		AttributeStreamOfInt32 stream = m_pathindices.get(index);</b>
+<b class="fc">&nbsp;		if (pindex &lt; stream.size())</b>
+<b class="fc">&nbsp;			return stream.read(pindex);</b>
+&nbsp;		else
+<b class="fc">&nbsp;			return -1;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Creates new user index on a path. The index have random values. The path
+&nbsp;	// index allows to store an integer user value on the path.
+&nbsp;	int createPathUserIndex() {
+<b class="fc">&nbsp;		if (m_pathindices == null)</b>
+<b class="fc">&nbsp;			m_pathindices = new ArrayList&lt;AttributeStreamOfInt32&gt;(0);</b>
+&nbsp;		// Try getting existing index. Use linear search. We do not expect many
+&nbsp;		// indices to be created.
+<b class="fc">&nbsp;		for (int i = 0; i &lt; m_pathindices.size(); i++) {</b>
+<b class="fc">&nbsp;			if (m_pathindices.get(i) == null) {</b>
+<b class="fc">&nbsp;				m_pathindices.set(i,</b>
+<b class="fc">&nbsp;						(AttributeStreamOfInt32) (AttributeStreamBase</b>
+<b class="fc">&nbsp;								.createIndexStream(0)));</b>
+<b class="fc">&nbsp;				return i;</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		m_pathindices.add((AttributeStreamOfInt32) (AttributeStreamBase</b>
+<b class="fc">&nbsp;				.createIndexStream(0)));</b>
+<b class="fc">&nbsp;		return (int) (m_pathindices.size() - 1);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Removes the path user index.
+&nbsp;	void removePathUserIndex(int index) {
+<b class="fc">&nbsp;		m_pathindices.set(index, null);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Moves a path from any geometry before a given path in the dst_geom
+&nbsp;	// geometry. The path_handle do not change after the operation.
+&nbsp;	// before_path can be -1, then the path is moved to the end of the dst_geom.
+&nbsp;	void movePath(int geom, int before_path, int path_to_move) {
+<b class="fc">&nbsp;		if (path_to_move == -1)</b>
+<b class="nc">&nbsp;			throw new IllegalArgumentException();</b>
+&nbsp;
+<b class="fc">&nbsp;		if (before_path == path_to_move)</b>
+&nbsp;			return;
+&nbsp;
+<b class="fc">&nbsp;		int next = getNextPath(path_to_move);</b>
+<b class="fc">&nbsp;		int prev = getPrevPath(path_to_move);</b>
+<b class="fc">&nbsp;		int geom_src = getGeometryFromPath(path_to_move);</b>
+<b class="fc">&nbsp;		if (prev == -1) {</b>
+<b class="fc">&nbsp;			setFirstPath_(geom_src, next);</b>
+<b class="fc">&nbsp;		} else {</b>
+<b class="fc">&nbsp;			setNextPath_(prev, next);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (next == -1) {</b>
+<b class="fc">&nbsp;			setLastPath_(geom_src, prev);</b>
+<b class="fc">&nbsp;		} else {</b>
+<b class="fc">&nbsp;			setPrevPath_(next, prev);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		setGeometryVertexCount_(geom_src, getPointCount(geom_src)</b>
+<b class="fc">&nbsp;				- getPathSize(path_to_move));</b>
+<b class="fc">&nbsp;		setGeometryPathCount_(geom_src, getPathCount(geom_src) - 1);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (before_path == -1)</b>
+<b class="nc">&nbsp;			prev = getLastPath(geom);</b>
+&nbsp;		else
+<b class="fc">&nbsp;			prev = getPrevPath(before_path);</b>
+&nbsp;
+<b class="fc">&nbsp;		setPrevPath_(path_to_move, prev);</b>
+<b class="fc">&nbsp;		setNextPath_(path_to_move, before_path);</b>
+<b class="fc">&nbsp;		if (before_path == -1)</b>
+<b class="nc">&nbsp;			setLastPath_(geom, path_to_move);</b>
+&nbsp;		else
+<b class="fc">&nbsp;			setPrevPath_(before_path, path_to_move);</b>
+<b class="fc">&nbsp;		if (prev == -1)</b>
+<b class="nc">&nbsp;			setFirstPath_(geom, path_to_move);</b>
+&nbsp;		else
+<b class="fc">&nbsp;			setNextPath_(prev, path_to_move);</b>
+<b class="fc">&nbsp;		setGeometryVertexCount_(geom, getPointCount(geom)</b>
+<b class="fc">&nbsp;				+ getPathSize(path_to_move));</b>
+<b class="fc">&nbsp;		setGeometryPathCount_(geom, getPathCount(geom) + 1);</b>
+<b class="fc">&nbsp;		setPathGeometry_(path_to_move, geom);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Adds a copy of a vertex to a path. Connects with a straight line.
+&nbsp;	// Returns new vertex handle.
+&nbsp;	int addVertex(int path, int vertex) {
+<b class="fc">&nbsp;		m_vertices.getPointByVal(getVertexIndex(vertex), getHelperPoint_());</b>
+<b class="fc">&nbsp;		return insertVertex_(path, -1, getHelperPoint_());</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Removes vertex from path. Uses either left or right segments to
+&nbsp;	// reconnect. Returns next vertex after erased one.
+&nbsp;	int removeVertex(int vertex, boolean b_left_segment) {
+<b class="fc">&nbsp;		int path = getPathFromVertex(vertex);</b>
+<b class="fc">&nbsp;		int prev = getPrevVertex(vertex);</b>
+<b class="fc">&nbsp;		int next = getNextVertex(vertex);</b>
+<b class="fc">&nbsp;		if (prev != -1)</b>
+<b class="fc">&nbsp;			setNextVertex_(prev, next);</b>
+&nbsp;
+<b class="fc">&nbsp;		int path_size = getPathSize(path);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (vertex == getFirstVertex(path)) {</b>
+<b class="fc">&nbsp;			setFirstVertex_(path, path_size &gt; 1 ? next : -1);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (next != -1)</b>
+<b class="fc">&nbsp;			setPrevVertex_(next, prev);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (vertex == getLastVertex(path)) {</b>
+<b class="fc">&nbsp;			setLastVertex_(path, path_size &gt; 1 ? prev : -1);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (prev != -1 &amp;&amp; next != -1) {</b>
+<b class="fc">&nbsp;			int vindex_prev = getVertexIndex(prev);</b>
+<b class="fc">&nbsp;			int vindex_next = getVertexIndex(next);</b>
+<b class="fc">&nbsp;			if (b_left_segment) {</b>
+<b class="fc">&nbsp;				Segment seg = getSegmentFromIndex_(vindex_prev);</b>
+<b class="fc">&nbsp;				if (seg != null) {</b>
+<b class="nc">&nbsp;					Point2D pt = new Point2D();</b>
+<b class="nc">&nbsp;					m_vertices.getXY(vindex_next, pt);</b>
+<b class="nc">&nbsp;					seg.setEndXY(pt);</b>
+&nbsp;				}
+<b class="nc">&nbsp;			} else {</b>
+<b class="fc">&nbsp;				int vindex_erased = getVertexIndex(vertex);</b>
+<b class="fc">&nbsp;				Segment seg = getSegmentFromIndex_(vindex_erased);</b>
+<b class="fc">&nbsp;				setSegmentToIndex_(vindex_prev, seg);</b>
+<b class="fc">&nbsp;				if (seg != null) {</b>
+<b class="nc">&nbsp;					Point2D pt = m_vertices.getXY(vindex_prev);</b>
+<b class="nc">&nbsp;					seg.setStartXY(pt);</b>
+&nbsp;				}
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		setPathSize_(path, path_size - 1);</b>
+<b class="fc">&nbsp;		int geometry = getGeometryFromPath(path);</b>
+<b class="fc">&nbsp;		setGeometryVertexCount_(geometry, getPointCount(geometry) - 1);</b>
+<b class="fc">&nbsp;		freeVertex_(vertex);</b>
+<b class="fc">&nbsp;		return next;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Returns first vertex of the given path.
+&nbsp;	int getFirstVertex(int path) {
+<b class="fc">&nbsp;		return m_path_index_list.getField(path, 4);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Returns last vertex of the given path. For the closed paths
+&nbsp;	// get_next_vertex for the last vertex returns the first vertex.
+&nbsp;	int getLastVertex(int path) {
+<b class="fc">&nbsp;		return m_path_index_list.getField(path, 5);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Returns next vertex. Closed paths are circular lists, so get_next_vertex
+&nbsp;	// always returns vertex. Open paths return -1 for last vertex.
+&nbsp;	int getNextVertex(int currentVertex) {
+<b class="fc">&nbsp;		return m_vertex_index_list.getField(currentVertex, 2);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Returns previous vertex. Closed paths are circular lists, so
+&nbsp;	// get_prev_vertex always returns vertex. Open paths return -1 for first
+&nbsp;	// vertex.
+&nbsp;	int getPrevVertex(int currentVertex) {
+<b class="fc">&nbsp;		return m_vertex_index_list.getField(currentVertex, 1);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	int getPrevVertex(int currentVertex, int dir) {
+<b class="fc">&nbsp;		return dir &gt; 0 ? m_vertex_index_list.getField(currentVertex, 1) : m_vertex_index_list.getField(currentVertex, 2);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	int getNextVertex(int currentVertex, int dir) {
+<b class="fc">&nbsp;		return dir &gt; 0 ? m_vertex_index_list.getField(currentVertex, 2) : m_vertex_index_list.getField(currentVertex, 1);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	// Returns a path the vertex belongs to.
+&nbsp;	int getPathFromVertex(int vertex) {
+<b class="fc">&nbsp;		return m_vertex_index_list.getField(vertex, 3);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Adds a copy of the point to a path. Connects with a straight line.
+&nbsp;	// Returns new vertex handle.
+&nbsp;	int addPoint(int path, Point point) {
+<b class="fc">&nbsp;		return insertVertex_(path, -1, point);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Vertex iterator allows to go through all vertices of the Edit_shape.
+<b class="fc">&nbsp;	static class VertexIterator {</b>
+&nbsp;		private EditShape m_parent;
+&nbsp;		private int m_geometry;
+&nbsp;		private int m_path;
+&nbsp;		private int m_vertex;
+&nbsp;		private int m_first_vertex;
+&nbsp;		private int m_index;
+&nbsp;		boolean m_b_first;
+&nbsp;		boolean m_b_skip_mulit_points;
+&nbsp;
+<b class="fc">&nbsp;		private VertexIterator(EditShape parent, int geometry, int path,</b>
+&nbsp;				int vertex, int first_vertex, int index,
+&nbsp;				boolean b_skip_mulit_points) {
+<b class="fc">&nbsp;			m_parent = parent;</b>
+<b class="fc">&nbsp;			m_geometry = geometry;</b>
+<b class="fc">&nbsp;			m_path = path;</b>
+<b class="fc">&nbsp;			m_vertex = vertex;</b>
+<b class="fc">&nbsp;			m_index = index;</b>
+<b class="fc">&nbsp;			m_b_skip_mulit_points = b_skip_mulit_points;</b>
+<b class="fc">&nbsp;			m_first_vertex = first_vertex;</b>
+<b class="fc">&nbsp;			m_b_first = true;</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		int moveToNext_() {
+<b class="fc">&nbsp;			if (m_b_first) {</b>
+<b class="fc">&nbsp;				m_b_first = false;</b>
+<b class="fc">&nbsp;				return m_vertex;</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			if (m_vertex != -1) {</b>
+<b class="fc">&nbsp;				m_vertex = m_parent.getNextVertex(m_vertex);</b>
+<b class="fc">&nbsp;				m_index++;</b>
+<b class="fc">&nbsp;				if (m_vertex != -1 &amp;&amp; m_vertex != m_first_vertex)</b>
+<b class="fc">&nbsp;					return m_vertex;</b>
+&nbsp;
+<b class="fc">&nbsp;				return moveToNextHelper_();// separate into another function for</b>
+&nbsp;											// inlining
+&nbsp;			}
+&nbsp;
+<b class="nc">&nbsp;			return -1;</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		int moveToNextHelper_() {
+<b class="fc">&nbsp;			m_path = m_parent.getNextPath(m_path);</b>
+<b class="fc">&nbsp;			m_index = 0;</b>
+<b class="fc">&nbsp;			while (m_geometry != -1) {</b>
+<b class="nc">&nbsp;				for (; m_path != -1; m_path = m_parent.getNextPath(m_path)) {</b>
+<b class="fc">&nbsp;					m_vertex = m_parent.getFirstVertex(m_path);</b>
+<b class="fc">&nbsp;					m_first_vertex = m_vertex;</b>
+<b class="fc">&nbsp;					if (m_vertex != -1)</b>
+<b class="fc">&nbsp;						return m_vertex;</b>
+&nbsp;				}
+&nbsp;
+<b class="fc">&nbsp;				m_geometry = m_parent.getNextGeometry(m_geometry);</b>
+<b class="fc">&nbsp;				if (m_geometry == -1)</b>
+<b class="fc">&nbsp;					break;</b>
+&nbsp;
+<b class="fc">&nbsp;				if (m_b_skip_mulit_points</b>
+<b class="nc">&nbsp;						&amp;&amp; !Geometry.isMultiPath(m_parent</b>
+<b class="nc">&nbsp;								.getGeometryType(m_geometry))) {</b>
+<b class="nc">&nbsp;					continue;</b>
+&nbsp;				}
+&nbsp;
+<b class="fc">&nbsp;				m_path = m_parent.getFirstPath(m_geometry);</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			return -1;</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		// moves to next vertex. Returns -1 when there are no more vertices.
+<b class="fc">&nbsp;		VertexIterator(VertexIterator source) {</b>
+<b class="fc">&nbsp;			m_parent = source.m_parent;</b>
+<b class="fc">&nbsp;			m_geometry = source.m_geometry;</b>
+<b class="fc">&nbsp;			m_path = source.m_path;</b>
+<b class="fc">&nbsp;			m_vertex = source.m_vertex;</b>
+<b class="fc">&nbsp;			m_index = source.m_index;</b>
+<b class="fc">&nbsp;			m_b_skip_mulit_points = source.m_b_skip_mulit_points;</b>
+<b class="fc">&nbsp;			m_first_vertex = source.m_first_vertex;</b>
+<b class="fc">&nbsp;			m_b_first = true;</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		public int next() {
+<b class="fc">&nbsp;			return moveToNext_();</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		public int currentGeometry() {
+<b class="fc">&nbsp;			assert (m_vertex != -1);</b>
+<b class="fc">&nbsp;			return m_geometry;</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		public int currentPath() {
+<b class="nc">&nbsp;			assert (m_vertex != -1);</b>
+<b class="nc">&nbsp;			return m_path;</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		public static VertexIterator create_(EditShape parent, int geometry,
+&nbsp;				int path, int vertex, int first_vertex, int index,
+&nbsp;				boolean b_skip_mulit_points) {
+<b class="fc">&nbsp;			return new VertexIterator(parent, geometry, path, vertex,</b>
+<b class="fc">&nbsp;					first_vertex, index, b_skip_mulit_points);</b>
+&nbsp;		}
+&nbsp;	};
+&nbsp;
+&nbsp;	// Returns the vertex iterator that allows iteration through all vertices of
+&nbsp;	// all paths of all geometries.
+&nbsp;	VertexIterator queryVertexIterator() {
+<b class="fc">&nbsp;		return queryVertexIterator(false);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	VertexIterator queryVertexIterator(VertexIterator source) {
+<b class="fc">&nbsp;		return new VertexIterator(source);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Returns the vertex iterator that allows iteration through all vertices of
+&nbsp;	// all paths of all geometries.
+&nbsp;	// If bSkipMultiPoints is true, then the iterator will skip the Multi_point
+&nbsp;	// vertices
+&nbsp;	VertexIterator queryVertexIterator(boolean b_skip_multi_points) {
+<b class="fc">&nbsp;		int geometry = -1;</b>
+<b class="fc">&nbsp;		int path = -1;</b>
+<b class="fc">&nbsp;		int vertex = -1;</b>
+<b class="fc">&nbsp;		int first_vertex = -1;</b>
+<b class="fc">&nbsp;		int index = 0;</b>
+<b class="fc">&nbsp;		boolean bFound = false;</b>
+&nbsp;
+<b class="fc">&nbsp;		for (geometry = getFirstGeometry(); geometry != -1; geometry = getNextGeometry(geometry)) {</b>
+<b class="fc">&nbsp;			if (b_skip_multi_points</b>
+<b class="nc">&nbsp;					&amp;&amp; !Geometry.isMultiPath(getGeometryType(geometry)))</b>
+<b class="nc">&nbsp;				continue;</b>
+&nbsp;
+<b class="fc">&nbsp;			for (path = getFirstPath(geometry); path != -1; path = getNextPath(path)) {</b>
+<b class="fc">&nbsp;				vertex = getFirstVertex(path);</b>
+<b class="fc">&nbsp;				first_vertex = vertex;</b>
+<b class="fc">&nbsp;				index = 0;</b>
+<b class="fc">&nbsp;				if (vertex == -1)</b>
+<b class="nc">&nbsp;					continue;</b>
+&nbsp;
+<b class="fc">&nbsp;				bFound = true;</b>
+<b class="fc">&nbsp;				break;</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			if (bFound)</b>
+<b class="fc">&nbsp;				break;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return VertexIterator.create_(this, geometry, path, vertex,</b>
+<b class="fc">&nbsp;				first_vertex, index, b_skip_multi_points);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Applies affine transformation
+&nbsp;	void applyTransformation(Transformation2D transform) {
+<b class="fc">&nbsp;		m_vertices_mp.applyTransformation(transform);</b>
+<b class="fc">&nbsp;		if (m_segments != null) {</b>
+<b class="nc">&nbsp;			for (int i = 0, n = m_segments.size(); i &lt; n; i++) {</b>
+<b class="nc">&nbsp;				if (m_segments.get(i) != null) {</b>
+<b class="nc">&nbsp;					m_segments.get(i).applyTransformation(transform);</b>
+&nbsp;				}
+&nbsp;			}
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	void interpolateAttributesForClosedPath_(int semantics, int path,
+&nbsp;			int from_vertex, int to_vertex, double sub_length, int ordinate) {
+<b class="nc">&nbsp;		if (from_vertex == to_vertex)</b>
+&nbsp;			return;
+&nbsp;
+<b class="nc">&nbsp;		double from_attribute = getAttributeAsDbl(semantics, from_vertex,</b>
+<b class="nc">&nbsp;				ordinate);</b>
+<b class="nc">&nbsp;		double to_attribute = getAttributeAsDbl(semantics, to_vertex, ordinate);</b>
+<b class="nc">&nbsp;		double cumulative_length = 0.0;</b>
+<b class="nc">&nbsp;		double prev_interpolated_attribute = from_attribute;</b>
+&nbsp;
+<b class="nc">&nbsp;		for (int vertex = from_vertex; vertex != to_vertex; vertex = getNextVertex(vertex)) {</b>
+<b class="nc">&nbsp;			setAttribute(semantics, vertex, ordinate,</b>
+<b class="nc">&nbsp;					prev_interpolated_attribute);</b>
+&nbsp;
+<b class="nc">&nbsp;			int vertex_index = getVertexIndex(vertex);</b>
+<b class="nc">&nbsp;			Segment segment = getSegmentFromIndex_(vertex_index);</b>
+&nbsp;			double segment_length;
+&nbsp;
+<b class="nc">&nbsp;			if (segment != null) {</b>
+<b class="nc">&nbsp;				segment_length = segment.calculateLength2D();</b>
+<b class="nc">&nbsp;			} else {</b>
+<b class="nc">&nbsp;				int next_vertex_index = getVertexIndex(getNextVertex(vertex));</b>
+<b class="nc">&nbsp;				segment_length = m_vertices._getShortestDistance(vertex_index,</b>
+<b class="nc">&nbsp;						next_vertex_index);</b>
+&nbsp;			}
+<b class="nc">&nbsp;			cumulative_length += segment_length;</b>
+<b class="nc">&nbsp;			double t = cumulative_length / sub_length;</b>
+<b class="nc">&nbsp;			prev_interpolated_attribute = MathUtils.lerp(from_attribute,  to_attribute,  t);</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		return;
+&nbsp;	}
+&nbsp;
+&nbsp;	void SetGeometryType_(int geom, int gt) {
+<b class="nc">&nbsp;		m_geometry_index_list.setField(geom, 2, gt);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void splitSegment_(int origin_vertex, SegmentIntersector intersector,
+&nbsp;			int intersector_index, boolean b_forward) {
+<b class="fc">&nbsp;		if (b_forward) {</b>
+<b class="fc">&nbsp;			splitSegmentForward_(origin_vertex, intersector, intersector_index);</b>
+<b class="fc">&nbsp;		} else {</b>
+<b class="fc">&nbsp;			splitSegmentBackward_(origin_vertex, intersector, intersector_index);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	void setPrevVertex_(int vertex, int prev) {
+<b class="fc">&nbsp;		m_vertex_index_list.setField(vertex, 1, prev);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void setNextVertex_(int vertex, int next) {
+<b class="fc">&nbsp;		m_vertex_index_list.setField(vertex, 2, next);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void setPathToVertex_(int vertex, int path) {
+<b class="fc">&nbsp;		m_vertex_index_list.setField(vertex, 3, path);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void setPathSize_(int path, int size) {
+<b class="fc">&nbsp;		m_path_index_list.setField(path, 3, size);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void setFirstVertex_(int path, int first_vertex) {
+<b class="fc">&nbsp;		m_path_index_list.setField(path, 4, first_vertex);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void setLastVertex_(int path, int last_vertex) {
+<b class="fc">&nbsp;		m_path_index_list.setField(path, 5, last_vertex);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void setGeometryPathCount_(int geom, int path_count) {
+<b class="fc">&nbsp;		m_geometry_index_list.setField(geom, 6, path_count);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void setGeometryVertexCount_(int geom, int vertex_count) {
+<b class="fc">&nbsp;		m_geometry_index_list.setField(geom, 5, vertex_count);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	boolean ringParentageCheckInternal_(int vertex_1, int vertex_2) {
+<b class="nc">&nbsp;		if (vertex_1 == vertex_2)</b>
+<b class="nc">&nbsp;			return true;</b>
+<b class="nc">&nbsp;		int vprev_1 = vertex_1;</b>
+<b class="nc">&nbsp;		int vprev_2 = vertex_2;</b>
+<b class="nc">&nbsp;		for (int v_1 = getNextVertex(vertex_1), v_2 = getNextVertex(vertex_2); v_1 != vertex_1</b>
+<b class="nc">&nbsp;				&amp;&amp; v_2 != vertex_2; v_1 = getNextVertex(v_1), v_2 = getNextVertex(v_2)) {</b>
+<b class="nc">&nbsp;			if (v_1 == vertex_2)</b>
+<b class="nc">&nbsp;				return true;</b>
+<b class="nc">&nbsp;			if (v_2 == vertex_1)</b>
+<b class="nc">&nbsp;				return true;</b>
+&nbsp;
+<b class="nc">&nbsp;			assert (getPrevVertex(v_1) == vprev_1);// detect malformed list</b>
+<b class="nc">&nbsp;			assert (getPrevVertex(v_2) == vprev_2);// detect malformed list</b>
+<b class="nc">&nbsp;			vprev_1 = v_1;</b>
+<b class="nc">&nbsp;			vprev_2 = v_2;</b>
+&nbsp;		}
+&nbsp;
+<b class="nc">&nbsp;		return false;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void reverseRingInternal_(int vertex) {
+<b class="fc">&nbsp;		int v = vertex;</b>
+&nbsp;		do {
+<b class="fc">&nbsp;			int prev = getPrevVertex(v);</b>
+<b class="fc">&nbsp;			int next = getNextVertex(v);</b>
+<b class="fc">&nbsp;			setNextVertex_(v, prev);</b>
+<b class="fc">&nbsp;			setPrevVertex_(v, next);</b>
+<b class="fc">&nbsp;			v = next;</b>
+<b class="fc">&nbsp;		} while (v != vertex);</b>
+&nbsp;		// Path&#39;s last becomes invalid. Do not attempt to fix it here, because
+&nbsp;		// this is not the intent of the method
+&nbsp;		// Note: only last is invalid. other things sould not change.
+&nbsp;	}
+&nbsp;
+&nbsp;	void setTotalPointCount_(int count) {
+<b class="fc">&nbsp;		m_point_count = count;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void removePathOnly_(int path) {
+<b class="fc">&nbsp;		int prev = getPrevPath(path);</b>
+<b class="fc">&nbsp;		int next = getNextPath(path);</b>
+<b class="fc">&nbsp;		int geometry = getGeometryFromPath(path);</b>
+<b class="fc">&nbsp;		if (prev != -1)</b>
+<b class="fc">&nbsp;			setNextPath_(prev, next);</b>
+&nbsp;		else {
+<b class="fc">&nbsp;			setFirstPath_(geometry, next);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (next != -1)</b>
+<b class="fc">&nbsp;			setPrevPath_(next, prev);</b>
+&nbsp;		else {
+<b class="fc">&nbsp;			setLastPath_(geometry, prev);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		setFirstVertex_(path, -1);</b>
+<b class="fc">&nbsp;		setLastVertex_(path, -1);</b>
+<b class="fc">&nbsp;		freePath_(path);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// void DbgVerifyIntegrity(int vertex);
+&nbsp;	// void dbg_verify_vertex_counts();
+&nbsp;	int removeVertexInternal_(int vertex, boolean b_left_segment) {
+<b class="fc">&nbsp;		int prev = getPrevVertex(vertex);</b>
+<b class="fc">&nbsp;		int next = getNextVertex(vertex);</b>
+<b class="fc">&nbsp;		if (prev != -1)</b>
+<b class="fc">&nbsp;			setNextVertex_(prev, next);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (next != -1)</b>
+<b class="fc">&nbsp;			setPrevVertex_(next, prev);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (prev != -1 &amp;&amp; next != -1) {</b>
+<b class="fc">&nbsp;			int vindex_prev = getVertexIndex(prev);</b>
+<b class="fc">&nbsp;			int vindex_next = getVertexIndex(next);</b>
+<b class="fc">&nbsp;			if (b_left_segment) {</b>
+<b class="fc">&nbsp;				Segment seg = getSegmentFromIndex_(vindex_prev);</b>
+<b class="fc">&nbsp;				if (seg != null) {</b>
+<b class="nc">&nbsp;					Point2D pt = new Point2D();</b>
+<b class="nc">&nbsp;					m_vertices.getXY(vindex_next, pt);</b>
+<b class="nc">&nbsp;					seg.setEndXY(pt);</b>
+&nbsp;				}
+<b class="nc">&nbsp;			} else {</b>
+<b class="fc">&nbsp;				int vindex_erased = getVertexIndex(vertex);</b>
+<b class="fc">&nbsp;				Segment seg = getSegmentFromIndex_(vindex_erased);</b>
+<b class="fc">&nbsp;				setSegmentToIndex_(vindex_prev, seg);</b>
+<b class="fc">&nbsp;				if (seg != null) {</b>
+<b class="nc">&nbsp;					Point2D pt = new Point2D();</b>
+<b class="nc">&nbsp;					m_vertices.getXY(vindex_prev, pt);</b>
+<b class="nc">&nbsp;					seg.setStartXY(pt);</b>
+&nbsp;				}
+&nbsp;			}
+&nbsp;		}
+<b class="fc">&nbsp;		freeVertex_(vertex);</b>
+<b class="fc">&nbsp;		return next;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	boolean isRingAreaValid_(int path) {
+<b class="fc">&nbsp;		return (getPathFlags_(path) &amp; PathFlags_.ringAreaValid) != 0;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Sets exterior flag
+&nbsp;	void setRingAreaValid_(int path, boolean b_yes_no) {
+<b class="fc">&nbsp;		int oldflags = getPathFlags_(path);</b>
+<b class="fc">&nbsp;		int flags = (oldflags | (int) PathFlags_.ringAreaValid)</b>
+<b class="fc">&nbsp;				- (int) PathFlags_.ringAreaValid;// clear the bit;</b>
+<b class="fc">&nbsp;		setPathFlags_(path, flags</b>
+<b class="fc">&nbsp;				| (b_yes_no ? (int) PathFlags_.ringAreaValid : 0));</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	int compareVerticesSimpleY_(int v_1, int v_2) {
+<b class="fc">&nbsp;		Point2D pt_1 = new Point2D();</b>
+<b class="fc">&nbsp;		getXY(v_1, pt_1);</b>
+<b class="fc">&nbsp;		Point2D pt_2 = new Point2D();</b>
+<b class="fc">&nbsp;		getXY(v_2, pt_2);</b>
+<b class="fc">&nbsp;		int res = pt_1.compare(pt_2);</b>
+<b class="fc">&nbsp;		return res;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	int compareVerticesSimpleX_(int v_1, int v_2) {
+<b class="nc">&nbsp;		Point2D pt_1 = new Point2D();</b>
+<b class="nc">&nbsp;		getXY(v_1, pt_1);</b>
+<b class="nc">&nbsp;		Point2D pt_2 = new Point2D();</b>
+<b class="nc">&nbsp;		getXY(v_2, pt_2);</b>
+<b class="nc">&nbsp;		int res = pt_1.compare(pt_2);</b>
+<b class="nc">&nbsp;		return res;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public static class SimplificatorVertexComparerY extends
+&nbsp;			AttributeStreamOfInt32.IntComparator {
+&nbsp;		EditShape parent;
+&nbsp;
+<b class="fc">&nbsp;		SimplificatorVertexComparerY(EditShape parent_) {</b>
+<b class="fc">&nbsp;			parent = parent_;</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		@Override
+&nbsp;		public int compare(int i_1, int i_2) {
+<b class="fc">&nbsp;			return parent.compareVerticesSimpleY_(i_1, i_2);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	public static class SimplificatorVertexComparerX extends
+&nbsp;			AttributeStreamOfInt32.IntComparator {
+&nbsp;		EditShape parent;
+&nbsp;
+<b class="nc">&nbsp;		SimplificatorVertexComparerX(EditShape parent_) {</b>
+<b class="nc">&nbsp;			parent = parent_;</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		@Override
+&nbsp;		public int compare(int i_1, int i_2) {
+<b class="nc">&nbsp;			return parent.compareVerticesSimpleX_(i_1, i_2);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	// void sort_vertices_simple_by_y_heap_merge(Dynamic_array&lt;int&gt;&amp; points,
+&nbsp;	// const Dynamic_array&lt;int&gt;* geoms);
+&nbsp;
+&nbsp;	void sortVerticesSimpleByY_(AttributeStreamOfInt32 points, int begin_,
+&nbsp;			int end_) {
+<b class="fc">&nbsp;		if (m_bucket_sort == null)</b>
+<b class="fc">&nbsp;			m_bucket_sort = new BucketSort();</b>
+<b class="fc">&nbsp;		m_bucket_sort.sort(points, begin_, end_, new EditShapeBucketSortHelper(</b>
+<b class="fc">&nbsp;				this));</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void sortVerticesSimpleByYHelper_(AttributeStreamOfInt32 points,
+&nbsp;			int begin_, int end_) {
+<b class="fc">&nbsp;		points.Sort(begin_, end_, new SimplificatorVertexComparerY(this));</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void sortVerticesSimpleByX_(AttributeStreamOfInt32 points, int begin_,
+&nbsp;			int end_) {
+<b class="nc">&nbsp;		points.Sort(begin_, end_, new SimplificatorVertexComparerX(this));</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Approximate size of the structure in memory.
+&nbsp;	// The estimated size can be very slightly less than the actual size.
+&nbsp;	// int estimate_memory_size() const;
+&nbsp;
+&nbsp;    boolean hasPointFeatures()
+&nbsp;    {
+<b class="fc">&nbsp;      for (int geometry = getFirstGeometry(); geometry != -1; geometry = getNextGeometry(geometry))</b>
+&nbsp;      {
+<b class="fc">&nbsp;        if (!Geometry.isMultiPath(getGeometryType(geometry)))</b>
+<b class="fc">&nbsp;          return true;</b>
+&nbsp;      }
+<b class="fc">&nbsp;      return false;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    void swapGeometry(int geom1, int geom2)
+&nbsp;    {
+<b class="nc">&nbsp;      int first_path1 = getFirstPath(geom1);</b>
+<b class="nc">&nbsp;      int first_path2 = getFirstPath(geom2);</b>
+<b class="nc">&nbsp;      int last_path1 = getLastPath(geom1);</b>
+<b class="nc">&nbsp;      int last_path2 = getLastPath(geom2);</b>
+&nbsp;
+<b class="nc">&nbsp;      for (int path = getFirstPath(geom1); path != -1; path = getNextPath(path))</b>
+&nbsp;      {
+<b class="nc">&nbsp;        setPathGeometry_(path, geom2);</b>
+&nbsp;      }
+&nbsp;
+<b class="nc">&nbsp;      for (int path = getFirstPath(geom2); path != -1; path = getNextPath(path))</b>
+&nbsp;      {
+<b class="nc">&nbsp;        setPathGeometry_(path, geom1);</b>
+&nbsp;      }
+&nbsp;
+<b class="nc">&nbsp;      setFirstPath_(geom1, first_path2);</b>
+<b class="nc">&nbsp;      setFirstPath_(geom2, first_path1);</b>
+<b class="nc">&nbsp;      setLastPath_(geom1, last_path2);</b>
+<b class="nc">&nbsp;      setLastPath_(geom2, last_path1);</b>
+&nbsp;
+<b class="nc">&nbsp;      int vc1 = getPointCount(geom1);</b>
+<b class="nc">&nbsp;      int pc1 = getPathCount(geom1);</b>
+<b class="nc">&nbsp;      int vc2 = getPointCount(geom2);</b>
+<b class="nc">&nbsp;      int pc2 = getPathCount(geom2);</b>
+&nbsp;
+<b class="nc">&nbsp;      setGeometryVertexCount_(geom1, vc2);</b>
+<b class="nc">&nbsp;      setGeometryVertexCount_(geom2, vc1);</b>
+<b class="nc">&nbsp;      setGeometryPathCount_(geom1, pc2);</b>
+<b class="nc">&nbsp;      setGeometryPathCount_(geom2, pc1);</b>
+&nbsp;
+<b class="nc">&nbsp;      int gt1 = m_geometry_index_list.getField(geom1, 2);</b>
+<b class="nc">&nbsp;      int gt2 = m_geometry_index_list.getField(geom2, 2);</b>
+<b class="nc">&nbsp;      m_geometry_index_list.setField(geom1, 2, gt2);</b>
+<b class="nc">&nbsp;      m_geometry_index_list.setField(geom2, 2, gt1);</b>
+&nbsp;    }
+&nbsp;    
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-02-21 15:02</div>
+</div>
+</body>
+</html>

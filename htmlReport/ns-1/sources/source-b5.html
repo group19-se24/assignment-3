@@ -1,0 +1,1718 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > PlaneSweepCrackerHelper</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.esri.core.geometry</a>
+</div>
+
+<h1>Coverage Summary for Class: PlaneSweepCrackerHelper (com.esri.core.geometry)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">PlaneSweepCrackerHelper</td>
+<td class="coverageStat">
+  <span class="percent">
+    93,5%
+  </span>
+  <span class="absValue">
+    (58/62)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    95,2%
+  </span>
+  <span class="absValue">
+    (710/746)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">PlaneSweepCrackerHelper$QComparator</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (8/8)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">PlaneSweepCrackerHelper$QMonikerComparator</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (8/8)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">PlaneSweepCrackerHelper$SimplifySweepComparator</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (15/15)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">PlaneSweepCrackerHelper$SimplifySweepMonikerComparator</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    88,9%
+  </span>
+  <span class="absValue">
+    (8/9)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    94,4%
+  </span>
+  <span class="absValue">
+    (68/72)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    95,3%
+  </span>
+  <span class="absValue">
+    (749/786)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; Copyright 1995-2015 Esri
+&nbsp;
+&nbsp;   Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp;   you may not use this file except in compliance with the License.
+&nbsp;   You may obtain a copy of the License at
+&nbsp;
+&nbsp;       http://www.apache.org/licenses/LICENSE-2.0
+&nbsp;
+&nbsp;   Unless required by applicable law or agreed to in writing, software
+&nbsp;   distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp;   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp;   See the License for the specific language governing permissions and
+&nbsp;   limitations under the License.
+&nbsp;
+&nbsp; For additional information, contact:
+&nbsp; Environmental Systems Research Institute, Inc.
+&nbsp; Attn: Contracts Dept
+&nbsp; 380 New York Street
+&nbsp; Redlands, California, USA 92373
+&nbsp;
+&nbsp; email: contracts@esri.com
+&nbsp; */
+&nbsp;/*
+&nbsp; * To change this template, choose Tools | Templates
+&nbsp; * and open the template in the editor.
+&nbsp; */
+&nbsp;package com.esri.core.geometry;
+&nbsp;
+<b class="fc">&nbsp;final class PlaneSweepCrackerHelper {</b>
+<b class="fc">&nbsp;	PlaneSweepCrackerHelper() {</b>
+<b class="fc">&nbsp;		m_edges = new StridedIndexTypeCollection(8);</b>
+<b class="fc">&nbsp;		m_clusters = new StridedIndexTypeCollection(5);</b>
+<b class="fc">&nbsp;		m_cluster_vertices = new IndexMultiList();</b>
+<b class="fc">&nbsp;		m_edge_vertices = new IndexMultiList();</b>
+<b class="fc">&nbsp;		m_complications = false;</b>
+<b class="fc">&nbsp;		m_sweep_point = new Point2D();</b>
+<b class="fc">&nbsp;		m_sweep_point.setCoords(0, 0);</b>
+<b class="fc">&nbsp;		m_tolerance = 0;</b>
+<b class="fc">&nbsp;		m_vertex_cluster_index = -1;</b>
+<b class="fc">&nbsp;		m_b_cracked = false;</b>
+<b class="fc">&nbsp;		m_shape = null;</b>
+&nbsp;
+<b class="fc">&nbsp;		m_event_q = new Treap();</b>
+<b class="fc">&nbsp;		m_sweep_structure = new Treap();</b>
+<b class="fc">&nbsp;		m_edges_to_insert_in_sweep_structure = new AttributeStreamOfInt32(0);</b>
+<b class="fc">&nbsp;		m_segment_intersector = new SegmentIntersector();</b>
+<b class="fc">&nbsp;		m_temp_edge_buffer = new AttributeStreamOfInt32(0);</b>
+<b class="fc">&nbsp;		m_modified_clusters = new AttributeStreamOfInt32(0);</b>
+<b class="fc">&nbsp;		m_helper_point = new Point();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// For use in Cluster/Cracker loop
+&nbsp;	boolean sweep(EditShape shape, double tolerance) {
+<b class="fc">&nbsp;		Transformation2D transform = new Transformation2D();</b>
+<b class="fc">&nbsp;		transform.setSwapCoordinates();</b>
+<b class="fc">&nbsp;		shape.applyTransformation(transform);// swap coordinates for the sweep</b>
+&nbsp;												// along x
+<b class="fc">&nbsp;		setEditShape_(shape);</b>
+<b class="fc">&nbsp;		m_b_cracked = false;</b>
+<b class="fc">&nbsp;		m_tolerance = tolerance;</b>
+<b class="fc">&nbsp;		m_tolerance_sqr = tolerance * tolerance;</b>
+&nbsp;
+<b class="fc">&nbsp;		boolean b_cracked = sweepImpl_();</b>
+<b class="fc">&nbsp;		shape.applyTransformation(transform);</b>
+<b class="fc">&nbsp;		if (!b_cracked) {</b>
+<b class="fc">&nbsp;			fillEventQueuePass2();</b>
+<b class="fc">&nbsp;			b_cracked |= sweepImpl_();</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		if (m_vertex_cluster_index != -1) {</b>
+<b class="fc">&nbsp;			m_shape.removeUserIndex(m_vertex_cluster_index);</b>
+<b class="fc">&nbsp;			m_vertex_cluster_index = -1;</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		m_shape = null;</b>
+<b class="fc">&nbsp;		return m_b_cracked;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Does one pass sweep vertically
+&nbsp;	boolean sweepVertical(EditShape shape, double tolerance) {
+<b class="fc">&nbsp;		setEditShape_(shape);</b>
+<b class="fc">&nbsp;		m_b_cracked = false;</b>
+<b class="fc">&nbsp;		m_tolerance = tolerance;</b>
+<b class="fc">&nbsp;		m_tolerance_sqr = tolerance * tolerance;</b>
+<b class="fc">&nbsp;		m_complications = false;</b>
+<b class="fc">&nbsp;		boolean bresult = sweepImpl_();</b>
+<b class="fc">&nbsp;		if (!m_complications) {</b>
+<b class="fc">&nbsp;			int filtered = shape.filterClosePoints(tolerance, true, false);</b>
+<b class="fc">&nbsp;			m_complications = filtered == 1;</b>
+<b class="fc">&nbsp;			bresult |= filtered == 1;</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		if (m_vertex_cluster_index != -1) {</b>
+<b class="fc">&nbsp;			m_shape.removeUserIndex(m_vertex_cluster_index);</b>
+<b class="fc">&nbsp;			m_vertex_cluster_index = -1;</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		m_shape = null;</b>
+<b class="fc">&nbsp;		return bresult;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	boolean hadCompications() {
+<b class="fc">&nbsp;		return m_complications;</b>
+&nbsp;	}
+&nbsp;
+<b class="fc">&nbsp;	private EditShape m_shape;</b>
+&nbsp;	private StridedIndexTypeCollection m_edges;
+&nbsp;	private StridedIndexTypeCollection m_clusters;
+&nbsp;	private IndexMultiList m_cluster_vertices;
+<b class="fc">&nbsp;	private IndexMultiList m_edge_vertices;</b>
+&nbsp;	private Point m_helper_point;
+&nbsp;
+&nbsp;	private Treap m_event_q;
+&nbsp;	private Treap m_sweep_structure;
+&nbsp;
+&nbsp;	boolean m_complications;
+&nbsp;
+<b class="fc">&nbsp;	static final class SimplifySweepComparator extends SweepComparator {</b>
+&nbsp;		PlaneSweepCrackerHelper m_parent;
+&nbsp;
+&nbsp;		SimplifySweepComparator(PlaneSweepCrackerHelper parent) {
+<b class="fc">&nbsp;			super(parent.m_shape, parent.m_tolerance, false);</b>
+<b class="fc">&nbsp;			m_parent = parent;</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		@Override
+&nbsp;		int compare(Treap treap, int elm, int node) {
+&nbsp;			// Compares two segments on a sweep line passing through m_sweep_y,
+&nbsp;			// m_sweep_x.
+<b class="fc">&nbsp;			if (m_b_intersection_detected)</b>
+<b class="fc">&nbsp;				return -1;</b>
+&nbsp;
+<b class="fc">&nbsp;			int vertex_list_left = m_parent.getEdgeOriginVertices(elm);</b>
+<b class="fc">&nbsp;			int left = m_parent.m_edge_vertices</b>
+<b class="fc">&nbsp;					.getFirstElement(vertex_list_left);</b>
+&nbsp;
+<b class="fc">&nbsp;			int right_elm = treap.getElement(node);</b>
+<b class="fc">&nbsp;			assert (m_parent.getEdgeSweepNode(right_elm) == node);</b>
+<b class="fc">&nbsp;			int vertex_list_right = m_parent.getEdgeOriginVertices(right_elm);</b>
+<b class="fc">&nbsp;			int right = m_parent.m_edge_vertices</b>
+<b class="fc">&nbsp;					.getFirstElement(vertex_list_right);</b>
+&nbsp;
+<b class="fc">&nbsp;			m_current_node = node;</b>
+<b class="fc">&nbsp;			return compareSegments(elm, left, right_elm, right);</b>
+&nbsp;		}
+&nbsp;	};
+&nbsp;
+&nbsp;	static final class SimplifySweepMonikerComparator extends
+&nbsp;			SweepMonkierComparator {
+&nbsp;		PlaneSweepCrackerHelper m_parent;
+&nbsp;
+&nbsp;		SimplifySweepMonikerComparator(PlaneSweepCrackerHelper parent) {
+<b class="fc">&nbsp;			super(parent.m_shape, parent.m_tolerance);</b>
+<b class="fc">&nbsp;			m_parent = parent;</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		@Override
+&nbsp;		int compare(Treap treap, int node) {
+&nbsp;			// Compares two segments on a sweep line passing through m_sweep_y,
+&nbsp;			// m_sweep_x.
+<b class="fc">&nbsp;			if (m_b_intersection_detected)</b>
+<b class="nc">&nbsp;				return -1;</b>
+&nbsp;
+<b class="fc">&nbsp;			int elm = treap.getElement(node);</b>
+<b class="fc">&nbsp;			int vertexList = m_parent.getEdgeOriginVertices(elm);</b>
+<b class="fc">&nbsp;			int vertex = m_parent.m_edge_vertices.getFirstElement(vertexList);</b>
+&nbsp;
+<b class="fc">&nbsp;			m_current_node = node;</b>
+<b class="fc">&nbsp;			return compareVertex_(treap, node, vertex);</b>
+&nbsp;		}
+&nbsp;	};
+&nbsp;
+&nbsp;	SimplifySweepComparator m_sweep_comparator;
+&nbsp;
+&nbsp;	AttributeStreamOfInt32 m_temp_edge_buffer;
+&nbsp;	AttributeStreamOfInt32 m_modified_clusters;
+&nbsp;	AttributeStreamOfInt32 m_edges_to_insert_in_sweep_structure;
+&nbsp;
+&nbsp;	int m_prev_neighbour;
+&nbsp;	int m_next_neighbour;
+&nbsp;	boolean m_b_continuing_segment_chain_optimization;// set to true, when the
+&nbsp;														// cluster has two edges
+&nbsp;														// attached, one is
+&nbsp;														// below and another
+&nbsp;														// above the sweep line
+&nbsp;
+&nbsp;	SegmentIntersector m_segment_intersector;
+&nbsp;
+&nbsp;	Line m_line_1;
+&nbsp;	Line m_line_2;
+&nbsp;
+&nbsp;	Point2D m_sweep_point;
+&nbsp;	double m_tolerance;
+&nbsp;	double m_tolerance_sqr;
+&nbsp;
+&nbsp;	int m_sweep_point_cluster;
+&nbsp;	int m_vertex_cluster_index;
+&nbsp;
+&nbsp;	boolean m_b_cracked;
+&nbsp;	boolean m_b_sweep_point_cluster_was_modified;// set to true if the
+&nbsp;													// coordinates of the
+&nbsp;													// cluster, where the sweep
+&nbsp;													// line was, has been
+&nbsp;													// changed.
+&nbsp;
+&nbsp;	int getEdgeCluster(int edge, int end) {
+<b class="fc">&nbsp;		assert (end == 0 || end == 1);</b>
+<b class="fc">&nbsp;		return m_edges.getField(edge, 0 + end);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void setEdgeCluster_(int edge, int end, int cluster) {
+<b class="fc">&nbsp;		assert (end == 0 || end == 1);</b>
+<b class="fc">&nbsp;		m_edges.setField(edge, 0 + end, cluster);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Edge may have several origin vertices, when there are two or more equal
+&nbsp;	// segements in that edge
+&nbsp;	// We have to store edge origin separately from the cluster vertices,
+&nbsp;	// because cluster can have several different edges started on it.
+&nbsp;	int getEdgeOriginVertices(int edge) {
+<b class="fc">&nbsp;		return m_edges.getField(edge, 2);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void setEdgeOriginVertices_(int edge, int vertices) {
+<b class="fc">&nbsp;		m_edges.setField(edge, 2, vertices);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	int getNextEdgeEx(int edge, int end) {
+<b class="fc">&nbsp;		assert (end == 0 || end == 1);</b>
+<b class="fc">&nbsp;		return m_edges.getField(edge, 3 + end);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void setNextEdgeEx_(int edge, int end, int next_edge) {
+<b class="nc">&nbsp;		assert (end == 0 || end == 1);</b>
+<b class="nc">&nbsp;		m_edges.setField(edge, 3 + end, next_edge);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// int get_prev_edge_ex(int edge, int end)
+&nbsp;	// {
+&nbsp;	// assert(end == 0 || end == 1);
+&nbsp;	// return m_edges.get_field(edge, 5 + end);
+&nbsp;	// }
+&nbsp;	// void set_prev_edge_ex_(int edge, int end, int prevEdge)
+&nbsp;	// {
+&nbsp;	// assert(end == 0 || end == 1);
+&nbsp;	// m_edges.set_field(edge, 5 + end, prevEdge);
+&nbsp;	// }
+&nbsp;
+&nbsp;	int getEdgeSweepNode(int edge) {
+<b class="fc">&nbsp;		return m_edges.getField(edge, 7);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void setEdgeSweepNode_(int edge, int sweepNode) {
+<b class="fc">&nbsp;		m_edges.setField(edge, 7, sweepNode);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	int getNextEdge(int edge, int cluster) {
+<b class="fc">&nbsp;		int end = getEdgeEnd(edge, cluster);</b>
+<b class="fc">&nbsp;		assert (end == 0 || end == 1);</b>
+<b class="fc">&nbsp;		return m_edges.getField(edge, 3 + end);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void setNextEdge_(int edge, int cluster, int next_edge) {
+<b class="fc">&nbsp;		int end = getEdgeEnd(edge, cluster);</b>
+<b class="fc">&nbsp;		assert (end == 0 || end == 1);</b>
+<b class="fc">&nbsp;		m_edges.setField(edge, 3 + end, next_edge);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	int getPrevEdge(int edge, int cluster) {
+<b class="fc">&nbsp;		int end = getEdgeEnd(edge, cluster);</b>
+<b class="fc">&nbsp;		assert (end == 0 || end == 1);</b>
+<b class="fc">&nbsp;		return m_edges.getField(edge, 5 + end);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void setPrevEdge_(int edge, int cluster, int prevEdge) {
+<b class="fc">&nbsp;		int end = getEdgeEnd(edge, cluster);</b>
+<b class="fc">&nbsp;		assert (end == 0 || end == 1);</b>
+<b class="fc">&nbsp;		m_edges.setField(edge, 5 + end, prevEdge);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	int getClusterVertices(int cluster) {
+<b class="fc">&nbsp;		return m_clusters.getField(cluster, 0);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void setClusterVertices_(int cluster, int vertices) {
+<b class="fc">&nbsp;		m_clusters.setField(cluster, 0, vertices);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	int getClusterVertexIndex(int cluster) {
+<b class="fc">&nbsp;		return m_clusters.getField(cluster, 4);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void setClusterVertexIndex_(int cluster, int vindex) {
+<b class="fc">&nbsp;		m_clusters.setField(cluster, 4, vindex);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	int getClusterSweepEdgeList(int cluster) {
+<b class="nc">&nbsp;		return m_clusters.getField(cluster, 2);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void setClusterSweepEdgeList_(int cluster, int sweep_edges) {
+<b class="nc">&nbsp;		m_clusters.setField(cluster, 2, sweep_edges);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	int getClusterFirstEdge(int cluster) {
+<b class="fc">&nbsp;		return m_clusters.getField(cluster, 1);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void setClusterFirstEdge_(int cluster, int first_edge) {
+<b class="fc">&nbsp;		m_clusters.setField(cluster, 1, first_edge);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	int getClusterEventQNode(int cluster) {
+<b class="fc">&nbsp;		return m_clusters.getField(cluster, 3);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void setClusterEventQNode_(int cluster, int node) {
+<b class="fc">&nbsp;		m_clusters.setField(cluster, 3, node);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	int newCluster_(int vertex) {
+<b class="fc">&nbsp;		int cluster = m_clusters.newElement();</b>
+<b class="fc">&nbsp;		int vertexList = m_cluster_vertices.createList();</b>
+<b class="fc">&nbsp;		setClusterVertices_(cluster, vertexList);</b>
+<b class="fc">&nbsp;		if (vertex != -1) {</b>
+<b class="fc">&nbsp;			m_cluster_vertices.addElement(vertexList, vertex);</b>
+<b class="fc">&nbsp;			assert (m_shape.getUserIndex(vertex, m_vertex_cluster_index) == -1);</b>
+<b class="fc">&nbsp;			m_shape.setUserIndex(vertex, m_vertex_cluster_index, cluster);</b>
+<b class="fc">&nbsp;			setClusterVertexIndex_(cluster, m_shape.getVertexIndex(vertex));</b>
+<b class="fc">&nbsp;		} else {</b>
+<b class="fc">&nbsp;			setClusterVertexIndex_(cluster, -1);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return cluster;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void deleteCluster_(int cluster) {
+<b class="fc">&nbsp;		m_clusters.deleteElement(cluster);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void addVertexToCluster_(int cluster, int vertex) {
+<b class="fc">&nbsp;		assert (m_shape.getUserIndex(vertex, m_vertex_cluster_index) == -1);</b>
+<b class="fc">&nbsp;		int vertexList = getClusterVertices(cluster);</b>
+<b class="fc">&nbsp;		m_cluster_vertices.addElement(vertexList, vertex);</b>
+<b class="fc">&nbsp;		m_shape.setUserIndex(vertex, m_vertex_cluster_index, cluster);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Creates a new unattached edge with the given origin.
+&nbsp;	int newEdge_(int origin_vertex) {
+<b class="fc">&nbsp;		int edge = m_edges.newElement();</b>
+<b class="fc">&nbsp;		int edgeVertices = m_edge_vertices.createList();</b>
+<b class="fc">&nbsp;		setEdgeOriginVertices_(edge, edgeVertices);</b>
+<b class="fc">&nbsp;		if (origin_vertex != -1)</b>
+<b class="fc">&nbsp;			m_edge_vertices.addElement(edgeVertices, origin_vertex);</b>
+&nbsp;
+<b class="fc">&nbsp;		return edge;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void addVertexToEdge_(int edge, int vertex) {
+<b class="fc">&nbsp;		int vertexList = getEdgeOriginVertices(edge);</b>
+<b class="fc">&nbsp;		m_edge_vertices.addElement(vertexList, vertex);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void deleteEdge_(int edge) {
+<b class="fc">&nbsp;		m_edges.deleteElement(edge);</b>
+<b class="fc">&nbsp;		int ind = m_edges_to_insert_in_sweep_structure.findElement(edge);</b>
+<b class="fc">&nbsp;		if (ind &gt;= 0)</b>
+<b class="nc">&nbsp;			m_edges_to_insert_in_sweep_structure.popElement(ind);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void addEdgeToCluster(int edge, int cluster) {
+<b class="fc">&nbsp;		if (getEdgeCluster(edge, 0) == -1) {</b>
+<b class="fc">&nbsp;			assert (getEdgeCluster(edge, 1) != cluster);</b>
+<b class="fc">&nbsp;			setEdgeCluster_(edge, 0, cluster);</b>
+<b class="fc">&nbsp;		} else if (getEdgeCluster(edge, 1) == -1) {</b>
+<b class="fc">&nbsp;			assert (getEdgeCluster(edge, 0) != cluster);</b>
+<b class="fc">&nbsp;			setEdgeCluster_(edge, 1, cluster);</b>
+<b class="fc">&nbsp;		} else</b>
+<b class="nc">&nbsp;			throw GeometryException.GeometryInternalError();</b>
+&nbsp;
+<b class="fc">&nbsp;		addEdgeToClusterImpl_(edge, cluster);// simply adds the edge to the list</b>
+&nbsp;												// of cluster edges.
+&nbsp;	}
+&nbsp;
+&nbsp;	void addEdgeToClusterImpl_(int edge, int cluster) {
+<b class="fc">&nbsp;		int first_edge = getClusterFirstEdge(cluster);</b>
+<b class="fc">&nbsp;		if (first_edge != -1) {</b>
+<b class="fc">&nbsp;			int next = getNextEdge(first_edge, cluster);</b>
+<b class="fc">&nbsp;			setPrevEdge_(next, cluster, edge);</b>
+<b class="fc">&nbsp;			setNextEdge_(edge, cluster, next);</b>
+<b class="fc">&nbsp;			setNextEdge_(first_edge, cluster, edge);</b>
+<b class="fc">&nbsp;			setPrevEdge_(edge, cluster, first_edge);</b>
+<b class="fc">&nbsp;		} else {</b>
+<b class="fc">&nbsp;			setPrevEdge_(edge, cluster, edge);// point to itself</b>
+<b class="fc">&nbsp;			setNextEdge_(edge, cluster, edge);</b>
+<b class="fc">&nbsp;			setClusterFirstEdge_(cluster, edge);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	int getEdgeEnd(int edge, int cluster) {
+<b class="fc">&nbsp;		if (getEdgeCluster(edge, 0) == cluster) {</b>
+<b class="fc">&nbsp;			assert (getEdgeCluster(edge, 1) != cluster);</b>
+<b class="fc">&nbsp;			return 0;</b>
+&nbsp;		} else {
+<b class="fc">&nbsp;			assert (getEdgeCluster(edge, 1) == cluster);</b>
+<b class="fc">&nbsp;			return 1;</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	// Merges two coincident clusters into one. The cluster2 becomes invalid.
+&nbsp;	void mergeClusters_(int cluster_1, int cluster2) {
+&nbsp;		// dbg_check_cluster_(cluster_1);
+&nbsp;		// dbg_check_cluster_(cluster2);
+<b class="fc">&nbsp;		int eventQnode = getClusterEventQNode(cluster2);</b>
+<b class="fc">&nbsp;		if (eventQnode != -1) {</b>
+<b class="nc">&nbsp;			m_event_q.deleteNode(eventQnode, -1);</b>
+<b class="nc">&nbsp;			setClusterEventQNode_(cluster2, -1);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		int firstEdge1 = getClusterFirstEdge(cluster_1);</b>
+<b class="fc">&nbsp;		int firstEdge2 = getClusterFirstEdge(cluster2);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (firstEdge2 != -1) {// scope</b>
+<b class="fc">&nbsp;			int edge2 = firstEdge2;</b>
+<b class="fc">&nbsp;			int lastEdge = firstEdge2;</b>
+<b class="fc">&nbsp;			boolean bForceContinue = false;</b>
+&nbsp;			// Delete edges that connect cluster_1 and cluster2.
+&nbsp;			do {
+&nbsp;				// dbg_check_edge_(edge2);
+<b class="fc">&nbsp;				bForceContinue = false;</b>
+&nbsp;				// assert(!StridedIndexTypeCollection.isValidElement(getEdgeSweepNode(edge2)));
+<b class="fc">&nbsp;				int end = getEdgeEnd(edge2, cluster2);</b>
+<b class="fc">&nbsp;				int nextEdge2 = getNextEdgeEx(edge2, end);</b>
+<b class="fc">&nbsp;				if (getEdgeCluster(edge2, (end + 1) &amp; 1) == cluster_1) { // Snapping</b>
+&nbsp;																			// clusters
+&nbsp;																			// that
+&nbsp;																			// are
+&nbsp;																			// connected
+&nbsp;																			// with
+&nbsp;																			// an
+&nbsp;																			// edge
+&nbsp;																			// Delete
+&nbsp;																			// the
+&nbsp;																			// edge.
+<b class="fc">&nbsp;					disconnectEdge_(edge2);</b>
+<b class="fc">&nbsp;					int edgeOrigins2 = getEdgeOriginVertices(edge2);</b>
+<b class="fc">&nbsp;					m_edge_vertices.deleteList(edgeOrigins2);</b>
+<b class="fc">&nbsp;					deleteEdge_(edge2);</b>
+<b class="fc">&nbsp;					if (edge2 == nextEdge2) {// deleted last edge connecting to</b>
+&nbsp;												// the cluster2 (all connections
+&nbsp;												// are degenerate)
+<b class="fc">&nbsp;						firstEdge2 = -1;</b>
+<b class="fc">&nbsp;						break;</b>
+&nbsp;					}
+<b class="fc">&nbsp;					if (firstEdge2 == edge2) {</b>
+<b class="fc">&nbsp;						firstEdge2 = getClusterFirstEdge(cluster2);</b>
+<b class="fc">&nbsp;						lastEdge = nextEdge2;</b>
+<b class="fc">&nbsp;						bForceContinue = true;</b>
+&nbsp;					}
+<b class="fc">&nbsp;				} else {</b>
+<b class="fc">&nbsp;					assert (edge2 != getClusterFirstEdge(cluster_1));</b>
+&nbsp;				}
+<b class="fc">&nbsp;				edge2 = nextEdge2;</b>
+<b class="fc">&nbsp;			} while (edge2 != lastEdge || bForceContinue);</b>
+&nbsp;
+<b class="fc">&nbsp;			if (firstEdge2 != -1) {</b>
+&nbsp;				// set the cluster to the edge ends
+&nbsp;				do {
+<b class="fc">&nbsp;					int end = getEdgeEnd(edge2, cluster2);</b>
+<b class="fc">&nbsp;					int nextEdge2 = getNextEdgeEx(edge2, end);</b>
+<b class="fc">&nbsp;					assert (edge2 != getClusterFirstEdge(cluster_1));</b>
+<b class="fc">&nbsp;					setEdgeCluster_(edge2, end, cluster_1);</b>
+<b class="fc">&nbsp;					edge2 = nextEdge2;</b>
+<b class="fc">&nbsp;				} while (edge2 != lastEdge);</b>
+&nbsp;
+<b class="fc">&nbsp;				firstEdge1 = getClusterFirstEdge(cluster_1);</b>
+<b class="fc">&nbsp;				if (firstEdge1 != -1) {</b>
+<b class="fc">&nbsp;					int next1 = getNextEdge(firstEdge1, cluster_1);</b>
+<b class="fc">&nbsp;					int next2 = getNextEdge(firstEdge2, cluster_1);</b>
+<b class="fc">&nbsp;					if (next1 == firstEdge1) {</b>
+<b class="fc">&nbsp;						setClusterFirstEdge_(cluster_1, firstEdge2);</b>
+<b class="fc">&nbsp;						addEdgeToClusterImpl_(firstEdge1, cluster_1);</b>
+<b class="fc">&nbsp;						setClusterFirstEdge_(cluster_1, firstEdge1);</b>
+<b class="fc">&nbsp;					} else if (next2 == firstEdge2) {</b>
+<b class="fc">&nbsp;						addEdgeToClusterImpl_(firstEdge2, cluster_1);</b>
+&nbsp;					}
+&nbsp;
+<b class="fc">&nbsp;					setNextEdge_(firstEdge2, cluster_1, next1);</b>
+<b class="fc">&nbsp;					setPrevEdge_(next1, cluster_1, firstEdge2);</b>
+<b class="fc">&nbsp;					setNextEdge_(firstEdge1, cluster_1, next2);</b>
+<b class="fc">&nbsp;					setPrevEdge_(next2, cluster_1, firstEdge1);</b>
+<b class="fc">&nbsp;				} else {</b>
+<b class="fc">&nbsp;					setClusterFirstEdge_(cluster_1, firstEdge2);</b>
+&nbsp;				}
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		int vertices1 = getClusterVertices(cluster_1);</b>
+<b class="fc">&nbsp;		int vertices2 = getClusterVertices(cluster2);</b>
+&nbsp;		// Update cluster info on vertices.
+<b class="fc">&nbsp;		for (int vh = m_cluster_vertices.getFirst(vertices2); vh != -1; vh = m_cluster_vertices</b>
+<b class="fc">&nbsp;				.getNext(vh)) {</b>
+<b class="fc">&nbsp;			int v = m_cluster_vertices.getElement(vh);</b>
+<b class="fc">&nbsp;			m_shape.setUserIndex(v, m_vertex_cluster_index, cluster_1);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		m_cluster_vertices.concatenateLists(vertices1, vertices2);</b>
+<b class="fc">&nbsp;		deleteCluster_(cluster2);</b>
+&nbsp;		// dbg_check_cluster_(cluster_1);
+&nbsp;	}
+&nbsp;
+&nbsp;	// Merges two coincident edges into one. The edge2 becomes invalid.
+&nbsp;	void mergeEdges_(int edge1, int edge2) {
+&nbsp;		// dbg_check_edge_(edge1);
+<b class="fc">&nbsp;		int cluster_1 = getEdgeCluster(edge1, 0);</b>
+<b class="fc">&nbsp;		int cluster2 = getEdgeCluster(edge1, 1);</b>
+<b class="fc">&nbsp;		int cluster21 = getEdgeCluster(edge2, 0);</b>
+<b class="fc">&nbsp;		int cluster22 = getEdgeCluster(edge2, 1);</b>
+&nbsp;
+<b class="fc">&nbsp;		int originVertices1 = getEdgeOriginVertices(edge1);</b>
+<b class="fc">&nbsp;		int originVertices2 = getEdgeOriginVertices(edge2);</b>
+<b class="fc">&nbsp;		m_edge_vertices.concatenateLists(originVertices1, originVertices2);</b>
+<b class="fc">&nbsp;		if (edge2 == getClusterFirstEdge(cluster_1))</b>
+<b class="fc">&nbsp;			setClusterFirstEdge_(cluster_1, edge1);</b>
+<b class="fc">&nbsp;		if (edge2 == getClusterFirstEdge(cluster2))</b>
+<b class="fc">&nbsp;			setClusterFirstEdge_(cluster2, edge1);</b>
+&nbsp;
+<b class="fc">&nbsp;		disconnectEdge_(edge2);// disconnects the edge2 from the clusters.</b>
+<b class="fc">&nbsp;		deleteEdge_(edge2);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (!((cluster_1 == cluster21 &amp;&amp; cluster2 == cluster22) || (cluster2 == cluster21 &amp;&amp; cluster_1 == cluster22))) {</b>
+&nbsp;			// Merged edges have different clusters (clusters have not yet been
+&nbsp;			// merged)
+&nbsp;			// merge clusters before merging the edges
+<b class="nc">&nbsp;			getClusterXY(cluster_1, pt_1);</b>
+<b class="nc">&nbsp;			getClusterXY(cluster21, pt_2);</b>
+<b class="nc">&nbsp;			if (pt_1.isEqual(pt_2)) {</b>
+<b class="nc">&nbsp;				if (cluster_1 != cluster21) {</b>
+<b class="nc">&nbsp;					mergeClusters_(cluster_1, cluster21);</b>
+<b class="nc">&nbsp;					assert (!m_modified_clusters.hasElement(cluster21));</b>
+&nbsp;				}
+<b class="nc">&nbsp;				if (cluster2 != cluster22) {</b>
+<b class="nc">&nbsp;					mergeClusters_(cluster2, cluster22);</b>
+<b class="nc">&nbsp;					assert (!m_modified_clusters.hasElement(cluster22));</b>
+&nbsp;				}
+&nbsp;			} else {
+<b class="nc">&nbsp;				if (cluster2 != cluster21) {</b>
+<b class="nc">&nbsp;					mergeClusters_(cluster2, cluster21);</b>
+<b class="nc">&nbsp;					assert (!m_modified_clusters.hasElement(cluster21));</b>
+&nbsp;				}
+<b class="nc">&nbsp;				if (cluster_1 != cluster22) {</b>
+<b class="nc">&nbsp;					mergeClusters_(cluster_1, cluster22);</b>
+<b class="nc">&nbsp;					assert (!m_modified_clusters.hasElement(cluster22));</b>
+&nbsp;				}
+&nbsp;			}
+&nbsp;		} else {
+&nbsp;			// Merged edges have equal clusters.
+&nbsp;		}
+&nbsp;		// dbg_check_edge_(edge1);
+&nbsp;	}
+&nbsp;
+&nbsp;	// Disconnects the edge from its clusters.
+&nbsp;	void disconnectEdge_(int edge) {
+<b class="fc">&nbsp;		int cluster_1 = getEdgeCluster(edge, 0);</b>
+<b class="fc">&nbsp;		int cluster2 = getEdgeCluster(edge, 1);</b>
+<b class="fc">&nbsp;		disconnectEdgeFromCluster_(edge, cluster_1);</b>
+<b class="fc">&nbsp;		disconnectEdgeFromCluster_(edge, cluster2);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Disconnects the edge from a cluster it is connected to.
+&nbsp;	void disconnectEdgeFromCluster_(int edge, int cluster) {
+<b class="fc">&nbsp;		int next = getNextEdge(edge, cluster);</b>
+<b class="fc">&nbsp;		assert (getPrevEdge(next, cluster) == edge);</b>
+<b class="fc">&nbsp;		int prev = getPrevEdge(edge, cluster);</b>
+<b class="fc">&nbsp;		assert (getNextEdge(prev, cluster) == edge);</b>
+<b class="fc">&nbsp;		int first_edge = getClusterFirstEdge(cluster);</b>
+<b class="fc">&nbsp;		if (next != edge) {</b>
+<b class="fc">&nbsp;			setNextEdge_(prev, cluster, next);</b>
+<b class="fc">&nbsp;			setPrevEdge_(next, cluster, prev);</b>
+<b class="fc">&nbsp;			if (first_edge == edge)</b>
+<b class="fc">&nbsp;				setClusterFirstEdge_(cluster, next);</b>
+<b class="fc">&nbsp;		} else</b>
+<b class="fc">&nbsp;			setClusterFirstEdge_(cluster, -1);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void applyIntersectorToEditShape_(int edgeOrigins,
+&nbsp;			SegmentIntersector intersector, int intersector_index) {
+&nbsp;		// Split Edit_shape segments and produce new vertices. Modify
+&nbsp;		// coordinates as necessary. No vertices are deleted.
+<b class="fc">&nbsp;		int vertexHandle = m_edge_vertices.getFirst(edgeOrigins);</b>
+<b class="fc">&nbsp;		int first_vertex = m_edge_vertices.getElement(vertexHandle);</b>
+&nbsp;
+<b class="fc">&nbsp;		int cluster_1 = getClusterFromVertex(first_vertex);</b>
+<b class="fc">&nbsp;		int cluster2 = getClusterFromVertex(m_shape.getNextVertex(first_vertex));</b>
+<b class="fc">&nbsp;		boolean bComplexCase = cluster_1 == cluster2;</b>
+<b class="fc">&nbsp;		assert (!bComplexCase);// if it ever asserts there will be a bug. Should</b>
+&nbsp;								// be a case of a curve that forms a loop.
+&nbsp;
+<b class="fc">&nbsp;		m_shape.splitSegment_(first_vertex, intersector, intersector_index,</b>
+<b class="fc">&nbsp;				true);</b>
+<b class="fc">&nbsp;		for (vertexHandle = m_edge_vertices.getNext(vertexHandle); vertexHandle != -1; vertexHandle = m_edge_vertices</b>
+<b class="fc">&nbsp;				.getNext(vertexHandle)) {</b>
+<b class="fc">&nbsp;			int vertex = m_edge_vertices.getElement(vertexHandle);</b>
+<b class="fc">&nbsp;			boolean b_forward = getClusterFromVertex(vertex) == cluster_1;</b>
+<b class="fc">&nbsp;			assert ((b_forward &amp;&amp; getClusterFromVertex(m_shape</b>
+<b class="fc">&nbsp;					.getNextVertex(vertex)) == cluster2) || (getClusterFromVertex(vertex) == cluster2 &amp;&amp; getClusterFromVertex(m_shape</b>
+<b class="fc">&nbsp;					.getNextVertex(vertex)) == cluster_1));</b>
+<b class="fc">&nbsp;			m_shape.splitSegment_(vertex, intersector, intersector_index,</b>
+<b class="fc">&nbsp;					b_forward);</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		// Now apply the updated coordinates to all vertices in the cluster_1
+&nbsp;		// and cluster2.
+&nbsp;		Point2D pt_0;
+&nbsp;		Point2D pt_1;
+<b class="fc">&nbsp;		pt_0 = intersector.getResultSegment(intersector_index, 0).getStartXY();</b>
+<b class="fc">&nbsp;		pt_1 = intersector.getResultSegment(intersector_index,</b>
+<b class="fc">&nbsp;				intersector.getResultSegmentCount(intersector_index) - 1)</b>
+<b class="fc">&nbsp;				.getEndXY();</b>
+<b class="fc">&nbsp;		updateClusterXY(cluster_1, pt_0);</b>
+<b class="fc">&nbsp;		updateClusterXY(cluster2, pt_1);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void createEdgesAndClustersFromSplitEdge_(int edge1,
+&nbsp;			SegmentIntersector intersector, int intersector_index) {
+&nbsp;		// dbg_check_new_edges_array_();
+&nbsp;		// The method uses m_temp_edge_buffer for temporary storage and clears
+&nbsp;		// it at the end.
+<b class="fc">&nbsp;		int edgeOrigins1 = getEdgeOriginVertices(edge1);</b>
+&nbsp;
+&nbsp;		// create new edges and clusters
+&nbsp;		// Note that edge1 is disconnected from its clusters already (the
+&nbsp;		// cluster&#39;s edge list does not contain it).
+<b class="fc">&nbsp;		int cluster_1 = getEdgeCluster(edge1, 0);</b>
+<b class="fc">&nbsp;		int cluster2 = getEdgeCluster(edge1, 1);</b>
+<b class="fc">&nbsp;		int prevEdge = newEdge_(-1);</b>
+<b class="fc">&nbsp;		m_edges_to_insert_in_sweep_structure.add(prevEdge);</b>
+<b class="fc">&nbsp;		int c_3 = StridedIndexTypeCollection.impossibleIndex3();</b>
+<b class="fc">&nbsp;		setEdgeSweepNode_(prevEdge, c_3);// mark that its in</b>
+&nbsp;											// m_edges_to_insert_in_sweep_structure
+<b class="fc">&nbsp;		m_temp_edge_buffer.add(prevEdge);</b>
+<b class="fc">&nbsp;		addEdgeToCluster(prevEdge, cluster_1);</b>
+<b class="fc">&nbsp;		for (int i = 1, n = intersector</b>
+<b class="fc">&nbsp;				.getResultSegmentCount(intersector_index); i &lt; n; i++) {// each</b>
+&nbsp;																		// iteration
+&nbsp;																		// adds
+&nbsp;																		// new
+&nbsp;																		// Cluster
+&nbsp;																		// and
+&nbsp;																		// Edge.
+<b class="fc">&nbsp;			int newCluster = newCluster_(-1);</b>
+<b class="fc">&nbsp;			m_modified_clusters.add(newCluster);</b>
+<b class="fc">&nbsp;			m_temp_edge_buffer.add(newCluster);</b>
+<b class="fc">&nbsp;			addEdgeToCluster(prevEdge, newCluster);</b>
+<b class="fc">&nbsp;			int newEdge = newEdge_(-1);</b>
+<b class="fc">&nbsp;			m_edges_to_insert_in_sweep_structure.add(newEdge);</b>
+<b class="fc">&nbsp;			setEdgeSweepNode_(newEdge, c_3);// mark that its in</b>
+&nbsp;											// m_edges_to_insert_in_sweep_structure
+<b class="fc">&nbsp;			m_temp_edge_buffer.add(newEdge);</b>
+<b class="fc">&nbsp;			addEdgeToCluster(newEdge, newCluster);</b>
+<b class="fc">&nbsp;			prevEdge = newEdge;</b>
+&nbsp;		}
+<b class="fc">&nbsp;		addEdgeToCluster(prevEdge, cluster2);</b>
+&nbsp;		// set the Edit_shape vertices to the new clusters and edges.
+<b class="fc">&nbsp;		for (int vertexHandle = m_edge_vertices.getFirst(edgeOrigins1); vertexHandle != -1; vertexHandle = m_edge_vertices</b>
+<b class="fc">&nbsp;				.getNext(vertexHandle)) {</b>
+<b class="fc">&nbsp;			int vertex = m_edge_vertices.getElement(vertexHandle);</b>
+<b class="fc">&nbsp;			int cluster = getClusterFromVertex(vertex);</b>
+<b class="fc">&nbsp;			if (cluster == cluster_1) {// connecting from cluster_1 to cluster2</b>
+<b class="fc">&nbsp;				int i = 0;</b>
+<b class="fc">&nbsp;				do {</b>
+<b class="fc">&nbsp;					if (i &gt; 0) {</b>
+<b class="fc">&nbsp;						int c = m_temp_edge_buffer.get(i - 1);</b>
+<b class="fc">&nbsp;						addVertexToCluster_(c, vertex);</b>
+<b class="fc">&nbsp;						if (getClusterVertexIndex(c) == -1)</b>
+<b class="fc">&nbsp;							setClusterVertexIndex_(c,</b>
+<b class="fc">&nbsp;									m_shape.getVertexIndex(vertex));</b>
+&nbsp;					}
+&nbsp;
+<b class="fc">&nbsp;					int edge = m_temp_edge_buffer.get(i);</b>
+<b class="fc">&nbsp;					i += 2;</b>
+<b class="fc">&nbsp;					addVertexToEdge_(edge, vertex);</b>
+<b class="fc">&nbsp;					vertex = m_shape.getNextVertex(vertex);</b>
+<b class="fc">&nbsp;				} while (i &lt; m_temp_edge_buffer.size());</b>
+<b class="fc">&nbsp;				assert (getClusterFromVertex(vertex) == cluster2);</b>
+&nbsp;			} else {// connecting from cluster2 to cluster_1
+<b class="fc">&nbsp;				assert (cluster == cluster2);</b>
+<b class="fc">&nbsp;				int i = m_temp_edge_buffer.size() - 1;</b>
+<b class="fc">&nbsp;				do {</b>
+<b class="fc">&nbsp;					if (i &lt; m_temp_edge_buffer.size() - 2) {</b>
+<b class="fc">&nbsp;						int c = m_temp_edge_buffer.get(i + 1);</b>
+<b class="fc">&nbsp;						addVertexToCluster_(c, vertex);</b>
+<b class="fc">&nbsp;						if (getClusterVertexIndex(c) &lt; 0)</b>
+<b class="nc">&nbsp;							setClusterVertexIndex_(c,</b>
+<b class="nc">&nbsp;									m_shape.getVertexIndex(vertex));</b>
+&nbsp;					}
+&nbsp;
+<b class="fc">&nbsp;					assert (i % 2 == 0);</b>
+<b class="fc">&nbsp;					int edge = m_temp_edge_buffer.get(i);</b>
+<b class="fc">&nbsp;					i -= 2;</b>
+<b class="fc">&nbsp;					addVertexToEdge_(edge, vertex);</b>
+<b class="fc">&nbsp;					vertex = m_shape.getNextVertex(vertex);</b>
+<b class="fc">&nbsp;				} while (i &gt;= 0);</b>
+<b class="fc">&nbsp;				assert (getClusterFromVertex(vertex) == cluster_1);</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+&nbsp;		// #ifdef _DEBUG_TOPO
+&nbsp;		// for (int i = 0, j = 0, n =
+&nbsp;		// intersector-&gt;get_result_segment_count(intersector_index); i &lt; n; i++,
+&nbsp;		// j+=2)
+&nbsp;		// {
+&nbsp;		// int edge = m_temp_edge_buffer.get(j);
+&nbsp;		// dbg_check_edge_(edge);
+&nbsp;		// }
+&nbsp;		// #endif
+&nbsp;
+<b class="fc">&nbsp;		m_temp_edge_buffer.clear(false);</b>
+&nbsp;		// dbg_check_new_edges_array_();
+&nbsp;	}
+&nbsp;
+&nbsp;	int getVertexFromClusterIndex(int cluster) {
+<b class="nc">&nbsp;		int vertexList = getClusterVertices(cluster);</b>
+<b class="nc">&nbsp;		int vertex = m_cluster_vertices.getFirstElement(vertexList);</b>
+<b class="nc">&nbsp;		return vertex;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	int getClusterFromVertex(int vertex) {
+<b class="fc">&nbsp;		return m_shape.getUserIndex(vertex, m_vertex_cluster_index);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	static final class QComparator extends Treap.Comparator {
+&nbsp;		EditShape m_shape;
+<b class="fc">&nbsp;		Point2D pt_1 = new Point2D();</b>
+<b class="fc">&nbsp;		Point2D pt_2 = new Point2D();</b>
+&nbsp;
+<b class="fc">&nbsp;		QComparator(EditShape shape) {</b>
+<b class="fc">&nbsp;			m_shape = shape;</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		@Override
+&nbsp;		int compare(Treap treap, int vertex, int node) {
+<b class="fc">&nbsp;			m_shape.getXY(vertex, pt_1);</b>
+<b class="fc">&nbsp;			int v_2 = treap.getElement(node);</b>
+<b class="fc">&nbsp;			m_shape.getXY(v_2, pt_2);</b>
+<b class="fc">&nbsp;			return pt_1.compare(pt_2);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	static final class QMonikerComparator extends Treap.MonikerComparator {
+&nbsp;		EditShape m_shape;
+<b class="fc">&nbsp;		Point2D m_point = new Point2D();</b>
+<b class="fc">&nbsp;		Point2D m_pt = new Point2D();</b>
+&nbsp;
+<b class="fc">&nbsp;		QMonikerComparator(EditShape shape) {</b>
+<b class="fc">&nbsp;			m_shape = shape;</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		void setPoint(Point2D pt) {
+<b class="fc">&nbsp;			m_point.setCoords(pt);</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		@Override
+&nbsp;		int compare(Treap treap, int node) {
+<b class="fc">&nbsp;			int v = treap.getElement(node);</b>
+<b class="fc">&nbsp;			m_shape.getXY(v, m_pt);</b>
+<b class="fc">&nbsp;			return m_point.compare(m_pt);</b>
+&nbsp;		}
+&nbsp;	};
+&nbsp;
+&nbsp;	void processSplitHelper1_(int index, int edge,
+&nbsp;			SegmentIntersector intersector) {
+<b class="fc">&nbsp;		int clusterStart = getEdgeCluster(edge, 0);</b>
+<b class="fc">&nbsp;		Point2D ptClusterStart = new Point2D();</b>
+<b class="fc">&nbsp;		getClusterXY(clusterStart, ptClusterStart);</b>
+<b class="fc">&nbsp;		Point2D ptClusterEnd = new Point2D();</b>
+<b class="fc">&nbsp;		int clusterEnd = getEdgeCluster(edge, 1);</b>
+<b class="fc">&nbsp;		getClusterXY(clusterEnd, ptClusterEnd);</b>
+&nbsp;		
+&nbsp;		// Collect all edges that are affected by the split and that are in the
+&nbsp;		// sweep structure.
+<b class="fc">&nbsp;		int count = intersector.getResultSegmentCount(index);</b>
+<b class="fc">&nbsp;		Segment seg = intersector.getResultSegment(index, 0);</b>
+<b class="fc">&nbsp;		Point2D newStart = new Point2D();</b>
+<b class="fc">&nbsp;		seg.getStartXY(newStart);</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (!ptClusterStart.isEqual(newStart)) {</b>
+<b class="fc">&nbsp;			if (!m_complications) {</b>
+<b class="fc">&nbsp;		        int res1 = ptClusterStart.compare(m_sweep_point);</b>
+<b class="fc">&nbsp;		        int res2 = newStart.compare(m_sweep_point);</b>
+<b class="fc">&nbsp;		        if (res1 * res2 &lt; 0) {</b>
+<b class="nc">&nbsp;					m_complications = true;// point is not yet have been processed</b>
+&nbsp;											// but moved before the sweep point,
+&nbsp;											// this will require
+&nbsp;					// repeating the cracking step and the sweep_vertical cannot
+&nbsp;					// help here
+&nbsp;				}
+&nbsp;			}
+&nbsp;			
+&nbsp;			// This cluster&#39;s position needs to be changed
+<b class="fc">&nbsp;			getAffectedEdges(clusterStart, m_temp_edge_buffer);</b>
+<b class="fc">&nbsp;			m_modified_clusters.add(clusterStart);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (!m_complications &amp;&amp; count &gt; 1) {</b>
+<b class="fc">&nbsp;			int dir = ptClusterStart.compare(ptClusterEnd);</b>
+<b class="fc">&nbsp;			Point2D midPoint = seg.getEndXY();</b>
+<b class="fc">&nbsp;			if (ptClusterStart.compare(midPoint) != dir</b>
+<b class="fc">&nbsp;					|| midPoint.compare(ptClusterEnd) != dir) {// split segment</b>
+&nbsp;																// midpoint is
+&nbsp;																// above the
+&nbsp;																// sweep line.
+&nbsp;																// Therefore the
+&nbsp;																// part of the
+&nbsp;																// segment
+<b class="fc">&nbsp;				m_complications = true;</b>
+<b class="fc">&nbsp;			} else {</b>
+<b class="fc">&nbsp;				if (midPoint.compare(m_sweep_point) &lt; 0) {</b>
+&nbsp;					// midpoint moved below sweepline.
+<b class="fc">&nbsp;					m_complications = true;</b>
+&nbsp;				}
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		seg = intersector.getResultSegment(index, count - 1);</b>
+<b class="fc">&nbsp;		Point2D newEnd = seg.getEndXY();</b>
+<b class="fc">&nbsp;		if (!ptClusterEnd.isEqual(newEnd)) {</b>
+<b class="fc">&nbsp;			if (!m_complications) {</b>
+<b class="fc">&nbsp;		        int res1 = ptClusterEnd.compare(m_sweep_point);</b>
+<b class="fc">&nbsp;		        int res2 = newEnd.compare(m_sweep_point);</b>
+<b class="fc">&nbsp;		        if (res1 * res2 &lt; 0) {			</b>
+<b class="nc">&nbsp;					m_complications = true;// point is not yet have been processed</b>
+&nbsp;											// but moved before the sweep point.
+&nbsp;				}
+&nbsp;			}
+&nbsp;			// This cluster&#39;s position needs to be changed
+<b class="fc">&nbsp;			getAffectedEdges(clusterEnd, m_temp_edge_buffer);</b>
+<b class="fc">&nbsp;			m_modified_clusters.add(clusterEnd);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		m_temp_edge_buffer.add(edge);</b>
+&nbsp;		// Delete all nodes from the sweep structure that are affected by the
+&nbsp;		// change.
+<b class="fc">&nbsp;		for (int i = 0, n = m_temp_edge_buffer.size(); i &lt; n; i++) {</b>
+<b class="fc">&nbsp;			int e = m_temp_edge_buffer.get(i);</b>
+<b class="fc">&nbsp;			int sweepNode = getEdgeSweepNode(e);</b>
+<b class="fc">&nbsp;			if (StridedIndexTypeCollection.isValidElement(sweepNode)) {</b>
+<b class="fc">&nbsp;				m_sweep_structure.deleteNode(sweepNode, -1);</b>
+<b class="fc">&nbsp;				setEdgeSweepNode_(e, -1);</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			int c_3 = StridedIndexTypeCollection.impossibleIndex3();</b>
+<b class="fc">&nbsp;			if (e != edge &amp;&amp; getEdgeSweepNode(e) != c_3)// c_3 means the edge is</b>
+&nbsp;														// already in the
+&nbsp;														// m_edges_to_insert_in_sweep_structure
+&nbsp;			{
+<b class="fc">&nbsp;				m_edges_to_insert_in_sweep_structure.add(e);</b>
+<b class="fc">&nbsp;				setEdgeSweepNode_(e, c_3);</b>
+&nbsp;			}
+&nbsp;		}
+<b class="fc">&nbsp;		m_temp_edge_buffer.clear(false);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	boolean checkAndFixIntersection_(int leftSweepNode, int rightSweepNode) {
+<b class="fc">&nbsp;		int leftEdge = m_sweep_structure.getElement(leftSweepNode);</b>
+<b class="fc">&nbsp;		m_sweep_comparator.compare(m_sweep_structure, leftEdge, rightSweepNode);</b>
+<b class="fc">&nbsp;		if (m_sweep_comparator.intersectionDetected()) {</b>
+<b class="fc">&nbsp;			m_sweep_comparator.clearIntersectionDetectedFlag();</b>
+<b class="fc">&nbsp;			fixIntersection_(leftSweepNode, rightSweepNode);</b>
+<b class="fc">&nbsp;			return true;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return false;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void fixIntersection_(int left, int right) {
+<b class="fc">&nbsp;		m_b_cracked = true;</b>
+<b class="fc">&nbsp;		int edge1 = m_sweep_structure.getElement(left);</b>
+<b class="fc">&nbsp;		int edge2 = m_sweep_structure.getElement(right);</b>
+<b class="fc">&nbsp;		assert (edge1 != edge2);</b>
+&nbsp;		Segment seg_1;
+&nbsp;		Segment seg_2;
+<b class="fc">&nbsp;		int vertexList1 = getEdgeOriginVertices(edge1);</b>
+<b class="fc">&nbsp;		int origin1 = m_edge_vertices.getFirstElement(vertexList1);</b>
+<b class="fc">&nbsp;		int vertexList2 = getEdgeOriginVertices(edge2);</b>
+<b class="fc">&nbsp;		int origin2 = m_edge_vertices.getFirstElement(vertexList2);</b>
+<b class="fc">&nbsp;		seg_1 = m_shape.getSegment(origin1);</b>
+<b class="fc">&nbsp;		if (seg_1 == null) {</b>
+<b class="fc">&nbsp;			if (m_line_1 == null)</b>
+<b class="fc">&nbsp;				m_line_1 = new Line();</b>
+<b class="fc">&nbsp;			m_shape.queryLineConnector(origin1, m_line_1);</b>
+<b class="fc">&nbsp;			seg_1 = m_line_1;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		seg_2 = m_shape.getSegment(origin2);</b>
+<b class="fc">&nbsp;		if (seg_2 == null) {</b>
+<b class="fc">&nbsp;			if (m_line_2 == null)</b>
+<b class="fc">&nbsp;				m_line_2 = new Line();</b>
+<b class="fc">&nbsp;			m_shape.queryLineConnector(origin2, m_line_2);</b>
+<b class="fc">&nbsp;			seg_2 = m_line_2;</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		// #ifdef _DEBUG_CRACKING_REPORT
+&nbsp;		// {
+&nbsp;		// Point_2D pt11, pt12, pt21, pt22;
+&nbsp;		// pt11 = seg_1-&gt;get_start_xy();
+&nbsp;		// pt12 = seg_1-&gt;get_end_xy();
+&nbsp;		// pt21 = seg_2-&gt;get_start_xy();
+&nbsp;		// pt22 = seg_2-&gt;get_end_xy();
+&nbsp;		// DEBUGPRINTF(L&quot;Intersecting %d (%0.4f, %0.4f - %0.4f, %0.4f) and %d (%0.4f, %0.4f - %0.4f, %0.4f)\n&quot;,
+&nbsp;		// edge1, pt11.x, pt11.y, pt12.x, pt12.y, edge2, pt21.x, pt21.y, pt22.x,
+&nbsp;		// pt22.y);
+&nbsp;		// }
+&nbsp;		// #endif
+&nbsp;
+<b class="fc">&nbsp;		m_segment_intersector.pushSegment(seg_1);</b>
+<b class="fc">&nbsp;		m_segment_intersector.pushSegment(seg_2);</b>
+<b class="fc">&nbsp;		if (m_segment_intersector.intersect(m_tolerance, true))</b>
+<b class="fc">&nbsp;			m_complications = true;</b>
+&nbsp;				
+&nbsp;				
+<b class="fc">&nbsp;		splitEdge_(edge1, edge2, -1, m_segment_intersector);</b>
+<b class="fc">&nbsp;		m_segment_intersector.clear();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void fixIntersectionPointSegment_(int cluster, int node) {
+<b class="fc">&nbsp;		m_b_cracked = true;</b>
+<b class="fc">&nbsp;		int edge1 = m_sweep_structure.getElement(node);</b>
+&nbsp;		Segment seg_1;
+<b class="fc">&nbsp;		int vertexList1 = getEdgeOriginVertices(edge1);</b>
+<b class="fc">&nbsp;		int origin1 = m_edge_vertices.getFirstElement(vertexList1);</b>
+<b class="fc">&nbsp;		seg_1 = m_shape.getSegment(origin1);</b>
+<b class="fc">&nbsp;		if (seg_1 == null) {</b>
+<b class="fc">&nbsp;			if (m_line_1 == null)</b>
+<b class="fc">&nbsp;				m_line_1 = new Line();</b>
+<b class="fc">&nbsp;			m_shape.queryLineConnector(origin1, m_line_1);</b>
+<b class="fc">&nbsp;			seg_1 = m_line_1;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		int clusterVertex = getClusterFirstVertex(cluster);</b>
+<b class="fc">&nbsp;		m_segment_intersector.pushSegment(seg_1);</b>
+&nbsp;
+<b class="fc">&nbsp;		m_shape.queryPoint(clusterVertex, m_helper_point);</b>
+<b class="fc">&nbsp;		m_segment_intersector.intersect(m_tolerance, m_helper_point, 0, 1.0,</b>
+<b class="fc">&nbsp;				true);</b>
+&nbsp;
+<b class="fc">&nbsp;		splitEdge_(edge1, -1, cluster, m_segment_intersector);</b>
+&nbsp;
+<b class="fc">&nbsp;		m_segment_intersector.clear();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void insertNewEdges_() {
+<b class="fc">&nbsp;		if (m_edges_to_insert_in_sweep_structure.size() == 0)</b>
+&nbsp;			return;
+&nbsp;
+<b class="fc">&nbsp;		while (m_edges_to_insert_in_sweep_structure.size() != 0) {</b>
+<b class="fc">&nbsp;			if (m_edges_to_insert_in_sweep_structure.size() &gt; Math.max(</b>
+<b class="fc">&nbsp;					(int) 100, m_shape.getTotalPointCount())) {</b>
+<b class="nc">&nbsp;				assert (false);</b>
+<b class="nc">&nbsp;				m_edges_to_insert_in_sweep_structure.clear(false);</b>
+<b class="nc">&nbsp;				m_complications = true;</b>
+<b class="nc">&nbsp;				break;// something strange going on here. bail out, forget about</b>
+&nbsp;						// these edges and continue with sweep line. We&#39;ll
+&nbsp;						// iterate on the data one more time.
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			int edge = m_edges_to_insert_in_sweep_structure.getLast();</b>
+<b class="fc">&nbsp;			m_edges_to_insert_in_sweep_structure.removeLast();</b>
+&nbsp;
+<b class="fc">&nbsp;			assert (getEdgeSweepNode(edge) == StridedIndexTypeCollection</b>
+<b class="fc">&nbsp;					.impossibleIndex3());</b>
+<b class="fc">&nbsp;			setEdgeSweepNode_(edge, -1);</b>
+<b class="fc">&nbsp;			int terminatingCluster = isEdgeOnSweepLine_(edge);</b>
+<b class="fc">&nbsp;			if (terminatingCluster != -1) {</b>
+<b class="fc">&nbsp;				insertNewEdgeToSweepStructure_(edge, terminatingCluster);</b>
+&nbsp;			}
+<b class="fc">&nbsp;			m_b_continuing_segment_chain_optimization = false;</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	boolean insertNewEdgeToSweepStructure_(int edge, int terminatingCluster) {
+<b class="fc">&nbsp;		assert (getEdgeSweepNode(edge) == -1);</b>
+&nbsp;		int newEdgeNode;
+<b class="fc">&nbsp;		if (m_b_continuing_segment_chain_optimization) {</b>
+<b class="fc">&nbsp;			newEdgeNode = m_sweep_structure.addElementAtPosition(</b>
+<b class="fc">&nbsp;					m_prev_neighbour, m_next_neighbour, edge, true, true, -1);</b>
+<b class="fc">&nbsp;			m_b_continuing_segment_chain_optimization = false;</b>
+<b class="fc">&nbsp;		} else {</b>
+<b class="fc">&nbsp;			newEdgeNode = m_sweep_structure.addUniqueElement(edge, -1);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (newEdgeNode == -1) {// a coinciding edge.</b>
+<b class="fc">&nbsp;			int existingNode = m_sweep_structure.getDuplicateElement(-1);</b>
+<b class="fc">&nbsp;			int existingEdge = m_sweep_structure.getElement(existingNode);</b>
+<b class="fc">&nbsp;			mergeEdges_(existingEdge, edge);</b>
+<b class="fc">&nbsp;			return false;</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		// Remember the sweep structure node in the edge.
+<b class="fc">&nbsp;		setEdgeSweepNode_(edge, newEdgeNode);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (m_sweep_comparator.intersectionDetected()) {</b>
+&nbsp;			// The edge has been inserted into the sweep structure and an
+&nbsp;			// intersection has beebn found. The edge will be split and removed.
+<b class="fc">&nbsp;			m_sweep_comparator.clearIntersectionDetectedFlag();</b>
+<b class="fc">&nbsp;			int intersectionNode = m_sweep_comparator.getLastComparedNode();</b>
+<b class="fc">&nbsp;			fixIntersection_(intersectionNode, newEdgeNode);</b>
+<b class="fc">&nbsp;			return true;</b>
+&nbsp;		} else {
+&nbsp;			// The edge has been inserted into the sweep structure without
+&nbsp;			// problems (it does not intersect its neighbours)
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return false;</b>
+&nbsp;	}
+&nbsp;
+<b class="fc">&nbsp;	Point2D pt_1 = new Point2D();</b>
+<b class="fc">&nbsp;	Point2D pt_2 = new Point2D();</b>
+&nbsp;	int isEdgeOnSweepLine_(int edge) {
+<b class="fc">&nbsp;		int cluster_1 = getEdgeCluster(edge, 0);</b>
+<b class="fc">&nbsp;		int cluster2 = getEdgeCluster(edge, 1);</b>
+<b class="fc">&nbsp;		getClusterXY(cluster_1, pt_1);</b>
+<b class="fc">&nbsp;		getClusterXY(cluster2, pt_2);</b>
+<b class="fc">&nbsp;		if (Point2D.sqrDistance(pt_1, pt_2) &lt;= m_tolerance_sqr) {// avoid</b>
+&nbsp;																	// degenerate
+&nbsp;																	// segments
+<b class="nc">&nbsp;			m_complications = true;</b>
+<b class="nc">&nbsp;			return -1;</b>
+&nbsp;		}
+<b class="fc">&nbsp;		int cmp1 = pt_1.compare(m_sweep_point);</b>
+<b class="fc">&nbsp;		int cmp2 = pt_2.compare(m_sweep_point);</b>
+<b class="fc">&nbsp;		if (cmp1 &lt;= 0 &amp;&amp; cmp2 &gt; 0) {</b>
+<b class="fc">&nbsp;			return cluster2;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (cmp2 &lt;= 0 &amp;&amp; cmp1 &gt; 0) {</b>
+<b class="fc">&nbsp;			return cluster_1;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return -1;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// void set_edit_shape(Edit_shape* shape);
+&nbsp;	// Fills the event queue and merges coincident clusters.
+&nbsp;	void fillEventQueue() {
+<b class="fc">&nbsp;		AttributeStreamOfInt32 event_q = new AttributeStreamOfInt32(0);</b>
+<b class="fc">&nbsp;		event_q.reserve(m_shape.getTotalPointCount());// temporary structure to</b>
+&nbsp;														// sort and find
+&nbsp;														// clusters
+<b class="fc">&nbsp;		EditShape.VertexIterator iter = m_shape.queryVertexIterator();</b>
+<b class="fc">&nbsp;		for (int vert = iter.next(); vert != -1; vert = iter.next()) {</b>
+<b class="fc">&nbsp;			if (m_shape.getUserIndex(vert, m_vertex_cluster_index) != -1)</b>
+<b class="fc">&nbsp;				event_q.add(vert);</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		// Now we can merge coincident clusters and form the envent structure.
+&nbsp;
+&nbsp;		// sort vertices lexicographically.
+<b class="fc">&nbsp;		m_shape.sortVerticesSimpleByY_(event_q, 0, event_q.size());</b>
+&nbsp;
+&nbsp;		// The m_event_q is the event structure for the planesweep algorithm.
+&nbsp;		// We could use any data structure that allows log(n) insertion and
+&nbsp;		// deletion in the sorted order and
+&nbsp;		// allow to iterate through in the sorted order.
+&nbsp;
+<b class="fc">&nbsp;		m_event_q.clear();</b>
+&nbsp;		// Populate the event structure
+<b class="fc">&nbsp;		m_event_q.setCapacity(event_q.size());</b>
+&nbsp;		{
+&nbsp;			// The comparator is used to sort vertices by the m_event_q
+<b class="fc">&nbsp;			m_event_q.setComparator(new QComparator(m_shape));</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		// create the vertex clusters and fill the event structure m_event_q.
+&nbsp;		// Because most vertices are expected to be non clustered, we create
+&nbsp;		// clusters only for actual clusters to save some memory.
+<b class="fc">&nbsp;		Point2D cluster_pt = new Point2D();</b>
+<b class="fc">&nbsp;		cluster_pt.setNaN();</b>
+<b class="fc">&nbsp;		int cluster = -1;</b>
+<b class="fc">&nbsp;		Point2D pt = new Point2D();</b>
+<b class="fc">&nbsp;		for (int index = 0, nvertex = event_q.size(); index &lt; nvertex; index++) {</b>
+<b class="fc">&nbsp;			int vertex = event_q.get(index);</b>
+<b class="fc">&nbsp;			m_shape.getXY(vertex, pt);</b>
+<b class="fc">&nbsp;			if (pt.isEqual(cluster_pt)) {</b>
+<b class="fc">&nbsp;				int vertexCluster = m_shape.getUserIndex(vertex,</b>
+<b class="fc">&nbsp;						m_vertex_cluster_index);</b>
+<b class="fc">&nbsp;				mergeClusters_(cluster, vertexCluster);</b>
+<b class="fc">&nbsp;				continue;</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			cluster = getClusterFromVertex(vertex);</b>
+&nbsp;			// add a vertex to the event queue
+<b class="fc">&nbsp;			m_shape.getXY(vertex, cluster_pt);</b>
+<b class="fc">&nbsp;			int eventQnode = m_event_q.addBiggestElement(vertex, -1); // this</b>
+&nbsp;																		// method
+&nbsp;																		// does
+&nbsp;																		// not
+&nbsp;																		// call
+&nbsp;																		// comparator&#39;s
+&nbsp;																		// compare,
+&nbsp;																		// assuming
+&nbsp;																		// sorted
+&nbsp;																		// order.
+<b class="fc">&nbsp;			setClusterEventQNode_(cluster, eventQnode);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	void fillEventQueuePass2() {
+<b class="fc">&nbsp;		AttributeStreamOfInt32 event_q = new AttributeStreamOfInt32(0);</b>
+<b class="fc">&nbsp;		event_q.reserve(m_shape.getTotalPointCount());// temporary structure to</b>
+&nbsp;														// sort and find
+&nbsp;														// clusters
+<b class="fc">&nbsp;		for (int node = m_event_q.getFirst(-1); node != -1; node = m_event_q</b>
+<b class="fc">&nbsp;				.getNext(node)) {</b>
+<b class="fc">&nbsp;			int v = m_event_q.getElement(node);</b>
+<b class="fc">&nbsp;			event_q.add(v);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		assert (event_q.size() == m_event_q.size(-1));</b>
+&nbsp;
+<b class="fc">&nbsp;		m_event_q.clear();</b>
+&nbsp;
+&nbsp;		// sort vertices lexicographically.
+<b class="fc">&nbsp;		m_shape.sortVerticesSimpleByY_(event_q, 0, event_q.size());</b>
+&nbsp;
+<b class="fc">&nbsp;		for (int index = 0, nvertex = event_q.size(); index &lt; nvertex; index++) {</b>
+<b class="fc">&nbsp;			int vertex = event_q.get(index);</b>
+<b class="fc">&nbsp;			int cluster = getClusterFromVertex(vertex);</b>
+<b class="fc">&nbsp;			int eventQnode = m_event_q.addBiggestElement(vertex, -1); // this</b>
+&nbsp;																		// method
+&nbsp;																		// does
+&nbsp;																		// not
+&nbsp;																		// call
+&nbsp;																		// comparator&#39;s
+&nbsp;																		// compare,
+&nbsp;																		// assuming
+&nbsp;																		// sorted
+&nbsp;																		// order.
+<b class="fc">&nbsp;			setClusterEventQNode_(cluster, eventQnode);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	// Returns edges already in the sweep structure that are affected by the
+&nbsp;	// change of cluster coordinate.
+&nbsp;	void getAffectedEdges(int cluster, AttributeStreamOfInt32 edges) {
+<b class="fc">&nbsp;		int first_edge = getClusterFirstEdge(cluster);</b>
+<b class="fc">&nbsp;		if (first_edge == -1)</b>
+&nbsp;			return;
+&nbsp;
+<b class="fc">&nbsp;		int edge = first_edge;</b>
+&nbsp;		do {
+<b class="fc">&nbsp;			int sweepNode = getEdgeSweepNode(edge);</b>
+<b class="fc">&nbsp;			if (StridedIndexTypeCollection.isValidElement(sweepNode)) {</b>
+<b class="fc">&nbsp;				edges.add(edge);</b>
+&nbsp;			}
+<b class="fc">&nbsp;			edge = getNextEdge(edge, cluster);</b>
+<b class="fc">&nbsp;		} while (edge != first_edge);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Updates all vertices of the cluster to new coordinate
+&nbsp;	void updateClusterXY(int cluster, Point2D pt) {
+<b class="fc">&nbsp;		int vertexList = getClusterVertices(cluster);</b>
+<b class="fc">&nbsp;		for (int vh = m_cluster_vertices.getFirst(vertexList); vh != -1; vh = m_cluster_vertices</b>
+<b class="fc">&nbsp;				.getNext(vh)) {</b>
+<b class="fc">&nbsp;			int vertex = m_cluster_vertices.getElement(vh);</b>
+<b class="fc">&nbsp;			m_shape.setXY(vertex, pt);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	// Modifies the given edges given the intersector class and the result
+&nbsp;	// index.
+&nbsp;	// The function updates the the event structure and puts new edges into the
+&nbsp;	// m_edges_to_insert_in_sweep_structure.
+&nbsp;	void splitEdge_(int edge1, int edge2, int intersectionCluster,
+&nbsp;			SegmentIntersector intersector) {
+&nbsp;
+<b class="fc">&nbsp;		disconnectEdge_(edge1);// disconnects the edge from the clusters. The</b>
+&nbsp;								// edge still remembers the clusters.
+<b class="fc">&nbsp;		if (edge2 != -1)</b>
+<b class="fc">&nbsp;			disconnectEdge_(edge2);// disconnects the edge from the clusters.</b>
+&nbsp;									// The edge still remembers the clusters.
+&nbsp;
+&nbsp;		// Collect all edges that are affected when the clusters change position
+&nbsp;		// due to snapping
+&nbsp;		// The edges are collected in m_edges_to_insert_in_sweep_structure.
+&nbsp;		// Collect the modified clusters in m_modified_clusters.
+<b class="fc">&nbsp;		processSplitHelper1_(0, edge1, intersector);</b>
+<b class="fc">&nbsp;		if (edge2 != -1)</b>
+<b class="fc">&nbsp;			processSplitHelper1_(1, edge2, intersector);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (intersectionCluster != -1) {</b>
+<b class="fc">&nbsp;			intersector.getResultPoint().getXY(pt_1);</b>
+<b class="fc">&nbsp;			getClusterXY(intersectionCluster, pt_2);</b>
+<b class="fc">&nbsp;			if (!pt_2.isEqual(pt_1))</b>
+<b class="fc">&nbsp;				m_modified_clusters.add(intersectionCluster);</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		// remove modified clusters from the event queue. We&#39;ll reincert them
+&nbsp;		// later
+<b class="fc">&nbsp;		for (int i = 0, n = m_modified_clusters.size(); i &lt; n; i++) {</b>
+<b class="fc">&nbsp;			int cluster = m_modified_clusters.get(i);</b>
+<b class="fc">&nbsp;			int eventQnode = getClusterEventQNode(cluster);</b>
+<b class="fc">&nbsp;			if (eventQnode != -1) {</b>
+<b class="fc">&nbsp;				m_event_q.deleteNode(eventQnode, -1);</b>
+<b class="fc">&nbsp;				setClusterEventQNode_(cluster, -1);</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		int edgeOrigins1 = getEdgeOriginVertices(edge1);</b>
+<b class="fc">&nbsp;		int edgeOrigins2 = (edge2 != -1) ? getEdgeOriginVertices(edge2) : -1;</b>
+&nbsp;
+&nbsp;		// Adjust the vertex coordinates and split the segments in the the edit
+&nbsp;		// shape.
+<b class="fc">&nbsp;		applyIntersectorToEditShape_(edgeOrigins1, intersector, 0);</b>
+<b class="fc">&nbsp;		if (edgeOrigins2 != -1)</b>
+<b class="fc">&nbsp;			applyIntersectorToEditShape_(edgeOrigins2, intersector, 1);</b>
+&nbsp;		else {
+<b class="fc">&nbsp;			assert (intersectionCluster != -1);</b>
+<b class="fc">&nbsp;			Point2D pt = intersector.getResultPoint().getXY();</b>
+<b class="fc">&nbsp;			updateClusterXY(intersectionCluster, pt);</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;		// Produce clusters, and new edges. The new edges are added to
+&nbsp;		// m_edges_to_insert_in_sweep_structure.
+<b class="fc">&nbsp;		createEdgesAndClustersFromSplitEdge_(edge1, intersector, 0);</b>
+<b class="fc">&nbsp;		if (edge2 != -1)</b>
+<b class="fc">&nbsp;			createEdgesAndClustersFromSplitEdge_(edge2, intersector, 1);</b>
+&nbsp;
+<b class="fc">&nbsp;		m_edge_vertices.deleteList(edgeOrigins1);</b>
+<b class="fc">&nbsp;		deleteEdge_(edge1);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (edge2 != -1) {</b>
+<b class="fc">&nbsp;			m_edge_vertices.deleteList(edgeOrigins2);</b>
+<b class="fc">&nbsp;			deleteEdge_(edge2);</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		// insert clusters into the event queue and the edges into the sweep
+&nbsp;		// structure.
+<b class="fc">&nbsp;		for (int i = 0, n = m_modified_clusters.size(); i &lt; n; i++) {</b>
+<b class="fc">&nbsp;			int cluster = m_modified_clusters.get(i);</b>
+<b class="fc">&nbsp;			if (cluster == m_sweep_point_cluster)</b>
+<b class="fc">&nbsp;				m_b_sweep_point_cluster_was_modified = true;</b>
+&nbsp;
+<b class="fc">&nbsp;			int eventQnode = getClusterEventQNode(cluster);</b>
+<b class="fc">&nbsp;			if (eventQnode == -1) {</b>
+<b class="fc">&nbsp;				int vertex = getClusterFirstVertex(cluster);</b>
+<b class="fc">&nbsp;				assert (getClusterFromVertex(vertex) == cluster);</b>
+&nbsp;
+<b class="fc">&nbsp;				eventQnode = m_event_q.addUniqueElement(vertex, -1);// O(logN)</b>
+&nbsp;																	// operation
+<b class="fc">&nbsp;				if (eventQnode == -1) {// the cluster is coinciding with another</b>
+&nbsp;										// one. merge.
+<b class="fc">&nbsp;					int existingNode = m_event_q.getDuplicateElement(-1);</b>
+<b class="fc">&nbsp;					int v = m_event_q.getElement(existingNode);</b>
+<b class="fc">&nbsp;					assert (m_shape.isEqualXY(vertex, v));</b>
+<b class="fc">&nbsp;					int existingCluster = getClusterFromVertex(v);</b>
+<b class="fc">&nbsp;					mergeClusters_(existingCluster, cluster);</b>
+<b class="fc">&nbsp;				} else {</b>
+<b class="fc">&nbsp;					setClusterEventQNode_(cluster, eventQnode);</b>
+&nbsp;				}
+&nbsp;			} else {
+&nbsp;				// if already inserted (probably impossible) case
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		m_modified_clusters.clear(false);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Returns a cluster&#39;s xy.
+&nbsp;	void getClusterXY(int cluster, Point2D ptOut) {
+<b class="fc">&nbsp;		int vindex = getClusterVertexIndex(cluster);</b>
+<b class="fc">&nbsp;		m_shape.getXYWithIndex(vindex, ptOut);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	int getClusterFirstVertex(int cluster) {
+<b class="fc">&nbsp;		int vertexList = getClusterVertices(cluster);</b>
+<b class="fc">&nbsp;		int vertex = m_cluster_vertices.getFirstElement(vertexList);</b>
+<b class="fc">&nbsp;		return vertex;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	boolean sweepImpl_() {
+<b class="fc">&nbsp;		m_b_sweep_point_cluster_was_modified = false;</b>
+<b class="fc">&nbsp;		m_sweep_point_cluster = -1;</b>
+<b class="fc">&nbsp;		if (m_sweep_comparator == null) {</b>
+<b class="fc">&nbsp;			m_sweep_structure.disableBalancing();</b>
+<b class="fc">&nbsp;			m_sweep_comparator = new SimplifySweepComparator(this);</b>
+<b class="fc">&nbsp;			m_sweep_structure.setComparator(m_sweep_comparator);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		AttributeStreamOfInt32 edgesToDelete = new AttributeStreamOfInt32(0);</b>
+<b class="fc">&nbsp;		SimplifySweepMonikerComparator sweepMoniker = null;</b>
+<b class="fc">&nbsp;		QMonikerComparator moniker = null;</b>
+&nbsp;
+<b class="fc">&nbsp;		int iterationCounter = 0;</b>
+<b class="fc">&nbsp;		m_prev_neighbour = -1;</b>
+<b class="fc">&nbsp;		m_next_neighbour = -1;</b>
+<b class="fc">&nbsp;		m_b_continuing_segment_chain_optimization = false;</b>
+&nbsp;
+<b class="fc">&nbsp;		int c_2 = StridedIndexTypeCollection.impossibleIndex2();</b>
+<b class="fc">&nbsp;		int c_3 = StridedIndexTypeCollection.impossibleIndex3();</b>
+<b class="fc">&nbsp;		assert (c_2 != c_3);</b>
+&nbsp;
+<b class="fc">&nbsp;		for (int eventQnode = m_event_q.getFirst(-1); eventQnode != -1;) {</b>
+<b class="fc">&nbsp;			iterationCounter++;</b>
+<b class="fc">&nbsp;			m_b_continuing_segment_chain_optimization = false;</b>
+&nbsp;
+<b class="fc">&nbsp;			int vertex = m_event_q.getElement(eventQnode);</b>
+<b class="fc">&nbsp;			m_sweep_point_cluster = getClusterFromVertex(vertex);</b>
+<b class="fc">&nbsp;			m_shape.getXY(vertex, m_sweep_point);</b>
+&nbsp;
+<b class="fc">&nbsp;			m_sweep_comparator.setSweepY(m_sweep_point.y, m_sweep_point.x);// move</b>
+&nbsp;																			// the
+&nbsp;																			// sweep
+&nbsp;																			// line
+&nbsp;
+<b class="fc">&nbsp;			boolean bDisconnectedCluster = false;</b>
+&nbsp;			{// scope
+<b class="fc">&nbsp;				int first_edge = getClusterFirstEdge(m_sweep_point_cluster);</b>
+<b class="fc">&nbsp;				bDisconnectedCluster = first_edge == -1;</b>
+<b class="fc">&nbsp;				if (!bDisconnectedCluster) {</b>
+<b class="fc">&nbsp;					int edge = first_edge;</b>
+&nbsp;					do {
+<b class="fc">&nbsp;						int sweepNode = getEdgeSweepNode(edge);</b>
+<b class="fc">&nbsp;						if (sweepNode == -1) {</b>
+<b class="fc">&nbsp;							m_edges_to_insert_in_sweep_structure.add(edge);</b>
+<b class="fc">&nbsp;							setEdgeSweepNode_(edge, c_3);// mark that its in</b>
+&nbsp;															// m_edges_to_insert_in_sweep_structure
+<b class="fc">&nbsp;						} else if (sweepNode != c_3) {</b>
+<b class="fc">&nbsp;							assert(StridedIndexTypeCollection.isValidElement(sweepNode));</b>
+<b class="fc">&nbsp;							edgesToDelete.add(sweepNode);</b>
+&nbsp;						}
+<b class="fc">&nbsp;						edge = getNextEdge(edge, m_sweep_point_cluster);</b>
+<b class="fc">&nbsp;					} while (edge != first_edge);</b>
+&nbsp;				}
+&nbsp;			}
+&nbsp;
+&nbsp;			// st_counter_insertions_peaks += edgesToDelete.size() == 0 &amp;&amp;
+&nbsp;			// m_edges_to_insert_in_sweep_structure.size() &gt; 0;
+&nbsp;			// First step is to delete the edges that terminate in the
+&nbsp;			// cluster.
+&nbsp;			// During that step we also determine the left and right neighbors
+&nbsp;			// of the deleted bunch and then check if those left and right
+&nbsp;			// intersect or not.
+<b class="fc">&nbsp;			if (edgesToDelete.size() &gt; 0) {</b>
+<b class="fc">&nbsp;				m_b_continuing_segment_chain_optimization = (edgesToDelete</b>
+<b class="fc">&nbsp;						.size() == 1 &amp;&amp; m_edges_to_insert_in_sweep_structure</b>
+<b class="fc">&nbsp;						.size() == 1);</b>
+&nbsp;
+&nbsp;				// Mark nodes that need to be deleted by setting c_2 to the
+&nbsp;				// edge&#39;s sweep node member.
+<b class="fc">&nbsp;				for (int i = 0, n = edgesToDelete.size(); i &lt; n; i++) {</b>
+<b class="fc">&nbsp;					int edge = m_sweep_structure.getElement(edgesToDelete</b>
+<b class="fc">&nbsp;							.get(i));</b>
+<b class="fc">&nbsp;					setEdgeSweepNode_(edge, c_2);</b>
+&nbsp;				}
+&nbsp;
+<b class="fc">&nbsp;				int left = c_2;</b>
+<b class="fc">&nbsp;				int right = c_2;</b>
+&nbsp;				// Determine left and right nodes for the bunch of nodes we are
+&nbsp;				// deleting.
+<b class="fc">&nbsp;				for (int i = 0, n = edgesToDelete.size(); i &lt; n; i++) {</b>
+<b class="fc">&nbsp;					int sweepNode = edgesToDelete.get(i);</b>
+<b class="fc">&nbsp;					if (left == c_2) {</b>
+<b class="fc">&nbsp;						int localleft = m_sweep_structure.getPrev(sweepNode);</b>
+<b class="fc">&nbsp;						if (localleft != -1) {</b>
+<b class="fc">&nbsp;							int edge = m_sweep_structure.getElement(localleft);</b>
+<b class="fc">&nbsp;							int node = getEdgeSweepNode(edge);</b>
+<b class="fc">&nbsp;							if (node != c_2)</b>
+<b class="fc">&nbsp;								left = localleft;</b>
+<b class="fc">&nbsp;						} else</b>
+<b class="fc">&nbsp;							left = -1;</b>
+&nbsp;					}
+&nbsp;
+<b class="fc">&nbsp;					if (right == c_2) {</b>
+<b class="fc">&nbsp;						int localright = m_sweep_structure.getNext(sweepNode);</b>
+<b class="fc">&nbsp;						if (localright != -1) {</b>
+<b class="fc">&nbsp;							int edge = m_sweep_structure.getElement(localright);</b>
+<b class="fc">&nbsp;							int node = getEdgeSweepNode(edge);</b>
+<b class="fc">&nbsp;							if (node != c_2)</b>
+<b class="fc">&nbsp;								right = localright;</b>
+<b class="fc">&nbsp;						} else</b>
+<b class="fc">&nbsp;							right = -1;</b>
+&nbsp;					}
+&nbsp;
+<b class="fc">&nbsp;					if (left != c_2 &amp;&amp; right != c_2)</b>
+<b class="fc">&nbsp;						break;</b>
+&nbsp;				}
+&nbsp;
+<b class="fc">&nbsp;				assert (left != c_2 &amp;&amp; right != c_2);</b>
+&nbsp;				// Now delete the bunch.
+<b class="fc">&nbsp;				for (int i = 0, n = edgesToDelete.size(); i &lt; n; i++) {</b>
+<b class="fc">&nbsp;					int sweepNode = edgesToDelete.get(i);</b>
+<b class="fc">&nbsp;					int edge = m_sweep_structure.getElement(sweepNode);</b>
+<b class="fc">&nbsp;					m_sweep_structure.deleteNode(sweepNode, -1);</b>
+<b class="fc">&nbsp;					setEdgeSweepNode_(edge, -1);</b>
+&nbsp;				}
+&nbsp;
+<b class="fc">&nbsp;				edgesToDelete.clear(false);</b>
+&nbsp;
+<b class="fc">&nbsp;				m_prev_neighbour = left != -1 ? left : -1;</b>
+<b class="fc">&nbsp;				m_next_neighbour = right != -1 ? right : -1;</b>
+&nbsp;
+&nbsp;				// Now check if the left and right we found intersect or not.
+<b class="fc">&nbsp;				if (left != -1 &amp;&amp; right != -1) {</b>
+<b class="fc">&nbsp;					if (!m_b_continuing_segment_chain_optimization) {</b>
+<b class="fc">&nbsp;						boolean bIntersected = checkAndFixIntersection_(left,</b>
+<b class="fc">&nbsp;								right);</b>
+&nbsp;					}
+<b class="fc">&nbsp;				} else {</b>
+<b class="fc">&nbsp;					if ((left == -1) &amp;&amp; (right == -1))</b>
+<b class="fc">&nbsp;						m_b_continuing_segment_chain_optimization = false;</b>
+&nbsp;				}
+<b class="fc">&nbsp;			} else {</b>
+&nbsp;				// edgesToDelete.size() == 0 - nothing to delete here. This is a
+&nbsp;				// cluster which has all edges directed up or a disconnected
+&nbsp;				// cluster.
+&nbsp;
+<b class="fc">&nbsp;				if (bDisconnectedCluster) {// check standalone cluster (point or</b>
+&nbsp;											// multipoint) if it cracks an edge.
+<b class="fc">&nbsp;					if (sweepMoniker == null)</b>
+<b class="fc">&nbsp;						sweepMoniker = new SimplifySweepMonikerComparator(this);</b>
+&nbsp;
+<b class="fc">&nbsp;					sweepMoniker.setPoint(m_sweep_point);</b>
+<b class="fc">&nbsp;					m_sweep_structure.searchUpperBound(sweepMoniker, -1);</b>
+<b class="fc">&nbsp;					if (sweepMoniker.intersectionDetected()) {</b>
+<b class="fc">&nbsp;						sweepMoniker.clearIntersectionDetectedFlag();</b>
+<b class="fc">&nbsp;						fixIntersectionPointSegment_(m_sweep_point_cluster,</b>
+<b class="fc">&nbsp;								sweepMoniker.getCurrentNode());</b>
+&nbsp;					}
+&nbsp;				}
+&nbsp;			}
+&nbsp;
+&nbsp;			// Now insert edges that start at the cluster and go up
+<b class="fc">&nbsp;			insertNewEdges_();</b>
+&nbsp;
+<b class="fc">&nbsp;			if (m_b_sweep_point_cluster_was_modified) {</b>
+<b class="fc">&nbsp;				m_b_sweep_point_cluster_was_modified = false;</b>
+<b class="fc">&nbsp;				if (moniker == null)</b>
+<b class="fc">&nbsp;					moniker = new QMonikerComparator(m_shape);</b>
+<b class="fc">&nbsp;				moniker.setPoint(m_sweep_point);</b>
+<b class="fc">&nbsp;				eventQnode = m_event_q.searchUpperBound(moniker, -1);</b>
+<b class="fc">&nbsp;			} else</b>
+<b class="fc">&nbsp;				eventQnode = m_event_q.getNext(eventQnode);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return m_b_cracked;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void setEditShape_(EditShape shape) {
+&nbsp;		// Populate the cluster and edge structures.
+<b class="fc">&nbsp;		m_shape = shape;</b>
+<b class="fc">&nbsp;		m_vertex_cluster_index = m_shape.createUserIndex();</b>
+&nbsp;
+<b class="fc">&nbsp;		m_edges.setCapacity(shape.getTotalPointCount() + 32);</b>
+&nbsp;
+<b class="fc">&nbsp;		m_clusters.setCapacity(shape.getTotalPointCount());</b>
+&nbsp;
+<b class="fc">&nbsp;		m_cluster_vertices.reserveLists(shape.getTotalPointCount());</b>
+<b class="fc">&nbsp;		m_cluster_vertices.reserveNodes(shape.getTotalPointCount());</b>
+&nbsp;
+<b class="fc">&nbsp;		m_edge_vertices.reserveLists(shape.getTotalPointCount() + 32);</b>
+<b class="fc">&nbsp;		m_edge_vertices.reserveNodes(shape.getTotalPointCount() + 32);</b>
+&nbsp;
+<b class="fc">&nbsp;		for (int geometry = m_shape.getFirstGeometry(); geometry != -1; geometry = m_shape</b>
+<b class="fc">&nbsp;				.getNextGeometry(geometry)) {</b>
+<b class="fc">&nbsp;			boolean bMultiPath = Geometry.isMultiPath(m_shape</b>
+<b class="fc">&nbsp;					.getGeometryType(geometry));</b>
+&nbsp;
+<b class="fc">&nbsp;			if (!bMultiPath) {// for multipoints do not add edges.</b>
+<b class="fc">&nbsp;				assert (m_shape.getGeometryType(geometry) == Geometry.GeometryType.MultiPoint);</b>
+&nbsp;
+<b class="fc">&nbsp;				for (int path = m_shape.getFirstPath(geometry); path != -1; path = m_shape</b>
+<b class="fc">&nbsp;						.getNextPath(path)) {</b>
+<b class="fc">&nbsp;					int vertex = m_shape.getFirstVertex(path);</b>
+<b class="fc">&nbsp;					for (int i = 0, n = m_shape.getPathSize(path); i &lt; n; i++) {</b>
+&nbsp;						// int cluster
+<b class="fc">&nbsp;						newCluster_(vertex);</b>
+<b class="fc">&nbsp;						vertex = m_shape.getNextVertex(vertex);</b>
+&nbsp;					}
+&nbsp;				}
+<b class="fc">&nbsp;				continue;</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			for (int path = m_shape.getFirstPath(geometry); path != -1; path = m_shape</b>
+<b class="fc">&nbsp;					.getNextPath(path)) {</b>
+<b class="fc">&nbsp;				int path_size = m_shape.getPathSize(path);</b>
+<b class="fc">&nbsp;				assert (path_size &gt; 1);</b>
+<b class="fc">&nbsp;				int first_vertex = m_shape.getFirstVertex(path);</b>
+&nbsp;
+&nbsp;				// first------------------
+<b class="fc">&nbsp;				int firstCluster = newCluster_(first_vertex);</b>
+<b class="fc">&nbsp;				int first_edge = newEdge_(first_vertex);</b>
+<b class="fc">&nbsp;				addEdgeToCluster(first_edge, firstCluster);</b>
+<b class="fc">&nbsp;				int prevEdge = first_edge;</b>
+<b class="fc">&nbsp;				int vertex = m_shape.getNextVertex(first_vertex);</b>
+<b class="fc">&nbsp;				for (int index = 0, n = path_size - 2; index &lt; n; index++) {</b>
+<b class="fc">&nbsp;					int nextvertex = m_shape.getNextVertex(vertex);</b>
+&nbsp;					// ------------x------------
+<b class="fc">&nbsp;					int cluster = newCluster_(vertex);</b>
+<b class="fc">&nbsp;					addEdgeToCluster(prevEdge, cluster);</b>
+<b class="fc">&nbsp;					int newEdge = newEdge_(vertex);</b>
+<b class="fc">&nbsp;					addEdgeToCluster(newEdge, cluster);</b>
+<b class="fc">&nbsp;					prevEdge = newEdge;</b>
+<b class="fc">&nbsp;					vertex = nextvertex;</b>
+&nbsp;				}
+&nbsp;
+&nbsp;				// ------------------lastx
+<b class="fc">&nbsp;				if (m_shape.isClosedPath(path)) {</b>
+<b class="fc">&nbsp;					int cluster = newCluster_(vertex);</b>
+<b class="fc">&nbsp;					addEdgeToCluster(prevEdge, cluster);</b>
+&nbsp;					// close the path
+&nbsp;					// lastx------------------firstx
+<b class="fc">&nbsp;					int newEdge = newEdge_(vertex);</b>
+<b class="fc">&nbsp;					addEdgeToCluster(newEdge, cluster);</b>
+<b class="fc">&nbsp;					addEdgeToCluster(newEdge, firstCluster);</b>
+<b class="fc">&nbsp;				} else {</b>
+&nbsp;					// ------------------lastx
+<b class="fc">&nbsp;					int cluster = newCluster_(vertex);</b>
+<b class="fc">&nbsp;					addEdgeToCluster(prevEdge, cluster);</b>
+&nbsp;				}
+&nbsp;				
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		fillEventQueue();</b>
+&nbsp;
+&nbsp;		// int perPoint = estimate_memory_size() /
+&nbsp;		// m_shape.get_total_point_count();
+&nbsp;		// perPoint = 0;
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-02-21 15:02</div>
+</div>
+</body>
+</html>

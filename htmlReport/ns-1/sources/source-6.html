@@ -1,0 +1,709 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > AttributeStreamOfInt64</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.esri.core.geometry</a>
+</div>
+
+<h1>Coverage Summary for Class: AttributeStreamOfInt64 (com.esri.core.geometry)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">AttributeStreamOfInt64</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/36)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/285)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; Copyright 1995-2017 Esri
+&nbsp;
+&nbsp;   Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp;   you may not use this file except in compliance with the License.
+&nbsp;   You may obtain a copy of the License at
+&nbsp;
+&nbsp;       http://www.apache.org/licenses/LICENSE-2.0
+&nbsp;
+&nbsp;   Unless required by applicable law or agreed to in writing, software
+&nbsp;   distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp;   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp;   See the License for the specific language governing permissions and
+&nbsp;   limitations under the License.
+&nbsp;
+&nbsp; For additional information, contact:
+&nbsp; Environmental Systems Research Institute, Inc.
+&nbsp; Attn: Contracts Dept
+&nbsp; 380 New York Street
+&nbsp; Redlands, California, USA 92373
+&nbsp;
+&nbsp; email: contracts@esri.com
+&nbsp; */
+&nbsp;
+&nbsp;
+&nbsp;package com.esri.core.geometry;
+&nbsp;
+&nbsp;import com.esri.core.geometry.VertexDescription.Persistence;
+&nbsp;
+&nbsp;import java.nio.ByteBuffer;
+&nbsp;
+&nbsp;import static com.esri.core.geometry.SizeOf.SIZE_OF_ATTRIBUTE_STREAM_OF_INT64;
+&nbsp;import static com.esri.core.geometry.SizeOf.sizeOfLongArray;
+&nbsp;
+&nbsp;final class AttributeStreamOfInt64 extends AttributeStreamBase {
+<b class="nc">&nbsp;	private long[] m_buffer = null;</b>
+&nbsp;	private int m_size;
+&nbsp;
+&nbsp;	public int size() {
+<b class="nc">&nbsp;		return m_size;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public void reserve(int reserve)// only in Java
+&nbsp;	{
+<b class="nc">&nbsp;		if (reserve &lt;= 0)</b>
+&nbsp;			return;
+<b class="nc">&nbsp;		if (m_buffer == null)</b>
+<b class="nc">&nbsp;			m_buffer = new long[reserve];</b>
+&nbsp;		else {
+<b class="nc">&nbsp;			if (reserve &lt;= m_buffer.length)</b>
+&nbsp;				return;
+<b class="nc">&nbsp;			long[] buf = new long[reserve];</b>
+<b class="nc">&nbsp;			System.arraycopy(m_buffer, 0, buf, 0, m_size);</b>
+<b class="nc">&nbsp;			m_buffer = buf;</b>
+&nbsp;		}
+&nbsp;
+&nbsp;	}
+&nbsp;
+&nbsp;	public int capacity() {
+<b class="nc">&nbsp;		return m_buffer != null ? m_buffer.length : 0;</b>
+&nbsp;	}
+&nbsp;	
+<b class="nc">&nbsp;	public AttributeStreamOfInt64(int size) {</b>
+<b class="nc">&nbsp;		int sz = size;</b>
+<b class="nc">&nbsp;		if (sz &lt; 2)</b>
+<b class="nc">&nbsp;			sz = 2;</b>
+<b class="nc">&nbsp;		m_buffer = new long[sz];</b>
+<b class="nc">&nbsp;		m_size = size;</b>
+&nbsp;	}
+&nbsp;
+<b class="nc">&nbsp;	public AttributeStreamOfInt64(int size, long defaultValue) {</b>
+<b class="nc">&nbsp;		int sz = size;</b>
+<b class="nc">&nbsp;		if (sz &lt; 2)</b>
+<b class="nc">&nbsp;			sz = 2;</b>
+<b class="nc">&nbsp;		m_buffer = new long[sz];</b>
+<b class="nc">&nbsp;		m_size = size;</b>
+<b class="nc">&nbsp;		for (int i = 0; i &lt; size; i++)</b>
+<b class="nc">&nbsp;			m_buffer[i] = defaultValue;</b>
+&nbsp;	}
+&nbsp;
+<b class="nc">&nbsp;	public AttributeStreamOfInt64(AttributeStreamOfInt64 other) {</b>
+<b class="nc">&nbsp;		m_buffer = other.m_buffer.clone();</b>
+<b class="nc">&nbsp;		m_size = other.m_size;</b>
+&nbsp;	}
+&nbsp;
+<b class="nc">&nbsp;	public AttributeStreamOfInt64(AttributeStreamOfInt64 other, int maxSize) {</b>
+<b class="nc">&nbsp;		m_size = other.size();</b>
+<b class="nc">&nbsp;		if (m_size &gt; maxSize)</b>
+<b class="nc">&nbsp;			m_size = maxSize;</b>
+<b class="nc">&nbsp;		int sz = m_size;</b>
+<b class="nc">&nbsp;		if (sz &lt; 2)</b>
+<b class="nc">&nbsp;			sz = 2;</b>
+<b class="nc">&nbsp;		m_buffer = new long[sz];</b>
+<b class="nc">&nbsp;		System.arraycopy(other.m_buffer, 0, m_buffer, 0, m_size);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Reads a value from the buffer at given offset.
+&nbsp;	 * 
+&nbsp;	 * @param offset
+&nbsp;	 *            is the element number in the stream.
+&nbsp;	 */
+&nbsp;	public long read(int offset) {
+<b class="nc">&nbsp;		return m_buffer[offset];</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Overwrites given element with new value.
+&nbsp;	 * 
+&nbsp;	 * @param offset
+&nbsp;	 *            is the element number in the stream.
+&nbsp;	 * @param value
+&nbsp;	 *            is the value to write.
+&nbsp;	 */
+&nbsp;	public void write(int offset, long value) {
+<b class="nc">&nbsp;		if (m_bReadonly) {</b>
+<b class="nc">&nbsp;			throw new RuntimeException(&quot;invalid_call&quot;);</b>
+&nbsp;		}
+<b class="nc">&nbsp;		m_buffer[offset] = value;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Adds a new value at the end of the stream.
+&nbsp;	 * 
+&nbsp;	 * @param offset
+&nbsp;	 *            is the element number in the stream.
+&nbsp;	 * @param value
+&nbsp;	 *            is the value to write.
+&nbsp;	 */
+&nbsp;	public void add(long v) {
+<b class="nc">&nbsp;		resize(m_size + 1);</b>
+<b class="nc">&nbsp;		m_buffer[m_size - 1] = v;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public AttributeStreamBase restrictedClone(int maxsize) {
+<b class="nc">&nbsp;		int len = m_size;</b>
+<b class="nc">&nbsp;		int newSize = maxsize &lt; len ? maxsize : len;</b>
+<b class="nc">&nbsp;		long[] newBuffer = new long[newSize];</b>
+<b class="nc">&nbsp;		System.arraycopy(m_buffer, 0, newBuffer, 0, newSize);</b>
+<b class="nc">&nbsp;		m_buffer = newBuffer;</b>
+<b class="nc">&nbsp;		m_size = newSize;</b>
+<b class="nc">&nbsp;		return this;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public int virtualSize() {
+<b class="nc">&nbsp;		return size();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public long estimateMemorySize()
+&nbsp;	{
+<b class="nc">&nbsp;		return SIZE_OF_ATTRIBUTE_STREAM_OF_INT64 + sizeOfLongArray(m_buffer.length);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public int getPersistence() {
+<b class="nc">&nbsp;		return Persistence.enumInt64;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public double readAsDbl(int offset) {
+<b class="nc">&nbsp;		return read(offset);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public int readAsInt(int offset) {
+<b class="nc">&nbsp;		return (int) read(offset);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public long readAsInt64(int offset) {
+<b class="nc">&nbsp;		return (long) read(offset);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public void resize(int newSize) {
+<b class="nc">&nbsp;		if (m_bLockedInSize)</b>
+<b class="nc">&nbsp;			throw new GeometryException(</b>
+<b class="nc">&nbsp;					&quot;invalid call. Attribute Stream is locked and cannot be resized.&quot;);</b>
+&nbsp;
+<b class="nc">&nbsp;		if (newSize &lt;= m_size) {</b>
+<b class="nc">&nbsp;			if ((newSize * 5) / 4 &lt; m_buffer.length) {// decrease when the 25%</b>
+&nbsp;														// margin is exceeded
+<b class="nc">&nbsp;				long[] newBuffer = new long[newSize];</b>
+<b class="nc">&nbsp;				System.arraycopy(m_buffer, 0, newBuffer, 0, newSize);</b>
+<b class="nc">&nbsp;				m_buffer = newBuffer;</b>
+&nbsp;			}
+<b class="nc">&nbsp;			m_size = newSize;</b>
+<b class="nc">&nbsp;		} else {</b>
+<b class="nc">&nbsp;			if (newSize &gt; m_buffer.length) {</b>
+<b class="nc">&nbsp;				int sz = (newSize &lt; 64) ? Math.max(newSize * 2, 4)</b>
+<b class="nc">&nbsp;						: (newSize * 5) / 4;</b>
+<b class="nc">&nbsp;				long[] newBuffer = new long[sz];</b>
+<b class="nc">&nbsp;				System.arraycopy(m_buffer, 0, newBuffer, 0, m_size);</b>
+<b class="nc">&nbsp;				m_buffer = newBuffer;</b>
+&nbsp;			}
+&nbsp;
+<b class="nc">&nbsp;			m_size = newSize;</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public void resizePreserveCapacity(int newSize)// java only method
+&nbsp;	{
+<b class="nc">&nbsp;		if (m_buffer == null || newSize &gt; m_buffer.length)</b>
+<b class="nc">&nbsp;			resize(newSize);</b>
+<b class="nc">&nbsp;		if (m_bLockedInSize)</b>
+<b class="nc">&nbsp;			throw new GeometryException(</b>
+<b class="nc">&nbsp;					&quot;invalid call. Attribute Stream is locked and cannot be resized.&quot;);</b>
+&nbsp;
+<b class="nc">&nbsp;		m_size = newSize;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public void resize(int newSize, double defaultValue) {
+<b class="nc">&nbsp;		if (m_bLockedInSize)</b>
+<b class="nc">&nbsp;			throw new GeometryException(</b>
+<b class="nc">&nbsp;					&quot;invalid call. Attribute Stream is locked and cannot be resized.&quot;);</b>
+<b class="nc">&nbsp;		if (newSize &lt;= m_size) {</b>
+<b class="nc">&nbsp;			if ((newSize * 5) / 4 &lt; m_buffer.length) {// decrease when the 25%</b>
+&nbsp;														// margin is exceeded
+<b class="nc">&nbsp;				long[] newBuffer = new long[newSize];</b>
+<b class="nc">&nbsp;				System.arraycopy(m_buffer, 0, newBuffer, 0, newSize);</b>
+<b class="nc">&nbsp;				m_buffer = newBuffer;</b>
+&nbsp;			}
+<b class="nc">&nbsp;			m_size = newSize;</b>
+<b class="nc">&nbsp;		} else {</b>
+<b class="nc">&nbsp;			if (newSize &gt; m_buffer.length) {</b>
+<b class="nc">&nbsp;				int sz = (newSize &lt; 64) ? Math.max(newSize * 2, 4)</b>
+<b class="nc">&nbsp;						: (newSize * 5) / 4;</b>
+<b class="nc">&nbsp;				long[] newBuffer = new long[sz];</b>
+<b class="nc">&nbsp;				System.arraycopy(m_buffer, 0, newBuffer, 0, m_size);</b>
+<b class="nc">&nbsp;				m_buffer = newBuffer;</b>
+&nbsp;			}
+&nbsp;
+<b class="nc">&nbsp;			for (int i = m_size; i &lt; newSize; i++)</b>
+<b class="nc">&nbsp;				m_buffer[i] = (long) defaultValue;</b>
+&nbsp;
+<b class="nc">&nbsp;			m_size = newSize;</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public void writeAsDbl(int offset, double d) {
+<b class="nc">&nbsp;		write(offset, (long) d);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public void writeAsInt64(int offset, long d) {
+<b class="nc">&nbsp;		write(offset, (long) d);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public void writeAsInt(int offset, int d) {
+<b class="nc">&nbsp;		write(offset, (long) d);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// @Override
+&nbsp;	// public void writeRange(int srcStart, int count, ByteBuffer dst,
+&nbsp;	// int dstOffsetBytes) {
+&nbsp;	// // TODO Auto-generated method stub
+&nbsp;	//
+&nbsp;	// }
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public int calculateHashImpl(int hashCode, int start, int end) {
+<b class="nc">&nbsp;		for (int i = start, n = size(); i &lt; n &amp;&amp; i &lt; end; i++)</b>
+<b class="nc">&nbsp;			hashCode = NumberUtils.hash(hashCode, read(i));</b>
+&nbsp;
+<b class="nc">&nbsp;		return hashCode;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public boolean equals(AttributeStreamBase other, int start, int end) {
+<b class="nc">&nbsp;		if (other == null)</b>
+<b class="nc">&nbsp;			return false;</b>
+&nbsp;
+<b class="nc">&nbsp;		if (!(other instanceof AttributeStreamOfInt64))</b>
+<b class="nc">&nbsp;			return false;</b>
+&nbsp;
+<b class="nc">&nbsp;		AttributeStreamOfInt64 _other = (AttributeStreamOfInt64) other;</b>
+&nbsp;
+<b class="nc">&nbsp;		int size = size();</b>
+<b class="nc">&nbsp;		int sizeOther = _other.size();</b>
+&nbsp;
+<b class="nc">&nbsp;		if (end &gt; size || end &gt; sizeOther &amp;&amp; (size != sizeOther))</b>
+<b class="nc">&nbsp;			return false;</b>
+&nbsp;
+<b class="nc">&nbsp;		if (end &gt; size)</b>
+<b class="nc">&nbsp;			end = size;</b>
+&nbsp;
+<b class="nc">&nbsp;		for (int i = start; i &lt; end; i++)</b>
+<b class="nc">&nbsp;			if (read(i) != _other.read(i))</b>
+<b class="nc">&nbsp;				return false;</b>
+&nbsp;
+<b class="nc">&nbsp;		return true;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public void addRange(AttributeStreamBase src, int start, int count,
+&nbsp;			boolean bForward, int stride) {
+<b class="nc">&nbsp;		if (m_bReadonly)</b>
+<b class="nc">&nbsp;			throw new GeometryException(&quot;invalid_call&quot;);</b>
+&nbsp;
+<b class="nc">&nbsp;		if (!bForward &amp;&amp; (stride &lt; 1 || count % stride != 0))</b>
+<b class="nc">&nbsp;			throw new IllegalArgumentException();</b>
+&nbsp;
+<b class="nc">&nbsp;		int oldSize = m_size;</b>
+<b class="nc">&nbsp;		int newSize = oldSize + count;</b>
+<b class="nc">&nbsp;		resize(newSize);</b>
+&nbsp;
+<b class="nc">&nbsp;		if (bForward) {</b>
+<b class="nc">&nbsp;			System.arraycopy(((AttributeStreamOfInt64) src).m_buffer, start,</b>
+<b class="nc">&nbsp;					m_buffer, oldSize, count);</b>
+<b class="nc">&nbsp;		} else {</b>
+<b class="nc">&nbsp;			int n = count;</b>
+&nbsp;
+<b class="nc">&nbsp;			for (int i = 0; i &lt; count; i += stride) {</b>
+<b class="nc">&nbsp;				n -= stride;</b>
+&nbsp;
+<b class="nc">&nbsp;				for (int s = 0; s &lt; stride; s++) {</b>
+<b class="nc">&nbsp;					m_buffer[oldSize + i + s] = ((AttributeStreamOfInt64) src).m_buffer[start</b>
+<b class="nc">&nbsp;							+ n + s];</b>
+&nbsp;				}
+&nbsp;			}
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public void insertRange(int start, AttributeStreamBase src, int srcStart,
+&nbsp;			int count, boolean bForward, int stride, int validSize) {
+<b class="nc">&nbsp;		if (m_bReadonly)</b>
+<b class="nc">&nbsp;			throw new GeometryException(&quot;invalid_call&quot;);</b>
+&nbsp;
+<b class="nc">&nbsp;		if (!bForward &amp;&amp; (stride &lt; 1 || count % stride != 0))</b>
+<b class="nc">&nbsp;			throw new IllegalArgumentException();</b>
+&nbsp;
+<b class="nc">&nbsp;		System.arraycopy(m_buffer, start, m_buffer, start + count, validSize</b>
+<b class="nc">&nbsp;				- start);</b>
+&nbsp;
+<b class="nc">&nbsp;		if (m_buffer == ((AttributeStreamOfInt64) src).m_buffer) {</b>
+<b class="nc">&nbsp;			if (start &lt; srcStart)</b>
+<b class="nc">&nbsp;				srcStart += count;</b>
+&nbsp;		}
+&nbsp;
+<b class="nc">&nbsp;		if (bForward) {</b>
+<b class="nc">&nbsp;			System.arraycopy(((AttributeStreamOfInt64) src).m_buffer, srcStart,</b>
+<b class="nc">&nbsp;					m_buffer, start, count);</b>
+<b class="nc">&nbsp;		} else {</b>
+<b class="nc">&nbsp;			int n = count;</b>
+&nbsp;
+<b class="nc">&nbsp;			for (int i = 0; i &lt; count; i += stride) {</b>
+<b class="nc">&nbsp;				n -= stride;</b>
+&nbsp;
+<b class="nc">&nbsp;				for (int s = 0; s &lt; stride; s++) {</b>
+<b class="nc">&nbsp;					m_buffer[start + i + s] = ((AttributeStreamOfInt64) src).m_buffer[srcStart</b>
+<b class="nc">&nbsp;							+ n + s];</b>
+&nbsp;				}
+&nbsp;			}
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public void insertRange(int start, double value, int count, int validSize) {
+<b class="nc">&nbsp;		if (m_bReadonly)</b>
+<b class="nc">&nbsp;			throw new GeometryException(&quot;invalid_call&quot;);</b>
+&nbsp;
+<b class="nc">&nbsp;		System.arraycopy(m_buffer, start, m_buffer, start + count, validSize</b>
+<b class="nc">&nbsp;				- start);</b>
+&nbsp;
+<b class="nc">&nbsp;		long v = (long) value;</b>
+<b class="nc">&nbsp;		for (int i = 0; i &lt; count; i++) {</b>
+<b class="nc">&nbsp;			m_buffer[start + i] = v;</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public void insertAttributes(int start, Point pt, int semantics,
+&nbsp;			int validSize) {
+<b class="nc">&nbsp;		if (m_bReadonly)</b>
+<b class="nc">&nbsp;			throw new GeometryException(&quot;invalid_call&quot;);</b>
+&nbsp;
+<b class="nc">&nbsp;		int comp = VertexDescription.getComponentCount(semantics);</b>
+&nbsp;
+<b class="nc">&nbsp;		System.arraycopy(m_buffer, start, m_buffer, start + comp, validSize</b>
+<b class="nc">&nbsp;				- start);</b>
+&nbsp;
+<b class="nc">&nbsp;		for (int c = 0; c &lt; comp; c++) {</b>
+<b class="nc">&nbsp;			m_buffer[start + c] = (long) pt.getAttributeAsDbl(semantics, c);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public void eraseRange(int index, int count, int validSize) {
+<b class="nc">&nbsp;		if (m_bReadonly)</b>
+<b class="nc">&nbsp;			throw new GeometryException(&quot;invalid_call&quot;);</b>
+&nbsp;
+<b class="nc">&nbsp;		if (index + count &gt; m_size)</b>
+<b class="nc">&nbsp;			throw new GeometryException(&quot;invalid_call&quot;);</b>
+&nbsp;
+<b class="nc">&nbsp;		System.arraycopy(m_buffer, index + count, m_buffer, index, validSize</b>
+<b class="nc">&nbsp;				- (index + count));</b>
+<b class="nc">&nbsp;		m_size -= count;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public void readRange(int srcStart, int count, ByteBuffer dst,
+&nbsp;			int dstOffset, boolean bForward) {
+<b class="nc">&nbsp;		if (srcStart &lt; 0 || count &lt; 0 || dstOffset &lt; 0</b>
+<b class="nc">&nbsp;				|| size() &lt; count + srcStart)</b>
+<b class="nc">&nbsp;			throw new IllegalArgumentException();</b>
+&nbsp;
+<b class="nc">&nbsp;		final int elmSize = NumberUtils.sizeOf((double) 0);</b>
+&nbsp;
+<b class="nc">&nbsp;		if (dst.capacity() &lt; (int) (dstOffset + elmSize * count))</b>
+<b class="nc">&nbsp;			throw new IllegalArgumentException();</b>
+&nbsp;
+<b class="nc">&nbsp;		if (count == 0)</b>
+&nbsp;			return;
+&nbsp;
+<b class="nc">&nbsp;		int j = srcStart;</b>
+<b class="nc">&nbsp;		if (!bForward)</b>
+<b class="nc">&nbsp;			j += count - 1;</b>
+&nbsp;
+<b class="nc">&nbsp;		final int dj = bForward ? 1 : -1;</b>
+&nbsp;
+<b class="nc">&nbsp;		int offset = dstOffset;</b>
+<b class="nc">&nbsp;		for (int i = 0; i &lt; count; i++, offset += elmSize) {</b>
+<b class="nc">&nbsp;			dst.putLong(offset, m_buffer[j]);</b>
+<b class="nc">&nbsp;			j += dj;</b>
+&nbsp;		}
+&nbsp;
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public void reverseRange(int index, int count, int stride) {
+<b class="nc">&nbsp;		if (m_bReadonly)</b>
+<b class="nc">&nbsp;			throw new GeometryException(&quot;invalid_call&quot;);</b>
+&nbsp;
+<b class="nc">&nbsp;		if (stride &lt; 1 || count % stride != 0)</b>
+<b class="nc">&nbsp;			throw new GeometryException(&quot;invalid_call&quot;);</b>
+&nbsp;
+<b class="nc">&nbsp;		int cIterations = count &gt;&gt; 1;</b>
+<b class="nc">&nbsp;		int n = count;</b>
+&nbsp;
+<b class="nc">&nbsp;		for (int i = 0; i &lt; cIterations; i += stride) {</b>
+<b class="nc">&nbsp;			n -= stride;</b>
+&nbsp;
+<b class="nc">&nbsp;			for (int s = 0; s &lt; stride; s++) {</b>
+<b class="nc">&nbsp;				long temp = m_buffer[index + i + s];</b>
+<b class="nc">&nbsp;				m_buffer[index + i + s] = m_buffer[index + n + s];</b>
+<b class="nc">&nbsp;				m_buffer[index + n + s] = temp;</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public void setRange(double value, int start, int count) {
+<b class="nc">&nbsp;		if (start &lt; 0 || count &lt; 0 || start &lt; 0 || count + start &gt; size())</b>
+<b class="nc">&nbsp;			throw new IllegalArgumentException();</b>
+&nbsp;
+<b class="nc">&nbsp;		long v = (long) value;</b>
+<b class="nc">&nbsp;		for (int i = start, n = start + count; i &lt; n; i++)</b>
+<b class="nc">&nbsp;			write(i, v);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public void writeRange(int startElement, int count,
+&nbsp;			AttributeStreamBase _src, int srcStart, boolean bForward, int stride) {
+<b class="nc">&nbsp;		if (startElement &lt; 0 || count &lt; 0 || srcStart &lt; 0)</b>
+<b class="nc">&nbsp;			throw new IllegalArgumentException();</b>
+&nbsp;
+<b class="nc">&nbsp;		if (!bForward &amp;&amp; (stride &lt;= 0 || (count % stride != 0)))</b>
+<b class="nc">&nbsp;			throw new IllegalArgumentException();</b>
+&nbsp;
+<b class="nc">&nbsp;		AttributeStreamOfInt64 src = (AttributeStreamOfInt64) _src; // the input</b>
+&nbsp;																	// type must
+&nbsp;																	// match
+&nbsp;
+<b class="nc">&nbsp;		if (src.size() &lt; (int) (srcStart + count))</b>
+<b class="nc">&nbsp;			throw new IllegalArgumentException();</b>
+&nbsp;
+<b class="nc">&nbsp;		if (count == 0)</b>
+&nbsp;			return;
+&nbsp;
+<b class="nc">&nbsp;		if (size() &lt; count + startElement)</b>
+<b class="nc">&nbsp;			resize(count + startElement);</b>
+&nbsp;
+<b class="nc">&nbsp;		if (_src == (AttributeStreamBase) this) {</b>
+<b class="nc">&nbsp;			_selfWriteRangeImpl(startElement, count, srcStart, bForward, stride);</b>
+&nbsp;			return;
+&nbsp;		}
+&nbsp;
+<b class="nc">&nbsp;		if (bForward) {</b>
+<b class="nc">&nbsp;			int j = startElement;</b>
+<b class="nc">&nbsp;			int offset = srcStart;</b>
+<b class="nc">&nbsp;			for (int i = 0; i &lt; count; i++) {</b>
+<b class="nc">&nbsp;				m_buffer[j] = src.m_buffer[offset];</b>
+<b class="nc">&nbsp;				j++;</b>
+<b class="nc">&nbsp;				offset++;</b>
+&nbsp;			}
+<b class="nc">&nbsp;		} else {</b>
+<b class="nc">&nbsp;			int j = startElement;</b>
+<b class="nc">&nbsp;			int offset = srcStart + count - stride;</b>
+<b class="nc">&nbsp;			if (stride == 1) {</b>
+<b class="nc">&nbsp;				for (int i = 0; i &lt; count; i++) {</b>
+<b class="nc">&nbsp;					m_buffer[j] = src.m_buffer[offset];</b>
+<b class="nc">&nbsp;					j++;</b>
+<b class="nc">&nbsp;					offset--;</b>
+&nbsp;				}
+<b class="nc">&nbsp;			} else {</b>
+<b class="nc">&nbsp;				for (int i = 0, n = count / stride; i &lt; n; i++) {</b>
+<b class="nc">&nbsp;					for (int k = 0; k &lt; stride; k++)</b>
+<b class="nc">&nbsp;						m_buffer[j + k] = src.m_buffer[offset + k];</b>
+&nbsp;
+<b class="nc">&nbsp;					j += stride;</b>
+<b class="nc">&nbsp;					offset -= stride;</b>
+&nbsp;				}
+&nbsp;			}
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	private void _selfWriteRangeImpl(int toElement, int count, int fromElement,
+&nbsp;			boolean bForward, int stride) {
+&nbsp;
+&nbsp;		// writing from to this stream.
+<b class="nc">&nbsp;		if (bForward) {</b>
+<b class="nc">&nbsp;			if (toElement == fromElement)</b>
+&nbsp;				return;
+&nbsp;		}
+&nbsp;
+&nbsp;		int offset;
+&nbsp;		int j;
+&nbsp;		int dj;
+&nbsp;
+<b class="nc">&nbsp;		if (fromElement &lt; toElement) {</b>
+<b class="nc">&nbsp;			offset = fromElement + count - stride;</b>
+<b class="nc">&nbsp;			j = toElement + count - stride;</b>
+<b class="nc">&nbsp;			for (int i = 0, n = count / 2; i &lt; n; i++) {</b>
+<b class="nc">&nbsp;				for (int k = 0; k &lt; stride; k++) {</b>
+<b class="nc">&nbsp;					m_buffer[j + k] = m_buffer[offset + k];</b>
+&nbsp;				}
+<b class="nc">&nbsp;				j -= stride;</b>
+<b class="nc">&nbsp;				offset -= stride;</b>
+&nbsp;			}
+<b class="nc">&nbsp;		} else {</b>
+<b class="nc">&nbsp;			offset = fromElement;</b>
+<b class="nc">&nbsp;			j = toElement;</b>
+<b class="nc">&nbsp;			dj = 1;</b>
+<b class="nc">&nbsp;			for (int i = 0; i &lt; count; i++) {</b>
+<b class="nc">&nbsp;				m_buffer[j] = m_buffer[offset];</b>
+<b class="nc">&nbsp;				j += 1;</b>
+<b class="nc">&nbsp;				offset++;</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="nc">&nbsp;		if (!bForward) {</b>
+&nbsp;			// reverse what we written
+<b class="nc">&nbsp;			j = toElement;</b>
+<b class="nc">&nbsp;			offset = toElement + count - stride;</b>
+<b class="nc">&nbsp;			dj = stride;</b>
+<b class="nc">&nbsp;			for (int i = 0, n = count / 2; i &lt; n; i++) {</b>
+<b class="nc">&nbsp;				for (int k = 0; k &lt; stride; k++) {</b>
+<b class="nc">&nbsp;					long v = m_buffer[j + k];</b>
+<b class="nc">&nbsp;					m_buffer[j + k] = m_buffer[offset + k];</b>
+<b class="nc">&nbsp;					m_buffer[offset + k] = v;</b>
+&nbsp;				}
+<b class="nc">&nbsp;				j += stride;</b>
+<b class="nc">&nbsp;				offset -= stride;</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public void writeRange(int startElement, int count, ByteBuffer src,
+&nbsp;			int offsetBytes, boolean bForward) {
+<b class="nc">&nbsp;		if (startElement &lt; 0 || count &lt; 0 || offsetBytes &lt; 0)</b>
+<b class="nc">&nbsp;			throw new IllegalArgumentException();</b>
+&nbsp;
+<b class="nc">&nbsp;		final int elmSize = NumberUtils.sizeOf((double) 0);</b>
+<b class="nc">&nbsp;		if (src.capacity() &lt; (int) (offsetBytes + elmSize * count))</b>
+<b class="nc">&nbsp;			throw new IllegalArgumentException();</b>
+&nbsp;
+<b class="nc">&nbsp;		if (count == 0)</b>
+&nbsp;			return;
+&nbsp;
+<b class="nc">&nbsp;		if (size() &lt; count + startElement)</b>
+<b class="nc">&nbsp;			resize(count + startElement);</b>
+&nbsp;
+<b class="nc">&nbsp;		int j = startElement;</b>
+<b class="nc">&nbsp;		if (!bForward)</b>
+<b class="nc">&nbsp;			j += count - 1;</b>
+&nbsp;
+<b class="nc">&nbsp;		final int dj = bForward ? 1 : -1;</b>
+&nbsp;
+<b class="nc">&nbsp;		int offset = offsetBytes;</b>
+<b class="nc">&nbsp;		for (int i = 0; i &lt; count; i++, offset += elmSize) {</b>
+<b class="nc">&nbsp;			m_buffer[j] = src.getLong(offset);</b>
+<b class="nc">&nbsp;			j += dj;</b>
+&nbsp;		}
+&nbsp;
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-02-21 15:02</div>
+</div>
+</body>
+</html>

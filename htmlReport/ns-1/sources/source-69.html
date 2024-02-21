@@ -1,0 +1,1006 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > OperatorExportToESRIShapeCursor</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.esri.core.geometry</a>
+</div>
+
+<h1>Coverage Summary for Class: OperatorExportToESRIShapeCursor (com.esri.core.geometry)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">OperatorExportToESRIShapeCursor</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    62,5%
+  </span>
+  <span class="absValue">
+    (5/8)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    70,7%
+  </span>
+  <span class="absValue">
+    (418/591)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; Copyright 1995-2015 Esri
+&nbsp;
+&nbsp;   Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp;   you may not use this file except in compliance with the License.
+&nbsp;   You may obtain a copy of the License at
+&nbsp;
+&nbsp;       http://www.apache.org/licenses/LICENSE-2.0
+&nbsp;
+&nbsp;   Unless required by applicable law or agreed to in writing, software
+&nbsp;   distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp;   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp;   See the License for the specific language governing permissions and
+&nbsp;   limitations under the License.
+&nbsp;
+&nbsp; For additional information, contact:
+&nbsp; Environmental Systems Research Institute, Inc.
+&nbsp; Attn: Contracts Dept
+&nbsp; 380 New York Street
+&nbsp; Redlands, California, USA 92373
+&nbsp;
+&nbsp; email: contracts@esri.com
+&nbsp; */
+&nbsp;
+&nbsp;package com.esri.core.geometry;
+&nbsp;
+&nbsp;import com.esri.core.geometry.VertexDescription.Semantics;
+&nbsp;import java.nio.ByteBuffer;
+&nbsp;import java.nio.ByteOrder;
+&nbsp;
+&nbsp;class OperatorExportToESRIShapeCursor extends ByteBufferCursor {
+&nbsp;	GeometryCursor m_inputGeometryCursor;
+&nbsp;	int m_exportFlags;
+&nbsp;	int m_index;
+&nbsp;	ByteBuffer m_shapeBuffer;
+&nbsp;
+<b class="nc">&nbsp;	public OperatorExportToESRIShapeCursor(int exportFlags,</b>
+&nbsp;			GeometryCursor geometryCursor) {
+<b class="nc">&nbsp;		m_index = -1;</b>
+<b class="nc">&nbsp;		if (geometryCursor == null)</b>
+<b class="nc">&nbsp;			throw new GeometryException(&quot;invalid argument&quot;);</b>
+&nbsp;
+<b class="nc">&nbsp;		m_exportFlags = exportFlags;</b>
+<b class="nc">&nbsp;		m_inputGeometryCursor = geometryCursor;</b>
+<b class="nc">&nbsp;		m_shapeBuffer = null;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public int getByteBufferID() {
+<b class="nc">&nbsp;		return m_index;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public ByteBuffer next() {
+<b class="nc">&nbsp;		Geometry geometry = m_inputGeometryCursor.next();</b>
+<b class="nc">&nbsp;		if (geometry != null) {</b>
+<b class="nc">&nbsp;			m_index = m_inputGeometryCursor.getGeometryID();</b>
+&nbsp;
+<b class="nc">&nbsp;			int size = exportToESRIShape(m_exportFlags, geometry, null);</b>
+<b class="nc">&nbsp;			if (m_shapeBuffer == null || size &gt; m_shapeBuffer.capacity())</b>
+<b class="nc">&nbsp;				m_shapeBuffer = ByteBuffer.allocate(size).order(</b>
+<b class="nc">&nbsp;						ByteOrder.LITTLE_ENDIAN);</b>
+<b class="nc">&nbsp;			exportToESRIShape(m_exportFlags, geometry, m_shapeBuffer);</b>
+<b class="nc">&nbsp;			return m_shapeBuffer;</b>
+&nbsp;		}
+<b class="nc">&nbsp;		return null;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	static int exportToESRIShape(int exportFlags, Geometry geometry,
+&nbsp;			ByteBuffer shapeBuffer) {
+<b class="fc">&nbsp;		if (geometry == null) {</b>
+<b class="nc">&nbsp;			if (shapeBuffer != null)</b>
+<b class="nc">&nbsp;				shapeBuffer.putInt(0, ShapeType.ShapeNull);</b>
+&nbsp;
+<b class="nc">&nbsp;			return 4;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		int type = geometry.getType().value();</b>
+<b class="fc">&nbsp;		switch (type) {</b>
+&nbsp;		case Geometry.GeometryType.Polygon:
+<b class="fc">&nbsp;			return exportMultiPathToESRIShape(true, exportFlags,</b>
+<b class="fc">&nbsp;					(MultiPath) geometry, shapeBuffer);</b>
+&nbsp;		case Geometry.GeometryType.Polyline:
+<b class="fc">&nbsp;			return exportMultiPathToESRIShape(false, exportFlags,</b>
+<b class="fc">&nbsp;					(MultiPath) geometry, shapeBuffer);</b>
+&nbsp;		case Geometry.GeometryType.MultiPoint:
+<b class="fc">&nbsp;			return exportMultiPointToESRIShape(exportFlags,</b>
+<b class="fc">&nbsp;					(MultiPoint) geometry, shapeBuffer);</b>
+&nbsp;		case Geometry.GeometryType.Point:
+<b class="fc">&nbsp;			return exportPointToESRIShape(exportFlags, (Point) geometry,</b>
+<b class="fc">&nbsp;					shapeBuffer);</b>
+&nbsp;		case Geometry.GeometryType.Envelope:
+<b class="fc">&nbsp;			return exportEnvelopeToESRIShape(exportFlags, (Envelope) geometry,</b>
+<b class="fc">&nbsp;					shapeBuffer);</b>
+&nbsp;		default: {
+<b class="nc">&nbsp;			throw GeometryException.GeometryInternalError();</b>
+&nbsp;			// return -1;
+&nbsp;		}
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	private static int exportEnvelopeToESRIShape(int exportFlags,
+&nbsp;			Envelope envelope, ByteBuffer shapeBuffer) {
+<b class="fc">&nbsp;		boolean bExportZs = envelope.hasAttribute(Semantics.Z)</b>
+<b class="fc">&nbsp;				&amp;&amp; (exportFlags &amp; ShapeExportFlags.ShapeExportStripZs) == 0;</b>
+<b class="fc">&nbsp;		boolean bExportMs = envelope.hasAttribute(Semantics.M)</b>
+<b class="fc">&nbsp;				&amp;&amp; (exportFlags &amp; ShapeExportFlags.ShapeExportStripMs) == 0;</b>
+<b class="fc">&nbsp;		boolean bExportIDs = envelope.hasAttribute(Semantics.ID)</b>
+<b class="fc">&nbsp;				&amp;&amp; (exportFlags &amp; ShapeExportFlags.ShapeExportStripIDs) == 0;</b>
+<b class="fc">&nbsp;		boolean bArcViewNaNs = (exportFlags &amp; ShapeExportFlags.ShapeExportTrueNaNs) == 0;</b>
+&nbsp;
+<b class="fc">&nbsp;		boolean bEmpty = envelope.isEmpty();</b>
+<b class="fc">&nbsp;		int partCount = bEmpty ? 0 : 1;</b>
+<b class="fc">&nbsp;		int pointCount = bEmpty ? 0 : 5;</b>
+&nbsp;
+<b class="fc">&nbsp;		int size = (4 /* type */) + (4 * 8 /* envelope */) + (4 /* part count */)</b>
+<b class="fc">&nbsp;				+ (4 /* point count */) + (partCount * 4 /* start indices */)</b>
+<b class="fc">&nbsp;				+ pointCount * 2 * 8 /* xy coordinates */;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (bExportZs)</b>
+<b class="fc">&nbsp;			size += (2 * 8 /* min max */) + (pointCount * 8 /* zs */);</b>
+<b class="fc">&nbsp;		if (bExportMs)</b>
+<b class="fc">&nbsp;			size += (2 * 8 /* min max */) + (pointCount * 8 /* ms */);</b>
+<b class="fc">&nbsp;		if (bExportIDs)</b>
+<b class="fc">&nbsp;			size += (pointCount * 4 /* ids */);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (shapeBuffer == null)</b>
+<b class="fc">&nbsp;			return size;</b>
+<b class="fc">&nbsp;		else if (shapeBuffer.capacity() &lt; size)</b>
+<b class="nc">&nbsp;			throw new GeometryException(&quot;buffer is too small&quot;);</b>
+&nbsp;
+&nbsp;		int type;
+&nbsp;
+&nbsp;		// Determine the shape type
+<b class="fc">&nbsp;		if (!bExportZs &amp;&amp; !bExportMs) {</b>
+<b class="nc">&nbsp;			if (bExportIDs)</b>
+<b class="nc">&nbsp;				type = ShapeType.ShapeGeneralPolygon</b>
+<b class="nc">&nbsp;						| ShapeModifiers.ShapeHasIDs;</b>
+&nbsp;			else
+<b class="nc">&nbsp;				type = ShapeType.ShapePolygon;</b>
+<b class="nc">&nbsp;		} else if (bExportZs &amp;&amp; !bExportMs) {</b>
+<b class="nc">&nbsp;			if (bExportIDs)</b>
+<b class="nc">&nbsp;				type = ShapeType.ShapeGeneralPolygon</b>
+&nbsp;						| ShapeModifiers.ShapeHasZs
+<b class="nc">&nbsp;						| ShapeModifiers.ShapeHasIDs;</b>
+&nbsp;			else
+<b class="nc">&nbsp;				type = ShapeType.ShapePolygonZ;</b>
+<b class="nc">&nbsp;		} else if (bExportMs &amp;&amp; !bExportZs) {</b>
+<b class="nc">&nbsp;			if (bExportIDs)</b>
+<b class="nc">&nbsp;				type = ShapeType.ShapeGeneralPolygon</b>
+&nbsp;						| ShapeModifiers.ShapeHasMs
+<b class="nc">&nbsp;						| ShapeModifiers.ShapeHasIDs;</b>
+&nbsp;			else
+<b class="nc">&nbsp;				type = ShapeType.ShapePolygonM;</b>
+<b class="nc">&nbsp;		} else {</b>
+<b class="fc">&nbsp;			if (bExportIDs)</b>
+<b class="fc">&nbsp;				type = ShapeType.ShapeGeneralPolygon</b>
+&nbsp;						| ShapeModifiers.ShapeHasZs | ShapeModifiers.ShapeHasMs
+<b class="fc">&nbsp;						| ShapeModifiers.ShapeHasIDs;</b>
+&nbsp;			else
+<b class="nc">&nbsp;				type = ShapeType.ShapePolygonZM;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		int offset = 0;</b>
+&nbsp;
+&nbsp;		// write type
+<b class="fc">&nbsp;		shapeBuffer.putInt(offset, type);</b>
+<b class="fc">&nbsp;		offset += 4;</b>
+&nbsp;
+&nbsp;		// write Envelope
+<b class="fc">&nbsp;		Envelope2D env = new Envelope2D();</b>
+<b class="fc">&nbsp;		envelope.queryEnvelope2D(env); // calls _VerifyAllStreams</b>
+<b class="fc">&nbsp;		shapeBuffer.putDouble(offset, env.xmin);</b>
+<b class="fc">&nbsp;		offset += 8;</b>
+<b class="fc">&nbsp;		shapeBuffer.putDouble(offset, env.ymin);</b>
+<b class="fc">&nbsp;		offset += 8;</b>
+<b class="fc">&nbsp;		shapeBuffer.putDouble(offset, env.xmax);</b>
+<b class="fc">&nbsp;		offset += 8;</b>
+<b class="fc">&nbsp;		shapeBuffer.putDouble(offset, env.ymax);</b>
+<b class="fc">&nbsp;		offset += 8;</b>
+&nbsp;
+&nbsp;		// write part count
+<b class="fc">&nbsp;		shapeBuffer.putInt(offset, partCount);</b>
+<b class="fc">&nbsp;		offset += 4;</b>
+&nbsp;
+&nbsp;		// write pointCount
+<b class="fc">&nbsp;		shapeBuffer.putInt(offset, pointCount);</b>
+<b class="fc">&nbsp;		offset += 4;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (!bEmpty) {</b>
+&nbsp;			// write start index
+<b class="fc">&nbsp;			shapeBuffer.putInt(offset, 0);</b>
+<b class="fc">&nbsp;			offset += 4;</b>
+&nbsp;
+&nbsp;			// write xy coordinates
+<b class="fc">&nbsp;			shapeBuffer.putDouble(offset, env.xmin);</b>
+<b class="fc">&nbsp;			offset += 8;</b>
+<b class="fc">&nbsp;			shapeBuffer.putDouble(offset, env.ymin);</b>
+<b class="fc">&nbsp;			offset += 8;</b>
+&nbsp;
+<b class="fc">&nbsp;			shapeBuffer.putDouble(offset, env.xmin);</b>
+<b class="fc">&nbsp;			offset += 8;</b>
+<b class="fc">&nbsp;			shapeBuffer.putDouble(offset, env.ymax);</b>
+<b class="fc">&nbsp;			offset += 8;</b>
+&nbsp;
+<b class="fc">&nbsp;			shapeBuffer.putDouble(offset, env.xmax);</b>
+<b class="fc">&nbsp;			offset += 8;</b>
+<b class="fc">&nbsp;			shapeBuffer.putDouble(offset, env.ymax);</b>
+<b class="fc">&nbsp;			offset += 8;</b>
+&nbsp;
+<b class="fc">&nbsp;			shapeBuffer.putDouble(offset, env.xmax);</b>
+<b class="fc">&nbsp;			offset += 8;</b>
+<b class="fc">&nbsp;			shapeBuffer.putDouble(offset, env.ymin);</b>
+<b class="fc">&nbsp;			offset += 8;</b>
+&nbsp;
+<b class="fc">&nbsp;			shapeBuffer.putDouble(offset, env.xmin);</b>
+<b class="fc">&nbsp;			offset += 8;</b>
+<b class="fc">&nbsp;			shapeBuffer.putDouble(offset, env.ymin);</b>
+<b class="fc">&nbsp;			offset += 8;</b>
+&nbsp;		}
+&nbsp;		// write Zs
+<b class="fc">&nbsp;		if (bExportZs) {</b>
+&nbsp;			Envelope1D zInterval;
+<b class="fc">&nbsp;			zInterval = envelope.queryInterval(Semantics.Z, 0);</b>
+&nbsp;
+<b class="fc">&nbsp;			double zmin = bArcViewNaNs ? Interop</b>
+<b class="fc">&nbsp;					.translateToAVNaN(zInterval.vmin) : zInterval.vmin;</b>
+<b class="fc">&nbsp;			double zmax = bArcViewNaNs ? Interop</b>
+<b class="fc">&nbsp;					.translateToAVNaN(zInterval.vmax) : zInterval.vmax;</b>
+&nbsp;
+&nbsp;			// write min max values
+<b class="fc">&nbsp;			shapeBuffer.putDouble(offset, zmin);</b>
+<b class="fc">&nbsp;			offset += 8;</b>
+<b class="fc">&nbsp;			shapeBuffer.putDouble(offset, zmax);</b>
+<b class="fc">&nbsp;			offset += 8;</b>
+&nbsp;
+<b class="fc">&nbsp;			if (!bEmpty) {</b>
+&nbsp;				// write arbitrary z values
+<b class="fc">&nbsp;				shapeBuffer.putDouble(offset, zmin);</b>
+<b class="fc">&nbsp;				offset += 8;</b>
+<b class="fc">&nbsp;				shapeBuffer.putDouble(offset, zmax);</b>
+<b class="fc">&nbsp;				offset += 8;</b>
+<b class="fc">&nbsp;				shapeBuffer.putDouble(offset, zmin);</b>
+<b class="fc">&nbsp;				offset += 8;</b>
+<b class="fc">&nbsp;				shapeBuffer.putDouble(offset, zmax);</b>
+<b class="fc">&nbsp;				offset += 8;</b>
+<b class="fc">&nbsp;				shapeBuffer.putDouble(offset, zmin);</b>
+<b class="fc">&nbsp;				offset += 8;</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;		// write Ms
+<b class="fc">&nbsp;		if (bExportMs) {</b>
+&nbsp;			Envelope1D mInterval;
+<b class="fc">&nbsp;			mInterval = envelope.queryInterval(Semantics.M, 0);</b>
+&nbsp;
+<b class="fc">&nbsp;			double mmin = bArcViewNaNs ? Interop</b>
+<b class="fc">&nbsp;					.translateToAVNaN(mInterval.vmin) : mInterval.vmin;</b>
+<b class="fc">&nbsp;			double mmax = bArcViewNaNs ? Interop</b>
+<b class="fc">&nbsp;					.translateToAVNaN(mInterval.vmax) : mInterval.vmax;</b>
+&nbsp;
+&nbsp;			// write min max values
+<b class="fc">&nbsp;			shapeBuffer.putDouble(offset, mmin);</b>
+<b class="fc">&nbsp;			offset += 8;</b>
+<b class="fc">&nbsp;			shapeBuffer.putDouble(offset, mmax);</b>
+<b class="fc">&nbsp;			offset += 8;</b>
+&nbsp;
+<b class="fc">&nbsp;			if (!bEmpty) {</b>
+&nbsp;				// write arbitrary m values
+<b class="fc">&nbsp;				shapeBuffer.putDouble(offset, mmin);</b>
+<b class="fc">&nbsp;				offset += 8;</b>
+<b class="fc">&nbsp;				shapeBuffer.putDouble(offset, mmax);</b>
+<b class="fc">&nbsp;				offset += 8;</b>
+<b class="fc">&nbsp;				shapeBuffer.putDouble(offset, mmin);</b>
+<b class="fc">&nbsp;				offset += 8;</b>
+<b class="fc">&nbsp;				shapeBuffer.putDouble(offset, mmax);</b>
+<b class="fc">&nbsp;				offset += 8;</b>
+<b class="fc">&nbsp;				shapeBuffer.putDouble(offset, mmin);</b>
+<b class="fc">&nbsp;				offset += 8;</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+&nbsp;		// write IDs
+<b class="fc">&nbsp;		if (bExportIDs &amp;&amp; !bEmpty) {</b>
+&nbsp;			Envelope1D idInterval;
+<b class="fc">&nbsp;			idInterval = envelope.queryInterval(Semantics.ID, 0);</b>
+&nbsp;
+<b class="fc">&nbsp;			int idmin = (int) idInterval.vmin;</b>
+<b class="fc">&nbsp;			int idmax = (int) idInterval.vmax;</b>
+&nbsp;
+&nbsp;			// write arbitrary id values
+<b class="fc">&nbsp;			shapeBuffer.putInt(offset, idmin);</b>
+<b class="fc">&nbsp;			offset += 4;</b>
+<b class="fc">&nbsp;			shapeBuffer.putInt(offset, idmax);</b>
+<b class="fc">&nbsp;			offset += 4;</b>
+<b class="fc">&nbsp;			shapeBuffer.putInt(offset, idmin);</b>
+<b class="fc">&nbsp;			offset += 4;</b>
+<b class="fc">&nbsp;			shapeBuffer.putInt(offset, idmax);</b>
+<b class="fc">&nbsp;			offset += 4;</b>
+<b class="fc">&nbsp;			shapeBuffer.putInt(offset, idmin);</b>
+<b class="fc">&nbsp;			offset += 4;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return offset;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private static int exportPointToESRIShape(int exportFlags, Point point,
+&nbsp;			ByteBuffer shapeBuffer) {
+<b class="fc">&nbsp;		boolean bExportZ = point.hasAttribute(Semantics.Z)</b>
+<b class="fc">&nbsp;				&amp;&amp; (exportFlags &amp; ShapeExportFlags.ShapeExportStripZs) == 0;</b>
+<b class="fc">&nbsp;		boolean bExportM = point.hasAttribute(Semantics.M)</b>
+<b class="fc">&nbsp;				&amp;&amp; (exportFlags &amp; ShapeExportFlags.ShapeExportStripMs) == 0;</b>
+<b class="fc">&nbsp;		boolean bExportID = point.hasAttribute(Semantics.ID)</b>
+<b class="fc">&nbsp;				&amp;&amp; (exportFlags &amp; ShapeExportFlags.ShapeExportStripIDs) == 0;</b>
+<b class="fc">&nbsp;		boolean bArcViewNaNs = (exportFlags &amp; ShapeExportFlags.ShapeExportTrueNaNs) == 0;</b>
+&nbsp;
+<b class="fc">&nbsp;		int size = (4 /* type */) + (2 * 8 /* xy coordinate */);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (bExportZ)</b>
+<b class="fc">&nbsp;			size += 8;</b>
+<b class="fc">&nbsp;		if (bExportM)</b>
+<b class="fc">&nbsp;			size += 8;</b>
+<b class="fc">&nbsp;		if (bExportID)</b>
+<b class="fc">&nbsp;			size += 4;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (shapeBuffer == null)</b>
+<b class="fc">&nbsp;			return size;</b>
+<b class="fc">&nbsp;		else if (shapeBuffer.capacity() &lt; size)</b>
+<b class="nc">&nbsp;			throw new GeometryException(&quot;buffer is too small&quot;);</b>
+&nbsp;
+&nbsp;		int type;
+&nbsp;
+&nbsp;		// Determine the shape type
+<b class="fc">&nbsp;		if (!bExportZ &amp;&amp; !bExportM) {</b>
+<b class="nc">&nbsp;			if (bExportID)</b>
+<b class="nc">&nbsp;				type = ShapeType.ShapeGeneralPoint | ShapeModifiers.ShapeHasIDs;</b>
+&nbsp;			else
+<b class="nc">&nbsp;				type = ShapeType.ShapePoint;</b>
+<b class="nc">&nbsp;		} else if (bExportZ &amp;&amp; !bExportM) {</b>
+<b class="nc">&nbsp;			if (bExportID)</b>
+<b class="nc">&nbsp;				type = ShapeType.ShapeGeneralPoint | ShapeModifiers.ShapeHasZs</b>
+<b class="nc">&nbsp;						| ShapeModifiers.ShapeHasIDs;</b>
+&nbsp;			else
+<b class="nc">&nbsp;				type = ShapeType.ShapePointZ;</b>
+<b class="nc">&nbsp;		} else if (bExportM &amp;&amp; !bExportZ) {</b>
+<b class="nc">&nbsp;			if (bExportID)</b>
+<b class="nc">&nbsp;				type = ShapeType.ShapeGeneralPoint | ShapeModifiers.ShapeHasMs</b>
+<b class="nc">&nbsp;						| ShapeModifiers.ShapeHasIDs;</b>
+&nbsp;			else
+<b class="nc">&nbsp;				type = ShapeType.ShapePointM;</b>
+<b class="nc">&nbsp;		} else {</b>
+<b class="fc">&nbsp;			if (bExportID)</b>
+<b class="fc">&nbsp;				type = ShapeType.ShapeGeneralPoint | ShapeModifiers.ShapeHasZs</b>
+&nbsp;						| ShapeModifiers.ShapeHasMs
+<b class="fc">&nbsp;						| ShapeModifiers.ShapeHasIDs;</b>
+&nbsp;			else
+<b class="nc">&nbsp;				type = ShapeType.ShapePointZM;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		int offset = 0;</b>
+&nbsp;
+&nbsp;		// write type
+&nbsp;
+<b class="fc">&nbsp;		shapeBuffer.putInt(offset, type);</b>
+<b class="fc">&nbsp;		offset += 4;</b>
+&nbsp;
+<b class="fc">&nbsp;		boolean bEmpty = point.isEmpty();</b>
+&nbsp;
+&nbsp;		// write xy
+<b class="fc">&nbsp;		double x = !bEmpty ? point.getX() : NumberUtils.NaN();</b>
+<b class="fc">&nbsp;		double y = !bEmpty ? point.getY() : NumberUtils.NaN();</b>
+<b class="fc">&nbsp;		shapeBuffer.putDouble(offset,</b>
+<b class="fc">&nbsp;				bArcViewNaNs ? Interop.translateToAVNaN(x) : x);</b>
+<b class="fc">&nbsp;		offset += 8;</b>
+<b class="fc">&nbsp;		shapeBuffer.putDouble(offset,</b>
+<b class="fc">&nbsp;				bArcViewNaNs ? Interop.translateToAVNaN(y) : y);</b>
+<b class="fc">&nbsp;		offset += 8;</b>
+&nbsp;
+&nbsp;		// write Z
+<b class="fc">&nbsp;		if (bExportZ) {</b>
+<b class="fc">&nbsp;			double z = !bEmpty ? point.getZ() : NumberUtils.NaN();</b>
+<b class="fc">&nbsp;			shapeBuffer.putDouble(offset,</b>
+<b class="fc">&nbsp;					bArcViewNaNs ? Interop.translateToAVNaN(z) : z);</b>
+<b class="fc">&nbsp;			offset += 8;</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		// WriteM
+<b class="fc">&nbsp;		if (bExportM) {</b>
+<b class="fc">&nbsp;			double m = !bEmpty ? point.getM() : NumberUtils.NaN();</b>
+<b class="fc">&nbsp;			shapeBuffer.putDouble(offset,</b>
+<b class="fc">&nbsp;					bArcViewNaNs ? Interop.translateToAVNaN(m) : m);</b>
+<b class="fc">&nbsp;			offset += 8;</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		// write ID
+<b class="fc">&nbsp;		if (bExportID) {</b>
+<b class="fc">&nbsp;			int id = !bEmpty ? point.getID() : 0;</b>
+<b class="fc">&nbsp;			shapeBuffer.putInt(offset, id);</b>
+<b class="fc">&nbsp;			offset += 4;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return offset;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private static int exportMultiPointToESRIShape(int exportFlags,
+&nbsp;			MultiPoint multipoint, ByteBuffer shapeBuffer) {
+<b class="fc">&nbsp;		MultiPointImpl multipointImpl = (MultiPointImpl) multipoint._getImpl();</b>
+<b class="fc">&nbsp;		boolean bExportZs = multipointImpl.hasAttribute(Semantics.Z)</b>
+<b class="fc">&nbsp;				&amp;&amp; (exportFlags &amp; ShapeExportFlags.ShapeExportStripZs) == 0;</b>
+<b class="fc">&nbsp;		boolean bExportMs = multipointImpl.hasAttribute(Semantics.M)</b>
+<b class="nc">&nbsp;				&amp;&amp; (exportFlags &amp; ShapeExportFlags.ShapeExportStripMs) == 0;</b>
+<b class="fc">&nbsp;		boolean bExportIDs = multipointImpl.hasAttribute(Semantics.ID)</b>
+<b class="fc">&nbsp;				&amp;&amp; (exportFlags &amp; ShapeExportFlags.ShapeExportStripIDs) == 0;</b>
+<b class="fc">&nbsp;		boolean bArcViewNaNs = (exportFlags &amp; ShapeExportFlags.ShapeExportTrueNaNs) == 0;</b>
+&nbsp;
+<b class="fc">&nbsp;		int pointCount = multipointImpl.getPointCount();</b>
+&nbsp;
+<b class="fc">&nbsp;		int size = (4 /* type */) + (4 * 8 /* envelope */) + (4 /* point count */)</b>
+<b class="fc">&nbsp;				+ (pointCount * 2 * 8 /* xy coordinates */);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (bExportZs)</b>
+<b class="fc">&nbsp;			size += (2 * 8 /* min max */) + (pointCount * 8 /* zs */);</b>
+<b class="fc">&nbsp;		if (bExportMs)</b>
+<b class="nc">&nbsp;			size += (2 * 8 /* min max */) + (pointCount * 8 /* ms */);</b>
+<b class="fc">&nbsp;		if (bExportIDs)</b>
+<b class="fc">&nbsp;			size += pointCount * 4 /* ids */;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (size &gt;= NumberUtils.intMax())</b>
+<b class="nc">&nbsp;			throw new GeometryException(&quot;invalid call&quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (shapeBuffer == null)</b>
+<b class="fc">&nbsp;			return size;</b>
+<b class="fc">&nbsp;		else if (shapeBuffer.capacity() &lt; size)</b>
+<b class="nc">&nbsp;			throw new GeometryException(&quot;buffer is too small&quot;);</b>
+&nbsp;
+&nbsp;		int type;
+&nbsp;
+&nbsp;		// Determine the shape type
+<b class="fc">&nbsp;		if (!bExportZs &amp;&amp; !bExportMs) {</b>
+<b class="fc">&nbsp;			if (bExportIDs)</b>
+<b class="nc">&nbsp;				type = ShapeType.ShapeGeneralMultiPoint</b>
+<b class="nc">&nbsp;						| ShapeModifiers.ShapeHasIDs;</b>
+&nbsp;			else
+<b class="fc">&nbsp;				type = ShapeType.ShapeMultiPoint;</b>
+<b class="fc">&nbsp;		} else if (bExportZs &amp;&amp; !bExportMs) {</b>
+<b class="fc">&nbsp;			if (bExportIDs)</b>
+<b class="fc">&nbsp;				type = ShapeType.ShapeGeneralMultiPoint</b>
+&nbsp;						| ShapeModifiers.ShapeHasZs
+<b class="fc">&nbsp;						| ShapeModifiers.ShapeHasIDs;</b>
+&nbsp;			else
+<b class="nc">&nbsp;				type = ShapeType.ShapeMultiPointZ;</b>
+<b class="nc">&nbsp;		} else if (bExportMs &amp;&amp; !bExportZs) {</b>
+<b class="nc">&nbsp;			if (bExportIDs)</b>
+<b class="nc">&nbsp;				type = ShapeType.ShapeGeneralMultiPoint</b>
+&nbsp;						| ShapeModifiers.ShapeHasMs
+<b class="nc">&nbsp;						| ShapeModifiers.ShapeHasIDs;</b>
+&nbsp;			else
+<b class="nc">&nbsp;				type = ShapeType.ShapeMultiPointM;</b>
+<b class="nc">&nbsp;		} else {</b>
+<b class="nc">&nbsp;			if (bExportIDs)</b>
+<b class="nc">&nbsp;				type = ShapeType.ShapeGeneralMultiPoint</b>
+&nbsp;						| ShapeModifiers.ShapeHasZs | ShapeModifiers.ShapeHasMs
+<b class="nc">&nbsp;						| ShapeModifiers.ShapeHasIDs;</b>
+&nbsp;			else
+<b class="nc">&nbsp;				type = ShapeType.ShapeMultiPointZM;</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		// write type
+<b class="fc">&nbsp;		int offset = 0;</b>
+&nbsp;
+<b class="fc">&nbsp;		shapeBuffer.putInt(offset, type);</b>
+<b class="fc">&nbsp;		offset += 4;</b>
+&nbsp;
+&nbsp;		// write Envelope
+<b class="fc">&nbsp;		Envelope2D env = new Envelope2D();</b>
+<b class="fc">&nbsp;		multipointImpl.queryEnvelope2D(env); // calls _VerifyAllStreams</b>
+<b class="fc">&nbsp;		shapeBuffer.putDouble(offset, env.xmin);</b>
+<b class="fc">&nbsp;		offset += 8;</b>
+<b class="fc">&nbsp;		shapeBuffer.putDouble(offset, env.ymin);</b>
+<b class="fc">&nbsp;		offset += 8;</b>
+<b class="fc">&nbsp;		shapeBuffer.putDouble(offset, env.xmax);</b>
+<b class="fc">&nbsp;		offset += 8;</b>
+<b class="fc">&nbsp;		shapeBuffer.putDouble(offset, env.ymax);</b>
+<b class="fc">&nbsp;		offset += 8;</b>
+&nbsp;
+&nbsp;		// write point count
+<b class="fc">&nbsp;		shapeBuffer.putInt(offset, pointCount);</b>
+<b class="fc">&nbsp;		offset += 4;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (pointCount &gt; 0) {</b>
+&nbsp;			// write xy coordinates
+<b class="fc">&nbsp;			AttributeStreamBase positionStream = multipointImpl</b>
+<b class="fc">&nbsp;					.getAttributeStreamRef(Semantics.POSITION);</b>
+<b class="fc">&nbsp;			AttributeStreamOfDbl position = (AttributeStreamOfDbl) positionStream;</b>
+<b class="fc">&nbsp;			for (int i = 0; i &lt; pointCount; i++) {</b>
+<b class="fc">&nbsp;				double x = position.read(2 * i);</b>
+<b class="fc">&nbsp;				double y = position.read(2 * i + 1);</b>
+<b class="fc">&nbsp;				shapeBuffer.putDouble(offset, x);</b>
+<b class="fc">&nbsp;				offset += 8;</b>
+<b class="fc">&nbsp;				shapeBuffer.putDouble(offset, y);</b>
+<b class="fc">&nbsp;				offset += 8;</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+&nbsp;		// write Zs
+<b class="fc">&nbsp;		if (bExportZs) {</b>
+<b class="fc">&nbsp;			Envelope1D zInterval = multipointImpl.queryInterval(Semantics.Z, 0);</b>
+<b class="fc">&nbsp;			shapeBuffer.putDouble(offset,</b>
+<b class="fc">&nbsp;					bArcViewNaNs ? Interop.translateToAVNaN(zInterval.vmin)</b>
+<b class="nc">&nbsp;							: zInterval.vmin);</b>
+<b class="fc">&nbsp;			offset += 8;</b>
+<b class="fc">&nbsp;			shapeBuffer.putDouble(offset,</b>
+<b class="fc">&nbsp;					bArcViewNaNs ? Interop.translateToAVNaN(zInterval.vmax)</b>
+<b class="nc">&nbsp;							: zInterval.vmax);</b>
+<b class="fc">&nbsp;			offset += 8;</b>
+&nbsp;
+<b class="fc">&nbsp;			if (pointCount &gt; 0) {</b>
+<b class="fc">&nbsp;				if (multipointImpl._attributeStreamIsAllocated(Semantics.Z)) {</b>
+<b class="fc">&nbsp;					AttributeStreamOfDbl zs = (AttributeStreamOfDbl) multipointImpl</b>
+<b class="fc">&nbsp;							.getAttributeStreamRef(Semantics.Z);</b>
+<b class="fc">&nbsp;					for (int i = 0; i &lt; pointCount; i++) {</b>
+<b class="fc">&nbsp;						double z = zs.read(i);</b>
+<b class="fc">&nbsp;						shapeBuffer.putDouble(offset,</b>
+<b class="fc">&nbsp;								bArcViewNaNs ? Interop.translateToAVNaN(z) : z);</b>
+<b class="fc">&nbsp;						offset += 8;</b>
+&nbsp;					}
+<b class="fc">&nbsp;				} else {</b>
+<b class="nc">&nbsp;					double z = VertexDescription.getDefaultValue(Semantics.Z);</b>
+&nbsp;
+<b class="nc">&nbsp;					if (bArcViewNaNs)</b>
+<b class="nc">&nbsp;						z = Interop.translateToAVNaN(z);</b>
+&nbsp;
+&nbsp;					// Can we write a function that writes all these values at
+&nbsp;					// once instead of doing a for loop?
+<b class="nc">&nbsp;					for (int i = 0; i &lt; pointCount; i++)</b>
+<b class="nc">&nbsp;						shapeBuffer.putDouble(offset, z);</b>
+<b class="nc">&nbsp;					offset += 8;</b>
+&nbsp;				}
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+&nbsp;		// write Ms
+<b class="fc">&nbsp;		if (bExportMs) {</b>
+<b class="nc">&nbsp;			Envelope1D mInterval = multipointImpl.queryInterval(Semantics.M, 0);</b>
+<b class="nc">&nbsp;			shapeBuffer.putDouble(offset,</b>
+<b class="nc">&nbsp;					bArcViewNaNs ? Interop.translateToAVNaN(mInterval.vmin)</b>
+<b class="nc">&nbsp;							: mInterval.vmin);</b>
+<b class="nc">&nbsp;			offset += 8;</b>
+<b class="nc">&nbsp;			shapeBuffer.putDouble(offset,</b>
+<b class="nc">&nbsp;					bArcViewNaNs ? Interop.translateToAVNaN(mInterval.vmax)</b>
+<b class="nc">&nbsp;							: mInterval.vmax);</b>
+<b class="nc">&nbsp;			offset += 8;</b>
+&nbsp;
+<b class="nc">&nbsp;			if (pointCount &gt; 0) {</b>
+<b class="nc">&nbsp;				if (multipointImpl._attributeStreamIsAllocated(Semantics.M)) {</b>
+<b class="nc">&nbsp;					AttributeStreamOfDbl ms = (AttributeStreamOfDbl) multipointImpl</b>
+<b class="nc">&nbsp;							.getAttributeStreamRef(Semantics.M);</b>
+<b class="nc">&nbsp;					for (int i = 0; i &lt; pointCount; i++) {</b>
+<b class="nc">&nbsp;						double m = ms.read(i);</b>
+<b class="nc">&nbsp;						shapeBuffer.putDouble(offset,</b>
+<b class="nc">&nbsp;								bArcViewNaNs ? Interop.translateToAVNaN(m) : m);</b>
+<b class="nc">&nbsp;						offset += 8;</b>
+&nbsp;					}
+<b class="nc">&nbsp;				} else {</b>
+<b class="nc">&nbsp;					double m = VertexDescription.getDefaultValue(Semantics.M);</b>
+&nbsp;
+<b class="nc">&nbsp;					if (bArcViewNaNs)</b>
+<b class="nc">&nbsp;						m = Interop.translateToAVNaN(m);</b>
+&nbsp;
+<b class="nc">&nbsp;					for (int i = 0; i &lt; pointCount; i++)</b>
+<b class="nc">&nbsp;						shapeBuffer.putDouble(offset, m);</b>
+<b class="nc">&nbsp;					offset += 8;</b>
+&nbsp;				}
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+&nbsp;		// write IDs
+<b class="fc">&nbsp;		if (bExportIDs) {</b>
+<b class="fc">&nbsp;			if (pointCount &gt; 0) {</b>
+<b class="fc">&nbsp;				if (multipointImpl._attributeStreamIsAllocated(Semantics.ID)) {</b>
+<b class="fc">&nbsp;					AttributeStreamOfInt32 ids = (AttributeStreamOfInt32) multipointImpl</b>
+<b class="fc">&nbsp;							.getAttributeStreamRef(Semantics.ID);</b>
+<b class="fc">&nbsp;					for (int i = 0; i &lt; pointCount; i++) {</b>
+<b class="fc">&nbsp;						int id = ids.read(i);</b>
+<b class="fc">&nbsp;						shapeBuffer.putInt(offset, id);</b>
+<b class="fc">&nbsp;						offset += 4;</b>
+&nbsp;					}
+<b class="fc">&nbsp;				} else {</b>
+<b class="nc">&nbsp;					int id = (int) VertexDescription</b>
+<b class="nc">&nbsp;							.getDefaultValue(Semantics.ID);</b>
+<b class="nc">&nbsp;					for (int i = 0; i &lt; pointCount; i++)</b>
+<b class="nc">&nbsp;						shapeBuffer.putInt(offset, id);</b>
+<b class="nc">&nbsp;					offset += 4;</b>
+&nbsp;				}
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return offset;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private static int exportMultiPathToESRIShape(boolean bPolygon,
+&nbsp;			int exportFlags, MultiPath multipath, ByteBuffer shapeBuffer) {
+<b class="fc">&nbsp;		MultiPathImpl multipathImpl = (MultiPathImpl) multipath._getImpl();</b>
+&nbsp;
+<b class="fc">&nbsp;		boolean bExportZs = multipathImpl.hasAttribute(Semantics.Z)</b>
+<b class="fc">&nbsp;				&amp;&amp; (exportFlags &amp; ShapeExportFlags.ShapeExportStripZs) == 0;</b>
+<b class="fc">&nbsp;		boolean bExportMs = multipathImpl.hasAttribute(Semantics.M)</b>
+<b class="fc">&nbsp;				&amp;&amp; (exportFlags &amp; ShapeExportFlags.ShapeExportStripMs) == 0;</b>
+<b class="fc">&nbsp;		boolean bExportIDs = multipathImpl.hasAttribute(Semantics.ID)</b>
+<b class="fc">&nbsp;				&amp;&amp; (exportFlags &amp; ShapeExportFlags.ShapeExportStripIDs) == 0;</b>
+<b class="fc">&nbsp;		boolean bHasCurves = multipathImpl.hasNonLinearSegments();</b>
+<b class="fc">&nbsp;		boolean bArcViewNaNs = (exportFlags &amp; ShapeExportFlags.ShapeExportTrueNaNs) == 0;</b>
+&nbsp;
+<b class="fc">&nbsp;		int partCount = multipathImpl.getPathCount();</b>
+<b class="fc">&nbsp;		int pointCount = multipathImpl.getPointCount();</b>
+&nbsp;
+<b class="fc">&nbsp;		if (!bPolygon) {</b>
+<b class="fc">&nbsp;			for (int ipart = 0; ipart &lt; partCount; ipart++)</b>
+<b class="fc">&nbsp;				if (multipath.isClosedPath(ipart))</b>
+<b class="nc">&nbsp;					pointCount++;</b>
+<b class="fc">&nbsp;		} else</b>
+<b class="fc">&nbsp;			pointCount += partCount;</b>
+&nbsp;
+<b class="fc">&nbsp;		int size = (4 /* type */) + (4 * 8 /* envelope */) + (4 /* part count */)</b>
+<b class="fc">&nbsp;				+ (4 /* point count */) + (partCount * 4 /* start indices */)</b>
+<b class="fc">&nbsp;				+ pointCount * 2 * 8 /* xy coordinates */;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (bExportZs)</b>
+<b class="fc">&nbsp;			size += (2 * 8 /* min max */) + (pointCount * 8 /* zs */);</b>
+<b class="fc">&nbsp;		if (bExportMs)</b>
+<b class="fc">&nbsp;			size += (2 * 8 /* min max */) + (pointCount * 8 /* ms */);</b>
+<b class="fc">&nbsp;		if (bExportIDs)</b>
+<b class="fc">&nbsp;			size += pointCount * 4 /* ids */;</b>
+&nbsp;		if (bHasCurves) {
+&nbsp;			// to-do: curves
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (size &gt;= NumberUtils.intMax())</b>
+<b class="nc">&nbsp;			throw new GeometryException(&quot;invalid call&quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (shapeBuffer == null)</b>
+<b class="fc">&nbsp;			return size;</b>
+<b class="fc">&nbsp;		else if (shapeBuffer.capacity() &lt; size)</b>
+<b class="nc">&nbsp;			throw new GeometryException(&quot;buffer is too small&quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;		int offset = 0;</b>
+&nbsp;
+&nbsp;		// Determine the shape type
+&nbsp;		int type;
+<b class="fc">&nbsp;		if (!bExportZs &amp;&amp; !bExportMs) {</b>
+<b class="fc">&nbsp;			if (bExportIDs || bHasCurves) {</b>
+<b class="nc">&nbsp;				type = bPolygon ? ShapeType.ShapeGeneralPolygon</b>
+<b class="nc">&nbsp;						: ShapeType.ShapeGeneralPolyline;</b>
+<b class="nc">&nbsp;				if (bExportIDs)</b>
+<b class="nc">&nbsp;					type |= ShapeModifiers.ShapeHasIDs;</b>
+<b class="nc">&nbsp;				if (bHasCurves)</b>
+<b class="nc">&nbsp;					type |= ShapeModifiers.ShapeHasCurves;</b>
+<b class="nc">&nbsp;			} else</b>
+<b class="fc">&nbsp;				type = bPolygon ? ShapeType.ShapePolygon</b>
+<b class="fc">&nbsp;						: ShapeType.ShapePolyline;</b>
+<b class="fc">&nbsp;		} else if (bExportZs &amp;&amp; !bExportMs) {</b>
+<b class="nc">&nbsp;			if (bExportIDs || bHasCurves) {</b>
+<b class="nc">&nbsp;				type = bPolygon ? ShapeType.ShapeGeneralPolygon</b>
+<b class="nc">&nbsp;						: ShapeType.ShapeGeneralPolyline;</b>
+<b class="nc">&nbsp;				type |= ShapeModifiers.ShapeHasZs;</b>
+<b class="nc">&nbsp;				if (bExportIDs)</b>
+<b class="nc">&nbsp;					type |= ShapeModifiers.ShapeHasIDs;</b>
+<b class="nc">&nbsp;				if (bHasCurves)</b>
+<b class="nc">&nbsp;					type |= ShapeModifiers.ShapeHasCurves;</b>
+<b class="nc">&nbsp;			} else</b>
+<b class="nc">&nbsp;				type = bPolygon ? ShapeType.ShapePolygonZ</b>
+<b class="nc">&nbsp;						: ShapeType.ShapePolylineZ;</b>
+<b class="nc">&nbsp;		} else if (bExportMs &amp;&amp; !bExportZs) {</b>
+<b class="nc">&nbsp;			if (bExportIDs || bHasCurves) {</b>
+<b class="nc">&nbsp;				type = bPolygon ? ShapeType.ShapeGeneralPolygon</b>
+<b class="nc">&nbsp;						: ShapeType.ShapeGeneralPolyline;</b>
+<b class="nc">&nbsp;				type |= ShapeModifiers.ShapeHasMs;</b>
+<b class="nc">&nbsp;				if (bExportIDs)</b>
+<b class="nc">&nbsp;					type |= ShapeModifiers.ShapeHasIDs;</b>
+<b class="nc">&nbsp;				if (bHasCurves)</b>
+<b class="nc">&nbsp;					type |= ShapeModifiers.ShapeHasCurves;</b>
+<b class="nc">&nbsp;			} else</b>
+<b class="nc">&nbsp;				type = bPolygon ? ShapeType.ShapePolygonM</b>
+<b class="nc">&nbsp;						: ShapeType.ShapePolylineM;</b>
+<b class="nc">&nbsp;		} else {</b>
+<b class="fc">&nbsp;			if (bExportIDs || bHasCurves) {</b>
+<b class="fc">&nbsp;				type = bPolygon ? ShapeType.ShapeGeneralPolygon</b>
+<b class="fc">&nbsp;						: ShapeType.ShapeGeneralPolyline;</b>
+<b class="fc">&nbsp;				type |= ShapeModifiers.ShapeHasZs | ShapeModifiers.ShapeHasMs;</b>
+<b class="fc">&nbsp;				if (bExportIDs)</b>
+<b class="fc">&nbsp;					type |= ShapeModifiers.ShapeHasIDs;</b>
+<b class="fc">&nbsp;				if (bHasCurves)</b>
+<b class="nc">&nbsp;					type |= ShapeModifiers.ShapeHasCurves;</b>
+<b class="nc">&nbsp;			} else</b>
+<b class="fc">&nbsp;				type = bPolygon ? ShapeType.ShapePolygonZM</b>
+<b class="nc">&nbsp;						: ShapeType.ShapePolylineZM;</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		// write type
+<b class="fc">&nbsp;		shapeBuffer.putInt(offset, type);</b>
+<b class="fc">&nbsp;		offset += 4;</b>
+&nbsp;
+&nbsp;		// write Envelope
+<b class="fc">&nbsp;		Envelope2D env = new Envelope2D();</b>
+<b class="fc">&nbsp;		multipathImpl.queryEnvelope2D(env); // calls _VerifyAllStreams</b>
+<b class="fc">&nbsp;		shapeBuffer.putDouble(offset, env.xmin);</b>
+<b class="fc">&nbsp;		offset += 8;</b>
+<b class="fc">&nbsp;		shapeBuffer.putDouble(offset, env.ymin);</b>
+<b class="fc">&nbsp;		offset += 8;</b>
+<b class="fc">&nbsp;		shapeBuffer.putDouble(offset, env.xmax);</b>
+<b class="fc">&nbsp;		offset += 8;</b>
+<b class="fc">&nbsp;		shapeBuffer.putDouble(offset, env.ymax);</b>
+<b class="fc">&nbsp;		offset += 8;</b>
+&nbsp;
+&nbsp;		// write part count
+<b class="fc">&nbsp;		shapeBuffer.putInt(offset, partCount);</b>
+<b class="fc">&nbsp;		offset += 4; // to-do: return error if larger than 2^32 - 1</b>
+&nbsp;
+&nbsp;		// write pointCount
+<b class="fc">&nbsp;		shapeBuffer.putInt(offset, pointCount);</b>
+<b class="fc">&nbsp;		offset += 4;</b>
+&nbsp;
+&nbsp;		// write start indices for each part
+<b class="fc">&nbsp;		int pointIndexDelta = 0;</b>
+<b class="fc">&nbsp;		for (int ipart = 0; ipart &lt; partCount; ipart++) {</b>
+<b class="fc">&nbsp;			int istart = multipathImpl.getPathStart(ipart) + pointIndexDelta;</b>
+<b class="fc">&nbsp;			shapeBuffer.putInt(offset, istart);</b>
+<b class="fc">&nbsp;			offset += 4;</b>
+<b class="fc">&nbsp;			if (bPolygon || multipathImpl.isClosedPath(ipart))</b>
+<b class="fc">&nbsp;				pointIndexDelta++;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (pointCount &gt; 0) {</b>
+&nbsp;			// write xy coordinates
+<b class="fc">&nbsp;			AttributeStreamBase positionStream = multipathImpl</b>
+<b class="fc">&nbsp;					.getAttributeStreamRef(Semantics.POSITION);</b>
+<b class="fc">&nbsp;			AttributeStreamOfDbl position = (AttributeStreamOfDbl) positionStream;</b>
+&nbsp;
+<b class="fc">&nbsp;			for (int ipart = 0; ipart &lt; partCount; ipart++) {</b>
+<b class="fc">&nbsp;				int partStart = multipathImpl.getPathStart(ipart);</b>
+<b class="fc">&nbsp;				int partEnd = multipathImpl.getPathEnd(ipart);</b>
+<b class="fc">&nbsp;				for (int i = partStart; i &lt; partEnd; i++) {</b>
+<b class="fc">&nbsp;					double x = position.read(2 * i);</b>
+<b class="fc">&nbsp;					double y = position.read(2 * i + 1);</b>
+&nbsp;
+<b class="fc">&nbsp;					shapeBuffer.putDouble(offset, x);</b>
+<b class="fc">&nbsp;					offset += 8;</b>
+<b class="fc">&nbsp;					shapeBuffer.putDouble(offset, y);</b>
+<b class="fc">&nbsp;					offset += 8;</b>
+&nbsp;				}
+&nbsp;
+&nbsp;				// If the part is closed, then we need to duplicate the start
+&nbsp;				// point
+<b class="fc">&nbsp;				if (bPolygon || multipathImpl.isClosedPath(ipart)) {</b>
+<b class="fc">&nbsp;					double x = position.read(2 * partStart);</b>
+<b class="fc">&nbsp;					double y = position.read(2 * partStart + 1);</b>
+&nbsp;
+<b class="fc">&nbsp;					shapeBuffer.putDouble(offset, x);</b>
+<b class="fc">&nbsp;					offset += 8;</b>
+<b class="fc">&nbsp;					shapeBuffer.putDouble(offset, y);</b>
+<b class="fc">&nbsp;					offset += 8;</b>
+&nbsp;				}
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+&nbsp;		// write Zs
+<b class="fc">&nbsp;		if (bExportZs) {</b>
+<b class="fc">&nbsp;			Envelope1D zInterval = multipathImpl.queryInterval(Semantics.Z, 0);</b>
+<b class="fc">&nbsp;			shapeBuffer.putDouble(offset,</b>
+<b class="fc">&nbsp;					bArcViewNaNs ? Interop.translateToAVNaN(zInterval.vmin)</b>
+<b class="nc">&nbsp;							: zInterval.vmin);</b>
+<b class="fc">&nbsp;			offset += 8;</b>
+<b class="fc">&nbsp;			shapeBuffer.putDouble(offset,</b>
+<b class="fc">&nbsp;					bArcViewNaNs ? Interop.translateToAVNaN(zInterval.vmax)</b>
+<b class="nc">&nbsp;							: zInterval.vmax);</b>
+<b class="fc">&nbsp;			offset += 8;</b>
+&nbsp;
+<b class="fc">&nbsp;			if (pointCount &gt; 0) {</b>
+<b class="fc">&nbsp;				if (multipathImpl._attributeStreamIsAllocated(Semantics.Z)) {</b>
+<b class="fc">&nbsp;					AttributeStreamOfDbl zs = (AttributeStreamOfDbl) multipathImpl</b>
+<b class="fc">&nbsp;							.getAttributeStreamRef(Semantics.Z);</b>
+<b class="fc">&nbsp;					for (int ipart = 0; ipart &lt; partCount; ipart++) {</b>
+<b class="fc">&nbsp;						int partStart = multipathImpl.getPathStart(ipart);</b>
+<b class="fc">&nbsp;						int partEnd = multipathImpl.getPathEnd(ipart);</b>
+<b class="fc">&nbsp;						for (int i = partStart; i &lt; partEnd; i++) {</b>
+<b class="fc">&nbsp;							double z = zs.read(i);</b>
+<b class="fc">&nbsp;							shapeBuffer.putDouble(offset,</b>
+<b class="fc">&nbsp;									bArcViewNaNs ? Interop.translateToAVNaN(z)</b>
+<b class="nc">&nbsp;											: z);</b>
+<b class="fc">&nbsp;							offset += 8;</b>
+&nbsp;						}
+&nbsp;
+&nbsp;						// If the part is closed, then we need to duplicate the
+&nbsp;						// start z
+<b class="fc">&nbsp;						if (bPolygon || multipathImpl.isClosedPath(ipart)) {</b>
+<b class="fc">&nbsp;							double z = zs.read(partStart);</b>
+<b class="fc">&nbsp;							shapeBuffer.putDouble(offset, z);</b>
+<b class="fc">&nbsp;							offset += 8;</b>
+&nbsp;						}
+&nbsp;					}
+<b class="fc">&nbsp;				} else {</b>
+<b class="nc">&nbsp;					double z = VertexDescription.getDefaultValue(Semantics.Z);</b>
+&nbsp;
+<b class="nc">&nbsp;					if (bArcViewNaNs)</b>
+<b class="nc">&nbsp;						z = Interop.translateToAVNaN(z);</b>
+&nbsp;
+<b class="nc">&nbsp;					for (int i = 0; i &lt; pointCount; i++)</b>
+<b class="nc">&nbsp;						shapeBuffer.putDouble(offset, z);</b>
+<b class="nc">&nbsp;					offset += 8;</b>
+&nbsp;				}
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+&nbsp;		// write Ms
+<b class="fc">&nbsp;		if (bExportMs) {</b>
+<b class="fc">&nbsp;			Envelope1D mInterval = multipathImpl.queryInterval(Semantics.M, 0);</b>
+<b class="fc">&nbsp;			shapeBuffer.putDouble(offset,</b>
+<b class="fc">&nbsp;					bArcViewNaNs ? Interop.translateToAVNaN(mInterval.vmin)</b>
+<b class="nc">&nbsp;							: mInterval.vmin);</b>
+<b class="fc">&nbsp;			offset += 8;</b>
+<b class="fc">&nbsp;			shapeBuffer.putDouble(offset,</b>
+<b class="fc">&nbsp;					bArcViewNaNs ? Interop.translateToAVNaN(mInterval.vmax)</b>
+<b class="nc">&nbsp;							: mInterval.vmax);</b>
+<b class="fc">&nbsp;			offset += 8;</b>
+&nbsp;
+<b class="fc">&nbsp;			if (pointCount &gt; 0) {</b>
+<b class="fc">&nbsp;				if (multipathImpl._attributeStreamIsAllocated(Semantics.M)) {</b>
+<b class="fc">&nbsp;					AttributeStreamOfDbl ms = (AttributeStreamOfDbl) multipathImpl</b>
+<b class="fc">&nbsp;							.getAttributeStreamRef(Semantics.M);</b>
+<b class="fc">&nbsp;					for (int ipart = 0; ipart &lt; partCount; ipart++) {</b>
+<b class="fc">&nbsp;						int partStart = multipathImpl.getPathStart(ipart);</b>
+<b class="fc">&nbsp;						int partEnd = multipathImpl.getPathEnd(ipart);</b>
+<b class="fc">&nbsp;						for (int i = partStart; i &lt; partEnd; i++) {</b>
+<b class="fc">&nbsp;							double m = ms.read(i);</b>
+<b class="fc">&nbsp;							shapeBuffer.putDouble(offset,</b>
+<b class="fc">&nbsp;									bArcViewNaNs ? Interop.translateToAVNaN(m)</b>
+<b class="nc">&nbsp;											: m);</b>
+<b class="fc">&nbsp;							offset += 8;</b>
+&nbsp;						}
+&nbsp;
+&nbsp;						// If the part is closed, then we need to duplicate the
+&nbsp;						// start m
+<b class="fc">&nbsp;						if (bPolygon || multipathImpl.isClosedPath(ipart)) {</b>
+<b class="fc">&nbsp;							double m = ms.read(partStart);</b>
+<b class="fc">&nbsp;							shapeBuffer.putDouble(offset, m);</b>
+<b class="fc">&nbsp;							offset += 8;</b>
+&nbsp;						}
+&nbsp;					}
+<b class="fc">&nbsp;				} else {</b>
+<b class="nc">&nbsp;					double m = VertexDescription.getDefaultValue(Semantics.M);</b>
+&nbsp;
+<b class="nc">&nbsp;					if (bArcViewNaNs)</b>
+<b class="nc">&nbsp;						m = Interop.translateToAVNaN(m);</b>
+&nbsp;
+<b class="nc">&nbsp;					for (int i = 0; i &lt; pointCount; i++)</b>
+<b class="nc">&nbsp;						shapeBuffer.putDouble(offset, m);</b>
+<b class="nc">&nbsp;					offset += 8;</b>
+&nbsp;				}
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+&nbsp;		// write Curves
+&nbsp;		if (bHasCurves) {
+&nbsp;			// to-do: We&#39;ll finish this later
+&nbsp;		}
+&nbsp;
+&nbsp;		// write IDs
+<b class="fc">&nbsp;		if (bExportIDs) {</b>
+<b class="fc">&nbsp;			if (pointCount &gt; 0) {</b>
+<b class="fc">&nbsp;				if (multipathImpl._attributeStreamIsAllocated(Semantics.ID)) {</b>
+<b class="fc">&nbsp;					AttributeStreamOfInt32 ids = (AttributeStreamOfInt32) multipathImpl</b>
+<b class="fc">&nbsp;							.getAttributeStreamRef(Semantics.ID);</b>
+<b class="fc">&nbsp;					for (int ipart = 0; ipart &lt; partCount; ipart++) {</b>
+<b class="fc">&nbsp;						int partStart = multipathImpl.getPathStart(ipart);</b>
+<b class="fc">&nbsp;						int partEnd = multipathImpl.getPathEnd(ipart);</b>
+<b class="fc">&nbsp;						for (int i = partStart; i &lt; partEnd; i++) {</b>
+<b class="fc">&nbsp;							int id = ids.read(i);</b>
+<b class="fc">&nbsp;							shapeBuffer.putInt(offset, id);</b>
+<b class="fc">&nbsp;							offset += 4;</b>
+&nbsp;						}
+&nbsp;
+&nbsp;						// If the part is closed, then we need to duplicate the
+&nbsp;						// start id
+<b class="fc">&nbsp;						if (bPolygon || multipathImpl.isClosedPath(ipart)) {</b>
+<b class="nc">&nbsp;							int id = ids.read(partStart);</b>
+<b class="nc">&nbsp;							shapeBuffer.putInt(offset, id);</b>
+<b class="nc">&nbsp;							offset += 4;</b>
+&nbsp;						}
+&nbsp;					}
+<b class="fc">&nbsp;				} else {</b>
+<b class="nc">&nbsp;					int id = (int) VertexDescription</b>
+<b class="nc">&nbsp;							.getDefaultValue(Semantics.ID);</b>
+<b class="nc">&nbsp;					for (int i = 0; i &lt; pointCount; i++)</b>
+<b class="nc">&nbsp;						shapeBuffer.putInt(offset, id);</b>
+<b class="nc">&nbsp;					offset += 4;</b>
+&nbsp;				}
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return offset;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-02-21 15:02</div>
+</div>
+</body>
+</html>

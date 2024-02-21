@@ -1,0 +1,1189 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > OperatorImportFromWkbLocal</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.esri.core.geometry</a>
+</div>
+
+<h1>Coverage Summary for Class: OperatorImportFromWkbLocal (com.esri.core.geometry)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">OperatorImportFromWkbLocal</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (8/8)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    81,8%
+  </span>
+  <span class="absValue">
+    (529/647)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">OperatorImportFromWkbLocal$WkbHelper</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (5/5)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (11/11)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    81,9%
+  </span>
+  <span class="absValue">
+    (534/652)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; Copyright 1995-2015 Esri
+&nbsp;
+&nbsp;   Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp;   you may not use this file except in compliance with the License.
+&nbsp;   You may obtain a copy of the License at
+&nbsp;
+&nbsp;       http://www.apache.org/licenses/LICENSE-2.0
+&nbsp;
+&nbsp;   Unless required by applicable law or agreed to in writing, software
+&nbsp;   distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp;   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp;   See the License for the specific language governing permissions and
+&nbsp;   limitations under the License.
+&nbsp;
+&nbsp; For additional information, contact:
+&nbsp; Environmental Systems Research Institute, Inc.
+&nbsp; Attn: Contracts Dept
+&nbsp; 380 New York Street
+&nbsp; Redlands, California, USA 92373
+&nbsp;
+&nbsp; email: contracts@esri.com
+&nbsp; */
+&nbsp;
+&nbsp;package com.esri.core.geometry;
+&nbsp;
+&nbsp;import java.nio.ByteBuffer;
+&nbsp;import java.nio.ByteOrder;
+&nbsp;import java.util.ArrayList;
+&nbsp;
+&nbsp;/**
+&nbsp; * OperatorImportFromWkbLocal implementation.
+&nbsp; */
+<b class="fc">&nbsp;class OperatorImportFromWkbLocal extends OperatorImportFromWkb {</b>
+&nbsp;
+&nbsp;	static final class WkbHelper {
+<b class="fc">&nbsp;		WkbHelper(ByteBuffer buffer) {</b>
+<b class="fc">&nbsp;			wkbBuffer = buffer;</b>
+<b class="fc">&nbsp;			adjustment = 0;</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		int getInt(int offset) {
+<b class="fc">&nbsp;			return wkbBuffer.getInt(adjustment + offset);</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		double getDouble(int offset) {
+<b class="fc">&nbsp;			return wkbBuffer.getDouble(adjustment + offset);</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		ByteBuffer wkbBuffer;
+&nbsp;		int adjustment;
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public Geometry execute(int importFlags, Geometry.Type type,
+&nbsp;			ByteBuffer wkbBuffer, ProgressTracker progress_tracker) {
+&nbsp;
+<b class="fc">&nbsp;		ByteOrder initialOrder = wkbBuffer.order();</b>
+&nbsp;
+&nbsp;		// read byte ordering
+<b class="fc">&nbsp;		int byteOrder = wkbBuffer.get(0);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (byteOrder == WkbByteOrder.wkbNDR)</b>
+<b class="fc">&nbsp;			wkbBuffer.order(ByteOrder.LITTLE_ENDIAN);</b>
+&nbsp;		else
+<b class="nc">&nbsp;			wkbBuffer.order(ByteOrder.BIG_ENDIAN);</b>
+&nbsp;
+<b class="fc">&nbsp;		WkbHelper wkbHelper = new WkbHelper(wkbBuffer);</b>
+&nbsp;
+&nbsp;		try {
+<b class="fc">&nbsp;			return importFromWkb(importFlags, type, wkbHelper);</b>
+<b class="nc">&nbsp;		} finally {</b>
+<b class="fc">&nbsp;			wkbBuffer.order(initialOrder);</b>
+<b class="nc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public OGCStructure executeOGC(int importFlags, ByteBuffer wkbBuffer,
+&nbsp;			ProgressTracker progress_tracker) {
+&nbsp;
+<b class="fc">&nbsp;		ByteOrder initialOrder = wkbBuffer.order();</b>
+&nbsp;
+&nbsp;		// read byte ordering
+<b class="fc">&nbsp;		int byteOrder = wkbBuffer.get(0);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (byteOrder == WkbByteOrder.wkbNDR)</b>
+<b class="fc">&nbsp;			wkbBuffer.order(ByteOrder.LITTLE_ENDIAN);</b>
+&nbsp;		else
+<b class="nc">&nbsp;			wkbBuffer.order(ByteOrder.BIG_ENDIAN);</b>
+&nbsp;
+<b class="fc">&nbsp;		ArrayList&lt;OGCStructure&gt; stack = new ArrayList&lt;OGCStructure&gt;(0);</b>
+<b class="fc">&nbsp;		AttributeStreamOfInt32 numGeometries = new AttributeStreamOfInt32(0);</b>
+<b class="fc">&nbsp;		AttributeStreamOfInt32 indices = new AttributeStreamOfInt32(0);</b>
+<b class="fc">&nbsp;		WkbHelper wkbHelper = new WkbHelper(wkbBuffer);</b>
+&nbsp;
+<b class="fc">&nbsp;		OGCStructure root = new OGCStructure();</b>
+<b class="fc">&nbsp;		root.m_structures = new ArrayList&lt;OGCStructure&gt;(0);</b>
+<b class="fc">&nbsp;		stack.add(root); // add dummy root</b>
+<b class="fc">&nbsp;		numGeometries.add(1);</b>
+<b class="fc">&nbsp;		indices.add(0);</b>
+&nbsp;
+<b class="fc">&nbsp;		boolean bCheckConsistentAttributes = false;</b>
+<b class="fc">&nbsp;		boolean bHasZs = false;</b>
+<b class="fc">&nbsp;		boolean bHasMs = false;</b>
+&nbsp;
+&nbsp;		try {
+&nbsp;
+<b class="fc">&nbsp;			while (!stack.isEmpty()) {</b>
+&nbsp;
+<b class="fc">&nbsp;				if (indices.getLast() == numGeometries.getLast()) {</b>
+<b class="fc">&nbsp;					stack.remove(stack.size() - 1);</b>
+<b class="fc">&nbsp;					indices.removeLast();</b>
+<b class="fc">&nbsp;					numGeometries.removeLast();</b>
+<b class="fc">&nbsp;					continue;</b>
+&nbsp;				}
+&nbsp;
+<b class="fc">&nbsp;				OGCStructure last = stack.get(stack.size() - 1);</b>
+<b class="fc">&nbsp;				indices.write(indices.size() - 1, indices.getLast() + 1);</b>
+&nbsp;				Geometry geometry;
+&nbsp;
+<b class="fc">&nbsp;				int wkbType = wkbHelper.getInt(1);</b>
+&nbsp;				int ogcType;
+&nbsp;
+&nbsp;				// strip away attributes from type identifier
+&nbsp;
+<b class="fc">&nbsp;				if (wkbType &gt; 3000) {</b>
+<b class="fc">&nbsp;					ogcType = wkbType - 3000;</b>
+&nbsp;
+<b class="fc">&nbsp;					if (bCheckConsistentAttributes) {</b>
+<b class="nc">&nbsp;						if (!bHasZs || !bHasMs)</b>
+<b class="nc">&nbsp;							throw new IllegalArgumentException();</b>
+&nbsp;					} else {
+<b class="fc">&nbsp;						bHasZs = true;</b>
+<b class="fc">&nbsp;						bHasMs = true;</b>
+<b class="fc">&nbsp;						bCheckConsistentAttributes = true;</b>
+&nbsp;					}
+<b class="fc">&nbsp;				} else if (wkbType &gt; 2000) {</b>
+<b class="nc">&nbsp;					ogcType = wkbType - 2000;</b>
+&nbsp;
+<b class="nc">&nbsp;					if (bCheckConsistentAttributes) {</b>
+<b class="nc">&nbsp;						if (bHasZs || !bHasMs)</b>
+<b class="nc">&nbsp;							throw new IllegalArgumentException();</b>
+&nbsp;					} else {
+<b class="nc">&nbsp;						bHasZs = false;</b>
+<b class="nc">&nbsp;						bHasMs = true;</b>
+<b class="nc">&nbsp;						bCheckConsistentAttributes = true;</b>
+&nbsp;					}
+<b class="nc">&nbsp;				} else if (wkbType &gt; 1000) {</b>
+<b class="nc">&nbsp;					ogcType = wkbType - 1000;</b>
+&nbsp;
+<b class="nc">&nbsp;					if (bCheckConsistentAttributes) {</b>
+<b class="nc">&nbsp;						if (!bHasZs || bHasMs)</b>
+<b class="nc">&nbsp;							throw new IllegalArgumentException();</b>
+&nbsp;					} else {
+<b class="nc">&nbsp;						bHasZs = true;</b>
+<b class="nc">&nbsp;						bHasMs = false;</b>
+<b class="nc">&nbsp;						bCheckConsistentAttributes = true;</b>
+&nbsp;					}
+<b class="nc">&nbsp;				} else {</b>
+<b class="fc">&nbsp;					ogcType = wkbType;</b>
+&nbsp;
+<b class="fc">&nbsp;					if (bCheckConsistentAttributes) {</b>
+<b class="fc">&nbsp;						if (bHasZs || bHasMs)</b>
+<b class="nc">&nbsp;							throw new IllegalArgumentException();</b>
+&nbsp;					} else {
+<b class="fc">&nbsp;						bHasZs = false;</b>
+<b class="fc">&nbsp;						bHasMs = false;</b>
+<b class="fc">&nbsp;						bCheckConsistentAttributes = true;</b>
+&nbsp;					}
+&nbsp;				}
+<b class="fc">&nbsp;				if (ogcType == 7) {</b>
+<b class="fc">&nbsp;					int count = wkbHelper.getInt(5);</b>
+<b class="fc">&nbsp;					wkbHelper.adjustment += 9;</b>
+&nbsp;
+<b class="fc">&nbsp;					OGCStructure next = new OGCStructure();</b>
+<b class="fc">&nbsp;					next.m_type = ogcType;</b>
+<b class="fc">&nbsp;					next.m_structures = new ArrayList&lt;OGCStructure&gt;(0);</b>
+<b class="fc">&nbsp;					last.m_structures.add(next);</b>
+<b class="fc">&nbsp;					stack.add(next);</b>
+<b class="fc">&nbsp;					indices.add(0);</b>
+<b class="fc">&nbsp;					numGeometries.add(count);</b>
+<b class="fc">&nbsp;				} else {</b>
+<b class="fc">&nbsp;					geometry = importFromWkb(importFlags,</b>
+<b class="fc">&nbsp;							Geometry.Type.Unknown, wkbHelper);</b>
+<b class="fc">&nbsp;					OGCStructure leaf = new OGCStructure();</b>
+<b class="fc">&nbsp;					leaf.m_type = ogcType;</b>
+<b class="fc">&nbsp;					leaf.m_geometry = geometry;</b>
+<b class="fc">&nbsp;					last.m_structures.add(leaf);</b>
+&nbsp;				}
+&nbsp;			}
+<b class="fc">&nbsp;		} finally {</b>
+<b class="fc">&nbsp;			wkbBuffer.order(initialOrder);</b>
+<b class="nc">&nbsp;		}</b>
+&nbsp;
+<b class="fc">&nbsp;		return root;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private static Geometry importFromWkb(int importFlags, Geometry.Type type,
+&nbsp;			WkbHelper wkbHelper) {
+&nbsp;
+&nbsp;		// read type
+<b class="fc">&nbsp;		int wkbType = wkbHelper.getInt(1);</b>
+&nbsp;
+<b class="fc">&nbsp;		switch (wkbType) {</b>
+&nbsp;		case WkbGeometryType.wkbPolygon:
+<b class="fc">&nbsp;			if (type.value() != Geometry.GeometryType.Polygon</b>
+<b class="fc">&nbsp;					&amp;&amp; type.value() != Geometry.GeometryType.Unknown)</b>
+<b class="nc">&nbsp;				throw new GeometryException(&quot;invalid shape type&quot;);</b>
+<b class="fc">&nbsp;			return importFromWkbPolygon(false, importFlags, false, false,</b>
+<b class="fc">&nbsp;					wkbHelper);</b>
+&nbsp;
+&nbsp;		case WkbGeometryType.wkbPolygonM:
+<b class="nc">&nbsp;			if (type.value() != Geometry.GeometryType.Polygon</b>
+<b class="nc">&nbsp;					&amp;&amp; type.value() != Geometry.GeometryType.Unknown)</b>
+<b class="nc">&nbsp;				throw new GeometryException(&quot;invalid shape type&quot;);</b>
+<b class="nc">&nbsp;			return importFromWkbPolygon(false, importFlags, false, true,</b>
+<b class="nc">&nbsp;					wkbHelper);</b>
+&nbsp;
+&nbsp;		case WkbGeometryType.wkbPolygonZ:
+<b class="nc">&nbsp;			if (type.value() != Geometry.GeometryType.Polygon</b>
+<b class="nc">&nbsp;					&amp;&amp; type.value() != Geometry.GeometryType.Unknown)</b>
+<b class="nc">&nbsp;				throw new GeometryException(&quot;invalid shape type&quot;);</b>
+<b class="nc">&nbsp;			return importFromWkbPolygon(false, importFlags, true, false,</b>
+<b class="nc">&nbsp;					wkbHelper);</b>
+&nbsp;
+&nbsp;		case WkbGeometryType.wkbPolygonZM:
+<b class="fc">&nbsp;			if (type.value() != Geometry.GeometryType.Polygon</b>
+<b class="nc">&nbsp;					&amp;&amp; type.value() != Geometry.GeometryType.Unknown)</b>
+<b class="nc">&nbsp;				throw new GeometryException(&quot;invalid shape type&quot;);</b>
+<b class="fc">&nbsp;			return importFromWkbPolygon(false, importFlags, true, true,</b>
+<b class="fc">&nbsp;					wkbHelper);</b>
+&nbsp;
+&nbsp;		case WkbGeometryType.wkbMultiPolygon:
+<b class="fc">&nbsp;			if (type.value() != Geometry.GeometryType.Polygon</b>
+<b class="fc">&nbsp;					&amp;&amp; type.value() != Geometry.GeometryType.Unknown)</b>
+<b class="nc">&nbsp;				throw new GeometryException(&quot;invalid shape type&quot;);</b>
+<b class="fc">&nbsp;			return importFromWkbPolygon(true, importFlags, false, false,</b>
+<b class="fc">&nbsp;					wkbHelper);</b>
+&nbsp;
+&nbsp;		case WkbGeometryType.wkbMultiPolygonM:
+<b class="nc">&nbsp;			if (type.value() != Geometry.GeometryType.Polygon</b>
+<b class="nc">&nbsp;					&amp;&amp; type.value() != Geometry.GeometryType.Unknown)</b>
+<b class="nc">&nbsp;				throw new GeometryException(&quot;invalid shape type&quot;);</b>
+<b class="nc">&nbsp;			return importFromWkbPolygon(true, importFlags, false, true,</b>
+<b class="nc">&nbsp;					wkbHelper);</b>
+&nbsp;
+&nbsp;		case WkbGeometryType.wkbMultiPolygonZ:
+<b class="nc">&nbsp;			if (type.value() != Geometry.GeometryType.Polygon</b>
+<b class="nc">&nbsp;					&amp;&amp; type.value() != Geometry.GeometryType.Unknown)</b>
+<b class="nc">&nbsp;				throw new GeometryException(&quot;invalid shape type&quot;);</b>
+<b class="nc">&nbsp;			return importFromWkbPolygon(true, importFlags, true, false,</b>
+<b class="nc">&nbsp;					wkbHelper);</b>
+&nbsp;
+&nbsp;		case WkbGeometryType.wkbMultiPolygonZM:
+<b class="fc">&nbsp;			if (type.value() != Geometry.GeometryType.Polygon</b>
+<b class="nc">&nbsp;					&amp;&amp; type.value() != Geometry.GeometryType.Unknown)</b>
+<b class="nc">&nbsp;				throw new GeometryException(&quot;invalid shape type&quot;);</b>
+<b class="fc">&nbsp;			return importFromWkbPolygon(true, importFlags, true, true,</b>
+<b class="fc">&nbsp;					wkbHelper);</b>
+&nbsp;
+&nbsp;		case WkbGeometryType.wkbLineString:
+<b class="fc">&nbsp;			if (type.value() != Geometry.GeometryType.Polyline</b>
+<b class="fc">&nbsp;					&amp;&amp; type.value() != Geometry.GeometryType.Unknown)</b>
+<b class="nc">&nbsp;				throw new GeometryException(&quot;invalid shape type&quot;);</b>
+<b class="fc">&nbsp;			return importFromWkbPolyline(false, importFlags, false, false,</b>
+<b class="fc">&nbsp;					wkbHelper);</b>
+&nbsp;
+&nbsp;		case WkbGeometryType.wkbLineStringM:
+<b class="nc">&nbsp;			if (type.value() != Geometry.GeometryType.Polyline</b>
+<b class="nc">&nbsp;					&amp;&amp; type.value() != Geometry.GeometryType.Unknown)</b>
+<b class="nc">&nbsp;				throw new GeometryException(&quot;invalid shape type&quot;);</b>
+<b class="nc">&nbsp;			return importFromWkbPolyline(false, importFlags, false, true,</b>
+<b class="nc">&nbsp;					wkbHelper);</b>
+&nbsp;
+&nbsp;		case WkbGeometryType.wkbLineStringZ:
+<b class="nc">&nbsp;			if (type.value() != Geometry.GeometryType.Polyline</b>
+<b class="nc">&nbsp;					&amp;&amp; type.value() != Geometry.GeometryType.Unknown)</b>
+<b class="nc">&nbsp;				throw new GeometryException(&quot;invalid shape type&quot;);</b>
+<b class="nc">&nbsp;			return importFromWkbPolyline(false, importFlags, true, false,</b>
+<b class="nc">&nbsp;					wkbHelper);</b>
+&nbsp;
+&nbsp;		case WkbGeometryType.wkbLineStringZM:
+<b class="fc">&nbsp;			if (type.value() != Geometry.GeometryType.Polyline</b>
+<b class="nc">&nbsp;					&amp;&amp; type.value() != Geometry.GeometryType.Unknown)</b>
+<b class="nc">&nbsp;				throw new GeometryException(&quot;invalid shape type&quot;);</b>
+<b class="fc">&nbsp;			return importFromWkbPolyline(false, importFlags, true, true,</b>
+<b class="fc">&nbsp;					wkbHelper);</b>
+&nbsp;
+&nbsp;		case WkbGeometryType.wkbMultiLineString:
+<b class="fc">&nbsp;			if (type.value() != Geometry.GeometryType.Polyline</b>
+<b class="fc">&nbsp;					&amp;&amp; type.value() != Geometry.GeometryType.Unknown)</b>
+<b class="nc">&nbsp;				throw new GeometryException(&quot;invalid shape type&quot;);</b>
+<b class="fc">&nbsp;			return importFromWkbPolyline(true, importFlags, false, false,</b>
+<b class="fc">&nbsp;					wkbHelper);</b>
+&nbsp;
+&nbsp;		case WkbGeometryType.wkbMultiLineStringM:
+<b class="nc">&nbsp;			if (type.value() != Geometry.GeometryType.Polyline</b>
+<b class="nc">&nbsp;					&amp;&amp; type.value() != Geometry.GeometryType.Unknown)</b>
+<b class="nc">&nbsp;				throw new GeometryException(&quot;invalid shape type&quot;);</b>
+<b class="nc">&nbsp;			return importFromWkbPolyline(true, importFlags, false, true,</b>
+<b class="nc">&nbsp;					wkbHelper);</b>
+&nbsp;
+&nbsp;		case WkbGeometryType.wkbMultiLineStringZ:
+<b class="nc">&nbsp;			if (type.value() != Geometry.GeometryType.Polyline</b>
+<b class="nc">&nbsp;					&amp;&amp; type.value() != Geometry.GeometryType.Unknown)</b>
+<b class="nc">&nbsp;				throw new GeometryException(&quot;invalid shape type&quot;);</b>
+<b class="nc">&nbsp;			return importFromWkbPolyline(true, importFlags, true, false,</b>
+<b class="nc">&nbsp;					wkbHelper);</b>
+&nbsp;
+&nbsp;		case WkbGeometryType.wkbMultiLineStringZM:
+<b class="fc">&nbsp;			if (type.value() != Geometry.GeometryType.Polyline</b>
+<b class="nc">&nbsp;					&amp;&amp; type.value() != Geometry.GeometryType.Unknown)</b>
+<b class="nc">&nbsp;				throw new GeometryException(&quot;invalid shape type&quot;);</b>
+<b class="fc">&nbsp;			return importFromWkbPolyline(true, importFlags, true, true,</b>
+<b class="fc">&nbsp;					wkbHelper);</b>
+&nbsp;
+&nbsp;		case WkbGeometryType.wkbMultiPoint:
+<b class="fc">&nbsp;			if (type.value() != Geometry.GeometryType.MultiPoint</b>
+<b class="fc">&nbsp;					&amp;&amp; type.value() != Geometry.GeometryType.Unknown)</b>
+<b class="nc">&nbsp;				throw new GeometryException(&quot;invalid shape type&quot;);</b>
+<b class="fc">&nbsp;			return importFromWkbMultiPoint(importFlags, false, false, wkbHelper);</b>
+&nbsp;
+&nbsp;		case WkbGeometryType.wkbMultiPointM:
+<b class="nc">&nbsp;			if (type.value() != Geometry.GeometryType.MultiPoint</b>
+<b class="nc">&nbsp;					&amp;&amp; type.value() != Geometry.GeometryType.Unknown)</b>
+<b class="nc">&nbsp;				throw new GeometryException(&quot;invalid shape type&quot;);</b>
+<b class="nc">&nbsp;			return importFromWkbMultiPoint(importFlags, false, true, wkbHelper);</b>
+&nbsp;
+&nbsp;		case WkbGeometryType.wkbMultiPointZ:
+<b class="fc">&nbsp;			if (type.value() != Geometry.GeometryType.MultiPoint</b>
+<b class="nc">&nbsp;					&amp;&amp; type.value() != Geometry.GeometryType.Unknown)</b>
+<b class="nc">&nbsp;				throw new GeometryException(&quot;invalid shape type&quot;);</b>
+<b class="fc">&nbsp;			return importFromWkbMultiPoint(importFlags, true, false, wkbHelper);</b>
+&nbsp;
+&nbsp;		case WkbGeometryType.wkbMultiPointZM:
+<b class="fc">&nbsp;			if (type.value() != Geometry.GeometryType.MultiPoint</b>
+<b class="fc">&nbsp;					&amp;&amp; type.value() != Geometry.GeometryType.Unknown)</b>
+<b class="nc">&nbsp;				throw new GeometryException(&quot;invalid shape type&quot;);</b>
+<b class="fc">&nbsp;			return importFromWkbMultiPoint(importFlags, true, true, wkbHelper);</b>
+&nbsp;
+&nbsp;		case WkbGeometryType.wkbPoint:
+<b class="fc">&nbsp;			if (type.value() != Geometry.GeometryType.Point</b>
+<b class="fc">&nbsp;					&amp;&amp; type.value() != Geometry.GeometryType.Unknown)</b>
+<b class="nc">&nbsp;				throw new GeometryException(&quot;invalid shape type&quot;);</b>
+<b class="fc">&nbsp;			return importFromWkbPoint(importFlags, false, false, wkbHelper);</b>
+&nbsp;
+&nbsp;		case WkbGeometryType.wkbPointM:
+<b class="nc">&nbsp;			if (type.value() != Geometry.GeometryType.Point</b>
+<b class="nc">&nbsp;					&amp;&amp; type.value() != Geometry.GeometryType.Unknown)</b>
+<b class="nc">&nbsp;				throw new GeometryException(&quot;invalid shape type&quot;);</b>
+<b class="nc">&nbsp;			return importFromWkbPoint(importFlags, false, true, wkbHelper);</b>
+&nbsp;
+&nbsp;		case WkbGeometryType.wkbPointZ:
+<b class="fc">&nbsp;			if (type.value() != Geometry.GeometryType.Point</b>
+<b class="nc">&nbsp;					&amp;&amp; type.value() != Geometry.GeometryType.Unknown)</b>
+<b class="nc">&nbsp;				throw new GeometryException(&quot;invalid shape type&quot;);</b>
+<b class="fc">&nbsp;			return importFromWkbPoint(importFlags, true, false, wkbHelper);</b>
+&nbsp;
+&nbsp;		case WkbGeometryType.wkbPointZM:
+<b class="fc">&nbsp;			if (type.value() != Geometry.GeometryType.Point</b>
+<b class="nc">&nbsp;					&amp;&amp; type.value() != Geometry.GeometryType.Unknown)</b>
+<b class="nc">&nbsp;				throw new GeometryException(&quot;invalid shape type&quot;);</b>
+<b class="fc">&nbsp;			return importFromWkbPoint(importFlags, true, true, wkbHelper);</b>
+&nbsp;
+&nbsp;		default:
+<b class="nc">&nbsp;			throw new GeometryException(&quot;invalid shape type&quot;);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	private static Geometry importFromWkbPolygon(boolean bMultiPolygon,
+&nbsp;			int importFlags, boolean bZs, boolean bMs, WkbHelper wkbHelper) {
+&nbsp;		int offset;
+&nbsp;		int polygonCount;
+&nbsp;
+<b class="fc">&nbsp;		if (bMultiPolygon) {</b>
+<b class="fc">&nbsp;			polygonCount = wkbHelper.getInt(5);</b>
+<b class="fc">&nbsp;			offset = 9;</b>
+<b class="fc">&nbsp;		} else {</b>
+<b class="fc">&nbsp;			polygonCount = 1;</b>
+<b class="fc">&nbsp;			offset = 0;</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		// Find total point count and part count
+<b class="fc">&nbsp;		int point_count = 0;</b>
+<b class="fc">&nbsp;		int partCount = 0;</b>
+<b class="fc">&nbsp;		int tempOffset = offset;</b>
+<b class="fc">&nbsp;		for (int ipolygon = 0; ipolygon &lt; polygonCount; ipolygon++) {</b>
+<b class="fc">&nbsp;			tempOffset += 5; // skip redundant byte order and type fields</b>
+<b class="fc">&nbsp;			int ipartcount = wkbHelper.getInt(tempOffset);</b>
+<b class="fc">&nbsp;			tempOffset += 4;</b>
+&nbsp;
+<b class="fc">&nbsp;			for (int ipart = 0; ipart &lt; ipartcount; ipart++) {</b>
+<b class="fc">&nbsp;				int ipointcount = wkbHelper.getInt(tempOffset);</b>
+<b class="fc">&nbsp;				tempOffset += 4;</b>
+&nbsp;
+&nbsp;				// If ipointcount == 0, then we have an empty part
+<b class="fc">&nbsp;				if (ipointcount == 0)</b>
+<b class="fc">&nbsp;					continue;</b>
+&nbsp;
+<b class="fc">&nbsp;				if (ipointcount &lt;= 2) {</b>
+<b class="fc">&nbsp;					tempOffset += ipointcount * 2 * 8;</b>
+&nbsp;
+<b class="fc">&nbsp;					if (bZs)</b>
+<b class="nc">&nbsp;						tempOffset += ipointcount * 8;</b>
+&nbsp;
+<b class="fc">&nbsp;					if (bMs)</b>
+<b class="nc">&nbsp;						tempOffset += ipointcount * 8;</b>
+&nbsp;
+<b class="fc">&nbsp;					if (ipointcount == 1)</b>
+<b class="fc">&nbsp;						point_count += ipointcount + 1;</b>
+&nbsp;					else
+<b class="fc">&nbsp;						point_count += ipointcount;</b>
+&nbsp;
+<b class="fc">&nbsp;					partCount++;</b>
+&nbsp;
+<b class="fc">&nbsp;					continue;</b>
+&nbsp;				}
+&nbsp;
+<b class="fc">&nbsp;				double startx = wkbHelper.getDouble(tempOffset);</b>
+<b class="fc">&nbsp;				tempOffset += 8;</b>
+<b class="fc">&nbsp;				double starty = wkbHelper.getDouble(tempOffset);</b>
+<b class="fc">&nbsp;				tempOffset += 8;</b>
+<b class="fc">&nbsp;				double startz = NumberUtils.TheNaN;</b>
+<b class="fc">&nbsp;				double startm = NumberUtils.TheNaN;</b>
+&nbsp;
+<b class="fc">&nbsp;				if (bZs) {</b>
+<b class="fc">&nbsp;					startz = wkbHelper.getDouble(tempOffset);</b>
+<b class="fc">&nbsp;					tempOffset += 8;</b>
+&nbsp;				}
+&nbsp;
+<b class="fc">&nbsp;				if (bMs) {</b>
+<b class="fc">&nbsp;					startm = wkbHelper.getDouble(tempOffset);</b>
+<b class="fc">&nbsp;					tempOffset += 8;</b>
+&nbsp;				}
+&nbsp;
+<b class="fc">&nbsp;				tempOffset += (ipointcount - 2) * 2 * 8;</b>
+&nbsp;
+<b class="fc">&nbsp;				if (bZs)</b>
+<b class="fc">&nbsp;					tempOffset += (ipointcount - 2) * 8;</b>
+&nbsp;
+<b class="fc">&nbsp;				if (bMs)</b>
+<b class="fc">&nbsp;					tempOffset += (ipointcount - 2) * 8;</b>
+&nbsp;
+<b class="fc">&nbsp;				double endx = wkbHelper.getDouble(tempOffset);</b>
+<b class="fc">&nbsp;				tempOffset += 8;</b>
+<b class="fc">&nbsp;				double endy = wkbHelper.getDouble(tempOffset);</b>
+<b class="fc">&nbsp;				tempOffset += 8;</b>
+<b class="fc">&nbsp;				double endz = NumberUtils.TheNaN;</b>
+<b class="fc">&nbsp;				double endm = NumberUtils.TheNaN;</b>
+&nbsp;
+<b class="fc">&nbsp;				if (bZs) {</b>
+<b class="fc">&nbsp;					endz = wkbHelper.getDouble(tempOffset);</b>
+<b class="fc">&nbsp;					tempOffset += 8;</b>
+&nbsp;				}
+&nbsp;
+<b class="fc">&nbsp;				if (bMs) {</b>
+<b class="fc">&nbsp;					endm = wkbHelper.getDouble(tempOffset);</b>
+<b class="fc">&nbsp;					tempOffset += 8;</b>
+&nbsp;				}
+&nbsp;
+<b class="fc">&nbsp;				if ((startx == endx || (NumberUtils.isNaN(startx) &amp;&amp; NumberUtils</b>
+<b class="nc">&nbsp;						.isNaN(endx)))</b>
+<b class="fc">&nbsp;						&amp;&amp; (starty == endy || (NumberUtils.isNaN(starty) &amp;&amp; NumberUtils</b>
+<b class="nc">&nbsp;								.isNaN(endy)))</b>
+<b class="fc">&nbsp;						&amp;&amp; (!bZs || startz == endz || (NumberUtils</b>
+<b class="nc">&nbsp;								.isNaN(startz) &amp;&amp; NumberUtils.isNaN(endz)))</b>
+<b class="fc">&nbsp;						&amp;&amp; (!bMs || startm == endm || (NumberUtils</b>
+<b class="nc">&nbsp;								.isNaN(startm) &amp;&amp; NumberUtils.isNaN(endm)))) {</b>
+<b class="fc">&nbsp;					point_count += ipointcount - 1;</b>
+<b class="fc">&nbsp;				} else {</b>
+<b class="fc">&nbsp;					point_count += ipointcount;</b>
+&nbsp;				}
+&nbsp;
+<b class="fc">&nbsp;				partCount++;</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		AttributeStreamOfDbl position = null;</b>
+<b class="fc">&nbsp;		AttributeStreamOfDbl zs = null;</b>
+<b class="fc">&nbsp;		AttributeStreamOfDbl ms = null;</b>
+<b class="fc">&nbsp;		AttributeStreamOfInt32 parts = null;</b>
+<b class="fc">&nbsp;		AttributeStreamOfInt8 pathFlags = null;</b>
+&nbsp;
+&nbsp;		Geometry newPolygon;
+&nbsp;		MultiPathImpl polygon;
+&nbsp;
+<b class="fc">&nbsp;		newPolygon = new Polygon();</b>
+<b class="fc">&nbsp;		polygon = (MultiPathImpl) newPolygon._getImpl();</b>
+&nbsp;
+<b class="fc">&nbsp;		if (bZs)</b>
+<b class="fc">&nbsp;			polygon.addAttribute(VertexDescription.Semantics.Z);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (bMs)</b>
+<b class="fc">&nbsp;			polygon.addAttribute(VertexDescription.Semantics.M);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (point_count &gt; 0) {</b>
+<b class="fc">&nbsp;			parts = (AttributeStreamOfInt32) (AttributeStreamBase</b>
+<b class="fc">&nbsp;					.createIndexStream(partCount + 1, 0));</b>
+<b class="fc">&nbsp;			pathFlags = (AttributeStreamOfInt8) (AttributeStreamBase</b>
+<b class="fc">&nbsp;					.createByteStream(parts.size(), (byte) PathFlags.enumClosed));</b>
+<b class="fc">&nbsp;			position = (AttributeStreamOfDbl) (AttributeStreamBase</b>
+<b class="fc">&nbsp;					.createAttributeStreamWithSemantics(</b>
+<b class="fc">&nbsp;							VertexDescription.Semantics.POSITION, point_count));</b>
+&nbsp;
+<b class="fc">&nbsp;			if (bZs)</b>
+<b class="fc">&nbsp;				zs = (AttributeStreamOfDbl) (AttributeStreamBase</b>
+<b class="fc">&nbsp;						.createAttributeStreamWithSemantics(</b>
+<b class="fc">&nbsp;								VertexDescription.Semantics.Z, point_count));</b>
+&nbsp;
+<b class="fc">&nbsp;			if (bMs)</b>
+<b class="fc">&nbsp;				ms = (AttributeStreamOfDbl) (AttributeStreamBase</b>
+<b class="fc">&nbsp;						.createAttributeStreamWithSemantics(</b>
+<b class="fc">&nbsp;								VertexDescription.Semantics.M, point_count));</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		boolean bCreateMs = false, bCreateZs = false;</b>
+<b class="fc">&nbsp;		int ipartend = 0;</b>
+<b class="fc">&nbsp;		int ipolygonend = 0;</b>
+<b class="fc">&nbsp;		int part_index = 0;</b>
+&nbsp;
+&nbsp;		// read Coordinates
+<b class="fc">&nbsp;		for (int ipolygon = 0; ipolygon &lt; polygonCount; ipolygon++) {</b>
+<b class="fc">&nbsp;			offset += 5; // skip redundant byte order and type fields</b>
+<b class="fc">&nbsp;			int ipartcount = wkbHelper.getInt(offset);</b>
+<b class="fc">&nbsp;			offset += 4;</b>
+<b class="fc">&nbsp;			int ipolygonstart = ipolygonend;</b>
+<b class="fc">&nbsp;			ipolygonend = ipolygonstart + ipartcount;</b>
+&nbsp;
+<b class="fc">&nbsp;			for (int ipart = ipolygonstart; ipart &lt; ipolygonend; ipart++) {</b>
+<b class="fc">&nbsp;				int ipointcount = wkbHelper.getInt(offset);</b>
+<b class="fc">&nbsp;				offset += 4;</b>
+&nbsp;
+<b class="fc">&nbsp;				if (ipointcount == 0)</b>
+<b class="fc">&nbsp;					continue;</b>
+&nbsp;
+<b class="fc">&nbsp;				int ipartstart = ipartend;</b>
+<b class="fc">&nbsp;				ipartend += ipointcount;</b>
+<b class="fc">&nbsp;				boolean bSkipLastPoint = true;</b>
+&nbsp;
+<b class="fc">&nbsp;				if (ipointcount == 1) {</b>
+<b class="fc">&nbsp;					ipartstart++;</b>
+<b class="fc">&nbsp;					ipartend++;</b>
+<b class="fc">&nbsp;					bSkipLastPoint = false;</b>
+<b class="fc">&nbsp;				} else if (ipointcount == 2) {</b>
+<b class="fc">&nbsp;					bSkipLastPoint = false;</b>
+<b class="fc">&nbsp;				} else {</b>
+&nbsp;					// Check if start point is equal to end point
+&nbsp;
+<b class="fc">&nbsp;					tempOffset = offset;</b>
+&nbsp;
+<b class="fc">&nbsp;					double startx = wkbHelper.getDouble(tempOffset);</b>
+<b class="fc">&nbsp;					tempOffset += 8;</b>
+<b class="fc">&nbsp;					double starty = wkbHelper.getDouble(tempOffset);</b>
+<b class="fc">&nbsp;					tempOffset += 8;</b>
+<b class="fc">&nbsp;					double startz = NumberUtils.TheNaN;</b>
+<b class="fc">&nbsp;					double startm = NumberUtils.TheNaN;</b>
+&nbsp;
+<b class="fc">&nbsp;					if (bZs) {</b>
+<b class="fc">&nbsp;						startz = wkbHelper.getDouble(tempOffset);</b>
+<b class="fc">&nbsp;						tempOffset += 8;</b>
+&nbsp;					}
+&nbsp;
+<b class="fc">&nbsp;					if (bMs) {</b>
+<b class="fc">&nbsp;						startm = wkbHelper.getDouble(tempOffset);</b>
+<b class="fc">&nbsp;						tempOffset += 8;</b>
+&nbsp;					}
+&nbsp;
+<b class="fc">&nbsp;					tempOffset += (ipointcount - 2) * 2 * 8;</b>
+&nbsp;
+<b class="fc">&nbsp;					if (bZs)</b>
+<b class="fc">&nbsp;						tempOffset += (ipointcount - 2) * 8;</b>
+&nbsp;
+<b class="fc">&nbsp;					if (bMs)</b>
+<b class="fc">&nbsp;						tempOffset += (ipointcount - 2) * 8;</b>
+&nbsp;
+<b class="fc">&nbsp;					double endx = wkbHelper.getDouble(tempOffset);</b>
+<b class="fc">&nbsp;					tempOffset += 8;</b>
+<b class="fc">&nbsp;					double endy = wkbHelper.getDouble(tempOffset);</b>
+<b class="fc">&nbsp;					tempOffset += 8;</b>
+<b class="fc">&nbsp;					double endz = NumberUtils.TheNaN;</b>
+<b class="fc">&nbsp;					double endm = NumberUtils.TheNaN;</b>
+&nbsp;
+<b class="fc">&nbsp;					if (bZs) {</b>
+<b class="fc">&nbsp;						endz = wkbHelper.getDouble(tempOffset);</b>
+<b class="fc">&nbsp;						tempOffset += 8;</b>
+&nbsp;					}
+&nbsp;
+<b class="fc">&nbsp;					if (bMs) {</b>
+<b class="fc">&nbsp;						endm = wkbHelper.getDouble(tempOffset);</b>
+<b class="fc">&nbsp;						tempOffset += 8;</b>
+&nbsp;					}
+&nbsp;
+<b class="fc">&nbsp;					if ((startx == endx || (NumberUtils.isNaN(startx) &amp;&amp; NumberUtils</b>
+<b class="nc">&nbsp;							.isNaN(endx)))</b>
+<b class="fc">&nbsp;							&amp;&amp; (starty == endy || (NumberUtils.isNaN(starty) &amp;&amp; NumberUtils</b>
+<b class="nc">&nbsp;									.isNaN(endy)))</b>
+<b class="fc">&nbsp;							&amp;&amp; (!bZs || startz == endz || (NumberUtils</b>
+<b class="nc">&nbsp;									.isNaN(startz) &amp;&amp; NumberUtils.isNaN(endz)))</b>
+<b class="fc">&nbsp;							&amp;&amp; (!bMs || startm == endm || (NumberUtils</b>
+<b class="nc">&nbsp;									.isNaN(startm) &amp;&amp; NumberUtils.isNaN(endm))))</b>
+<b class="fc">&nbsp;						ipartend--;</b>
+&nbsp;					else
+<b class="fc">&nbsp;						bSkipLastPoint = false;</b>
+&nbsp;				}
+&nbsp;
+<b class="fc">&nbsp;				if (ipart == ipolygonstart)</b>
+<b class="fc">&nbsp;					pathFlags.setBits(ipart,</b>
+<b class="fc">&nbsp;							(byte) PathFlags.enumOGCStartPolygon);</b>
+&nbsp;
+<b class="fc">&nbsp;				parts.write(++part_index, ipartend);</b>
+&nbsp;
+&nbsp;				// We must write from the buffer backwards - ogc polygon
+&nbsp;				// format is opposite of shapefile format
+<b class="fc">&nbsp;				for (int i = ipartstart; i &lt; ipartend; i++) {</b>
+<b class="fc">&nbsp;					double x = wkbHelper.getDouble(offset);</b>
+<b class="fc">&nbsp;					offset += 8;</b>
+<b class="fc">&nbsp;					double y = wkbHelper.getDouble(offset);</b>
+<b class="fc">&nbsp;					offset += 8;</b>
+&nbsp;
+<b class="fc">&nbsp;					position.write(2 * i, x);</b>
+<b class="fc">&nbsp;					position.write(2 * i + 1, y);</b>
+&nbsp;
+<b class="fc">&nbsp;					if (bZs) {</b>
+<b class="fc">&nbsp;						double z = wkbHelper.getDouble(offset);</b>
+<b class="fc">&nbsp;						offset += 8;</b>
+&nbsp;
+<b class="fc">&nbsp;						zs.write(i, z);</b>
+<b class="fc">&nbsp;						if (!VertexDescription.isDefaultValue(</b>
+<b class="fc">&nbsp;								VertexDescription.Semantics.Z, z))</b>
+<b class="fc">&nbsp;							bCreateZs = true;</b>
+&nbsp;					}
+&nbsp;
+<b class="fc">&nbsp;					if (bMs) {</b>
+<b class="fc">&nbsp;						double m = wkbHelper.getDouble(offset);</b>
+<b class="fc">&nbsp;						offset += 8;</b>
+&nbsp;
+<b class="fc">&nbsp;						ms.write(i, m);</b>
+<b class="fc">&nbsp;						if (!VertexDescription.isDefaultValue(</b>
+<b class="fc">&nbsp;								VertexDescription.Semantics.M, m))</b>
+<b class="fc">&nbsp;							bCreateMs = true;</b>
+&nbsp;					}
+&nbsp;				}
+&nbsp;
+<b class="fc">&nbsp;				if (bSkipLastPoint) {</b>
+<b class="fc">&nbsp;					offset += 2 * 8;</b>
+&nbsp;
+<b class="fc">&nbsp;					if (bZs)</b>
+<b class="fc">&nbsp;						offset += 8;</b>
+&nbsp;
+<b class="fc">&nbsp;					if (bMs)</b>
+<b class="fc">&nbsp;						offset += 8;</b>
+<b class="fc">&nbsp;				} else if (ipointcount == 1) {</b>
+<b class="fc">&nbsp;					double x = position.read(2 * ipartstart);</b>
+<b class="fc">&nbsp;					double y = position.read(2 * ipartstart + 1);</b>
+<b class="fc">&nbsp;					position.write(2 * (ipartstart - 1), x);</b>
+<b class="fc">&nbsp;					position.write(2 * (ipartstart - 1) + 1, y);</b>
+&nbsp;
+<b class="fc">&nbsp;					if (bZs) {</b>
+<b class="nc">&nbsp;						double z = zs.read(ipartstart);</b>
+<b class="nc">&nbsp;						zs.write(ipartstart - 1, z);</b>
+&nbsp;					}
+&nbsp;
+<b class="fc">&nbsp;					if (bMs) {</b>
+<b class="nc">&nbsp;						double m = ms.read(ipartstart);</b>
+<b class="nc">&nbsp;						ms.write(ipartstart - 1, m);</b>
+&nbsp;					}
+&nbsp;				}
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+&nbsp;		// set envelopes and assign AttributeStreams
+&nbsp;
+<b class="fc">&nbsp;		if (point_count &gt; 0) {</b>
+<b class="fc">&nbsp;			polygon.setPathStreamRef(parts); // sets m_parts</b>
+<b class="fc">&nbsp;			polygon.setPathFlagsStreamRef(pathFlags);</b>
+<b class="fc">&nbsp;			polygon.setAttributeStreamRef(VertexDescription.Semantics.POSITION,</b>
+<b class="fc">&nbsp;					position);</b>
+&nbsp;
+<b class="fc">&nbsp;			if (bZs) {</b>
+<b class="fc">&nbsp;				if (!bCreateZs)</b>
+<b class="nc">&nbsp;					zs = null;</b>
+&nbsp;
+<b class="fc">&nbsp;				polygon.setAttributeStreamRef(VertexDescription.Semantics.Z, zs);</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			if (bMs) {</b>
+<b class="fc">&nbsp;				if (!bCreateMs)</b>
+<b class="nc">&nbsp;					ms = null;</b>
+&nbsp;
+<b class="fc">&nbsp;				polygon.setAttributeStreamRef(VertexDescription.Semantics.M, ms);</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			polygon.notifyModified(MultiPathImpl.DirtyFlags.DirtyAll);</b>
+&nbsp;
+<b class="fc">&nbsp;			AttributeStreamOfInt8 path_flags_clone = new AttributeStreamOfInt8(</b>
+<b class="fc">&nbsp;					pathFlags);</b>
+&nbsp;
+<b class="fc">&nbsp;			for (int i = 0; i &lt; path_flags_clone.size() - 1; i++) {</b>
+<b class="fc">&nbsp;				if (((int) path_flags_clone.read(i) &amp; (int) PathFlags.enumOGCStartPolygon) != 0) {// Should</b>
+&nbsp;																									// be
+&nbsp;																									// clockwise
+<b class="fc">&nbsp;					if (!InternalUtils.isClockwiseRing(polygon, i))</b>
+<b class="fc">&nbsp;						polygon.reversePath(i); // make clockwise</b>
+<b class="fc">&nbsp;				} else {// Should be counter-clockwise</b>
+<b class="fc">&nbsp;					if (InternalUtils.isClockwiseRing(polygon, i))</b>
+<b class="fc">&nbsp;						polygon.reversePath(i); // make counter-clockwise</b>
+&nbsp;				}
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			polygon.setPathFlagsStreamRef(path_flags_clone);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if ((importFlags &amp; (int) WkbImportFlags.wkbImportNonTrusted) == 0)</b>
+<b class="fc">&nbsp;			polygon.setIsSimple(MultiVertexGeometryImpl.GeometryXSimple.Weak,</b>
+<b class="fc">&nbsp;					0.0, false);</b>
+&nbsp;
+<b class="fc">&nbsp;		polygon.setDirtyOGCFlags(false);</b>
+<b class="fc">&nbsp;		wkbHelper.adjustment += offset;</b>
+&nbsp;
+<b class="fc">&nbsp;		return newPolygon;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private static Geometry importFromWkbPolyline(boolean bMultiPolyline,
+&nbsp;			int importFlags, boolean bZs, boolean bMs, WkbHelper wkbHelper) {
+&nbsp;		int offset;
+&nbsp;		int originalPartCount;
+&nbsp;
+<b class="fc">&nbsp;		if (bMultiPolyline) {</b>
+<b class="fc">&nbsp;			originalPartCount = wkbHelper.getInt(5);</b>
+<b class="fc">&nbsp;			offset = 9;</b>
+<b class="fc">&nbsp;		} else {</b>
+<b class="fc">&nbsp;			originalPartCount = 1;</b>
+<b class="fc">&nbsp;			offset = 0;</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		// Find total point count and part count
+<b class="fc">&nbsp;		int point_count = 0;</b>
+<b class="fc">&nbsp;		int partCount = 0;</b>
+<b class="fc">&nbsp;		int tempOffset = offset;</b>
+<b class="fc">&nbsp;		for (int ipart = 0; ipart &lt; originalPartCount; ipart++) {</b>
+<b class="fc">&nbsp;			tempOffset += 5; // skip redundant byte order and type fields</b>
+<b class="fc">&nbsp;			int ipointcount = wkbHelper.getInt(tempOffset);</b>
+<b class="fc">&nbsp;			tempOffset += 4;</b>
+&nbsp;
+&nbsp;			// If ipointcount == 0, then we have an empty part
+<b class="fc">&nbsp;			if (ipointcount == 0)</b>
+<b class="fc">&nbsp;				continue;</b>
+&nbsp;
+<b class="fc">&nbsp;			point_count += ipointcount;</b>
+<b class="fc">&nbsp;			partCount++;</b>
+&nbsp;
+<b class="fc">&nbsp;			if (ipointcount == 1)</b>
+<b class="fc">&nbsp;				point_count++;</b>
+&nbsp;
+<b class="fc">&nbsp;			tempOffset += ipointcount * 2 * 8;</b>
+&nbsp;
+<b class="fc">&nbsp;			if (bZs)</b>
+<b class="fc">&nbsp;				tempOffset += ipointcount * 8;</b>
+&nbsp;
+<b class="fc">&nbsp;			if (bMs)</b>
+<b class="fc">&nbsp;				tempOffset += ipointcount * 8;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		AttributeStreamOfDbl position = null;</b>
+<b class="fc">&nbsp;		AttributeStreamOfDbl zs = null;</b>
+<b class="fc">&nbsp;		AttributeStreamOfDbl ms = null;</b>
+<b class="fc">&nbsp;		AttributeStreamOfInt32 parts = null;</b>
+<b class="fc">&nbsp;		AttributeStreamOfInt8 pathFlags = null;</b>
+&nbsp;
+&nbsp;		Polyline newpolyline;
+&nbsp;		MultiPathImpl polyline;
+&nbsp;
+<b class="fc">&nbsp;		newpolyline = new Polyline();</b>
+<b class="fc">&nbsp;		polyline = (MultiPathImpl) newpolyline._getImpl();</b>
+&nbsp;
+<b class="fc">&nbsp;		if (bZs)</b>
+<b class="fc">&nbsp;			polyline.addAttribute(VertexDescription.Semantics.Z);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (bMs)</b>
+<b class="fc">&nbsp;			polyline.addAttribute(VertexDescription.Semantics.M);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (point_count &gt; 0) {</b>
+<b class="fc">&nbsp;			parts = (AttributeStreamOfInt32) (AttributeStreamBase</b>
+<b class="fc">&nbsp;					.createIndexStream(partCount + 1, 0));</b>
+<b class="fc">&nbsp;			pathFlags = (AttributeStreamOfInt8) (AttributeStreamBase</b>
+<b class="fc">&nbsp;					.createByteStream(parts.size(), (byte) 0));</b>
+<b class="fc">&nbsp;			position = (AttributeStreamOfDbl) (AttributeStreamBase</b>
+<b class="fc">&nbsp;					.createAttributeStreamWithSemantics(</b>
+<b class="fc">&nbsp;							VertexDescription.Semantics.POSITION, point_count));</b>
+&nbsp;
+<b class="fc">&nbsp;			if (bZs)</b>
+<b class="fc">&nbsp;				zs = (AttributeStreamOfDbl) (AttributeStreamBase</b>
+<b class="fc">&nbsp;						.createAttributeStreamWithSemantics(</b>
+<b class="fc">&nbsp;								VertexDescription.Semantics.Z, point_count));</b>
+&nbsp;
+<b class="fc">&nbsp;			if (bMs)</b>
+<b class="fc">&nbsp;				ms = (AttributeStreamOfDbl) (AttributeStreamBase</b>
+<b class="fc">&nbsp;						.createAttributeStreamWithSemantics(</b>
+<b class="fc">&nbsp;								VertexDescription.Semantics.M, point_count));</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		boolean bCreateMs = false, bCreateZs = false;</b>
+<b class="fc">&nbsp;		int ipartend = 0;</b>
+<b class="fc">&nbsp;		int part_index = 0;</b>
+&nbsp;
+&nbsp;		// read Coordinates
+<b class="fc">&nbsp;		for (int ipart = 0; ipart &lt; originalPartCount; ipart++) {</b>
+<b class="fc">&nbsp;			offset += 5; // skip redundant byte order and type fields</b>
+&nbsp;
+<b class="fc">&nbsp;			int ipointcount = wkbHelper.getInt(offset);</b>
+<b class="fc">&nbsp;			offset += 4;</b>
+&nbsp;
+<b class="fc">&nbsp;			if (ipointcount == 0)</b>
+<b class="fc">&nbsp;				continue;</b>
+&nbsp;
+<b class="fc">&nbsp;			int ipartstart = ipartend;</b>
+<b class="fc">&nbsp;			ipartend = ipartstart + ipointcount;</b>
+&nbsp;
+<b class="fc">&nbsp;			if (ipointcount == 1) {</b>
+<b class="fc">&nbsp;				ipartstart++;</b>
+<b class="fc">&nbsp;				ipartend++;</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			parts.write(++part_index, ipartend);</b>
+&nbsp;
+<b class="fc">&nbsp;			for (int i = ipartstart; i &lt; ipartend; i++) {</b>
+<b class="fc">&nbsp;				double x = wkbHelper.getDouble(offset);</b>
+<b class="fc">&nbsp;				offset += 8;</b>
+<b class="fc">&nbsp;				double y = wkbHelper.getDouble(offset);</b>
+<b class="fc">&nbsp;				offset += 8;</b>
+&nbsp;
+<b class="fc">&nbsp;				position.write(2 * i, x);</b>
+<b class="fc">&nbsp;				position.write(2 * i + 1, y);</b>
+&nbsp;
+<b class="fc">&nbsp;				if (bZs) {</b>
+<b class="fc">&nbsp;					double z = wkbHelper.getDouble(offset);</b>
+<b class="fc">&nbsp;					offset += 8;</b>
+&nbsp;
+<b class="fc">&nbsp;					zs.write(i, z);</b>
+<b class="fc">&nbsp;					if (!VertexDescription.isDefaultValue(</b>
+<b class="fc">&nbsp;							VertexDescription.Semantics.Z, z))</b>
+<b class="fc">&nbsp;						bCreateZs = true;</b>
+&nbsp;				}
+&nbsp;
+<b class="fc">&nbsp;				if (bMs) {</b>
+<b class="fc">&nbsp;					double m = wkbHelper.getDouble(offset);</b>
+<b class="fc">&nbsp;					offset += 8;</b>
+&nbsp;
+<b class="fc">&nbsp;					ms.write(i, m);</b>
+<b class="fc">&nbsp;					if (!VertexDescription.isDefaultValue(</b>
+<b class="fc">&nbsp;							VertexDescription.Semantics.M, m))</b>
+<b class="fc">&nbsp;						bCreateMs = true;</b>
+&nbsp;				}
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			if (ipointcount == 1) {</b>
+<b class="fc">&nbsp;				double x = position.read(2 * ipartstart);</b>
+<b class="fc">&nbsp;				double y = position.read(2 * ipartstart + 1);</b>
+<b class="fc">&nbsp;				position.write(2 * (ipartstart - 1), x);</b>
+<b class="fc">&nbsp;				position.write(2 * (ipartstart - 1) + 1, y);</b>
+&nbsp;
+<b class="fc">&nbsp;				if (bZs) {</b>
+<b class="nc">&nbsp;					double z = zs.read(ipartstart);</b>
+<b class="nc">&nbsp;					zs.write(ipartstart - 1, z);</b>
+&nbsp;				}
+&nbsp;
+<b class="fc">&nbsp;				if (bMs) {</b>
+<b class="nc">&nbsp;					double m = ms.read(ipartstart);</b>
+<b class="nc">&nbsp;					ms.write(ipartstart - 1, m);</b>
+&nbsp;				}
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+&nbsp;		// set envelopes and assign AttributeStreams
+&nbsp;
+<b class="fc">&nbsp;		if (point_count &gt; 0) {</b>
+<b class="fc">&nbsp;			polyline.setPathStreamRef(parts); // sets m_parts</b>
+<b class="fc">&nbsp;			polyline.setPathFlagsStreamRef(pathFlags);</b>
+<b class="fc">&nbsp;			polyline.setAttributeStreamRef(</b>
+<b class="fc">&nbsp;					VertexDescription.Semantics.POSITION, position);</b>
+&nbsp;
+<b class="fc">&nbsp;			if (bZs) {</b>
+<b class="fc">&nbsp;				if (!bCreateZs)</b>
+<b class="nc">&nbsp;					zs = null;</b>
+&nbsp;
+<b class="fc">&nbsp;				polyline.setAttributeStreamRef(VertexDescription.Semantics.Z,</b>
+<b class="fc">&nbsp;						zs);</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			if (bMs) {</b>
+<b class="fc">&nbsp;				if (!bCreateMs)</b>
+<b class="nc">&nbsp;					ms = null;</b>
+&nbsp;
+<b class="fc">&nbsp;				polyline.setAttributeStreamRef(VertexDescription.Semantics.M,</b>
+<b class="fc">&nbsp;						ms);</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			polyline.notifyModified(MultiPathImpl.DirtyFlags.DirtyAll);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		wkbHelper.adjustment += offset;</b>
+&nbsp;
+<b class="fc">&nbsp;		return newpolyline;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private static Geometry importFromWkbMultiPoint(int importFlags,
+&nbsp;			boolean bZs, boolean bMs, WkbHelper wkbHelper) {
+<b class="fc">&nbsp;		int offset = 5; // skip byte order and type</b>
+&nbsp;
+&nbsp;		// set point count
+<b class="fc">&nbsp;		int point_count = wkbHelper.getInt(offset);</b>
+<b class="fc">&nbsp;		offset += 4;</b>
+&nbsp;
+<b class="fc">&nbsp;		AttributeStreamOfDbl position = null;</b>
+<b class="fc">&nbsp;		AttributeStreamOfDbl zs = null;</b>
+<b class="fc">&nbsp;		AttributeStreamOfDbl ms = null;</b>
+&nbsp;
+&nbsp;		MultiPoint newmultipoint;
+&nbsp;		MultiPointImpl multipoint;
+&nbsp;
+<b class="fc">&nbsp;		newmultipoint = new MultiPoint();</b>
+<b class="fc">&nbsp;		multipoint = (MultiPointImpl) newmultipoint._getImpl();</b>
+&nbsp;
+<b class="fc">&nbsp;		if (bZs)</b>
+<b class="fc">&nbsp;			multipoint.addAttribute(VertexDescription.Semantics.Z);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (bMs)</b>
+<b class="fc">&nbsp;			multipoint.addAttribute(VertexDescription.Semantics.M);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (point_count &gt; 0) {</b>
+<b class="fc">&nbsp;			position = (AttributeStreamOfDbl) (AttributeStreamBase</b>
+<b class="fc">&nbsp;					.createAttributeStreamWithSemantics(</b>
+<b class="fc">&nbsp;							VertexDescription.Semantics.POSITION, point_count));</b>
+&nbsp;
+<b class="fc">&nbsp;			if (bZs)</b>
+<b class="fc">&nbsp;				zs = (AttributeStreamOfDbl) (AttributeStreamBase</b>
+<b class="fc">&nbsp;						.createAttributeStreamWithSemantics(</b>
+<b class="fc">&nbsp;								VertexDescription.Semantics.Z, point_count));</b>
+&nbsp;
+<b class="fc">&nbsp;			if (bMs)</b>
+<b class="fc">&nbsp;				ms = (AttributeStreamOfDbl) (AttributeStreamBase</b>
+<b class="fc">&nbsp;						.createAttributeStreamWithSemantics(</b>
+<b class="fc">&nbsp;								VertexDescription.Semantics.M, point_count));</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		boolean bCreateMs = false, bCreateZs = false;</b>
+<b class="fc">&nbsp;		for (int i = 0; i &lt; point_count; i++) {</b>
+<b class="fc">&nbsp;			offset += 5; // skip redundant byte order and type fields</b>
+&nbsp;
+&nbsp;			// read xy coordinates
+<b class="fc">&nbsp;			double x = wkbHelper.getDouble(offset);</b>
+<b class="fc">&nbsp;			offset += 8;</b>
+<b class="fc">&nbsp;			double y = wkbHelper.getDouble(offset);</b>
+<b class="fc">&nbsp;			offset += 8;</b>
+&nbsp;
+<b class="fc">&nbsp;			position.write(2 * i, x);</b>
+<b class="fc">&nbsp;			position.write(2 * i + 1, y);</b>
+&nbsp;
+<b class="fc">&nbsp;			if (bZs) {</b>
+<b class="fc">&nbsp;				double z = wkbHelper.getDouble(offset);</b>
+<b class="fc">&nbsp;				offset += 8;</b>
+&nbsp;
+<b class="fc">&nbsp;				zs.write(i, z);</b>
+<b class="fc">&nbsp;				if (!VertexDescription.isDefaultValue(</b>
+<b class="fc">&nbsp;						VertexDescription.Semantics.Z, z))</b>
+<b class="fc">&nbsp;					bCreateZs = true;</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			if (bMs) {</b>
+<b class="fc">&nbsp;				double m = wkbHelper.getDouble(offset);</b>
+<b class="fc">&nbsp;				offset += 8;</b>
+&nbsp;
+<b class="fc">&nbsp;				ms.write(i, m);</b>
+<b class="fc">&nbsp;				if (!VertexDescription.isDefaultValue(</b>
+<b class="fc">&nbsp;						VertexDescription.Semantics.M, m))</b>
+<b class="fc">&nbsp;					bCreateMs = true;</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+&nbsp;		// set envelopes and assign AttributeStreams
+&nbsp;
+<b class="fc">&nbsp;		if (point_count &gt; 0) {</b>
+<b class="fc">&nbsp;			multipoint.resize(point_count);</b>
+<b class="fc">&nbsp;			multipoint.setAttributeStreamRef(</b>
+<b class="fc">&nbsp;					VertexDescription.Semantics.POSITION, position);</b>
+&nbsp;
+<b class="fc">&nbsp;			if (bZs) {</b>
+<b class="fc">&nbsp;				if (!bCreateZs)</b>
+<b class="nc">&nbsp;					zs = null;</b>
+&nbsp;
+<b class="fc">&nbsp;				multipoint.setAttributeStreamRef(VertexDescription.Semantics.Z,</b>
+<b class="fc">&nbsp;						zs);</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			if (bMs) {</b>
+<b class="fc">&nbsp;				if (!bCreateMs)</b>
+<b class="nc">&nbsp;					ms = null;</b>
+&nbsp;
+<b class="fc">&nbsp;				multipoint.setAttributeStreamRef(VertexDescription.Semantics.M,</b>
+<b class="fc">&nbsp;						ms);</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			multipoint.notifyModified(MultiPointImpl.DirtyFlags.DirtyAll);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		wkbHelper.adjustment += offset;</b>
+&nbsp;
+<b class="fc">&nbsp;		return newmultipoint;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private static Geometry importFromWkbPoint(int importFlags, boolean bZs,
+&nbsp;			boolean bMs, WkbHelper wkbHelper) {
+<b class="fc">&nbsp;		int offset = 5; // skip byte order and type</b>
+&nbsp;
+&nbsp;		// set xy coordinate
+<b class="fc">&nbsp;		double x = wkbHelper.getDouble(offset);</b>
+<b class="fc">&nbsp;		offset += 8;</b>
+<b class="fc">&nbsp;		double y = wkbHelper.getDouble(offset);</b>
+<b class="fc">&nbsp;		offset += 8;</b>
+&nbsp;
+<b class="fc">&nbsp;		double z = NumberUtils.TheNaN;</b>
+<b class="fc">&nbsp;		if (bZs) {</b>
+<b class="fc">&nbsp;			z = wkbHelper.getDouble(offset);</b>
+<b class="fc">&nbsp;			offset += 8;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		double m = NumberUtils.TheNaN;</b>
+<b class="fc">&nbsp;		if (bMs) {</b>
+<b class="fc">&nbsp;			m = wkbHelper.getDouble(offset);</b>
+<b class="fc">&nbsp;			offset += 8;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		boolean bEmpty = NumberUtils.isNaN(x);</b>
+<b class="fc">&nbsp;		Point point = new Point();</b>
+&nbsp;
+<b class="fc">&nbsp;		if (!bEmpty) {</b>
+<b class="fc">&nbsp;			point.setX(x);</b>
+<b class="fc">&nbsp;			point.setY(y);</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		// set Z
+<b class="fc">&nbsp;		if (bZs) {</b>
+<b class="fc">&nbsp;			point.addAttribute(VertexDescription.Semantics.Z);</b>
+<b class="fc">&nbsp;			if (!bEmpty)</b>
+<b class="fc">&nbsp;				point.setZ(z);</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		// set M
+<b class="fc">&nbsp;		if (bMs) {</b>
+<b class="fc">&nbsp;			point.addAttribute(VertexDescription.Semantics.M);</b>
+<b class="fc">&nbsp;			if (!bEmpty)</b>
+<b class="fc">&nbsp;				point.setM(m);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		wkbHelper.adjustment += offset;</b>
+&nbsp;
+<b class="fc">&nbsp;		return point;</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-02-21 15:02</div>
+</div>
+</body>
+</html>

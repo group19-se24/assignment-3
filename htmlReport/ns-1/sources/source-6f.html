@@ -1,0 +1,563 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > OperatorExportToJsonCursor</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.esri.core.geometry</a>
+</div>
+
+<h1>Coverage Summary for Class: OperatorExportToJsonCursor (com.esri.core.geometry)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">OperatorExportToJsonCursor</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    91,7%
+  </span>
+  <span class="absValue">
+    (11/12)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    69,3%
+  </span>
+  <span class="absValue">
+    (165/238)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; Copyright 1995-2015 Esri
+&nbsp;
+&nbsp;   Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp;   you may not use this file except in compliance with the License.
+&nbsp;   You may obtain a copy of the License at
+&nbsp;
+&nbsp;       http://www.apache.org/licenses/LICENSE-2.0
+&nbsp;
+&nbsp;   Unless required by applicable law or agreed to in writing, software
+&nbsp;   distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp;   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp;   See the License for the specific language governing permissions and
+&nbsp;   limitations under the License.
+&nbsp;
+&nbsp; For additional information, contact:
+&nbsp; Environmental Systems Research Institute, Inc.
+&nbsp; Attn: Contracts Dept
+&nbsp; 380 New York Street
+&nbsp; Redlands, California, USA 92373
+&nbsp;
+&nbsp; email: contracts@esri.com
+&nbsp; */
+&nbsp;package com.esri.core.geometry;
+&nbsp;
+&nbsp;import com.esri.core.geometry.VertexDescription.Semantics;
+&nbsp;
+&nbsp;import java.io.IOException;
+&nbsp;import java.util.Map;
+&nbsp;
+&nbsp;class OperatorExportToJsonCursor extends JsonCursor {
+&nbsp;
+&nbsp;	GeometryCursor m_inputGeometryCursor;
+&nbsp;	SpatialReference m_spatialReference;
+&nbsp;	int m_index;
+&nbsp;
+<b class="fc">&nbsp;	public OperatorExportToJsonCursor(SpatialReference spatialReference, GeometryCursor geometryCursor) {</b>
+<b class="fc">&nbsp;		m_index = -1;</b>
+<b class="fc">&nbsp;		if (geometryCursor == null) {</b>
+<b class="nc">&nbsp;			throw new IllegalArgumentException();</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		m_inputGeometryCursor = geometryCursor;</b>
+<b class="fc">&nbsp;		m_spatialReference = spatialReference;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public int getID() {
+<b class="nc">&nbsp;		return m_index;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public String next() {
+&nbsp;		Geometry geometry;
+<b class="fc">&nbsp;		if ((geometry = m_inputGeometryCursor.next()) != null) {</b>
+<b class="fc">&nbsp;			m_index = m_inputGeometryCursor.getGeometryID();</b>
+<b class="fc">&nbsp;			return exportToString(geometry, m_spatialReference, null);</b>
+&nbsp;		}
+<b class="nc">&nbsp;		return null;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	static String exportToString(Geometry geometry, SpatialReference spatialReference, Map&lt;String, Object&gt; exportProperties) {
+<b class="fc">&nbsp;		JsonWriter jsonWriter = new JsonStringWriter();</b>
+<b class="fc">&nbsp;		exportToJson_(geometry, spatialReference, jsonWriter, exportProperties);</b>
+<b class="fc">&nbsp;		return (String) jsonWriter.getJson();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private static void exportToJson_(Geometry geometry, SpatialReference spatialReference, JsonWriter jsonWriter, Map&lt;String, Object&gt; exportProperties) {
+&nbsp;		try {
+<b class="fc">&nbsp;			int type = geometry.getType().value();</b>
+<b class="fc">&nbsp;			switch (type) {</b>
+&nbsp;			case Geometry.GeometryType.Point:
+<b class="fc">&nbsp;				exportPointToJson((Point) geometry, spatialReference, jsonWriter, exportProperties);</b>
+<b class="fc">&nbsp;				break;</b>
+&nbsp;
+&nbsp;			case Geometry.GeometryType.MultiPoint:
+<b class="fc">&nbsp;				exportMultiPointToJson((MultiPoint) geometry, spatialReference, jsonWriter, exportProperties);</b>
+<b class="fc">&nbsp;				break;</b>
+&nbsp;
+&nbsp;			case Geometry.GeometryType.Polyline:
+<b class="fc">&nbsp;				exportPolylineToJson((Polyline) geometry, spatialReference, jsonWriter, exportProperties);</b>
+<b class="fc">&nbsp;				break;</b>
+&nbsp;
+&nbsp;			case Geometry.GeometryType.Polygon:
+<b class="fc">&nbsp;				exportPolygonToJson((Polygon) geometry, spatialReference, jsonWriter, exportProperties);</b>
+<b class="fc">&nbsp;				break;</b>
+&nbsp;
+&nbsp;			case Geometry.GeometryType.Envelope:
+<b class="fc">&nbsp;				exportEnvelopeToJson((Envelope) geometry, spatialReference, jsonWriter, exportProperties);</b>
+<b class="fc">&nbsp;				break;</b>
+&nbsp;
+&nbsp;			default:
+<b class="nc">&nbsp;				throw new RuntimeException(&quot;not implemented for this geometry type&quot;);</b>
+&nbsp;			}
+&nbsp;
+<b class="nc">&nbsp;		} catch (Exception e) {</b>
+&nbsp;		}
+&nbsp;
+&nbsp;	}
+&nbsp;
+&nbsp;	private static void exportPolygonToJson(Polygon pp, SpatialReference spatialReference, JsonWriter jsonWriter, Map&lt;String, Object&gt; exportProperties) {
+<b class="fc">&nbsp;		exportPolypathToJson(pp, &quot;rings&quot;, spatialReference, jsonWriter, exportProperties);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private static void exportPolylineToJson(Polyline pp, SpatialReference spatialReference, JsonWriter jsonWriter, Map&lt;String, Object&gt; exportProperties) {
+<b class="fc">&nbsp;		exportPolypathToJson(pp, &quot;paths&quot;, spatialReference, jsonWriter, exportProperties);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private static void exportPolypathToJson(MultiPath pp, String name, SpatialReference spatialReference, JsonWriter jsonWriter, Map&lt;String, Object&gt; exportProperties) {
+<b class="fc">&nbsp;		boolean bExportZs = pp.hasAttribute(Semantics.Z);</b>
+<b class="fc">&nbsp;		boolean bExportMs = pp.hasAttribute(Semantics.M);</b>
+&nbsp;
+<b class="fc">&nbsp;		boolean bPositionAsF = false;</b>
+<b class="fc">&nbsp;		int decimals = 17;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (exportProperties != null) {</b>
+<b class="nc">&nbsp;			Object numberOfDecimalsXY = exportProperties.get(&quot;numberOfDecimalsXY&quot;);</b>
+<b class="nc">&nbsp;			if (numberOfDecimalsXY != null &amp;&amp; numberOfDecimalsXY instanceof Number) {</b>
+<b class="nc">&nbsp;				bPositionAsF = true;</b>
+<b class="nc">&nbsp;				decimals = ((Number) numberOfDecimalsXY).intValue();</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		jsonWriter.startObject();</b>
+&nbsp;
+<b class="fc">&nbsp;		if (bExportZs) {</b>
+<b class="nc">&nbsp;			jsonWriter.addPairBoolean(&quot;hasZ&quot;, true);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (bExportMs) {</b>
+<b class="nc">&nbsp;			jsonWriter.addPairBoolean(&quot;hasM&quot;, true);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		jsonWriter.addPairArray(name);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (!pp.isEmpty()) {</b>
+<b class="fc">&nbsp;			int n = pp.getPathCount(); // rings or paths</b>
+&nbsp;
+<b class="fc">&nbsp;			MultiPathImpl mpImpl = (MultiPathImpl) pp._getImpl();// get impl for</b>
+&nbsp;			// faster
+&nbsp;			// access
+<b class="fc">&nbsp;			AttributeStreamOfDbl zs = null;</b>
+<b class="fc">&nbsp;			AttributeStreamOfDbl ms = null;</b>
+&nbsp;
+<b class="fc">&nbsp;			if (bExportZs) {</b>
+<b class="nc">&nbsp;				zs = (AttributeStreamOfDbl) mpImpl.getAttributeStreamRef(Semantics.Z);</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			if (bExportMs) {</b>
+<b class="nc">&nbsp;				ms = (AttributeStreamOfDbl) mpImpl.getAttributeStreamRef(Semantics.M);</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			boolean bPolygon = pp instanceof Polygon;</b>
+<b class="fc">&nbsp;			Point2D pt = new Point2D();</b>
+&nbsp;
+<b class="fc">&nbsp;			for (int i = 0; i &lt; n; i++) {</b>
+<b class="fc">&nbsp;				jsonWriter.addValueArray();</b>
+<b class="fc">&nbsp;				int startindex = pp.getPathStart(i);</b>
+<b class="fc">&nbsp;				int numVertices = pp.getPathSize(i);</b>
+<b class="fc">&nbsp;				double startx = 0.0, starty = 0.0, startz = NumberUtils.NaN(), startm = NumberUtils.NaN();</b>
+<b class="fc">&nbsp;				double z = NumberUtils.NaN(), m = NumberUtils.NaN();</b>
+<b class="fc">&nbsp;				boolean bClosed = pp.isClosedPath(i);</b>
+<b class="fc">&nbsp;				for (int j = startindex; j &lt; startindex + numVertices; j++) {</b>
+<b class="fc">&nbsp;					pp.getXY(j, pt);</b>
+&nbsp;
+<b class="fc">&nbsp;					jsonWriter.addValueArray();</b>
+&nbsp;
+<b class="fc">&nbsp;					if (bPositionAsF) {</b>
+<b class="nc">&nbsp;						jsonWriter.addValueDouble(pt.x, decimals, true);</b>
+<b class="nc">&nbsp;						jsonWriter.addValueDouble(pt.y, decimals, true);</b>
+<b class="nc">&nbsp;					} else {</b>
+<b class="fc">&nbsp;						jsonWriter.addValueDouble(pt.x);</b>
+<b class="fc">&nbsp;						jsonWriter.addValueDouble(pt.y);</b>
+&nbsp;					}
+&nbsp;
+<b class="fc">&nbsp;					if (bExportZs) {</b>
+<b class="nc">&nbsp;						z = zs.get(j);</b>
+<b class="nc">&nbsp;						jsonWriter.addValueDouble(z);</b>
+&nbsp;					}
+&nbsp;
+<b class="fc">&nbsp;					if (bExportMs) {</b>
+<b class="nc">&nbsp;						m = ms.get(j);</b>
+<b class="nc">&nbsp;						jsonWriter.addValueDouble(m);</b>
+&nbsp;					}
+&nbsp;
+<b class="fc">&nbsp;					if (j == startindex &amp;&amp; bClosed) {</b>
+<b class="fc">&nbsp;						startx = pt.x;</b>
+<b class="fc">&nbsp;						starty = pt.y;</b>
+<b class="fc">&nbsp;						startz = z;</b>
+<b class="fc">&nbsp;						startm = m;</b>
+&nbsp;					}
+&nbsp;
+<b class="fc">&nbsp;					jsonWriter.endArray();</b>
+&nbsp;				}
+&nbsp;
+&nbsp;				// Close the Path/Ring by writing the Point at the start index
+<b class="fc">&nbsp;				if (bClosed &amp;&amp; (startx != pt.x || starty != pt.y || (bExportZs &amp;&amp; !(NumberUtils.isNaN(startz) &amp;&amp; NumberUtils.isNaN(z)) &amp;&amp; startz != z) || (bExportMs &amp;&amp; !(NumberUtils.isNaN(startm) &amp;&amp; NumberUtils.isNaN(m)) &amp;&amp; startm != m))) {</b>
+<b class="fc">&nbsp;					pp.getXY(startindex, pt);</b>
+&nbsp;					// getPoint(startindex);
+<b class="fc">&nbsp;					jsonWriter.addValueArray();</b>
+&nbsp;
+<b class="fc">&nbsp;					if (bPositionAsF) {</b>
+<b class="nc">&nbsp;						jsonWriter.addValueDouble(pt.x, decimals, true);</b>
+<b class="nc">&nbsp;						jsonWriter.addValueDouble(pt.y, decimals, true);</b>
+<b class="nc">&nbsp;					} else {</b>
+<b class="fc">&nbsp;						jsonWriter.addValueDouble(pt.x);</b>
+<b class="fc">&nbsp;						jsonWriter.addValueDouble(pt.y);</b>
+&nbsp;					}
+&nbsp;
+<b class="fc">&nbsp;					if (bExportZs) {</b>
+<b class="nc">&nbsp;						z = zs.get(startindex);</b>
+<b class="nc">&nbsp;						jsonWriter.addValueDouble(z);</b>
+&nbsp;					}
+&nbsp;
+<b class="fc">&nbsp;					if (bExportMs) {</b>
+<b class="nc">&nbsp;						m = ms.get(startindex);</b>
+<b class="nc">&nbsp;						jsonWriter.addValueDouble(m);</b>
+&nbsp;					}
+&nbsp;
+<b class="fc">&nbsp;					jsonWriter.endArray();</b>
+&nbsp;				}
+&nbsp;
+<b class="fc">&nbsp;				jsonWriter.endArray();</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		jsonWriter.endArray();</b>
+&nbsp;
+<b class="fc">&nbsp;		if (spatialReference != null) {</b>
+<b class="fc">&nbsp;			writeSR(spatialReference, jsonWriter);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		jsonWriter.endObject();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private static void exportMultiPointToJson(MultiPoint mpt, SpatialReference spatialReference, JsonWriter jsonWriter, Map&lt;String, Object&gt; exportProperties) {
+<b class="fc">&nbsp;		boolean bExportZs = mpt.hasAttribute(Semantics.Z);</b>
+<b class="fc">&nbsp;		boolean bExportMs = mpt.hasAttribute(Semantics.M);</b>
+&nbsp;
+<b class="fc">&nbsp;		boolean bPositionAsF = false;</b>
+<b class="fc">&nbsp;		int decimals = 17;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (exportProperties != null) {</b>
+<b class="nc">&nbsp;			Object numberOfDecimalsXY = exportProperties.get(&quot;numberOfDecimalsXY&quot;);</b>
+<b class="nc">&nbsp;			if (numberOfDecimalsXY != null &amp;&amp; numberOfDecimalsXY instanceof Number) {</b>
+<b class="nc">&nbsp;				bPositionAsF = true;</b>
+<b class="nc">&nbsp;				decimals = ((Number) numberOfDecimalsXY).intValue();</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		jsonWriter.startObject();</b>
+&nbsp;
+<b class="fc">&nbsp;		if (bExportZs) {</b>
+<b class="nc">&nbsp;			jsonWriter.addPairBoolean(&quot;hasZ&quot;, true);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (bExportMs) {</b>
+<b class="nc">&nbsp;			jsonWriter.addPairBoolean(&quot;hasM&quot;, true);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		jsonWriter.addPairArray(&quot;points&quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (!mpt.isEmpty()) {</b>
+<b class="fc">&nbsp;			MultiPointImpl mpImpl = (MultiPointImpl) mpt._getImpl();// get impl</b>
+&nbsp;			// for
+&nbsp;			// faster
+&nbsp;			// access
+<b class="fc">&nbsp;			AttributeStreamOfDbl zs = null;</b>
+<b class="fc">&nbsp;			AttributeStreamOfDbl ms = null;</b>
+&nbsp;
+<b class="fc">&nbsp;			if (bExportZs) {</b>
+<b class="nc">&nbsp;				zs = (AttributeStreamOfDbl) mpImpl.getAttributeStreamRef(Semantics.Z);</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			if (bExportMs) {</b>
+<b class="nc">&nbsp;				ms = (AttributeStreamOfDbl) mpImpl.getAttributeStreamRef(Semantics.M);</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			Point2D pt = new Point2D();</b>
+<b class="fc">&nbsp;			int n = mpt.getPointCount();</b>
+<b class="fc">&nbsp;			for (int i = 0; i &lt; n; i++) {</b>
+<b class="fc">&nbsp;				mpt.getXY(i, pt);</b>
+&nbsp;
+<b class="fc">&nbsp;				jsonWriter.addValueArray();</b>
+&nbsp;
+<b class="fc">&nbsp;				if (bPositionAsF) {</b>
+<b class="nc">&nbsp;					jsonWriter.addValueDouble(pt.x, decimals, true);</b>
+<b class="nc">&nbsp;					jsonWriter.addValueDouble(pt.y, decimals, true);</b>
+<b class="nc">&nbsp;				} else {</b>
+<b class="fc">&nbsp;					jsonWriter.addValueDouble(pt.x);</b>
+<b class="fc">&nbsp;					jsonWriter.addValueDouble(pt.y);</b>
+&nbsp;				}
+&nbsp;
+<b class="fc">&nbsp;				if (bExportZs) {</b>
+<b class="nc">&nbsp;					double z = zs.get(i);</b>
+<b class="nc">&nbsp;					jsonWriter.addValueDouble(z);</b>
+&nbsp;				}
+&nbsp;
+<b class="fc">&nbsp;				if (bExportMs) {</b>
+<b class="nc">&nbsp;					double m = ms.get(i);</b>
+<b class="nc">&nbsp;					jsonWriter.addValueDouble(m);</b>
+&nbsp;				}
+&nbsp;
+<b class="fc">&nbsp;				jsonWriter.endArray();</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		jsonWriter.endArray();</b>
+&nbsp;
+<b class="fc">&nbsp;		if (spatialReference != null) {</b>
+<b class="fc">&nbsp;			writeSR(spatialReference, jsonWriter);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		jsonWriter.endObject();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private static void exportPointToJson(Point pt, SpatialReference spatialReference, JsonWriter jsonWriter, Map&lt;String, Object&gt; exportProperties) {
+<b class="fc">&nbsp;		boolean bExportZs = pt.hasAttribute(Semantics.Z);</b>
+<b class="fc">&nbsp;		boolean bExportMs = pt.hasAttribute(Semantics.M);</b>
+&nbsp;
+<b class="fc">&nbsp;		boolean bPositionAsF = false;</b>
+<b class="fc">&nbsp;		int decimals = 17;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (exportProperties != null) {</b>
+<b class="nc">&nbsp;			Object numberOfDecimalsXY = exportProperties.get(&quot;numberOfDecimalsXY&quot;);</b>
+<b class="nc">&nbsp;			if (numberOfDecimalsXY != null &amp;&amp; numberOfDecimalsXY instanceof Number) {</b>
+<b class="nc">&nbsp;				bPositionAsF = true;</b>
+<b class="nc">&nbsp;				decimals = ((Number) numberOfDecimalsXY).intValue();</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		jsonWriter.startObject();</b>
+&nbsp;
+<b class="fc">&nbsp;		if (pt.isEmpty()) {</b>
+<b class="fc">&nbsp;			jsonWriter.addPairNull(&quot;x&quot;);</b>
+<b class="fc">&nbsp;			jsonWriter.addPairNull(&quot;y&quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;			if (bExportZs) {</b>
+<b class="nc">&nbsp;				jsonWriter.addPairNull(&quot;z&quot;);</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			if (bExportMs) {</b>
+<b class="nc">&nbsp;				jsonWriter.addPairNull(&quot;m&quot;);</b>
+&nbsp;			}
+<b class="nc">&nbsp;		} else {</b>
+&nbsp;
+<b class="fc">&nbsp;			if (bPositionAsF) {</b>
+<b class="nc">&nbsp;				jsonWriter.addPairDouble(&quot;x&quot;, pt.getX(), decimals, true);</b>
+<b class="nc">&nbsp;				jsonWriter.addPairDouble(&quot;y&quot;, pt.getY(), decimals, true);</b>
+<b class="nc">&nbsp;			} else {</b>
+<b class="fc">&nbsp;				jsonWriter.addPairDouble(&quot;x&quot;, pt.getX());</b>
+<b class="fc">&nbsp;				jsonWriter.addPairDouble(&quot;y&quot;, pt.getY());</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			if (bExportZs) {</b>
+<b class="fc">&nbsp;				jsonWriter.addPairDouble(&quot;z&quot;, pt.getZ());</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			if (bExportMs) {</b>
+<b class="nc">&nbsp;				jsonWriter.addPairDouble(&quot;m&quot;, pt.getM());</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (spatialReference != null) {</b>
+<b class="fc">&nbsp;			writeSR(spatialReference, jsonWriter);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		jsonWriter.endObject();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private static void exportEnvelopeToJson(Envelope env, SpatialReference spatialReference, JsonWriter jsonWriter, Map&lt;String, Object&gt; exportProperties) {
+<b class="fc">&nbsp;		boolean bExportZs = env.hasAttribute(Semantics.Z);</b>
+<b class="fc">&nbsp;		boolean bExportMs = env.hasAttribute(Semantics.M);</b>
+&nbsp;
+<b class="fc">&nbsp;		boolean bPositionAsF = false;</b>
+<b class="fc">&nbsp;		int decimals = 17;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (exportProperties != null) {</b>
+<b class="nc">&nbsp;			Object numberOfDecimalsXY = exportProperties.get(&quot;numberOfDecimalsXY&quot;);</b>
+<b class="nc">&nbsp;			if (numberOfDecimalsXY != null &amp;&amp; numberOfDecimalsXY instanceof Number) {</b>
+<b class="nc">&nbsp;				bPositionAsF = true;</b>
+<b class="nc">&nbsp;				decimals = ((Number) numberOfDecimalsXY).intValue();</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		jsonWriter.startObject();</b>
+&nbsp;
+<b class="fc">&nbsp;		if (env.isEmpty()) {</b>
+<b class="fc">&nbsp;			jsonWriter.addPairNull(&quot;xmin&quot;);</b>
+<b class="fc">&nbsp;			jsonWriter.addPairNull(&quot;ymin&quot;);</b>
+<b class="fc">&nbsp;			jsonWriter.addPairNull(&quot;xmax&quot;);</b>
+<b class="fc">&nbsp;			jsonWriter.addPairNull(&quot;ymax&quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;			if (bExportZs) {</b>
+<b class="nc">&nbsp;				jsonWriter.addPairNull(&quot;zmin&quot;);</b>
+<b class="nc">&nbsp;				jsonWriter.addPairNull(&quot;zmax&quot;);</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			if (bExportMs) {</b>
+<b class="nc">&nbsp;				jsonWriter.addPairNull(&quot;mmin&quot;);</b>
+<b class="nc">&nbsp;				jsonWriter.addPairNull(&quot;mmax&quot;);</b>
+&nbsp;			}
+<b class="nc">&nbsp;		} else {</b>
+&nbsp;
+<b class="fc">&nbsp;			if (bPositionAsF) {</b>
+<b class="nc">&nbsp;				jsonWriter.addPairDouble(&quot;xmin&quot;, env.getXMin(), decimals, true);</b>
+<b class="nc">&nbsp;				jsonWriter.addPairDouble(&quot;ymin&quot;, env.getYMin(), decimals, true);</b>
+<b class="nc">&nbsp;				jsonWriter.addPairDouble(&quot;xmax&quot;, env.getXMax(), decimals, true);</b>
+<b class="nc">&nbsp;				jsonWriter.addPairDouble(&quot;ymax&quot;, env.getYMax(), decimals, true);</b>
+<b class="nc">&nbsp;			} else {</b>
+<b class="fc">&nbsp;				jsonWriter.addPairDouble(&quot;xmin&quot;, env.getXMin());</b>
+<b class="fc">&nbsp;				jsonWriter.addPairDouble(&quot;ymin&quot;, env.getYMin());</b>
+<b class="fc">&nbsp;				jsonWriter.addPairDouble(&quot;xmax&quot;, env.getXMax());</b>
+<b class="fc">&nbsp;				jsonWriter.addPairDouble(&quot;ymax&quot;, env.getYMax());</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			if (bExportZs) {</b>
+<b class="nc">&nbsp;				Envelope1D z = env.queryInterval(Semantics.Z, 0);</b>
+<b class="nc">&nbsp;				jsonWriter.addPairDouble(&quot;zmin&quot;, z.vmin);</b>
+<b class="nc">&nbsp;				jsonWriter.addPairDouble(&quot;zmax&quot;, z.vmax);</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			if (bExportMs) {</b>
+<b class="nc">&nbsp;				Envelope1D m = env.queryInterval(Semantics.M, 0);</b>
+<b class="nc">&nbsp;				jsonWriter.addPairDouble(&quot;mmin&quot;, m.vmin);</b>
+<b class="nc">&nbsp;				jsonWriter.addPairDouble(&quot;mmax&quot;, m.vmax);</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (spatialReference != null) {</b>
+<b class="fc">&nbsp;			writeSR(spatialReference, jsonWriter);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		jsonWriter.endObject();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private static void writeSR(SpatialReference spatialReference, JsonWriter jsonWriter) {
+<b class="fc">&nbsp;		int wkid = spatialReference.getOldID();</b>
+<b class="fc">&nbsp;		if (wkid &gt; 0) {</b>
+<b class="fc">&nbsp;			jsonWriter.addPairObject(&quot;spatialReference&quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;			jsonWriter.addPairInt(&quot;wkid&quot;, wkid);</b>
+&nbsp;
+<b class="fc">&nbsp;			int latest_wkid = spatialReference.getLatestID();</b>
+<b class="fc">&nbsp;			if (latest_wkid &gt; 0 &amp;&amp; latest_wkid != wkid) {</b>
+<b class="fc">&nbsp;				jsonWriter.addPairInt(&quot;latestWkid&quot;, latest_wkid);</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			jsonWriter.endObject();</b>
+<b class="fc">&nbsp;		} else {</b>
+<b class="fc">&nbsp;			String wkt = spatialReference.getText();</b>
+<b class="fc">&nbsp;			if (wkt != null) {</b>
+<b class="fc">&nbsp;				jsonWriter.addPairObject(&quot;spatialReference&quot;);</b>
+<b class="fc">&nbsp;				jsonWriter.addPairString(&quot;wkt&quot;, wkt);</b>
+<b class="fc">&nbsp;				jsonWriter.endObject();</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-02-21 15:02</div>
+</div>
+</body>
+</html>

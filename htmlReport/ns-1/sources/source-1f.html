@@ -1,0 +1,825 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > Geometry</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.esri.core.geometry</a>
+</div>
+
+<h1>Coverage Summary for Class: Geometry (com.esri.core.geometry)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">Geometry</td>
+<td class="coverageStat">
+  <span class="percent">
+    73,5%
+  </span>
+  <span class="absValue">
+    (25/34)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    75%
+  </span>
+  <span class="absValue">
+    (63/84)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">Geometry$GeometryAccelerationDegree</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (7/7)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">Geometry$GeometryType</td>
+  </tr>
+  <tr>
+    <td class="name">Geometry$Type</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (4/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    95,7%
+  </span>
+  <span class="absValue">
+    (22/23)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    76,9%
+  </span>
+  <span class="absValue">
+    (30/39)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    80,7%
+  </span>
+  <span class="absValue">
+    (92/114)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; Copyright 1995-2018 Esri
+&nbsp;
+&nbsp;   Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp;   you may not use this file except in compliance with the License.
+&nbsp;   You may obtain a copy of the License at
+&nbsp;
+&nbsp;       http://www.apache.org/licenses/LICENSE-2.0
+&nbsp;
+&nbsp;   Unless required by applicable law or agreed to in writing, software
+&nbsp;   distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp;   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp;   See the License for the specific language governing permissions and
+&nbsp;   limitations under the License.
+&nbsp;
+&nbsp; For additional information, contact:
+&nbsp; Environmental Systems Research Institute, Inc.
+&nbsp; Attn: Contracts Dept
+&nbsp; 380 New York Street
+&nbsp; Redlands, California, USA 92373
+&nbsp;
+&nbsp; email: contracts@esri.com
+&nbsp; */
+&nbsp;
+&nbsp;
+&nbsp;package com.esri.core.geometry;
+&nbsp;
+&nbsp;import java.io.ObjectStreamException;
+&nbsp;import java.io.Serializable;
+&nbsp;
+&nbsp;import static com.esri.core.geometry.SizeOf.sizeOfDoubleArray;
+&nbsp;
+&nbsp;/**
+&nbsp; * Common properties and methods shared by all geometric objects. Geometries are
+&nbsp; * objects that define a spatial location and and associated geometric shape.
+&nbsp; */
+&nbsp;public abstract class Geometry implements Serializable {
+&nbsp;	VertexDescription m_description;
+&nbsp;	volatile int m_touchFlag;
+&nbsp;
+<b class="fc">&nbsp;	Geometry() {</b>
+<b class="fc">&nbsp;		m_description = null;</b>
+<b class="fc">&nbsp;		m_touchFlag = 0;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Geometry types
+&nbsp;	 */
+&nbsp;	static public interface GeometryType {
+&nbsp;		public final static int Unknown = 0;
+&nbsp;		public final static int Point = 1 + 0x20; // points
+&nbsp;		public final static int Line = 2 + 0x40 + 0x100; // lines, segment
+&nbsp;		final static int Bezier = 3 + 0x40 + 0x100; // lines, segment
+&nbsp;		final static int EllipticArc = 4 + 0x40 + 0x100; // lines, segment
+&nbsp;		public final static int Envelope = 5 + 0x40 + 0x80; // lines, areas
+&nbsp;		public final static int MultiPoint = 6 + 0x20 + 0x200; // points,
+&nbsp;		// multivertex
+&nbsp;		public final static int Polyline = 7 + 0x40 + 0x200 + 0x400; // lines,
+&nbsp;																		// multivertex,
+&nbsp;		// multipath
+&nbsp;		public final static int Polygon = 8 + 0x40 + 0x80 + 0x200 + 0x400;
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * The type of this geometry.
+&nbsp;	 */
+<b class="fc">&nbsp;	static public enum Type {</b>
+<b class="fc">&nbsp;		/**</b>
+&nbsp;		 * Used to indicate that the geometry type is not known before executing
+&nbsp;		 * a method.
+&nbsp;		 */
+<b class="fc">&nbsp;		Unknown(GeometryType.Unknown),</b>
+<b class="fc">&nbsp;		/**</b>
+&nbsp;		 * The value representing a point as geometry type.
+&nbsp;		 */
+&nbsp;
+<b class="fc">&nbsp;		Point(GeometryType.Point),</b>
+<b class="fc">&nbsp;		/**</b>
+&nbsp;		 * The value representing a line as geometry type.
+&nbsp;		 */
+&nbsp;
+<b class="fc">&nbsp;		Line(GeometryType.Line),</b>
+<b class="fc">&nbsp;		/**</b>
+&nbsp;		 * The value representing an envelope as geometry type.
+&nbsp;		 */
+&nbsp;
+<b class="fc">&nbsp;		Envelope(GeometryType.Envelope),</b>
+<b class="fc">&nbsp;		/**</b>
+&nbsp;		 * The value representing a multipoint as geometry type.
+&nbsp;		 */
+&nbsp;
+<b class="fc">&nbsp;		MultiPoint(GeometryType.MultiPoint),</b>
+<b class="fc">&nbsp;		/**</b>
+&nbsp;		 * The value representing a polyline as geometry type.
+&nbsp;		 */
+&nbsp;
+<b class="fc">&nbsp;		Polyline(GeometryType.Polyline),</b>
+<b class="fc">&nbsp;		/**</b>
+&nbsp;		 * The value representing a polygon as geometry type.
+&nbsp;		 */
+&nbsp;
+<b class="fc">&nbsp;		Polygon(GeometryType.Polygon);</b>
+&nbsp;
+&nbsp;		private int enumValue;
+&nbsp;
+&nbsp;		/**
+&nbsp;		 * Returns the integer representation of the enumeration value.
+&nbsp;		 */
+&nbsp;		public int value() {
+<b class="fc">&nbsp;			return enumValue;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		Type(int val) {</b>
+<b class="fc">&nbsp;			enumValue = val;</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;		static public Geometry.Type intToType(int geometryType)
+&nbsp;		{
+<b class="fc">&nbsp;			Geometry.Type[] v = Geometry.Type.values();</b>
+<b class="fc">&nbsp;            for(int i = 0; i &lt; v.length; i++)</b>
+&nbsp;            {
+<b class="fc">&nbsp;                if(v[i].value() == geometryType)</b>
+<b class="fc">&nbsp;                    return v[i];</b>
+&nbsp;            }
+&nbsp;            
+<b class="nc">&nbsp;            throw new IllegalArgumentException();		</b>
+&nbsp;        }
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns the geometry type.
+&nbsp;	 * 
+&nbsp;	 * @return Returns the geometry type.
+&nbsp;	 */
+&nbsp;	public abstract Geometry.Type getType();
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns the topological dimension of the geometry object based on the
+&nbsp;	 * geometry&#39;s type.
+&nbsp;	 * &lt;p&gt;
+&nbsp;	 * Returns 0 for point and multipoint.
+&nbsp;	 * &lt;p&gt;
+&nbsp;	 * Returns 1 for lines and polylines.
+&nbsp;	 * &lt;p&gt;
+&nbsp;	 * Returns 2 for polygons and envelopes
+&nbsp;	 * &lt;p&gt;
+&nbsp;	 * Returns 3 for objects with volume
+&nbsp;	 * 
+&nbsp;	 * @return Returns the integer value of the dimension of geometry.
+&nbsp;	 */
+&nbsp;	public abstract int getDimension();
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns an estimate of this object size in bytes.
+&nbsp;	 * &lt;p&gt;
+&nbsp;	 * This estimate doesn&#39;t include the size of the {@link VertexDescription} object
+&nbsp;	 * because instances of {@link VertexDescription} are shared among
+&nbsp;	 * geometry objects.
+&nbsp;	 * 
+&nbsp;	 * @return Returns an estimate of this object size in bytes.
+&nbsp;	 */
+&nbsp;	public abstract long estimateMemorySize();
+&nbsp;
+&nbsp;	protected static long estimateMemorySize(double[] attributes)
+&nbsp;	{
+<b class="fc">&nbsp;		return attributes != null ? sizeOfDoubleArray(attributes.length) : 0;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns the VertexDescription of this geometry.
+&nbsp;	 * @return VertexDescription
+&nbsp;	 */
+&nbsp;	public VertexDescription getDescription() {
+<b class="fc">&nbsp;		return m_description;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Assigns the new VertexDescription by adding or dropping attributes. The
+&nbsp;	 * Geometry will have the src description as a result.
+&nbsp;	 * @param src VertexDescription to assign.
+&nbsp;	 */
+&nbsp;	public void assignVertexDescription(VertexDescription src) {
+<b class="fc">&nbsp;		_touch();</b>
+<b class="fc">&nbsp;		if (src == m_description)</b>
+&nbsp;			return;
+&nbsp;
+<b class="fc">&nbsp;		_assignVertexDescriptionImpl(src);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	protected abstract void _assignVertexDescriptionImpl(VertexDescription src);
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Merges the new VertexDescription by adding missing attributes from the
+&nbsp;	 * src. The Geometry will have a union of the current and the src
+&nbsp;	 * descriptions.
+&nbsp;	 * @param src VertexDescription to merge.
+&nbsp;	 */
+&nbsp;	public void mergeVertexDescription(VertexDescription src) {
+<b class="fc">&nbsp;		_touch();</b>
+<b class="fc">&nbsp;		if (src == m_description)</b>
+&nbsp;			return;
+&nbsp;
+&nbsp;		// check if we need to do anything (if the src has same attributes)
+<b class="fc">&nbsp;		VertexDescription newdescription = VertexDescriptionDesignerImpl.getMergedVertexDescription(m_description, src);</b>
+<b class="fc">&nbsp;		if (newdescription == m_description)</b>
+&nbsp;			return;
+&nbsp;		
+<b class="fc">&nbsp;		_assignVertexDescriptionImpl(newdescription);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * A shortcut for getDescription().hasAttribute()
+&nbsp;	 * @param semantics The VertexDescription.Semantics to check.
+&nbsp;	 * @return Return true if the attribute is present.
+&nbsp;	 */
+&nbsp;	public boolean hasAttribute(int semantics) {
+<b class="fc">&nbsp;		return getDescription().hasAttribute(semantics);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Adds a new attribute to the Geometry.
+&nbsp;	 * 
+&nbsp;	 * @param semantics The VertexDescription.Semantics to add.
+&nbsp;	 */
+&nbsp;	public void addAttribute(int semantics) {
+<b class="fc">&nbsp;		_touch();</b>
+<b class="fc">&nbsp;		if (m_description.hasAttribute(semantics))</b>
+&nbsp;			return;
+&nbsp;		
+<b class="fc">&nbsp;		VertexDescription newvd = VertexDescriptionDesignerImpl.getMergedVertexDescription(m_description, semantics);</b>
+<b class="fc">&nbsp;		_assignVertexDescriptionImpl(newvd);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Drops an attribute from the Geometry. Dropping the attribute is
+&nbsp;	 * equivalent to setting the attribute to the default value for each vertex,
+&nbsp;	 * However, it is faster and the result Geometry has smaller memory
+&nbsp;	 * footprint and smaller size when persisted.
+&nbsp;	 * @param semantics The VertexDescription.Semantics to drop.
+&nbsp;	 */
+&nbsp;	public void dropAttribute(int semantics) {
+<b class="fc">&nbsp;		_touch();</b>
+<b class="fc">&nbsp;		if (!m_description.hasAttribute(semantics))</b>
+&nbsp;			return;
+&nbsp;
+<b class="fc">&nbsp;		VertexDescription newvd = VertexDescriptionDesignerImpl.removeSemanticsFromVertexDescription(m_description, semantics);</b>
+<b class="fc">&nbsp;		_assignVertexDescriptionImpl(newvd);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Drops all attributes from the Geometry with exception of POSITON.
+&nbsp;	 */
+&nbsp;	public void dropAllAttributes() {
+<b class="fc">&nbsp;		assignVertexDescription(VertexDescriptionDesignerImpl</b>
+<b class="fc">&nbsp;				.getDefaultDescriptor2D());</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns the min and max attribute values at the ordinate of the Geometry.
+&nbsp;	 * @param semantics The semantics of the interval.
+&nbsp;	 * @param ordinate The ordinate of the interval.
+&nbsp;	 * @return The interval.
+&nbsp;	 */
+&nbsp;	public abstract Envelope1D queryInterval(int semantics, int ordinate);
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns the axis aligned bounding box of the geometry.
+&nbsp;	 * 
+&nbsp;	 * @param env
+&nbsp;	 *            The envelope to return the result in.
+&nbsp;	 */
+&nbsp;	public abstract void queryEnvelope(Envelope env);
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns tight bbox of the Geometry in X, Y plane.
+&nbsp;	 * @param env
+&nbsp;	 *            The envelope to return the result in.
+&nbsp;	 */
+&nbsp;	public abstract void queryEnvelope2D(Envelope2D env);
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns tight bbox of the Geometry in 3D.
+&nbsp;	 * @param env
+&nbsp;	 *            The envelope to return the result in.
+&nbsp;	 */
+&nbsp;	abstract void queryEnvelope3D(Envelope3D env);
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns the conservative bbox of the Geometry in X, Y plane. This is a
+&nbsp;	 * faster method than QueryEnvelope2D. However, the bbox could be larger
+&nbsp;	 * than the tight box.
+&nbsp;	 * @param env
+&nbsp;	 *            The envelope to return the result in.
+&nbsp;	 */
+&nbsp;	public void queryLooseEnvelope2D(Envelope2D env) {
+<b class="fc">&nbsp;		queryEnvelope2D(env);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns tight conservative box of the Geometry in 3D. This is a faster
+&nbsp;	 * method than the QueryEnvelope3D. However, the box could be larger than
+&nbsp;	 * the tight box.
+&nbsp;	 * @param env
+&nbsp;	 *            The envelope to return the result in.
+&nbsp;	 */
+&nbsp;	void queryLooseEnvelope3D(Envelope3D env) {
+<b class="nc">&nbsp;		queryEnvelope3D(env);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * IsEmpty returns TRUE when the Geometry object does not contain geometric
+&nbsp;	 * information beyond its original initialization state.
+&nbsp;	 * 
+&nbsp;	 * @return boolean Returns TRUE if this geometry is empty.
+&nbsp;	 */
+&nbsp;	public abstract boolean isEmpty();
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns the geometry to its original initialization state by releasing
+&nbsp;	 * all data referenced by the geometry.
+&nbsp;	 */
+&nbsp;	public abstract void setEmpty();
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Applies 2D affine transformation in XY plane.
+&nbsp;	 * 
+&nbsp;	 * @param transform
+&nbsp;	 *            The affine transformation to be applied to this geometry.
+&nbsp;	 */
+&nbsp;	public abstract void applyTransformation(Transformation2D transform);
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Applies 3D affine transformation. Adds Z attribute if it is missing.
+&nbsp;	 * 
+&nbsp;	 * @param transform
+&nbsp;	 *            The affine transformation to be applied to this geometry.
+&nbsp;	 */
+&nbsp;	abstract void applyTransformation(Transformation3D transform);
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Creates an instance of an empty geometry of the same type.
+&nbsp;	 * @return The new instance.
+&nbsp;	 */
+&nbsp;	public abstract Geometry createInstance();
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Copies this geometry to another geometry of the same type. The result
+&nbsp;	 * geometry is an exact copy.
+&nbsp;	 * @param dst The geometry instance to copy to.
+&nbsp;	 * @exception GeometryException
+&nbsp;	 *                invalid_argument if the geometry is of different type.
+&nbsp;	 */
+&nbsp;	public abstract void copyTo(Geometry dst);
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Calculates the area of the geometry. If the spatial reference is a
+&nbsp;	 * Geographic Coordinate System (WGS84) then the 2D area calculation is
+&nbsp;	 * defined in angular units.
+&nbsp;	 * 
+&nbsp;	 * @return A double value representing the 2D area of the geometry.
+&nbsp;	 */
+&nbsp;	public double calculateArea2D() {
+<b class="fc">&nbsp;		return 0;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Calculates the length of the geometry. If the spatial reference is a
+&nbsp;	 * Geographic Coordinate System (a system where coordinates are defined
+&nbsp;	 * using angular units such as longitude and latitude) then the 2D distance
+&nbsp;	 * calculation is returned in angular units. In cases where length must be
+&nbsp;	 * calculated on a Geographic Coordinate System consider the using the
+&nbsp;	 * geodeticLength method on the {@link GeometryEngine}
+&nbsp;	 * 
+&nbsp;	 * @return A double value representing the 2D length of the geometry.
+&nbsp;	 */
+&nbsp;	public double calculateLength2D() {
+<b class="nc">&nbsp;		return 0;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	protected Object _getImpl() {
+<b class="nc">&nbsp;		throw new RuntimeException(&quot;invalid call&quot;);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Adds the Z attribute to this Geometry
+&nbsp;	 */
+&nbsp;	void addZ() {
+<b class="nc">&nbsp;		addAttribute(VertexDescription.Semantics.Z);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns true if this Geometry has the Z attribute
+&nbsp;	 * 
+&nbsp;	 * @return true if this Geometry has the Z attribute
+&nbsp;	 */
+&nbsp;	public boolean hasZ() {
+<b class="fc">&nbsp;		return hasAttribute(VertexDescription.Semantics.Z);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Adds the M attribute to this Geometry
+&nbsp;	 */
+&nbsp;	public void addM() {
+<b class="nc">&nbsp;		addAttribute(VertexDescription.Semantics.M);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns true if this Geometry has an M attribute
+&nbsp;	 * 
+&nbsp;	 * @return true if this Geometry has an M attribute
+&nbsp;	 */
+&nbsp;	public boolean hasM() {
+<b class="nc">&nbsp;		return hasAttribute(VertexDescription.Semantics.M);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Adds the ID attribute to this Geometry
+&nbsp;	 */
+&nbsp;	public void addID() {
+<b class="nc">&nbsp;		addAttribute(VertexDescription.Semantics.ID);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns true if this Geometry has an ID attribute
+&nbsp;	 * 
+&nbsp;	 * @return true if this Geometry has an ID attribute
+&nbsp;	 */
+&nbsp;	public boolean hasID() {
+<b class="nc">&nbsp;		return hasAttribute(VertexDescription.Semantics.ID);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns this geometry&#39;s dimension.
+&nbsp;	 * &lt;p&gt;
+&nbsp;	 * Returns 0 for point and multipoint.
+&nbsp;	 * &lt;p&gt;
+&nbsp;	 * Returns 1 for lines and polylines.
+&nbsp;	 * &lt;p&gt;
+&nbsp;	 * Returns 2 for polygons and envelopes
+&nbsp;	 * &lt;p&gt;
+&nbsp;	 * Returns 3 for objects with volume
+&nbsp;	 * 
+&nbsp;	 * @param type
+&nbsp;	 *            The integer value from geometry enumeration. You can use the
+&nbsp;	 *            method {@link Type#value()} to get at the integer value.
+&nbsp;	 * @return The integer dimension of this geometry.
+&nbsp;	 */
+&nbsp;	public static int getDimensionFromType(int type) {
+<b class="fc">&nbsp;		return (((type &amp; (0x40 | 0x80)) &gt;&gt; 6) + 1) &gt;&gt; 1;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Indicates if the integer value of the enumeration is a point type
+&nbsp;	 * (dimension 0).
+&nbsp;	 * 
+&nbsp;	 * @param type
+&nbsp;	 *            The integer value from geometry enumeration. You can use the
+&nbsp;	 *            method {@link Type#value()} to get at the integer value.
+&nbsp;	 * @return TRUE if the geometry is a point (a Point or a Multipoint).
+&nbsp;	 */
+&nbsp;	public static boolean isPoint(int type) {
+<b class="fc">&nbsp;		return (type &amp; 0x20) != 0;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Indicates if the integer value of the enumeration is linear (dimension
+&nbsp;	 * 1).
+&nbsp;	 * 
+&nbsp;	 * @param type
+&nbsp;	 *            The integer value from geometry enumeration. You can use the
+&nbsp;	 *            method {@link Type#value()} to get at the integer value.
+&nbsp;	 * @return TRUE if the geometry is a line.
+&nbsp;	 */
+&nbsp;	public static boolean isLinear(int type) {
+<b class="fc">&nbsp;		return (type &amp; 0x40) != 0;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Indicates if the integer value of the enumeration is an area (dimension
+&nbsp;	 * 2).
+&nbsp;	 * 
+&nbsp;	 * @param type
+&nbsp;	 *            The integer value from geometry enumeration. You can use the
+&nbsp;	 *            method {@link Type#value()} to get at the integer value.
+&nbsp;	 * @return TRUE if the geometry is a polygon.
+&nbsp;	 */
+&nbsp;	public static boolean isArea(int type) {
+<b class="fc">&nbsp;		return (type &amp; 0x80) != 0;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Indicates if the integer value of the enumeration is a segment.
+&nbsp;	 * 
+&nbsp;	 * @param type
+&nbsp;	 *            The integer value from geometry enumeration. You can use the
+&nbsp;	 *            method {@link Type#value()} to get at the integer value.
+&nbsp;	 * @return TRUE if the geometry is a segment.
+&nbsp;	 */
+&nbsp;	public static boolean isSegment(int type) {
+<b class="fc">&nbsp;		return (type &amp; 0x100) != 0;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Indicates if the integer value of the enumeration is a multivertex (ie,
+&nbsp;	 * multipoint, line, or area).
+&nbsp;	 * 
+&nbsp;	 * @param type
+&nbsp;	 *            The integer value from geometry enumeration. You can use the
+&nbsp;	 *            method {@link Type#value()} to get at the integer value.
+&nbsp;	 * @return TRUE if the geometry has multiple vertices.
+&nbsp;	 */
+&nbsp;	public static boolean isMultiVertex(int type) {
+<b class="fc">&nbsp;		return (type &amp; 0x200) != 0;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Indicates if the integer value of the enumeration is a multipath (ie,
+&nbsp;	 * line or area).
+&nbsp;	 * 
+&nbsp;	 * @param type
+&nbsp;	 *            The integer value from geometry enumeration. You can use the
+&nbsp;	 *            method {@link Type#value()} to get at the integer value.
+&nbsp;	 * @return TRUE if the geometry is a multipath.
+&nbsp;	 */
+&nbsp;	public static boolean isMultiPath(int type) {
+<b class="fc">&nbsp;		return (type &amp; 0x400) != 0;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Creates a copy of the geometry.
+&nbsp;	 * 
+&nbsp;	 * @return Returns a copy of this geometry.
+&nbsp;	 */
+&nbsp;	public Geometry copy() {
+<b class="fc">&nbsp;		Geometry geom = createInstance();</b>
+<b class="fc">&nbsp;		this.copyTo(geom);</b>
+<b class="fc">&nbsp;		return geom;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns boundary of this geometry.
+&nbsp;	 *
+&nbsp;	 * Polygon and Envelope boundary is a Polyline. For Polyline and Line, the
+&nbsp;	 * boundary is a Multi_point consisting of path end points. For Multi_point and
+&nbsp;	 * Point null is returned.
+&nbsp;	 * @return The boundary geometry.
+&nbsp;	 */
+&nbsp;	public abstract Geometry getBoundary();
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Replaces NaNs in the attribute with the given value.
+&nbsp;	 * If the geometry is not empty, it adds the attribute if geometry does not have it yet, and replaces the values.
+&nbsp;	 * If the geometry is empty, it adds the attribute and does not set any values.
+&nbsp;	 * @param semantics The semantics for which to replace the NaNs.
+&nbsp;	 * @param value The value to replace NaNs with. 
+&nbsp;	 */
+&nbsp;	public abstract void replaceNaNs(int semantics, double value);
+&nbsp;
+&nbsp;	static Geometry _clone(Geometry src) {
+<b class="fc">&nbsp;		Geometry geom = src.createInstance();</b>
+<b class="fc">&nbsp;		src.copyTo(geom);</b>
+<b class="fc">&nbsp;		return geom;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * The stateFlag value changes with changes applied to this geometry. This
+&nbsp;	 * allows the user to keep track of the geometry&#39;s state.
+&nbsp;	 * 
+&nbsp;	 * @return The state of the geometry.
+&nbsp;	 */
+&nbsp;	public int getStateFlag() {
+<b class="fc">&nbsp;		m_touchFlag &amp;= 0x7FFFFFFF;</b>
+<b class="fc">&nbsp;		return m_touchFlag;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Called whenever geometry changes
+&nbsp;	synchronized void _touch() {
+<b class="fc">&nbsp;		if (m_touchFlag &gt;= 0) {</b>
+<b class="fc">&nbsp;			m_touchFlag += 0x80000001;</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Describes the degree of acceleration of the geometry.
+&nbsp;	 * Acceleration usually builds a raster and a quadtree.
+&nbsp;	 */
+<b class="fc">&nbsp;	static public enum GeometryAccelerationDegree {</b>
+<b class="fc">&nbsp;		/**</b>
+&nbsp;		 * mild acceleration, takes least amount of memory. (64x64x2 bit raster)
+&nbsp;		 */
+<b class="fc">&nbsp;		enumMild,</b>
+<b class="fc">&nbsp;		/**</b>
+&nbsp;		 * medium acceleration, takes more memory and takes more time to accelerate, but may work faster.
+&nbsp;		 * (256x256x2 bit raster and a quad tree for segments)
+&nbsp;		 */
+<b class="fc">&nbsp;		enumMedium,</b>
+<b class="fc">&nbsp;		/**</b>
+&nbsp;		*high acceleration, takes even more memory and may take
+&nbsp;		*longest time to accelerate, but may work faster than the
+&nbsp;		*other two.
+&nbsp;		*(1024x1024x2 bit raster and a quad tree for segments)
+&nbsp;		*/
+<b class="fc">&nbsp;		enumHot</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	Object writeReplace() throws ObjectStreamException {
+<b class="fc">&nbsp;		Type gt = getType();</b>
+<b class="fc">&nbsp;		if (gt == Geometry.Type.Point)</b>
+&nbsp;		{
+<b class="fc">&nbsp;			PtSrlzr pt = new PtSrlzr();</b>
+<b class="fc">&nbsp;			pt.setGeometryByValue((Point)this);</b>
+<b class="fc">&nbsp;			return pt;</b>
+&nbsp;		}
+<b class="fc">&nbsp;		else if (gt == Geometry.Type.Envelope)</b>
+&nbsp;		{
+<b class="fc">&nbsp;			EnvSrlzr e = new EnvSrlzr();</b>
+<b class="fc">&nbsp;			e.setGeometryByValue((Envelope)this);</b>
+<b class="fc">&nbsp;			return e;</b>
+&nbsp;		}
+<b class="fc">&nbsp;		else if (gt == Geometry.Type.Line)</b>
+&nbsp;		{
+<b class="fc">&nbsp;			LnSrlzr ln = new LnSrlzr();</b>
+<b class="fc">&nbsp;			ln.setGeometryByValue((Line)this);</b>
+<b class="fc">&nbsp;			return ln;</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		GenericGeometrySerializer geomSerializer = new GenericGeometrySerializer();</b>
+<b class="fc">&nbsp;		geomSerializer.setGeometryByValue(this);</b>
+<b class="fc">&nbsp;		return geomSerializer;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * The output of this method can be only used for debugging. It is subject to change without notice. 
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String toString() {
+<b class="fc">&nbsp;		String snippet = OperatorExportToJson.local().execute(null, this);</b>
+<b class="fc">&nbsp;		if (snippet.length() &gt; 200) { </b>
+<b class="nc">&nbsp;			return snippet.substring(0, 197) + &quot;... (&quot;+snippet.length()+&quot; characters)&quot;; </b>
+&nbsp;		}
+&nbsp;		else {
+<b class="fc">&nbsp;			return snippet;</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns count of geometry vertices: 1 for Point, 4 for Envelope,
+&nbsp;	 * get_point_count for MultiVertexGeometry types, 2 for segment types Returns 0
+&nbsp;	 * if geometry is empty.
+&nbsp;	 * @param geom The geometry to get the vertex count for.
+&nbsp;	 * @return The vertex count.
+&nbsp;	 */
+&nbsp;	public static int vertex_count(Geometry geom) {
+<b class="nc">&nbsp;		Geometry.Type gt = geom.getType();</b>
+<b class="nc">&nbsp;		if (Geometry.isMultiVertex(gt.value()))</b>
+<b class="nc">&nbsp;			return ((MultiVertexGeometry) geom).getPointCount();</b>
+&nbsp;
+<b class="nc">&nbsp;		if (geom.isEmpty())</b>
+<b class="nc">&nbsp;			return 0;</b>
+&nbsp;
+<b class="nc">&nbsp;		if (gt == Geometry.Type.Envelope)</b>
+<b class="nc">&nbsp;			return 4;</b>
+&nbsp;
+<b class="nc">&nbsp;		if (gt == Geometry.Type.Point)</b>
+<b class="nc">&nbsp;			return 1;</b>
+&nbsp;
+<b class="nc">&nbsp;		if (Geometry.isSegment(gt.value()))</b>
+<b class="nc">&nbsp;			return 2;</b>
+&nbsp;
+<b class="nc">&nbsp;		throw new GeometryException(&quot;missing type&quot;);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-02-21 15:02</div>
+</div>
+</body>
+</html>

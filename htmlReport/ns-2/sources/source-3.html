@@ -1,0 +1,959 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > OGCGeometry</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.esri.core.geometry.ogc</a>
+</div>
+
+<h1>Coverage Summary for Class: OGCGeometry (com.esri.core.geometry.ogc)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">OGCGeometry</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    74,1%
+  </span>
+  <span class="absValue">
+    (43/58)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    71,1%
+  </span>
+  <span class="absValue">
+    (276/388)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; Copyright 1995-2018 Esri
+&nbsp;
+&nbsp;   Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp;   you may not use this file except in compliance with the License.
+&nbsp;   You may obtain a copy of the License at
+&nbsp;
+&nbsp;       http://www.apache.org/licenses/LICENSE-2.0
+&nbsp;
+&nbsp;   Unless required by applicable law or agreed to in writing, software
+&nbsp;   distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp;   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp;   See the License for the specific language governing permissions and
+&nbsp;   limitations under the License.
+&nbsp;
+&nbsp; For additional information, contact:
+&nbsp; Environmental Systems Research Institute, Inc.
+&nbsp; Attn: Contracts Dept
+&nbsp; 380 New York Street
+&nbsp; Redlands, California, USA 92373
+&nbsp;
+&nbsp; email: contracts@esri.com
+&nbsp; */
+&nbsp;
+&nbsp;package com.esri.core.geometry.ogc;
+&nbsp;
+&nbsp;import com.esri.core.geometry.Envelope;
+&nbsp;import com.esri.core.geometry.Envelope1D;
+&nbsp;import com.esri.core.geometry.Geometry;
+&nbsp;import com.esri.core.geometry.GeometryCursor;
+&nbsp;import com.esri.core.geometry.GeometryCursorAppend;
+&nbsp;import com.esri.core.geometry.GeometryEngine;
+&nbsp;import com.esri.core.geometry.JsonParserReader;
+&nbsp;import com.esri.core.geometry.MapGeometry;
+&nbsp;import com.esri.core.geometry.MapOGCStructure;
+&nbsp;import com.esri.core.geometry.MultiPoint;
+&nbsp;import com.esri.core.geometry.NumberUtils;
+&nbsp;import com.esri.core.geometry.OGCStructure;
+&nbsp;import com.esri.core.geometry.Operator;
+&nbsp;import com.esri.core.geometry.OperatorBuffer;
+&nbsp;import com.esri.core.geometry.OperatorCentroid2D;
+&nbsp;import com.esri.core.geometry.OperatorConvexHull;
+&nbsp;import com.esri.core.geometry.OperatorExportToGeoJson;
+&nbsp;import com.esri.core.geometry.OperatorExportToWkb;
+&nbsp;import com.esri.core.geometry.OperatorFactoryLocal;
+&nbsp;import com.esri.core.geometry.OperatorImportFromESRIShape;
+&nbsp;import com.esri.core.geometry.OperatorImportFromGeoJson;
+&nbsp;import com.esri.core.geometry.OperatorImportFromWkb;
+&nbsp;import com.esri.core.geometry.OperatorImportFromWkt;
+&nbsp;import com.esri.core.geometry.OperatorIntersection;
+&nbsp;import com.esri.core.geometry.OperatorSimplify;
+&nbsp;import com.esri.core.geometry.OperatorSimplifyOGC;
+&nbsp;import com.esri.core.geometry.OperatorUnion;
+&nbsp;import com.esri.core.geometry.Point;
+&nbsp;import com.esri.core.geometry.Point2D;
+&nbsp;import com.esri.core.geometry.Polygon;
+&nbsp;import com.esri.core.geometry.Polyline;
+&nbsp;import com.esri.core.geometry.SimpleGeometryCursor;
+&nbsp;import com.esri.core.geometry.SpatialReference;
+&nbsp;import com.esri.core.geometry.VertexDescription;
+&nbsp;
+&nbsp;import java.nio.ByteBuffer;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Arrays;
+&nbsp;
+&nbsp;/**
+&nbsp; * OGC Simple Feature Access specification v.1.2.1
+&nbsp; * 
+&nbsp; */
+<b class="fc">&nbsp;public abstract class OGCGeometry {</b>
+&nbsp;	public int dimension() {
+<b class="fc">&nbsp;		return getEsriGeometry().getDimension();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public int coordinateDimension() {
+<b class="nc">&nbsp;		int d = 2;</b>
+<b class="nc">&nbsp;		if (getEsriGeometry().getDescription().hasAttribute(</b>
+<b class="nc">&nbsp;				VertexDescription.Semantics.M))</b>
+<b class="nc">&nbsp;			d++;</b>
+<b class="nc">&nbsp;		if (getEsriGeometry().getDescription().hasAttribute(</b>
+<b class="nc">&nbsp;				VertexDescription.Semantics.Z))</b>
+<b class="nc">&nbsp;			d++;</b>
+&nbsp;
+<b class="nc">&nbsp;		return d;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	abstract public String geometryType();
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns an estimate of this object size in bytes.
+&nbsp;	 * &lt;p&gt;
+&nbsp;	 * This estimate doesn&#39;t include the size of the {@link SpatialReference} object
+&nbsp;	 * because instances of {@link SpatialReference} are expected to be shared among
+&nbsp;	 * geometry objects.
+&nbsp;	 *
+&nbsp;	 * @return Returns an estimate of this object size in bytes.
+&nbsp;	 */
+&nbsp;	public abstract long estimateMemorySize();
+&nbsp;
+&nbsp;	public int SRID() {
+<b class="fc">&nbsp;		if (esriSR == null)</b>
+<b class="fc">&nbsp;			return 0;</b>
+&nbsp;
+<b class="nc">&nbsp;		return esriSR.getID();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public OGCGeometry envelope() {
+<b class="fc">&nbsp;		com.esri.core.geometry.Envelope env = new com.esri.core.geometry.Envelope();</b>
+<b class="fc">&nbsp;		getEsriGeometry().queryEnvelope(env);</b>
+<b class="fc">&nbsp;		com.esri.core.geometry.Polygon polygon = new com.esri.core.geometry.Polygon();</b>
+<b class="fc">&nbsp;		polygon.addEnvelope(env, false);</b>
+<b class="fc">&nbsp;		return new OGCPolygon(polygon, esriSR);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public String asText() {
+<b class="nc">&nbsp;		return GeometryEngine.geometryToWkt(getEsriGeometry(), 0);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public ByteBuffer asBinary() {
+<b class="nc">&nbsp;		OperatorExportToWkb op = (OperatorExportToWkb) OperatorFactoryLocal</b>
+<b class="nc">&nbsp;				.getInstance().getOperator(Operator.Type.ExportToWkb);</b>
+<b class="nc">&nbsp;		return op.execute(0, getEsriGeometry(), null);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public String asGeoJson() {
+<b class="fc">&nbsp;		OperatorExportToGeoJson op = (OperatorExportToGeoJson) OperatorFactoryLocal</b>
+<b class="fc">&nbsp;				.getInstance().getOperator(Operator.Type.ExportToGeoJson);</b>
+<b class="fc">&nbsp;		return op.execute(esriSR, getEsriGeometry());</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	String asGeoJsonImpl(int export_flags) {
+<b class="fc">&nbsp;		OperatorExportToGeoJson op = (OperatorExportToGeoJson) OperatorFactoryLocal.getInstance().getOperator(Operator.Type.ExportToGeoJson);</b>
+<b class="fc">&nbsp;		return op.execute(export_flags, esriSR, getEsriGeometry());</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * 
+&nbsp;	 * @return Convert to REST JSON.
+&nbsp;	 */
+&nbsp;	public String asJson() {
+<b class="fc">&nbsp;		return GeometryEngine.geometryToJson(esriSR, getEsriGeometry());</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	
+&nbsp;	public boolean isEmpty() {
+<b class="fc">&nbsp;		return getEsriGeometry().isEmpty();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public double MinZ() {
+<b class="nc">&nbsp;		Envelope1D e = getEsriGeometry().queryInterval(</b>
+<b class="nc">&nbsp;				VertexDescription.Semantics.Z, 0);</b>
+<b class="nc">&nbsp;		return e.vmin;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public double MaxZ() {
+<b class="nc">&nbsp;		Envelope1D e = getEsriGeometry().queryInterval(</b>
+<b class="nc">&nbsp;				VertexDescription.Semantics.Z, 0);</b>
+<b class="nc">&nbsp;		return e.vmax;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public double MinMeasure() {
+<b class="nc">&nbsp;		Envelope1D e = getEsriGeometry().queryInterval(</b>
+<b class="nc">&nbsp;				VertexDescription.Semantics.M, 0);</b>
+<b class="nc">&nbsp;		return e.vmin;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public double MaxMeasure() {
+<b class="nc">&nbsp;		Envelope1D e = getEsriGeometry().queryInterval(</b>
+<b class="nc">&nbsp;				VertexDescription.Semantics.M, 0);</b>
+<b class="nc">&nbsp;		return e.vmax;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns true if this geometric object has no anomalous geometric points,
+&nbsp;	 * such as self intersection or self tangency. See the
+&nbsp;	 * &quot;Simple feature access - Part 1&quot; document (OGC 06-103r4) for meaning of
+&nbsp;	 * &quot;simple&quot; for each geometry type.
+&nbsp;	 * 
+&nbsp;	 * The method has O(n log n) complexity when the input geometry is simple.
+&nbsp;	 * For non-simple geometries, it terminates immediately when the first issue
+&nbsp;	 * is encountered.
+&nbsp;	 * 
+&nbsp;	 * @return True if geometry is simple and false otherwise.
+&nbsp;	 * 
+&nbsp;	 * Note: If isSimple is true, then isSimpleRelaxed is true too. 
+&nbsp;	 */
+&nbsp;	public boolean isSimple() {
+<b class="fc">&nbsp;		return OperatorSimplifyOGC.local().isSimpleOGC(getEsriGeometry(),</b>
+<b class="fc">&nbsp;				esriSR, true, null, null);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Extension method - checks if geometry is simple for Geodatabase.
+&nbsp;	 * 
+&nbsp;	 * @return Returns true if geometry is simple, false otherwise.
+&nbsp;	 * 
+&nbsp;	 * Note: If isSimpleRelaxed is true, then isSimple is either true or false. Geodatabase has more relaxed requirements for simple geometries than OGC.
+&nbsp;	 */
+&nbsp;	public boolean isSimpleRelaxed() {
+<b class="fc">&nbsp;		OperatorSimplify op = (OperatorSimplify) OperatorFactoryLocal</b>
+<b class="fc">&nbsp;				.getInstance().getOperator(Operator.Type.Simplify);</b>
+<b class="fc">&nbsp;		return op.isSimpleAsFeature(getEsriGeometry(), esriSR, true, null, null);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Deprecated
+&nbsp;	/**
+&nbsp;	 * Use makeSimpleRelaxed instead.
+&nbsp;	 */
+&nbsp;	public OGCGeometry MakeSimpleRelaxed(boolean forceProcessing) {
+<b class="nc">&nbsp;		return makeSimpleRelaxed(forceProcessing);</b>
+&nbsp;	}
+&nbsp;	/**
+&nbsp;	 * Makes a simple geometry for Geodatabase.
+&nbsp;	 * 
+&nbsp;	 * @return Returns simplified geometry.
+&nbsp;	 * 
+&nbsp;	 * Note: isSimpleRelaxed should return true after this operation.
+&nbsp;	 */
+&nbsp;	public OGCGeometry makeSimpleRelaxed(boolean forceProcessing) {
+<b class="nc">&nbsp;		OperatorSimplify op = (OperatorSimplify) OperatorFactoryLocal</b>
+<b class="nc">&nbsp;				.getInstance().getOperator(Operator.Type.Simplify);</b>
+<b class="nc">&nbsp;		return OGCGeometry.createFromEsriGeometry(</b>
+<b class="nc">&nbsp;				op.execute(getEsriGeometry(), esriSR, forceProcessing, null),</b>
+<b class="nc">&nbsp;				esriSR);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Resolves topological issues in this geometry and makes it Simple according to OGC specification.
+&nbsp;	 * 
+&nbsp;	 * @return Returns simplified geometry.
+&nbsp;	 * 
+&nbsp;	 * Note: isSimple and isSimpleRelaxed should return true after this operation. 
+&nbsp;	 */
+&nbsp;	public OGCGeometry makeSimple() {
+<b class="fc">&nbsp;		return simplifyBunch_(getEsriGeometryCursor());</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public boolean is3D() {
+<b class="fc">&nbsp;		return getEsriGeometry().getDescription().hasAttribute(</b>
+<b class="fc">&nbsp;				VertexDescription.Semantics.Z);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public boolean isMeasured() {
+<b class="fc">&nbsp;		return getEsriGeometry().getDescription().hasAttribute(</b>
+<b class="fc">&nbsp;				VertexDescription.Semantics.M);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	abstract public OGCGeometry boundary();
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * OGC equals. Performs topological comparison with tolerance.
+&nbsp;	 * This is different from equals(Object), that uses exact comparison.
+&nbsp;	 */
+&nbsp;	public boolean Equals(OGCGeometry another) {
+<b class="fc">&nbsp;		if (this == another)</b>
+<b class="nc">&nbsp;			return !isEmpty();</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (another == null)</b>
+<b class="nc">&nbsp;			return false;</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (another.geometryType() == OGCConcreteGeometryCollection.TYPE) {</b>
+<b class="nc">&nbsp;			return another.Equals(this);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		com.esri.core.geometry.Geometry geom1 = getEsriGeometry();</b>
+<b class="fc">&nbsp;		com.esri.core.geometry.Geometry geom2 = another.getEsriGeometry();</b>
+<b class="fc">&nbsp;		return com.esri.core.geometry.GeometryEngine.equals(geom1, geom2,</b>
+<b class="fc">&nbsp;				getEsriSpatialReference());</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Deprecated
+&nbsp;	public boolean equals(OGCGeometry another) {
+<b class="fc">&nbsp;		return Equals(another);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public boolean disjoint(OGCGeometry another) {
+<b class="fc">&nbsp;		if (another.geometryType() == OGCConcreteGeometryCollection.TYPE) {</b>
+<b class="fc">&nbsp;			return another.disjoint(this);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		com.esri.core.geometry.Geometry geom1 = getEsriGeometry();</b>
+<b class="fc">&nbsp;		com.esri.core.geometry.Geometry geom2 = another.getEsriGeometry();</b>
+<b class="fc">&nbsp;		return com.esri.core.geometry.GeometryEngine.disjoint(geom1, geom2,</b>
+<b class="fc">&nbsp;				getEsriSpatialReference());</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public boolean intersects(OGCGeometry another) {
+<b class="fc">&nbsp;		return !disjoint(another);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public boolean touches(OGCGeometry another) {
+<b class="nc">&nbsp;		if (another.geometryType() == OGCConcreteGeometryCollection.TYPE) {</b>
+&nbsp;			//TODO
+<b class="nc">&nbsp;			throw new UnsupportedOperationException();</b>
+&nbsp;		}
+&nbsp;		
+<b class="nc">&nbsp;		com.esri.core.geometry.Geometry geom1 = getEsriGeometry();</b>
+<b class="nc">&nbsp;		com.esri.core.geometry.Geometry geom2 = another.getEsriGeometry();</b>
+<b class="nc">&nbsp;		return com.esri.core.geometry.GeometryEngine.touches(geom1, geom2,</b>
+<b class="nc">&nbsp;				getEsriSpatialReference());</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public boolean crosses(OGCGeometry another) {
+<b class="nc">&nbsp;		if (another.geometryType() == OGCConcreteGeometryCollection.TYPE) {</b>
+&nbsp;			//TODO
+<b class="nc">&nbsp;			throw new UnsupportedOperationException();</b>
+&nbsp;		}
+&nbsp;		
+<b class="nc">&nbsp;		com.esri.core.geometry.Geometry geom1 = getEsriGeometry();</b>
+<b class="nc">&nbsp;		com.esri.core.geometry.Geometry geom2 = another.getEsriGeometry();</b>
+<b class="nc">&nbsp;		return com.esri.core.geometry.GeometryEngine.crosses(geom1, geom2,</b>
+<b class="nc">&nbsp;				getEsriSpatialReference());</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public boolean within(OGCGeometry another) {
+<b class="fc">&nbsp;		return another.contains(this);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public boolean contains(OGCGeometry another) {
+<b class="fc">&nbsp;		if (another.geometryType() == OGCConcreteGeometryCollection.TYPE) {</b>
+<b class="fc">&nbsp;			return new OGCConcreteGeometryCollection(this, esriSR).contains(another);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		com.esri.core.geometry.Geometry geom1 = getEsriGeometry();</b>
+<b class="fc">&nbsp;		com.esri.core.geometry.Geometry geom2 = another.getEsriGeometry();</b>
+<b class="fc">&nbsp;		return com.esri.core.geometry.GeometryEngine.contains(geom1, geom2,</b>
+<b class="fc">&nbsp;				getEsriSpatialReference());</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public boolean overlaps(OGCGeometry another) {
+<b class="nc">&nbsp;		if (another.geometryType() == OGCConcreteGeometryCollection.TYPE) {</b>
+&nbsp;			// TODO
+<b class="nc">&nbsp;			throw new UnsupportedOperationException();</b>
+&nbsp;		}
+&nbsp;		
+<b class="nc">&nbsp;		com.esri.core.geometry.Geometry geom1 = getEsriGeometry();</b>
+<b class="nc">&nbsp;		com.esri.core.geometry.Geometry geom2 = another.getEsriGeometry();</b>
+<b class="nc">&nbsp;		return com.esri.core.geometry.GeometryEngine.overlaps(geom1, geom2,</b>
+<b class="nc">&nbsp;				getEsriSpatialReference());</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public boolean relate(OGCGeometry another, String matrix) {
+<b class="nc">&nbsp;		if (another.geometryType() == OGCConcreteGeometryCollection.TYPE) {</b>
+&nbsp;			//TODO
+<b class="nc">&nbsp;			throw new UnsupportedOperationException();</b>
+&nbsp;		}
+&nbsp;		
+<b class="nc">&nbsp;		com.esri.core.geometry.Geometry geom1 = getEsriGeometry();</b>
+<b class="nc">&nbsp;		com.esri.core.geometry.Geometry geom2 = another.getEsriGeometry();</b>
+<b class="nc">&nbsp;		return com.esri.core.geometry.GeometryEngine.relate(geom1, geom2,</b>
+<b class="nc">&nbsp;				getEsriSpatialReference(), matrix);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	abstract public OGCGeometry locateAlong(double mValue);
+&nbsp;
+&nbsp;	abstract public OGCGeometry locateBetween(double mStart, double mEnd);
+&nbsp;
+&nbsp;	// analysis
+&nbsp;	public double distance(OGCGeometry another) {
+<b class="fc">&nbsp;		if (this == another) {</b>
+<b class="nc">&nbsp;			return isEmpty() ? Double.NaN : 0;</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		if (another.geometryType() == OGCConcreteGeometryCollection.TYPE) {</b>
+<b class="fc">&nbsp;			return another.distance(this);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		com.esri.core.geometry.Geometry geom1 = getEsriGeometry();</b>
+<b class="fc">&nbsp;		com.esri.core.geometry.Geometry geom2 = another.getEsriGeometry();</b>
+<b class="fc">&nbsp;		return com.esri.core.geometry.GeometryEngine.distance(geom1, geom2,</b>
+<b class="fc">&nbsp;				getEsriSpatialReference());</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// This method firstly groups geometries by dimension (points, lines,
+&nbsp;	// areas),
+&nbsp;	// then simplifies each group such that each group is reduced to a single
+&nbsp;	// geometry.
+&nbsp;	// As a result there are at most three geometries, each geometry is Simple.
+&nbsp;	// Afterwards
+&nbsp;	// it produces a single OGCGeometry.
+&nbsp;	private OGCGeometry simplifyBunch_(GeometryCursor gc) {
+&nbsp;		// Combines geometries into multipoint, polyline, and polygon types,
+&nbsp;		// simplifying them and unioning them,
+&nbsp;		// then produces OGCGeometry from the result.
+&nbsp;		// Can produce OGCConcreteGoemetryCollection
+<b class="fc">&nbsp;		MultiPoint dstMultiPoint = null;</b>
+<b class="fc">&nbsp;		ArrayList&lt;Geometry&gt; dstPolylines = new ArrayList&lt;Geometry&gt;();</b>
+<b class="fc">&nbsp;		ArrayList&lt;Geometry&gt; dstPolygons = new ArrayList&lt;Geometry&gt;();</b>
+<b class="fc">&nbsp;		for (com.esri.core.geometry.Geometry g = gc.next(); g != null; g = gc</b>
+<b class="fc">&nbsp;				.next()) {</b>
+<b class="fc">&nbsp;			switch (g.getType()) {</b>
+&nbsp;			case Point:
+<b class="nc">&nbsp;				if (dstMultiPoint == null)</b>
+<b class="nc">&nbsp;					dstMultiPoint = new MultiPoint();</b>
+<b class="nc">&nbsp;				dstMultiPoint.add((Point) g);</b>
+<b class="nc">&nbsp;				break;</b>
+&nbsp;			case MultiPoint:
+<b class="nc">&nbsp;				if (dstMultiPoint == null)</b>
+<b class="nc">&nbsp;					dstMultiPoint = new MultiPoint();</b>
+<b class="nc">&nbsp;				dstMultiPoint.add((MultiPoint) g, 0, -1);</b>
+<b class="nc">&nbsp;				break;</b>
+&nbsp;			case Polyline:
+<b class="fc">&nbsp;				dstPolylines.add((Polyline) g.copy());</b>
+<b class="fc">&nbsp;				break;</b>
+&nbsp;			case Polygon:
+<b class="fc">&nbsp;				dstPolygons.add((Polygon) g.copy());</b>
+<b class="fc">&nbsp;				break;</b>
+&nbsp;			default:
+<b class="nc">&nbsp;				throw new UnsupportedOperationException();</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		ArrayList&lt;Geometry&gt; result = new ArrayList&lt;Geometry&gt;(3);</b>
+<b class="fc">&nbsp;		if (dstMultiPoint != null) {</b>
+<b class="nc">&nbsp;			Geometry resMP = OperatorSimplifyOGC.local().execute(dstMultiPoint,</b>
+<b class="nc">&nbsp;					esriSR, true, null);</b>
+<b class="nc">&nbsp;			result.add(resMP);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (dstPolylines.size() &gt; 0) {</b>
+<b class="fc">&nbsp;			if (dstPolylines.size() == 1) {</b>
+<b class="fc">&nbsp;				Geometry resMP = OperatorSimplifyOGC.local().execute(</b>
+<b class="fc">&nbsp;						dstPolylines.get(0), esriSR, true, null);</b>
+<b class="fc">&nbsp;				result.add(resMP);</b>
+<b class="fc">&nbsp;			} else {</b>
+<b class="nc">&nbsp;				GeometryCursor res = OperatorUnion.local().execute(</b>
+<b class="nc">&nbsp;						new SimpleGeometryCursor(dstPolylines), esriSR, null);</b>
+<b class="nc">&nbsp;				Geometry resPolyline = res.next();</b>
+<b class="nc">&nbsp;				Geometry resMP = OperatorSimplifyOGC.local().execute(</b>
+<b class="nc">&nbsp;						resPolyline, esriSR, true, null);</b>
+<b class="nc">&nbsp;				result.add(resMP);</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (dstPolygons.size() &gt; 0) {</b>
+<b class="fc">&nbsp;			if (dstPolygons.size() == 1) {</b>
+<b class="fc">&nbsp;				Geometry resMP = OperatorSimplifyOGC.local().execute(</b>
+<b class="fc">&nbsp;						dstPolygons.get(0), esriSR, true, null);</b>
+<b class="fc">&nbsp;				result.add(resMP);</b>
+<b class="fc">&nbsp;			} else {</b>
+<b class="nc">&nbsp;				GeometryCursor res = OperatorUnion.local().execute(</b>
+<b class="nc">&nbsp;						new SimpleGeometryCursor(dstPolygons), esriSR, null);</b>
+<b class="nc">&nbsp;				Geometry resPolygon = res.next();</b>
+<b class="nc">&nbsp;				Geometry resMP = OperatorSimplifyOGC.local().execute(</b>
+<b class="nc">&nbsp;						resPolygon, esriSR, true, null);</b>
+<b class="nc">&nbsp;				result.add(resMP);</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return OGCGeometry.createFromEsriCursor(</b>
+<b class="fc">&nbsp;				new SimpleGeometryCursor(result), esriSR);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public OGCGeometry buffer(double distance) {
+<b class="fc">&nbsp;		OperatorBuffer op = (OperatorBuffer) OperatorFactoryLocal.getInstance()</b>
+<b class="fc">&nbsp;				.getOperator(Operator.Type.Buffer);</b>
+<b class="fc">&nbsp;		if (distance == 0) {// when distance is 0, return self (maybe we should</b>
+&nbsp;							// create a copy instead).
+<b class="fc">&nbsp;			return this;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		double d[] = { distance };</b>
+<b class="fc">&nbsp;		com.esri.core.geometry.GeometryCursor cursor = op.execute(</b>
+<b class="fc">&nbsp;				getEsriGeometryCursor(), getEsriSpatialReference(), d, true,</b>
+<b class="fc">&nbsp;				null);</b>
+<b class="fc">&nbsp;		return OGCGeometry.createFromEsriGeometry(cursor.next(), esriSR);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public OGCGeometry centroid() {
+<b class="fc">&nbsp;		OperatorCentroid2D op = (OperatorCentroid2D) OperatorFactoryLocal.getInstance()</b>
+<b class="fc">&nbsp;				.getOperator(Operator.Type.Centroid2D);</b>
+&nbsp;
+<b class="fc">&nbsp;		Point2D centroid = op.execute(getEsriGeometry(), null);</b>
+<b class="fc">&nbsp;		if (centroid == null) {</b>
+<b class="fc">&nbsp;			return OGCGeometry.createFromEsriGeometry(new Point(), esriSR);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return OGCGeometry.createFromEsriGeometry(new Point(centroid), esriSR);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public OGCGeometry convexHull() {
+<b class="fc">&nbsp;		com.esri.core.geometry.GeometryCursor cursor = OperatorConvexHull.local().execute(</b>
+<b class="fc">&nbsp;				getEsriGeometryCursor(), false, null);</b>
+<b class="fc">&nbsp;		return OGCGeometry.createFromEsriCursor(cursor, esriSR);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public OGCGeometry intersection(OGCGeometry another) {
+<b class="fc">&nbsp;		if (another.geometryType() == OGCConcreteGeometryCollection.TYPE) {</b>
+<b class="fc">&nbsp;			return (new OGCConcreteGeometryCollection(this, esriSR)).intersection(another);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		com.esri.core.geometry.OperatorIntersection op = (OperatorIntersection) OperatorFactoryLocal</b>
+<b class="fc">&nbsp;				.getInstance().getOperator(Operator.Type.Intersection);</b>
+<b class="fc">&nbsp;		com.esri.core.geometry.GeometryCursor cursor = op.execute(</b>
+<b class="fc">&nbsp;				getEsriGeometryCursor(), another.getEsriGeometryCursor(),</b>
+<b class="fc">&nbsp;				getEsriSpatialReference(), null, 7);</b>
+<b class="fc">&nbsp;		return OGCGeometry.createFromEsriCursor(cursor, esriSR, true);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public OGCGeometry union(OGCGeometry another) {
+<b class="fc">&nbsp;		String thisType = geometryType();</b>
+<b class="fc">&nbsp;		String anotherType = another.geometryType();</b>
+<b class="fc">&nbsp;		if (thisType != anotherType || thisType == OGCConcreteGeometryCollection.TYPE) {</b>
+&nbsp;			//heterogeneous union.
+&nbsp;			//We make a geometry collection, then process to union parts and remove overlaps.
+<b class="fc">&nbsp;			ArrayList&lt;OGCGeometry&gt; geoms = new ArrayList&lt;OGCGeometry&gt;();</b>
+<b class="fc">&nbsp;			geoms.add(this);</b>
+<b class="fc">&nbsp;			geoms.add(another);</b>
+<b class="fc">&nbsp;			OGCConcreteGeometryCollection geomCol = new OGCConcreteGeometryCollection(geoms, esriSR);</b>
+<b class="fc">&nbsp;			return geomCol.flattenAndRemoveOverlaps().reduceFromMulti();</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		OperatorUnion op = (OperatorUnion) OperatorFactoryLocal.getInstance()</b>
+<b class="fc">&nbsp;				.getOperator(Operator.Type.Union);</b>
+<b class="fc">&nbsp;		GeometryCursorAppend ap = new GeometryCursorAppend(</b>
+<b class="fc">&nbsp;				getEsriGeometryCursor(), another.getEsriGeometryCursor());</b>
+<b class="fc">&nbsp;		com.esri.core.geometry.GeometryCursor cursor = op.execute(ap,</b>
+<b class="fc">&nbsp;				getEsriSpatialReference(), null);</b>
+<b class="fc">&nbsp;		return OGCGeometry.createFromEsriCursor(cursor, esriSR);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public OGCGeometry difference(OGCGeometry another) {
+<b class="fc">&nbsp;		if (another.geometryType() == OGCConcreteGeometryCollection.TYPE) {</b>
+<b class="fc">&nbsp;			return (new OGCConcreteGeometryCollection(this, esriSR)).difference(another);</b>
+&nbsp;		}
+&nbsp;		
+<b class="nc">&nbsp;		com.esri.core.geometry.Geometry geom1 = getEsriGeometry();</b>
+<b class="nc">&nbsp;		com.esri.core.geometry.Geometry geom2 = another.getEsriGeometry();</b>
+<b class="nc">&nbsp;		return createFromEsriGeometry(</b>
+<b class="nc">&nbsp;				com.esri.core.geometry.GeometryEngine.difference(geom1, geom2,</b>
+<b class="nc">&nbsp;						getEsriSpatialReference()), esriSR);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public OGCGeometry symDifference(OGCGeometry another) {
+<b class="fc">&nbsp;		if (another.geometryType() == OGCConcreteGeometryCollection.TYPE) {</b>
+&nbsp;			// TODO
+<b class="nc">&nbsp;			throw new UnsupportedOperationException();</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		com.esri.core.geometry.Geometry geom1 = getEsriGeometry();</b>
+<b class="fc">&nbsp;		com.esri.core.geometry.Geometry geom2 = another.getEsriGeometry();</b>
+<b class="fc">&nbsp;		return createFromEsriGeometry(</b>
+<b class="fc">&nbsp;				com.esri.core.geometry.GeometryEngine.symmetricDifference(</b>
+<b class="fc">&nbsp;						geom1, geom2, getEsriSpatialReference()), esriSR);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public abstract com.esri.core.geometry.Geometry getEsriGeometry();
+&nbsp;
+&nbsp;	public GeometryCursor getEsriGeometryCursor() {
+<b class="fc">&nbsp;		return new SimpleGeometryCursor(getEsriGeometry());</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public com.esri.core.geometry.SpatialReference getEsriSpatialReference() {
+<b class="fc">&nbsp;		return esriSR;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Create an OGCGeometry instance from the GeometryCursor.
+&nbsp;	 * 
+&nbsp;	 * @param gc
+&nbsp;	 * @param sr
+&nbsp;	 * @return Geometry instance created from the geometry cursor.
+&nbsp;	 */
+&nbsp;	public static OGCGeometry createFromEsriCursor(GeometryCursor gc,
+&nbsp;			SpatialReference sr) {
+<b class="fc">&nbsp;		return createFromEsriCursor(gc, sr, false);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public static OGCGeometry createFromEsriCursor(GeometryCursor gc,
+&nbsp;			SpatialReference sr, boolean skipEmpty) {
+<b class="fc">&nbsp;		ArrayList&lt;OGCGeometry&gt; geoms = new ArrayList&lt;OGCGeometry&gt;(10);</b>
+<b class="fc">&nbsp;		Geometry emptyGeom = null;</b>
+<b class="fc">&nbsp;		for (Geometry g = gc.next(); g != null; g = gc.next()) {</b>
+<b class="fc">&nbsp;			emptyGeom = g;</b>
+<b class="fc">&nbsp;			if (!skipEmpty || !g.isEmpty())</b>
+<b class="fc">&nbsp;				geoms.add(createFromEsriGeometry(g, sr));</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (geoms.size() == 1) {</b>
+<b class="fc">&nbsp;			return geoms.get(0);</b>
+<b class="fc">&nbsp;		} else if (geoms.size() == 0)</b>
+<b class="fc">&nbsp;			return createFromEsriGeometry(emptyGeom, sr);</b>
+&nbsp;		else
+<b class="nc">&nbsp;			return new OGCConcreteGeometryCollection(geoms, sr);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public static OGCGeometry fromText(String text) {
+<b class="fc">&nbsp;		OperatorImportFromWkt op = (OperatorImportFromWkt) OperatorFactoryLocal</b>
+<b class="fc">&nbsp;				.getInstance().getOperator(Operator.Type.ImportFromWkt);</b>
+<b class="fc">&nbsp;		OGCStructure ogcStructure = op.executeOGC(0, text, null);</b>
+<b class="fc">&nbsp;		return OGCGeometry.createFromOGCStructure(ogcStructure,</b>
+<b class="fc">&nbsp;				SpatialReference.create(4326));</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public static OGCGeometry fromBinary(ByteBuffer binary) {
+<b class="fc">&nbsp;		OperatorImportFromWkb op = (OperatorImportFromWkb) OperatorFactoryLocal</b>
+<b class="fc">&nbsp;				.getInstance().getOperator(Operator.Type.ImportFromWkb);</b>
+<b class="fc">&nbsp;		OGCStructure ogcStructure = op.executeOGC(0, binary, null);</b>
+<b class="fc">&nbsp;		return OGCGeometry.createFromOGCStructure(ogcStructure,</b>
+<b class="fc">&nbsp;				SpatialReference.create(4326));</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public static OGCGeometry fromEsriShape(ByteBuffer buffer) {
+<b class="nc">&nbsp;		OperatorImportFromESRIShape op = (OperatorImportFromESRIShape) OperatorFactoryLocal</b>
+<b class="nc">&nbsp;				.getInstance().getOperator(Operator.Type.ImportFromESRIShape);</b>
+<b class="nc">&nbsp;		Geometry g = op.execute(0, Geometry.Type.Unknown, buffer);</b>
+<b class="nc">&nbsp;		return OGCGeometry.createFromEsriGeometry(g,</b>
+<b class="nc">&nbsp;				SpatialReference.create(4326));</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public static OGCGeometry fromJson(String string) {
+<b class="fc">&nbsp;		MapGeometry mapGeom = GeometryEngine.jsonToGeometry(JsonParserReader.createFromString(string));</b>
+<b class="fc">&nbsp;		return OGCGeometry.createFromEsriGeometry(mapGeom.getGeometry(),</b>
+<b class="fc">&nbsp;				mapGeom.getSpatialReference());</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public static OGCGeometry fromGeoJson(String string) {
+<b class="fc">&nbsp;		OperatorImportFromGeoJson op = (OperatorImportFromGeoJson) OperatorFactoryLocal</b>
+<b class="fc">&nbsp;				.getInstance().getOperator(Operator.Type.ImportFromGeoJson);</b>
+<b class="fc">&nbsp;		MapOGCStructure mapOGCStructure = op.executeOGC(0, string, null);</b>
+<b class="fc">&nbsp;		return OGCGeometry.createFromOGCStructure(</b>
+<b class="fc">&nbsp;				mapOGCStructure.m_ogcStructure,</b>
+<b class="fc">&nbsp;				mapOGCStructure.m_spatialReference);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public static OGCGeometry createFromEsriGeometry(Geometry geom,
+&nbsp;			SpatialReference sr) {
+<b class="fc">&nbsp;		return createFromEsriGeometry(geom, sr, false);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public static OGCGeometry createFromEsriGeometry(Geometry geom,
+&nbsp;			SpatialReference sr, boolean multiType) {
+<b class="fc">&nbsp;		if (geom == null)</b>
+<b class="nc">&nbsp;			return null;</b>
+<b class="fc">&nbsp;		Geometry.Type t = geom.getType();</b>
+<b class="fc">&nbsp;		if (t == Geometry.Type.Polygon) {</b>
+<b class="fc">&nbsp;			if (!multiType &amp;&amp; ((Polygon) geom).getExteriorRingCount() == 1)</b>
+<b class="fc">&nbsp;				return new OGCPolygon((Polygon) geom, sr);</b>
+&nbsp;			else
+<b class="fc">&nbsp;				return new OGCMultiPolygon((Polygon) geom, sr);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (t == Geometry.Type.Polyline) {</b>
+<b class="fc">&nbsp;			if (!multiType &amp;&amp; ((Polyline) geom).getPathCount() == 1)</b>
+<b class="fc">&nbsp;				return new OGCLineString((Polyline) geom, 0, sr);</b>
+&nbsp;			else
+<b class="fc">&nbsp;				return new OGCMultiLineString((Polyline) geom, sr);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (t == Geometry.Type.MultiPoint) {</b>
+<b class="fc">&nbsp;			if (!multiType &amp;&amp; ((MultiPoint) geom).getPointCount() &lt;= 1) {</b>
+<b class="fc">&nbsp;				if (geom.isEmpty())</b>
+<b class="fc">&nbsp;					return new OGCPoint(new Point(), sr);</b>
+&nbsp;				else
+<b class="fc">&nbsp;					return new OGCPoint(((MultiPoint) geom).getPoint(0), sr);</b>
+&nbsp;			} else
+<b class="fc">&nbsp;				return new OGCMultiPoint((MultiPoint) geom, sr);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (t == Geometry.Type.Point) {</b>
+<b class="fc">&nbsp;			if (!multiType) {</b>
+<b class="fc">&nbsp;				return new OGCPoint((Point) geom, sr);</b>
+&nbsp;			} else {
+<b class="nc">&nbsp;				return new OGCMultiPoint((Point) geom, sr);</b>
+&nbsp;			}
+&nbsp;		}
+<b class="nc">&nbsp;		if (t == Geometry.Type.Envelope) {</b>
+<b class="nc">&nbsp;			Polygon p = new Polygon();</b>
+<b class="nc">&nbsp;			p.addEnvelope((Envelope) geom, false);</b>
+<b class="nc">&nbsp;			return createFromEsriGeometry(p, sr, multiType);</b>
+&nbsp;		}
+&nbsp;
+<b class="nc">&nbsp;		throw new UnsupportedOperationException();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public static OGCGeometry createFromOGCStructure(OGCStructure ogcStructure,
+&nbsp;			SpatialReference sr) {
+<b class="fc">&nbsp;		ArrayList&lt;OGCConcreteGeometryCollection&gt; collectionStack = new ArrayList&lt;OGCConcreteGeometryCollection&gt;(</b>
+<b class="fc">&nbsp;				0);</b>
+<b class="fc">&nbsp;		ArrayList&lt;OGCStructure&gt; structureStack = new ArrayList&lt;OGCStructure&gt;(0);</b>
+<b class="fc">&nbsp;		ArrayList&lt;Integer&gt; indices = new ArrayList&lt;Integer&gt;(0);</b>
+&nbsp;
+<b class="fc">&nbsp;		OGCGeometry[] geometries = new OGCGeometry[1];</b>
+<b class="fc">&nbsp;		OGCConcreteGeometryCollection root = new OGCConcreteGeometryCollection(</b>
+<b class="fc">&nbsp;				Arrays.asList(geometries), sr);</b>
+&nbsp;
+<b class="fc">&nbsp;		structureStack.add(ogcStructure);</b>
+<b class="fc">&nbsp;		collectionStack.add(root);</b>
+<b class="fc">&nbsp;		indices.add(0);</b>
+&nbsp;
+<b class="fc">&nbsp;		while (!structureStack.isEmpty()) {</b>
+<b class="fc">&nbsp;			OGCStructure lastStructure = structureStack.get(structureStack</b>
+<b class="fc">&nbsp;					.size() - 1);</b>
+<b class="fc">&nbsp;			if (indices.get(indices.size() - 1) == lastStructure.m_structures</b>
+<b class="fc">&nbsp;					.size()) {</b>
+<b class="fc">&nbsp;				structureStack.remove(structureStack.size() - 1);</b>
+<b class="fc">&nbsp;				collectionStack.remove(collectionStack.size() - 1);</b>
+<b class="fc">&nbsp;				indices.remove(indices.size() - 1);</b>
+<b class="fc">&nbsp;				continue;</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			OGCConcreteGeometryCollection lastCollection = collectionStack</b>
+<b class="fc">&nbsp;					.get(collectionStack.size() - 1);</b>
+&nbsp;			OGCGeometry g;
+<b class="fc">&nbsp;			int i = indices.get(indices.size() - 1);</b>
+&nbsp;
+<b class="fc">&nbsp;			int type = lastStructure.m_structures.get(i).m_type;</b>
+&nbsp;
+<b class="fc">&nbsp;			switch (type) {</b>
+&nbsp;			case 1:
+<b class="fc">&nbsp;				g = new OGCPoint(</b>
+<b class="fc">&nbsp;						(Point) lastStructure.m_structures.get(i).m_geometry,</b>
+<b class="fc">&nbsp;						sr);</b>
+<b class="fc">&nbsp;				lastCollection.geometries.set(i, g);</b>
+<b class="fc">&nbsp;				indices.set(indices.size() - 1, i + 1);</b>
+<b class="fc">&nbsp;				break;</b>
+&nbsp;			case 2:
+<b class="fc">&nbsp;				g = new OGCLineString(</b>
+<b class="fc">&nbsp;						(Polyline) lastStructure.m_structures.get(i).m_geometry,</b>
+<b class="fc">&nbsp;						0, sr);</b>
+<b class="fc">&nbsp;				lastCollection.geometries.set(i, g);</b>
+<b class="fc">&nbsp;				indices.set(indices.size() - 1, i + 1);</b>
+<b class="fc">&nbsp;				break;</b>
+&nbsp;			case 3:
+<b class="fc">&nbsp;				g = new OGCPolygon(</b>
+<b class="fc">&nbsp;						(Polygon) lastStructure.m_structures.get(i).m_geometry,</b>
+<b class="fc">&nbsp;						0, sr);</b>
+<b class="fc">&nbsp;				lastCollection.geometries.set(i, g);</b>
+<b class="fc">&nbsp;				indices.set(indices.size() - 1, i + 1);</b>
+<b class="fc">&nbsp;				break;</b>
+&nbsp;			case 4:
+<b class="fc">&nbsp;				g = new OGCMultiPoint(</b>
+<b class="fc">&nbsp;						(MultiPoint) lastStructure.m_structures.get(i).m_geometry,</b>
+<b class="fc">&nbsp;						sr);</b>
+<b class="fc">&nbsp;				lastCollection.geometries.set(i, g);</b>
+<b class="fc">&nbsp;				indices.set(indices.size() - 1, i + 1);</b>
+<b class="fc">&nbsp;				break;</b>
+&nbsp;			case 5:
+<b class="fc">&nbsp;				g = new OGCMultiLineString(</b>
+<b class="fc">&nbsp;						(Polyline) lastStructure.m_structures.get(i).m_geometry,</b>
+<b class="fc">&nbsp;						sr);</b>
+<b class="fc">&nbsp;				lastCollection.geometries.set(i, g);</b>
+<b class="fc">&nbsp;				indices.set(indices.size() - 1, i + 1);</b>
+<b class="fc">&nbsp;				break;</b>
+&nbsp;			case 6:
+<b class="fc">&nbsp;				g = new OGCMultiPolygon(</b>
+<b class="fc">&nbsp;						(Polygon) lastStructure.m_structures.get(i).m_geometry,</b>
+<b class="fc">&nbsp;						sr);</b>
+<b class="fc">&nbsp;				lastCollection.geometries.set(i, g);</b>
+<b class="fc">&nbsp;				indices.set(indices.size() - 1, i + 1);</b>
+<b class="fc">&nbsp;				break;</b>
+&nbsp;			case 7:
+<b class="fc">&nbsp;				geometries = new OGCGeometry[lastStructure.m_structures.get(i).m_structures</b>
+<b class="fc">&nbsp;						.size()];</b>
+<b class="fc">&nbsp;				g = new OGCConcreteGeometryCollection(</b>
+<b class="fc">&nbsp;						Arrays.asList(geometries), sr);</b>
+<b class="fc">&nbsp;				lastCollection.geometries.set(i, g);</b>
+<b class="fc">&nbsp;				indices.set(indices.size() - 1, i + 1);</b>
+<b class="fc">&nbsp;				structureStack.add(lastStructure.m_structures.get(i));</b>
+<b class="fc">&nbsp;				collectionStack.add((OGCConcreteGeometryCollection) g);</b>
+<b class="fc">&nbsp;				indices.add(0);</b>
+<b class="fc">&nbsp;				break;</b>
+&nbsp;			default:
+<b class="nc">&nbsp;				throw new UnsupportedOperationException();</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return root.geometries.get(0);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	protected boolean isConcreteGeometryCollection() {
+<b class="fc">&nbsp;		return false;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * SpatialReference of the Geometry.
+&nbsp;	 */
+&nbsp;	public com.esri.core.geometry.SpatialReference esriSR;
+&nbsp;
+&nbsp;	public void setSpatialReference(SpatialReference esriSR_) {
+<b class="fc">&nbsp;		esriSR = esriSR_;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Converts this Geometry to the OGCMulti* if it is not OGCMulti* or
+&nbsp;	 * OGCGeometryCollection already.
+&nbsp;	 * 
+&nbsp;	 * @return OGCMulti* or OGCGeometryCollection instance.
+&nbsp;	 */
+&nbsp;	public abstract OGCGeometry convertToMulti();
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * For the geometry collection types, when it has 1 or 0 elements, converts a MultiPolygon to Polygon, 
+&nbsp;	 * MultiPoint to Point, MultiLineString to a LineString, and
+&nbsp;	 * OGCConcretGeometryCollection to the reduced element it contains.
+&nbsp;	 * 
+&nbsp;	 * If OGCConcretGeometryCollection is empty, returns self.
+&nbsp;	 * 
+&nbsp;	 * @return A reduced geometry or this.
+&nbsp;	 */
+&nbsp;	public abstract OGCGeometry reduceFromMulti();
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public String toString() {
+<b class="nc">&nbsp;		String snippet = asText();</b>
+<b class="nc">&nbsp;		if (snippet.length() &gt; 200) {</b>
+<b class="nc">&nbsp;			snippet = snippet.substring(0, 197) + &quot;...&quot;;</b>
+&nbsp;		}
+&nbsp;		return String
+<b class="nc">&nbsp;				.format(&quot;%s: %s&quot;, this.getClass().getSimpleName(), snippet);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public boolean equals(Object other)	{
+<b class="fc">&nbsp;		if (other == null)</b>
+<b class="nc">&nbsp;			return false;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (other == this)</b>
+<b class="nc">&nbsp;			return true;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (other.getClass() != getClass())</b>
+<b class="fc">&nbsp;			return false;</b>
+&nbsp;		
+<b class="fc">&nbsp;		OGCGeometry another = (OGCGeometry)other;</b>
+<b class="fc">&nbsp;		com.esri.core.geometry.Geometry geom1 = getEsriGeometry();</b>
+<b class="fc">&nbsp;		com.esri.core.geometry.Geometry geom2 = another.getEsriGeometry();</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (geom1 == null) {</b>
+<b class="nc">&nbsp;			if (geom2 != null)</b>
+<b class="nc">&nbsp;				return false;</b>
+&nbsp;		}
+<b class="fc">&nbsp;		else if (!geom1.equals(geom2)) {</b>
+<b class="fc">&nbsp;			return false;</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		if (esriSR == another.esriSR) {</b>
+<b class="fc">&nbsp;			return true;</b>
+&nbsp;		}
+&nbsp;			
+<b class="fc">&nbsp;		if (esriSR != null &amp;&amp; another.esriSR != null) {</b>
+<b class="fc">&nbsp;			return esriSR.equals(another.esriSR);</b>
+&nbsp;		}
+&nbsp;			
+<b class="nc">&nbsp;		return false;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public int hashCode() {
+<b class="fc">&nbsp;		int hash = 1;</b>
+<b class="fc">&nbsp;		com.esri.core.geometry.Geometry geom1 = getEsriGeometry();</b>
+<b class="fc">&nbsp;		if (geom1 != null)</b>
+<b class="fc">&nbsp;			hash = geom1.hashCode();</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (esriSR != null)</b>
+<b class="fc">&nbsp;			hash = NumberUtils.hashCombine(hash, esriSR.hashCode());</b>
+&nbsp;		
+<b class="fc">&nbsp;		return hash;</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-02-21 15:02</div>
+</div>
+</body>
+</html>

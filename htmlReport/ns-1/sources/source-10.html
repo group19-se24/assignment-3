@@ -1,0 +1,946 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > ConvexHull</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.esri.core.geometry</a>
+</div>
+
+<h1>Coverage Summary for Class: ConvexHull (com.esri.core.geometry)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ConvexHull</td>
+<td class="coverageStat">
+  <span class="percent">
+    93,1%
+  </span>
+  <span class="absValue">
+    (27/29)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    94,9%
+  </span>
+  <span class="absValue">
+    (357/376)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">ConvexHull$CallBack</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">ConvexHull$CallBackPoints</td>
+<td class="coverageStat">
+  <span class="percent">
+    66,7%
+  </span>
+  <span class="absValue">
+    (2/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    75%
+  </span>
+  <span class="absValue">
+    (3/4)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">ConvexHull$CallBackShape</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (6/6)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">ConvexHull$CallBackStream</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (4/4)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    92,3%
+  </span>
+  <span class="absValue">
+    (36/39)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    94,9%
+  </span>
+  <span class="absValue">
+    (371/391)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; Copyright 1995-2015 Esri
+&nbsp;
+&nbsp;   Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp;   you may not use this file except in compliance with the License.
+&nbsp;   You may obtain a copy of the License at
+&nbsp;
+&nbsp;       http://www.apache.org/licenses/LICENSE-2.0
+&nbsp;
+&nbsp;   Unless required by applicable law or agreed to in writing, software
+&nbsp;   distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp;   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp;   See the License for the specific language governing permissions and
+&nbsp;   limitations under the License.
+&nbsp;
+&nbsp; For additional information, contact:
+&nbsp; Environmental Systems Research Institute, Inc.
+&nbsp; Attn: Contracts Dept
+&nbsp; 380 New York Street
+&nbsp; Redlands, California, USA 92373
+&nbsp;
+&nbsp; email: contracts@esri.com
+&nbsp; */
+&nbsp;package com.esri.core.geometry;
+&nbsp;
+<b class="fc">&nbsp;class ConvexHull {</b>
+&nbsp;	/*
+&nbsp;	 * Constructor for a Convex_hull object. Used for dynamic insertion of geometries to create a convex hull.
+&nbsp;	 */
+<b class="fc">&nbsp;	ConvexHull() {</b>
+<b class="fc">&nbsp;		m_tree_hull = new Treap();</b>
+<b class="fc">&nbsp;		m_tree_hull.setCapacity(20);</b>
+<b class="fc">&nbsp;		m_shape = new EditShape();</b>
+<b class="fc">&nbsp;		m_geometry_handle = m_shape.createGeometry(Geometry.Type.MultiPoint);</b>
+<b class="fc">&nbsp;		m_path_handle = m_shape.insertPath(m_geometry_handle, -1);</b>
+<b class="fc">&nbsp;		m_call_back = new CallBackShape(this);</b>
+&nbsp;	}
+&nbsp;
+<b class="fc">&nbsp;	private ConvexHull(AttributeStreamOfDbl stream, int n) {</b>
+<b class="fc">&nbsp;		m_tree_hull = new Treap();</b>
+<b class="fc">&nbsp;		m_tree_hull.setCapacity(Math.min(20, n));</b>
+<b class="fc">&nbsp;		m_stream = stream;</b>
+<b class="fc">&nbsp;		m_call_back = new CallBackStream(this);</b>
+&nbsp;	}
+&nbsp;
+<b class="fc">&nbsp;	private ConvexHull(Point2D[] points, int n) {</b>
+<b class="fc">&nbsp;		m_tree_hull = new Treap();</b>
+<b class="fc">&nbsp;		m_tree_hull.setCapacity(Math.min(20, n));</b>
+<b class="fc">&nbsp;		m_points = points;</b>
+<b class="fc">&nbsp;		m_call_back = new CallBackPoints(this);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Adds a geometry to the current bounding geometry using an incremental algorithm for dynamic insertion.
+&nbsp;	 * @param geometry The geometry to add to the bounding geometry.
+&nbsp;	 */
+&nbsp;
+&nbsp;	void addGeometry(Geometry geometry) {
+<b class="fc">&nbsp;		if (geometry.isEmpty())</b>
+&nbsp;			return;
+&nbsp;		
+<b class="fc">&nbsp;		int type = geometry.getType().value();</b>
+&nbsp;
+<b class="fc">&nbsp;		if (MultiVertexGeometry.isMultiVertex(type))</b>
+<b class="fc">&nbsp;			addMultiVertexGeometry_((MultiVertexGeometry) geometry);</b>
+<b class="fc">&nbsp;		else if (MultiPath.isSegment(type))</b>
+<b class="fc">&nbsp;			addSegment_((Segment) geometry);</b>
+<b class="fc">&nbsp;		else if (type == Geometry.GeometryType.Envelope)</b>
+<b class="fc">&nbsp;			addEnvelope_((Envelope) geometry);</b>
+<b class="fc">&nbsp;		else if (type == Geometry.GeometryType.Point)</b>
+<b class="fc">&nbsp;			addPoint_((Point) geometry);</b>
+&nbsp;		else
+<b class="nc">&nbsp;			throw new IllegalArgumentException(&quot;invalid shape type&quot;);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Gets the current bounding geometry.
+&nbsp;	 * Returns a Geometry.
+&nbsp;	 */
+&nbsp;
+&nbsp;	Geometry getBoundingGeometry() {
+&nbsp;		// Extracts the convex hull from the tree. Reading the tree in order from first to last is the resulting convex hull.
+<b class="fc">&nbsp;		Point point = new Point();</b>
+<b class="fc">&nbsp;		int first = m_tree_hull.getFirst(-1);</b>
+<b class="fc">&nbsp;		Polygon hull = new Polygon(m_shape.getVertexDescription());</b>
+<b class="fc">&nbsp;		if (m_tree_hull.size(-1) == 0)</b>
+<b class="nc">&nbsp;			return hull;</b>
+&nbsp;		
+<b class="fc">&nbsp;		m_shape.queryPoint(m_tree_hull.getElement(first), point);</b>
+<b class="fc">&nbsp;		hull.startPath(point);</b>
+&nbsp;
+<b class="fc">&nbsp;		for (int i = m_tree_hull.getNext(first); i != -1; i = m_tree_hull.getNext(i)) {</b>
+<b class="fc">&nbsp;			m_shape.queryPoint(m_tree_hull.getElement(i), point);</b>
+<b class="fc">&nbsp;			hull.lineTo(point);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return hull;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Static method to construct the convex hull of a Multi_vertex_geometry.
+&nbsp;	 * Returns a Geometry.
+&nbsp;	 * \param mvg The geometry used to create the convex hull.
+&nbsp;	 */
+&nbsp;
+&nbsp;	static Geometry construct(MultiVertexGeometry mvg) {
+<b class="fc">&nbsp;		if (mvg.isEmpty())</b>
+<b class="nc">&nbsp;			return new Polygon(mvg.getDescription());</b>
+&nbsp;
+<b class="fc">&nbsp;		MultiVertexGeometryImpl mvg_impl = (MultiVertexGeometryImpl) mvg._getImpl();</b>
+<b class="fc">&nbsp;		int N = mvg_impl.getPointCount();</b>
+&nbsp;
+<b class="fc">&nbsp;		if (N &lt;= 2) {</b>
+<b class="fc">&nbsp;			if (N == 1 || mvg_impl.getXY(0).equals(mvg_impl.getXY(1))) {</b>
+<b class="fc">&nbsp;				Point point = new Point(mvg_impl.getDescription());</b>
+<b class="fc">&nbsp;				mvg_impl.getPointByVal(0, point);</b>
+<b class="fc">&nbsp;				return point;</b>
+&nbsp;			} else {
+<b class="fc">&nbsp;				Point pt = new Point();</b>
+<b class="fc">&nbsp;				Polyline polyline = new Polyline(mvg_impl.getDescription());</b>
+<b class="fc">&nbsp;				mvg_impl.getPointByVal(0, pt);</b>
+<b class="fc">&nbsp;				polyline.startPath(pt);</b>
+<b class="fc">&nbsp;				mvg_impl.getPointByVal(1, pt);</b>
+<b class="fc">&nbsp;				polyline.lineTo(pt);</b>
+<b class="fc">&nbsp;				return polyline;</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		AttributeStreamOfDbl stream = (AttributeStreamOfDbl) mvg_impl.getAttributeStreamRef(VertexDescription.Semantics.POSITION);</b>
+<b class="fc">&nbsp;		ConvexHull convex_hull = new ConvexHull(stream, N);</b>
+&nbsp;
+<b class="fc">&nbsp;		int t0 = 0, tm = 1;</b>
+<b class="fc">&nbsp;		Point2D pt_0 = new Point2D();</b>
+<b class="fc">&nbsp;		Point2D pt_m = new Point2D();</b>
+<b class="fc">&nbsp;		Point2D pt_p = new Point2D();</b>
+&nbsp;
+<b class="fc">&nbsp;		stream.read(t0 &lt;&lt; 1, pt_0);</b>
+&nbsp;
+<b class="fc">&nbsp;		while (true) {</b>
+<b class="fc">&nbsp;			if (tm &gt;= N)</b>
+<b class="fc">&nbsp;				break;</b>
+&nbsp;
+<b class="fc">&nbsp;			stream.read(tm &lt;&lt; 1, pt_m);</b>
+<b class="fc">&nbsp;			if (!pt_m.isEqual(pt_0, NumberUtils.doubleEps()))</b>
+<b class="fc">&nbsp;				break;</b>
+&nbsp;
+<b class="fc">&nbsp;			tm++; // We don&#39;t want to close the gap between t0 and tm.</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		convex_hull.m_tree_hull.addElement(t0, -1);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (tm &lt; N) {</b>
+<b class="fc">&nbsp;			convex_hull.m_tree_hull.addBiggestElement(tm, -1);</b>
+&nbsp;
+<b class="fc">&nbsp;			for (int tp = tm + 1; tp &lt; mvg_impl.getPointCount(); tp++) {// Dynamically insert into the current convex hull</b>
+&nbsp;
+<b class="fc">&nbsp;				stream.read(tp &lt;&lt; 1, pt_p);</b>
+<b class="fc">&nbsp;				int p = convex_hull.treeHull_(pt_p);</b>
+&nbsp;
+<b class="fc">&nbsp;				if (p != -1)</b>
+<b class="fc">&nbsp;					convex_hull.m_tree_hull.setElement(p, tp); // reset the place holder to the point index.</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+&nbsp;		// Extracts the convex hull from the tree. Reading the tree in order from first to last is the resulting convex hull.
+&nbsp;
+<b class="fc">&nbsp;		VertexDescription description = mvg_impl.getDescription();</b>
+<b class="fc">&nbsp;		boolean b_has_attributes = (description.getAttributeCount() &gt; 1);</b>
+<b class="fc">&nbsp;		int point_count = convex_hull.m_tree_hull.size(-1);</b>
+&nbsp;
+&nbsp;		Geometry hull;
+&nbsp;
+<b class="fc">&nbsp;		if (point_count &gt;= 2) {</b>
+<b class="fc">&nbsp;			if (point_count &gt;= 3)</b>
+<b class="fc">&nbsp;				hull = new Polygon(description);</b>
+&nbsp;			else
+<b class="fc">&nbsp;				hull = new Polyline(description);</b>
+&nbsp;
+<b class="fc">&nbsp;			MultiPathImpl hull_impl = (MultiPathImpl) hull._getImpl();</b>
+<b class="fc">&nbsp;			hull_impl.addPath((Point2D[]) null, 0, true);</b>
+&nbsp;
+<b class="fc">&nbsp;			Point point = null;</b>
+<b class="fc">&nbsp;			if (b_has_attributes)</b>
+<b class="fc">&nbsp;				point = new Point();</b>
+&nbsp;
+<b class="fc">&nbsp;			for (int i = convex_hull.m_tree_hull.getFirst(-1); i != -1; i = convex_hull.m_tree_hull.getNext(i)) {</b>
+<b class="fc">&nbsp;				if (b_has_attributes) {</b>
+<b class="fc">&nbsp;					mvg_impl.getPointByVal(convex_hull.m_tree_hull.getElement(i), point);</b>
+<b class="fc">&nbsp;					hull_impl.insertPoint(0, -1, point);</b>
+<b class="fc">&nbsp;				} else {</b>
+<b class="fc">&nbsp;					stream.read(convex_hull.m_tree_hull.getElement(i) &lt;&lt; 1, pt_p);</b>
+<b class="fc">&nbsp;					hull_impl.insertPoint(0, -1, pt_p);</b>
+&nbsp;				}
+&nbsp;			}
+<b class="fc">&nbsp;		} else {</b>
+<b class="fc">&nbsp;			assert (point_count == 1);</b>
+&nbsp;
+<b class="fc">&nbsp;			if (b_has_attributes) {</b>
+<b class="nc">&nbsp;				Point point = new Point(description);</b>
+<b class="nc">&nbsp;				mvg_impl.getPointByVal(convex_hull.m_tree_hull.getElement(convex_hull.m_tree_hull.getFirst(-1)), point);</b>
+<b class="nc">&nbsp;				hull = point;</b>
+<b class="nc">&nbsp;			} else {</b>
+<b class="fc">&nbsp;				stream.read(convex_hull.m_tree_hull.getElement(convex_hull.m_tree_hull.getFirst(-1)) &lt;&lt; 1, pt_p);</b>
+<b class="fc">&nbsp;				hull = new Point(pt_p);</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return hull;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Static method to construct the convex hull from an array of points. The
+&nbsp;	 * out_convex_hull array will be populated with the subset of index
+&nbsp;	 * positions which contribute to the convex hull.
+&nbsp;	 * Returns the number of points in the convex hull.
+&nbsp;	 * \param points The points used to create the convex hull.
+&nbsp;	 * \param count The number of points in the input Point2D array.
+&nbsp;	 * \param out_convex_hull An index array allocated by the user at least as big as the size of the input points array.
+&nbsp;	 */
+&nbsp;	static int construct(Point2D[] points, int count, int[] out_convex_hull) {
+<b class="fc">&nbsp;		ConvexHull convex_hull = new ConvexHull(points, count);</b>
+&nbsp;
+<b class="fc">&nbsp;		int t0 = 0, tm = 1;</b>
+<b class="fc">&nbsp;		Point2D pt_0 = points[t0];</b>
+&nbsp;
+<b class="fc">&nbsp;		while (tm &lt; count &amp;&amp; points[tm].isEqual(pt_0, NumberUtils.doubleEps()))</b>
+<b class="fc">&nbsp;			tm++; // We don&#39;t want to close the gap between t0 and tm.</b>
+&nbsp;
+<b class="fc">&nbsp;		convex_hull.m_tree_hull.addElement(t0, -1);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (tm &lt; count) {</b>
+<b class="fc">&nbsp;			convex_hull.m_tree_hull.addBiggestElement(tm, -1);</b>
+&nbsp;
+<b class="fc">&nbsp;			for (int tp = tm + 1; tp &lt; count; tp++) {// Dynamically insert into the current convex hull.</b>
+&nbsp;
+<b class="fc">&nbsp;				Point2D pt_p = points[tp];</b>
+<b class="fc">&nbsp;				int p = convex_hull.treeHull_(pt_p);</b>
+&nbsp;
+<b class="fc">&nbsp;				if (p != -1)</b>
+<b class="fc">&nbsp;					convex_hull.m_tree_hull.setElement(p, tp); // reset the place holder to the point index.</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+&nbsp;		// Extracts the convex hull from the tree. Reading the tree in order from first to last is the resulting convex hull.
+<b class="fc">&nbsp;		int out_count = 0;</b>
+<b class="fc">&nbsp;		for (int i = convex_hull.m_tree_hull.getFirst(-1); i != -1; i = convex_hull.m_tree_hull.getNext(i))</b>
+<b class="fc">&nbsp;			out_convex_hull[out_count++] = convex_hull.m_tree_hull.getElement(i);</b>
+&nbsp;
+<b class="fc">&nbsp;		return out_count;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns true if the given path of the input MultiPath is convex. Returns false otherwise.
+&nbsp;	 * \param multi_path The MultiPath to check if the path is convex.
+&nbsp;	 * \param path_index The path of the MultiPath to check if its convex.
+&nbsp;	 */
+&nbsp;	static boolean isPathConvex(MultiPath multi_path, int path_index, ProgressTracker progress_tracker) {
+<b class="fc">&nbsp;		MultiPathImpl mimpl = (MultiPathImpl) multi_path._getImpl();</b>
+<b class="fc">&nbsp;		int path_start = mimpl.getPathStart(path_index);</b>
+<b class="fc">&nbsp;		int path_end = mimpl.getPathEnd(path_index);</b>
+&nbsp;
+<b class="fc">&nbsp;		boolean bxyclosed = !mimpl.isClosedPath(path_index) &amp;&amp; mimpl.isClosedPathInXYPlane(path_index);</b>
+&nbsp;
+<b class="fc">&nbsp;		AttributeStreamOfDbl position = (AttributeStreamOfDbl) (mimpl.getAttributeStreamRef(VertexDescription.Semantics.POSITION));</b>
+<b class="fc">&nbsp;		int position_start = 2 * path_start;</b>
+<b class="fc">&nbsp;		int position_end = 2 * path_end;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (bxyclosed)</b>
+<b class="nc">&nbsp;			position_end -= 2;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (position_end - position_start &lt; 6)</b>
+<b class="nc">&nbsp;			return true;</b>
+&nbsp;
+&nbsp;		// This matches the logic for case 1 of the tree hull algorithm. The idea is inductive. We assume we have a convex hull pt_0,...,pt_m, and we see if
+&nbsp;		// a new point (pt_pivot) is among the transitive tournament for pt_0, knowing that pt_pivot comes after pt_m.
+&nbsp;
+&nbsp;		// We check three conditions:
+&nbsp;		// 1) pt_m-&gt;pt_pivot-&gt;pt_0 is clockwise (closure across the boundary is convex)
+&nbsp;		// 2) pt_1-&gt;pt_pivot-&gt;pt_0 is clockwise (the first step forward is convex)  (pt_1 is the next point after pt_0)
+&nbsp;		// 3) pt_m-&gt;pt_pivot-&gt;pt_m_prev is clockwise (the first step backwards is convex)  (pt_m_prev is the previous point before pt_m)
+&nbsp;
+&nbsp;		// If all three of the above conditions are clockwise, then pt_pivot is among the transitive tournament for pt_0, and therefore the polygon pt_0, ..., pt_m, pt_pivot is convex.
+&nbsp;
+<b class="fc">&nbsp;		Point2D pt_0 = new Point2D(), pt_m = new Point2D(), pt_pivot = new Point2D();</b>
+<b class="fc">&nbsp;		position.read(position_start, pt_0);</b>
+<b class="fc">&nbsp;		position.read(position_start + 2, pt_m);</b>
+<b class="fc">&nbsp;		position.read(position_start + 4, pt_pivot);</b>
+&nbsp;
+&nbsp;		// Initial inductive step
+<b class="fc">&nbsp;		ECoordinate det_ec = determinant_(pt_m, pt_pivot, pt_0);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (det_ec.isFuzzyZero() || !isClockwise_(det_ec.value()))</b>
+<b class="fc">&nbsp;			return false;</b>
+&nbsp;
+<b class="fc">&nbsp;		Point2D pt_1 = new Point2D(pt_m.x, pt_m.y);</b>
+<b class="fc">&nbsp;		Point2D pt_m_prev = new Point2D();</b>
+&nbsp;
+&nbsp;		// Assume that pt_0,...,pt_m is convex. Check if the next point, pt_pivot, maintains the convex invariant.
+<b class="fc">&nbsp;		for (int i = position_start + 6; i &lt; position_end; i += 2) {</b>
+<b class="fc">&nbsp;			pt_m_prev.setCoords(pt_m);</b>
+<b class="fc">&nbsp;			pt_m.setCoords(pt_pivot);</b>
+<b class="fc">&nbsp;			position.read(i, pt_pivot);</b>
+&nbsp;
+<b class="fc">&nbsp;			det_ec = determinant_(pt_m, pt_pivot, pt_0);</b>
+&nbsp;
+<b class="fc">&nbsp;			if (det_ec.isFuzzyZero() || !isClockwise_(det_ec.value()))</b>
+<b class="fc">&nbsp;				return false;</b>
+&nbsp;
+<b class="fc">&nbsp;			det_ec = determinant_(pt_1, pt_pivot, pt_0);</b>
+&nbsp;
+<b class="fc">&nbsp;			if (det_ec.isFuzzyZero() || !isClockwise_(det_ec.value()))</b>
+<b class="nc">&nbsp;				return false;</b>
+&nbsp;
+<b class="fc">&nbsp;			det_ec = determinant_(pt_m, pt_pivot, pt_m_prev);</b>
+&nbsp;
+<b class="fc">&nbsp;			if (det_ec.isFuzzyZero() || !isClockwise_(det_ec.value()))</b>
+<b class="fc">&nbsp;				return false;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return true;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Dynamically inserts each geometry into the convex hull.
+&nbsp;	private void addMultiVertexGeometry_(MultiVertexGeometry mvg) {
+<b class="fc">&nbsp;		Point point = new Point();</b>
+<b class="fc">&nbsp;		Point2D pt_p = new Point2D();</b>
+&nbsp;
+<b class="fc">&nbsp;		for (int i = 0; i &lt; mvg.getPointCount(); i++) {</b>
+<b class="fc">&nbsp;			mvg.getXY(i, pt_p);</b>
+<b class="fc">&nbsp;			int p = addPoint_(pt_p);</b>
+&nbsp;
+<b class="fc">&nbsp;			if (p != -1) {</b>
+<b class="fc">&nbsp;				mvg.getPointByVal(i, point);</b>
+<b class="fc">&nbsp;				int tp = m_shape.addPoint(m_path_handle, point);</b>
+<b class="fc">&nbsp;				m_tree_hull.setElement(p, tp); // reset the place holder to tp</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	private void addEnvelope_(Envelope envelope) {
+<b class="fc">&nbsp;		Point point = new Point();</b>
+<b class="fc">&nbsp;		Point2D pt_p = new Point2D();</b>
+&nbsp;
+<b class="fc">&nbsp;		for (int i = 0; i &lt; 4; i++) {</b>
+<b class="fc">&nbsp;			envelope.queryCorner(i, pt_p);</b>
+<b class="fc">&nbsp;			int p = addPoint_(pt_p);</b>
+&nbsp;
+<b class="fc">&nbsp;			if (p != -1) {</b>
+<b class="fc">&nbsp;				envelope.queryCornerByVal(i, point);</b>
+<b class="fc">&nbsp;				int tp = m_shape.addPoint(m_path_handle, point);</b>
+<b class="fc">&nbsp;				m_tree_hull.setElement(p, tp); // reset the place holder to tp</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	private void addSegment_(Segment segment) {
+<b class="fc">&nbsp;		Point point = new Point();</b>
+&nbsp;
+<b class="fc">&nbsp;		Point2D pt_start = segment.getStartXY();</b>
+<b class="fc">&nbsp;		int p_start = addPoint_(pt_start);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (p_start != -1) {</b>
+<b class="nc">&nbsp;			segment.queryStart(point);</b>
+<b class="nc">&nbsp;			int t_start = m_shape.addPoint(m_path_handle, point);</b>
+<b class="nc">&nbsp;			m_tree_hull.setElement(p_start, t_start); // reset the place holder</b>
+&nbsp;			// to tp
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		Point2D pt_end = segment.getEndXY();</b>
+<b class="fc">&nbsp;		int p_end = addPoint_(pt_end);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (p_end != -1) {</b>
+<b class="fc">&nbsp;			segment.queryEnd(point);</b>
+<b class="fc">&nbsp;			int t_end = m_shape.addPoint(m_path_handle, point);</b>
+<b class="fc">&nbsp;			m_tree_hull.setElement(p_end, t_end); // reset the place holder to</b>
+&nbsp;			// tp
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	private void addPoint_(Point point) {
+<b class="fc">&nbsp;		Point2D pt_p = point.getXY();</b>
+<b class="fc">&nbsp;		int p = addPoint_(pt_p);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (p != -1) {</b>
+<b class="fc">&nbsp;			int tp = m_shape.addPoint(m_path_handle, point);</b>
+<b class="fc">&nbsp;			m_tree_hull.setElement(p, tp); // reset the place holder to tp</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	private int addPoint_(Point2D pt_p) {
+<b class="fc">&nbsp;		int p = -1;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (m_tree_hull.size(-1) == 0) {</b>
+<b class="fc">&nbsp;			p = m_tree_hull.addElement(-4, -1); // reset the place holder to tp</b>
+<b class="fc">&nbsp;			return p;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (m_tree_hull.size(-1) == 1) {</b>
+<b class="fc">&nbsp;			int t0 = m_tree_hull.getElement(m_tree_hull.getFirst(-1));</b>
+<b class="fc">&nbsp;			Point2D pt_0 = m_shape.getXY(t0);</b>
+&nbsp;
+<b class="fc">&nbsp;			if (!pt_p.isEqual(pt_0, NumberUtils.doubleEps())) // We don&#39;t want to close the gap between t0 and tm.</b>
+<b class="fc">&nbsp;				p = m_tree_hull.addBiggestElement(-5, -1); // set place holder to -5 to indicate the second element being added (tm).</b>
+&nbsp;
+<b class="fc">&nbsp;			return p;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		p = treeHull_(pt_p);</b>
+<b class="fc">&nbsp;		return p;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Algorithm taken from &quot;Axioms and Hulls&quot; by D.E. Knuth, Lecture Notes in Computer Science 606, page 47.
+&nbsp;	private int treeHull_(Point2D pt_pivot) {
+<b class="fc">&nbsp;		assert (m_tree_hull.size(-1) &gt;= 2);</b>
+&nbsp;
+<b class="fc">&nbsp;		int p = -1;</b>
+&nbsp;
+&nbsp;		do {
+<b class="fc">&nbsp;			int first = m_tree_hull.getFirst(-1);</b>
+<b class="fc">&nbsp;			int last = m_tree_hull.getLast(-1);</b>
+<b class="fc">&nbsp;			int t0 = m_tree_hull.getElement(first);</b>
+<b class="fc">&nbsp;			int tm = m_tree_hull.getElement(last);</b>
+&nbsp;
+<b class="fc">&nbsp;			Point2D pt_0 = new Point2D(); // should the memory be cached?</b>
+<b class="fc">&nbsp;			Point2D pt_m = new Point2D(); // should the memory be cached?</b>
+<b class="fc">&nbsp;			m_call_back.getXY(t0, pt_0);</b>
+<b class="fc">&nbsp;			m_call_back.getXY(tm, pt_m);</b>
+&nbsp;
+<b class="fc">&nbsp;			assert (!pt_0.isEqual(pt_m, NumberUtils.doubleEps())); // assert that the gap is not closed</b>
+&nbsp;
+<b class="fc">&nbsp;			int orient_m_p_0 = Point2D.orientationRobust(pt_m, pt_pivot, pt_0); // determines case 1, 2, 3</b>
+&nbsp;
+<b class="fc">&nbsp;			if (isClockwise_(orient_m_p_0)) {// Case 1: tp-&gt;t0-&gt;tm is clockwise</b>
+&nbsp;
+<b class="fc">&nbsp;				p = m_tree_hull.addBiggestElement(-1, -1); // set place holder to -1 for case 1.</b>
+<b class="fc">&nbsp;				int l = treeHullWalkBackward_(pt_pivot, last, first);</b>
+&nbsp;
+<b class="fc">&nbsp;				if (l != first)</b>
+<b class="fc">&nbsp;					treeHullWalkForward_(pt_pivot, first, m_tree_hull.getPrev(l));</b>
+&nbsp;
+<b class="fc">&nbsp;				continue;</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			if (isCounterClockwise_(orient_m_p_0)) {// Case 2: tp-&gt;tm-&gt;t0 is clockwise</b>
+<b class="fc">&nbsp;				int k = m_tree_hull.getRoot(-1), k_min = m_tree_hull.getFirst(-1), k_max = m_tree_hull.getLast(-1), k_prev;</b>
+&nbsp;				int tk, tk_prev;
+<b class="fc">&nbsp;				Point2D pt_k = new Point2D();</b>
+<b class="fc">&nbsp;				Point2D pt_k_prev = new Point2D();</b>
+&nbsp;
+<b class="fc">&nbsp;				while (k_min != m_tree_hull.getPrev(k_max)) {// binary search to find k such that t0-&gt;tp-&gt;tj holds (i.e. clockwise) for j &gt;= k. Hence, tj-&gt;tp-&gt;t0 is clockwise (or degenerate) for j &lt; k.</b>
+<b class="fc">&nbsp;					tk = m_tree_hull.getElement(k);</b>
+<b class="fc">&nbsp;					m_call_back.getXY(tk, pt_k);</b>
+<b class="fc">&nbsp;					int orient_k_p_0 = Point2D.orientationRobust(pt_k, pt_pivot, pt_0);</b>
+&nbsp;
+<b class="fc">&nbsp;					if (isCounterClockwise_(orient_k_p_0)) {</b>
+<b class="fc">&nbsp;						k_max = k;</b>
+<b class="fc">&nbsp;						k = m_tree_hull.getLeft(k);</b>
+<b class="fc">&nbsp;					} else {</b>
+<b class="fc">&nbsp;						k_min = k;</b>
+<b class="fc">&nbsp;						k = m_tree_hull.getRight(k);</b>
+&nbsp;					}
+&nbsp;				}
+&nbsp;
+<b class="fc">&nbsp;				k = k_max;</b>
+<b class="fc">&nbsp;				k_prev = k_min;</b>
+<b class="fc">&nbsp;				tk = m_tree_hull.getElement(k);</b>
+<b class="fc">&nbsp;				tk_prev = m_tree_hull.getElement(k_prev);</b>
+<b class="fc">&nbsp;				m_call_back.getXY(tk, pt_k);</b>
+<b class="fc">&nbsp;				m_call_back.getXY(tk_prev, pt_k_prev);</b>
+<b class="fc">&nbsp;				assert (isCounterClockwise_(Point2D.orientationRobust(pt_k, pt_pivot, pt_0)) &amp;&amp; !isCounterClockwise_(Point2D.orientationRobust(pt_k_prev, pt_pivot, pt_0)));</b>
+<b class="fc">&nbsp;				assert (k_prev != first || isCounterClockwise_(Point2D.orientationRobust(pt_k, pt_pivot, pt_0)));</b>
+&nbsp;
+<b class="fc">&nbsp;				if (k_prev != first) {</b>
+<b class="fc">&nbsp;					int orient_k_prev_p_k = Point2D.orientationRobust(pt_k_prev, pt_pivot, pt_k);</b>
+&nbsp;
+<b class="fc">&nbsp;					if (!isClockwise_(orient_k_prev_p_k))</b>
+<b class="fc">&nbsp;						continue; // pt_pivot is inside the hull (or on the boundary)</b>
+&nbsp;				}
+&nbsp;
+<b class="fc">&nbsp;				p = m_tree_hull.addElementAtPosition(k_prev, k, -2, true, false, -1); // set place holder to -2 for case 2.</b>
+<b class="fc">&nbsp;				treeHullWalkForward_(pt_pivot, k, last);</b>
+<b class="fc">&nbsp;				treeHullWalkBackward_(pt_pivot, k_prev, first);</b>
+&nbsp;
+<b class="fc">&nbsp;				continue;</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			assert (isDegenerate_(orient_m_p_0));</b>
+&nbsp;			{// Case 3: degenerate
+<b class="fc">&nbsp;				int between = isBetween_(pt_pivot, pt_m, pt_0);</b>
+&nbsp;
+<b class="fc">&nbsp;				if (between == -1) {</b>
+<b class="fc">&nbsp;					int l = m_tree_hull.getPrev(last);</b>
+<b class="fc">&nbsp;					m_tree_hull.deleteNode(last, -1);</b>
+<b class="fc">&nbsp;					p = m_tree_hull.addBiggestElement(-3, -1); // set place holder to -3 for case 3.</b>
+<b class="fc">&nbsp;					treeHullWalkBackward_(pt_pivot, l, first);</b>
+<b class="fc">&nbsp;				} else if (between == 1) {</b>
+<b class="fc">&nbsp;					int j = m_tree_hull.getNext(first);</b>
+<b class="fc">&nbsp;					m_tree_hull.deleteNode(first, -1);</b>
+<b class="fc">&nbsp;					p = m_tree_hull.addElementAtPosition(-1, j, -3, true, false, -1); // set place holder to -3 for case 3.</b>
+<b class="fc">&nbsp;					treeHullWalkForward_(pt_pivot, j, last);</b>
+&nbsp;				}
+&nbsp;
+&nbsp;				continue;
+&nbsp;			}
+&nbsp;
+&nbsp;		} while (false);
+&nbsp;
+<b class="fc">&nbsp;		return p;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private int treeHullWalkForward_(Point2D pt_pivot, int start, int end) {
+<b class="fc">&nbsp;		if (start == end)</b>
+<b class="fc">&nbsp;			return end;</b>
+&nbsp;
+<b class="fc">&nbsp;		int j = start;</b>
+<b class="fc">&nbsp;		int tj = m_tree_hull.getElement(j);</b>
+<b class="fc">&nbsp;		int j_next = m_tree_hull.getNext(j);</b>
+<b class="fc">&nbsp;		Point2D pt_j = new Point2D();</b>
+<b class="fc">&nbsp;		Point2D pt_j_next = new Point2D();</b>
+&nbsp;
+<b class="fc">&nbsp;		m_call_back.getXY(tj, pt_j);</b>
+&nbsp;
+<b class="fc">&nbsp;		while (j != end &amp;&amp; m_tree_hull.size(-1) &gt; 2) {//Stops when we find a clockwise triple containting the pivot point, or when the tree_hull size is 2. Deletes non-clockwise triples along the way.</b>
+<b class="fc">&nbsp;			int tj_next = m_tree_hull.getElement(j_next);</b>
+<b class="fc">&nbsp;			m_call_back.getXY(tj_next, pt_j_next);</b>
+&nbsp;
+<b class="fc">&nbsp;			int orient_j_next_p_j = Point2D.orientationRobust(pt_j_next, pt_pivot, pt_j);</b>
+&nbsp;
+<b class="fc">&nbsp;			if (isClockwise_(orient_j_next_p_j))</b>
+<b class="fc">&nbsp;				break;</b>
+&nbsp;
+<b class="fc">&nbsp;			int ccw = j;</b>
+&nbsp;
+<b class="fc">&nbsp;			j = j_next;</b>
+<b class="fc">&nbsp;			pt_j.setCoords(pt_j_next);</b>
+<b class="fc">&nbsp;			j_next = m_tree_hull.getNext(j);</b>
+<b class="fc">&nbsp;			m_call_back.deleteNode(ccw);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return j;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private int treeHullWalkBackward_(Point2D pt_pivot, int start, int end) {
+<b class="fc">&nbsp;		if (start == end)</b>
+<b class="fc">&nbsp;			return end;</b>
+&nbsp;
+<b class="fc">&nbsp;		int l = start;</b>
+<b class="fc">&nbsp;		int tl = m_tree_hull.getElement(l);</b>
+<b class="fc">&nbsp;		int l_prev = m_tree_hull.getPrev(l);</b>
+<b class="fc">&nbsp;		Point2D pt_l = new Point2D();</b>
+<b class="fc">&nbsp;		Point2D pt_l_prev = new Point2D();</b>
+&nbsp;
+<b class="fc">&nbsp;		m_call_back.getXY(tl, pt_l);</b>
+&nbsp;
+<b class="fc">&nbsp;		while (l != end &amp;&amp; m_tree_hull.size(-1) &gt; 2) {//Stops when we find a clockwise triple containting the pivot point, or when the tree_hull size is 2. Deletes non-clockwise triples along the way.</b>
+<b class="fc">&nbsp;			int tl_prev = m_tree_hull.getElement(l_prev);</b>
+<b class="fc">&nbsp;			m_call_back.getXY(tl_prev, pt_l_prev);</b>
+&nbsp;
+<b class="fc">&nbsp;			int orient_l_p_l_prev = Point2D.orientationRobust(pt_l, pt_pivot, pt_l_prev);</b>
+&nbsp;
+<b class="fc">&nbsp;			if (isClockwise_(orient_l_p_l_prev))</b>
+<b class="fc">&nbsp;				break;</b>
+&nbsp;
+<b class="fc">&nbsp;			int ccw = l;</b>
+&nbsp;
+<b class="fc">&nbsp;			l = l_prev;</b>
+<b class="fc">&nbsp;			pt_l.setCoords(pt_l_prev);</b>
+<b class="fc">&nbsp;			l_prev = m_tree_hull.getPrev(l);</b>
+<b class="fc">&nbsp;			m_call_back.deleteNode(ccw);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return l;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Orientation predicates
+&nbsp;	private static ECoordinate determinant_(Point2D p, Point2D q, Point2D r) {
+<b class="fc">&nbsp;		ECoordinate det_ec = new ECoordinate();</b>
+<b class="fc">&nbsp;		det_ec.set(q.x);</b>
+<b class="fc">&nbsp;		det_ec.sub(p.x);</b>
+&nbsp;
+<b class="fc">&nbsp;		ECoordinate rp_y_ec = new ECoordinate();</b>
+<b class="fc">&nbsp;		rp_y_ec.set(r.y);</b>
+<b class="fc">&nbsp;		rp_y_ec.sub(p.y);</b>
+&nbsp;
+<b class="fc">&nbsp;		ECoordinate qp_y_ec = new ECoordinate();</b>
+<b class="fc">&nbsp;		qp_y_ec.set(q.y);</b>
+<b class="fc">&nbsp;		qp_y_ec.sub(p.y);</b>
+&nbsp;
+<b class="fc">&nbsp;		ECoordinate rp_x_ec = new ECoordinate();</b>
+<b class="fc">&nbsp;		rp_x_ec.set(r.x);</b>
+<b class="fc">&nbsp;		rp_x_ec.sub(p.x);</b>
+&nbsp;
+<b class="fc">&nbsp;		det_ec.mul(rp_y_ec);</b>
+<b class="fc">&nbsp;		qp_y_ec.mul(rp_x_ec);</b>
+<b class="fc">&nbsp;		det_ec.sub(qp_y_ec);</b>
+<b class="fc">&nbsp;		return det_ec;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private static boolean isClockwise_(double det) {
+<b class="fc">&nbsp;		return det &lt; 0.0;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private static boolean isCounterClockwise_(double det) {
+<b class="nc">&nbsp;		return det &gt; 0.0;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private static boolean isDegenerate_(double det) {
+<b class="nc">&nbsp;		return det == 0.0;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private static boolean isClockwise_(int orientation) {
+<b class="fc">&nbsp;		return orientation &lt; 0.0;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private static boolean isCounterClockwise_(int orientation) {
+<b class="fc">&nbsp;		return orientation &gt; 0.0;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private static boolean isDegenerate_(int orientation) {
+<b class="fc">&nbsp;		return orientation == 0.0;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private static int isBetween_(Point2D pt_pivot, Point2D pt_m, Point2D pt_0) {
+<b class="fc">&nbsp;		int ordinate = -1;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (pt_m.y == pt_0.y) {</b>
+<b class="fc">&nbsp;			ordinate = 0;</b>
+<b class="fc">&nbsp;		} else if (pt_m.x == pt_0.x) {</b>
+<b class="fc">&nbsp;			ordinate = 1;</b>
+<b class="fc">&nbsp;		} else {// use bigger ordinate, but shouldn&#39;t matter</b>
+&nbsp;
+<b class="fc">&nbsp;			double diff_x = Math.abs(pt_m.x - pt_0.x);</b>
+<b class="fc">&nbsp;			double diff_y = Math.abs(pt_m.y - pt_0.y);</b>
+&nbsp;
+<b class="fc">&nbsp;			if (diff_x &gt;= diff_y)</b>
+<b class="fc">&nbsp;				ordinate = 0;</b>
+&nbsp;			else
+<b class="fc">&nbsp;				ordinate = 1;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		int res = -1;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (ordinate == 0) {</b>
+<b class="fc">&nbsp;			assert (pt_m.x != pt_0.x);</b>
+&nbsp;
+<b class="fc">&nbsp;			if (pt_m.x &lt; pt_0.x) {</b>
+<b class="fc">&nbsp;				if (pt_pivot.x &lt; pt_m.x)</b>
+<b class="fc">&nbsp;					res = -1;</b>
+<b class="fc">&nbsp;				else if (pt_0.x &lt; pt_pivot.x)</b>
+<b class="nc">&nbsp;					res = 1;</b>
+&nbsp;				else
+<b class="fc">&nbsp;					res = 0;</b>
+<b class="fc">&nbsp;			} else {</b>
+<b class="fc">&nbsp;				assert (pt_0.x &lt; pt_m.x);</b>
+&nbsp;
+<b class="fc">&nbsp;				if (pt_m.x &lt; pt_pivot.x)</b>
+<b class="fc">&nbsp;					res = -1;</b>
+<b class="fc">&nbsp;				else if (pt_pivot.x &lt; pt_0.x)</b>
+<b class="fc">&nbsp;					res = 1;</b>
+&nbsp;				else
+<b class="fc">&nbsp;					res = 0;</b>
+&nbsp;			}
+<b class="fc">&nbsp;		} else {</b>
+<b class="fc">&nbsp;			assert (pt_m.y != pt_0.y);</b>
+&nbsp;
+<b class="fc">&nbsp;			if (pt_m.y &lt; pt_0.y) {</b>
+<b class="fc">&nbsp;				if (pt_pivot.y &lt; pt_m.y)</b>
+<b class="nc">&nbsp;					res = -1;</b>
+<b class="fc">&nbsp;				else if (pt_0.y &lt; pt_pivot.y)</b>
+<b class="nc">&nbsp;					res = 1;</b>
+&nbsp;				else
+<b class="fc">&nbsp;					res = 0;</b>
+<b class="fc">&nbsp;			} else {</b>
+<b class="fc">&nbsp;				assert (pt_0.y &lt; pt_m.y);</b>
+&nbsp;
+<b class="fc">&nbsp;				if (pt_m.y &lt; pt_pivot.y)</b>
+<b class="fc">&nbsp;					res = -1;</b>
+<b class="fc">&nbsp;				else if (pt_pivot.y &lt; pt_0.y)</b>
+<b class="nc">&nbsp;					res = 1;</b>
+&nbsp;				else
+<b class="fc">&nbsp;					res = 0;</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return res;</b>
+&nbsp;	}
+&nbsp;
+<b class="fc">&nbsp;	private static abstract class CallBack {</b>
+&nbsp;		abstract void getXY(int ti, Point2D pt);
+&nbsp;
+&nbsp;		abstract void deleteNode(int i);
+&nbsp;	}
+&nbsp;
+&nbsp;	private static final class CallBackShape extends CallBack {
+&nbsp;		private ConvexHull m_convex_hull;
+&nbsp;
+<b class="fc">&nbsp;		CallBackShape(ConvexHull convex_hull) {</b>
+<b class="fc">&nbsp;			m_convex_hull = convex_hull;</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		@Override
+&nbsp;		void getXY(int ti, Point2D pt) {
+<b class="fc">&nbsp;			m_convex_hull.m_shape.getXY(ti, pt);</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		@Override
+&nbsp;		void deleteNode(int i) {
+<b class="fc">&nbsp;			int ti = m_convex_hull.m_tree_hull.getElement(i);</b>
+<b class="fc">&nbsp;			m_convex_hull.m_tree_hull.deleteNode(i, -1);</b>
+<b class="fc">&nbsp;			m_convex_hull.m_shape.removeVertex(ti, false);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	private static final class CallBackStream extends CallBack {
+&nbsp;		private ConvexHull m_convex_hull;
+&nbsp;
+<b class="fc">&nbsp;		CallBackStream(ConvexHull convex_hull) {</b>
+<b class="fc">&nbsp;			m_convex_hull = convex_hull;</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		@Override
+&nbsp;		void getXY(int ti, Point2D pt) {
+<b class="fc">&nbsp;			m_convex_hull.m_stream.read(ti &lt;&lt; 1, pt);</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		@Override
+&nbsp;		void deleteNode(int i) {
+<b class="fc">&nbsp;			m_convex_hull.m_tree_hull.deleteNode(i, -1);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	private static final class CallBackPoints extends CallBack {
+&nbsp;		private ConvexHull m_convex_hull;
+&nbsp;
+<b class="fc">&nbsp;		CallBackPoints(ConvexHull convex_hull) {</b>
+<b class="fc">&nbsp;			m_convex_hull = convex_hull;</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		@Override
+&nbsp;		void getXY(int ti, Point2D pt) {
+<b class="fc">&nbsp;			pt.setCoords(m_convex_hull.m_points[ti]);</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		@Override
+&nbsp;		void deleteNode(int i) {
+<b class="nc">&nbsp;			m_convex_hull.m_tree_hull.deleteNode(i, -1);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	// Members
+<b class="fc">&nbsp;	private Treap m_tree_hull;</b>
+<b class="fc">&nbsp;	private EditShape m_shape;</b>
+<b class="fc">&nbsp;	private AttributeStreamOfDbl m_stream;</b>
+<b class="fc">&nbsp;	private Point2D[] m_points;</b>
+&nbsp;	private int m_geometry_handle;
+&nbsp;	private int m_path_handle;
+&nbsp;	private Line m_line;
+&nbsp;	private CallBack m_call_back;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-02-21 15:02</div>
+</div>
+</body>
+</html>

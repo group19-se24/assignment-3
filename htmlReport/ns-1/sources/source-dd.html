@@ -1,0 +1,2789 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > TopoGraph</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.esri.core.geometry</a>
+</div>
+
+<h1>Coverage Summary for Class: TopoGraph (com.esri.core.geometry)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">TopoGraph</td>
+<td class="coverageStat">
+  <span class="percent">
+    84,9%
+  </span>
+  <span class="absValue">
+    (107/126)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    88,4%
+  </span>
+  <span class="absValue">
+    (1082/1224)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">TopoGraph$ClusterSweepMonikerComparator</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (4/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (19/19)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">TopoGraph$EnumInputMode</td>
+  </tr>
+  <tr>
+    <td class="name">TopoGraph$PlaneSweepComparator</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (4/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    94%
+  </span>
+  <span class="absValue">
+    (47/50)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">TopoGraph$TopoGraphAngleComparer</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/3)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    86%
+  </span>
+  <span class="absValue">
+    (117/136)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    88,8%
+  </span>
+  <span class="absValue">
+    (1151/1296)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; Copyright 1995-2015 Esri
+&nbsp;
+&nbsp;   Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp;   you may not use this file except in compliance with the License.
+&nbsp;   You may obtain a copy of the License at
+&nbsp;
+&nbsp;       http://www.apache.org/licenses/LICENSE-2.0
+&nbsp;
+&nbsp;   Unless required by applicable law or agreed to in writing, software
+&nbsp;   distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp;   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp;   See the License for the specific language governing permissions and
+&nbsp;   limitations under the License.
+&nbsp;
+&nbsp; For additional information, contact:
+&nbsp; Environmental Systems Research Institute, Inc.
+&nbsp; Attn: Contracts Dept
+&nbsp; 380 New York Street
+&nbsp; Redlands, California, USA 92373
+&nbsp;
+&nbsp; email: contracts@esri.com
+&nbsp; */
+&nbsp;package com.esri.core.geometry;
+&nbsp;
+&nbsp;import java.util.ArrayList;
+&nbsp;
+&nbsp;import com.esri.core.geometry.AttributeStreamOfInt32.IntComparator;
+&nbsp;
+<b class="fc">&nbsp;final class TopoGraph {</b>
+&nbsp;
+&nbsp;	static interface EnumInputMode {
+&nbsp;
+&nbsp;		final static int enumInputModeBuildGraph = 0;
+&nbsp;		final static int enumInputModeSimplifyAlternate = 4 + 0;
+&nbsp;		final static int enumInputModeSimplifyWinding = 4 + 1;
+&nbsp;		final static int enumInputModeIsSimplePolygon = 4 + 3;
+&nbsp;	}
+&nbsp;
+&nbsp;	EditShape m_shape;
+&nbsp;
+&nbsp;	// cluster data: index, parentage, halfEdge, globalPrev, globalNext
+&nbsp;	StridedIndexTypeCollection m_clusterData;
+&nbsp;	StridedIndexTypeCollection m_clusterVertices;
+&nbsp;	int m_firstCluster;
+&nbsp;	int m_lastCluster;
+&nbsp;	// edge data: index, origin, faceParentage, edgeParentage, twin, prev, next
+&nbsp;	StridedIndexTypeCollection m_halfEdgeData;
+&nbsp;	// chain data index, half_edge, parentage, parentChain, firstIsland,
+&nbsp;	// nextInParent, prev, next
+&nbsp;	StridedIndexTypeCollection m_chainData;
+&nbsp;	AttributeStreamOfDbl m_chainAreas;
+&nbsp;	AttributeStreamOfDbl m_chainPerimeters;
+&nbsp;
+&nbsp;	final int c_edgeParentageMask;
+&nbsp;	final int c_edgeBitMask;
+&nbsp;	int m_universeChain;
+&nbsp;	ArrayList&lt;AttributeStreamOfInt32&gt; m_edgeIndices;
+&nbsp;	ArrayList&lt;AttributeStreamOfInt32&gt; m_clusterIndices;
+&nbsp;	ArrayList&lt;AttributeStreamOfInt32&gt; m_chainIndices;
+&nbsp;
+&nbsp;	int m_geometryIDIndex; // index of geometryIDs in the m_shape
+&nbsp;	int m_clusterIndex; // vertex index of cluster handles in the m_shape
+&nbsp;	int m_halfEdgeIndex; // vertex index of half-edges in the m_shape
+&nbsp;	int m_tmpHalfEdgeParentageIndex;
+&nbsp;	int m_tmpHalfEdgeWindingNumberIndex;
+<b class="fc">&nbsp;	int m_tmpHalfEdgeOddEvenNumberIndex = -1;</b>
+&nbsp;	
+<b class="fc">&nbsp;	int m_universe_geomID = -1;</b>
+&nbsp;	
+<b class="fc">&nbsp;	boolean m_buildChains = true;</b>
+&nbsp;	
+<b class="fc">&nbsp;	private boolean m_dirty_check_failed = false;</b>
+<b class="fc">&nbsp;	private double m_check_dirty_planesweep_tolerance = Double.NaN;</b>
+&nbsp;	
+&nbsp;	void check_dirty_planesweep(double tolerance) {
+<b class="fc">&nbsp;		m_check_dirty_planesweep_tolerance = tolerance;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	boolean dirty_check_failed() {
+<b class="fc">&nbsp;		return m_dirty_check_failed;</b>
+&nbsp;	}
+&nbsp;	
+<b class="fc">&nbsp;	NonSimpleResult m_non_simple_result = new NonSimpleResult();</b>
+&nbsp;
+&nbsp;	int m_pointCount;// point count processed in this Topo_graph. Used to
+&nbsp;						// reserve data.
+&nbsp;
+<b class="fc">&nbsp;	static final class PlaneSweepComparator extends Treap.Comparator {</b>
+&nbsp;		TopoGraph m_helper;
+&nbsp;		SegmentBuffer m_buffer_left;
+&nbsp;		SegmentBuffer m_buffer_right;
+&nbsp;		Envelope1D interval_left;
+&nbsp;		Envelope1D interval_right;
+&nbsp;		double m_y_scanline;
+&nbsp;
+<b class="fc">&nbsp;		PlaneSweepComparator(TopoGraph helper) {</b>
+<b class="fc">&nbsp;			m_helper = helper;</b>
+<b class="fc">&nbsp;			m_y_scanline = NumberUtils.TheNaN;</b>
+<b class="fc">&nbsp;			m_buffer_left = new SegmentBuffer();</b>
+<b class="fc">&nbsp;			m_buffer_right = new SegmentBuffer();</b>
+<b class="fc">&nbsp;			interval_left = new Envelope1D();</b>
+<b class="fc">&nbsp;			interval_right = new Envelope1D();</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		@Override
+&nbsp;		int compare(Treap treap, int left, int node) {
+<b class="fc">&nbsp;			int right = treap.getElement(node);</b>
+&nbsp;			// can be sped up a little, because left or right stay the same
+&nbsp;			// while an edge is inserted into the tree.
+<b class="fc">&nbsp;			m_helper.querySegmentXY(left, m_buffer_left);</b>
+<b class="fc">&nbsp;			m_helper.querySegmentXY(right, m_buffer_right);</b>
+<b class="fc">&nbsp;			Segment segLeft = m_buffer_left.get();</b>
+<b class="fc">&nbsp;			Segment segRight = m_buffer_right.get();</b>
+&nbsp;
+&nbsp;			// Prerequisite: The segments have the start point lexicographically
+&nbsp;			// above the end point.
+<b class="fc">&nbsp;			assert (segLeft.getStartXY().compare(segLeft.getEndXY()) &lt; 0);</b>
+<b class="fc">&nbsp;			assert (segRight.getStartXY().compare(segRight.getEndXY()) &lt; 0);</b>
+&nbsp;
+&nbsp;			// Simple test for faraway segments
+<b class="fc">&nbsp;			interval_left.setCoords(segLeft.getStartX(), segLeft.getEndX());</b>
+<b class="fc">&nbsp;			interval_right.setCoords(segRight.getStartX(), segRight.getEndX());</b>
+<b class="fc">&nbsp;			if (interval_left.vmax &lt; interval_right.vmin)</b>
+<b class="fc">&nbsp;				return -1;</b>
+<b class="fc">&nbsp;			if (interval_left.vmin &gt; interval_right.vmax)</b>
+<b class="fc">&nbsp;				return 1;</b>
+&nbsp;
+<b class="fc">&nbsp;			boolean bLeftHorz = segLeft.getStartY() == segLeft.getEndY();</b>
+<b class="fc">&nbsp;			boolean bRightHorz = segRight.getStartY() == segRight.getEndY();</b>
+<b class="fc">&nbsp;			if (bLeftHorz || bRightHorz) {</b>
+<b class="fc">&nbsp;				if (bLeftHorz &amp;&amp; bRightHorz) {</b>
+<b class="nc">&nbsp;					assert (interval_left.equals(interval_right));</b>
+<b class="nc">&nbsp;					return 0;</b>
+&nbsp;				}
+&nbsp;
+&nbsp;				// left segment is horizontal. The right one is not.
+&nbsp;				// Prerequisite of this algorithm is that this can only happen
+&nbsp;				// when:
+&nbsp;				// left
+&nbsp;				// |right -------------------- end == end
+&nbsp;				// | |
+&nbsp;				// | left |
+&nbsp;				// -------------------- right |
+&nbsp;				// start == start
+&nbsp;				// or:
+&nbsp;				// right segment is horizontal. The left one is not.
+&nbsp;				// Prerequisite of this algorithm is that his can only happen
+&nbsp;				// when:
+&nbsp;				// right
+&nbsp;				// |left -------------------- end == end
+&nbsp;				// | |
+&nbsp;				// | right |
+&nbsp;				// -------------------- left |
+&nbsp;				// start == start
+&nbsp;
+<b class="fc">&nbsp;				if (segLeft.getStartY() == segRight.getStartY()</b>
+<b class="fc">&nbsp;						&amp;&amp; segLeft.getStartX() == segRight.getStartX())</b>
+<b class="fc">&nbsp;					return bLeftHorz ? 1 : -1;</b>
+<b class="fc">&nbsp;				else if (segLeft.getEndY() == segRight.getEndY()</b>
+<b class="fc">&nbsp;						&amp;&amp; segLeft.getEndX() == segRight.getEndX())</b>
+<b class="fc">&nbsp;					return bLeftHorz ? -1 : 1;</b>
+&nbsp;			}
+&nbsp;
+&nbsp;			// Now do actual intersections
+<b class="fc">&nbsp;			double xLeft = segLeft.intersectionOfYMonotonicWithAxisX(</b>
+<b class="fc">&nbsp;					m_y_scanline, interval_left.vmin);</b>
+<b class="fc">&nbsp;			double xRight = segRight.intersectionOfYMonotonicWithAxisX(</b>
+<b class="fc">&nbsp;					m_y_scanline, interval_right.vmin);</b>
+&nbsp;
+<b class="fc">&nbsp;			if (xLeft == xRight) {</b>
+&nbsp;				// apparently these edges originate from same vertex and the
+&nbsp;				// scanline is on the vertex. move scanline a little.
+<b class="fc">&nbsp;				double yLeft = segLeft.getEndY();</b>
+<b class="fc">&nbsp;				double yRight = segRight.getEndY();</b>
+<b class="fc">&nbsp;				double miny = Math.min(yLeft, yRight);</b>
+<b class="fc">&nbsp;				double y = (miny + m_y_scanline) * 0.5;</b>
+<b class="fc">&nbsp;				if (y == m_y_scanline) {</b>
+&nbsp;					// assert(0);//ST: not a bug. just curious to see this
+&nbsp;					// happens.
+<b class="nc">&nbsp;					y = miny; // apparently, one of the segments is almost</b>
+&nbsp;								// horizontal line.
+&nbsp;				}
+<b class="fc">&nbsp;				xLeft = segLeft.intersectionOfYMonotonicWithAxisX(y,</b>
+<b class="fc">&nbsp;						interval_left.vmin);</b>
+<b class="fc">&nbsp;				xRight = segRight.intersectionOfYMonotonicWithAxisX(y,</b>
+<b class="fc">&nbsp;						interval_right.vmin);</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			return xLeft &lt; xRight ? -1 : (xLeft &gt; xRight ? 1 : 0);</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		void setY(double y) {
+<b class="fc">&nbsp;			m_y_scanline = y;</b>
+&nbsp;		}
+&nbsp;		// void operator=(const Plane_sweep_comparator&amp;); // do not allow
+&nbsp;		// operator =
+&nbsp;	};
+&nbsp;
+&nbsp;	static final class TopoGraphAngleComparer extends IntComparator {
+&nbsp;		TopoGraph m_parent;
+&nbsp;
+<b class="fc">&nbsp;		TopoGraphAngleComparer(TopoGraph parent_) {</b>
+<b class="fc">&nbsp;			m_parent = parent_;</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		@Override
+&nbsp;		public int compare(int v1, int v2) {
+<b class="fc">&nbsp;			return m_parent.compareEdgeAngles_(v1, v2);</b>
+&nbsp;		}
+&nbsp;	};
+&nbsp;
+<b class="fc">&nbsp;	static final class ClusterSweepMonikerComparator extends</b>
+&nbsp;			Treap.MonikerComparator {
+&nbsp;		TopoGraph m_parent;
+&nbsp;		SegmentBuffer m_segment_buffer;
+&nbsp;		Point2D m_point;
+&nbsp;		Envelope1D m_interval;
+&nbsp;
+<b class="fc">&nbsp;		ClusterSweepMonikerComparator(TopoGraph parent) {</b>
+<b class="fc">&nbsp;			m_parent = parent;</b>
+<b class="fc">&nbsp;			m_segment_buffer = new SegmentBuffer();</b>
+<b class="fc">&nbsp;			m_point = new Point2D();</b>
+<b class="fc">&nbsp;			m_interval = new Envelope1D();</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		void setPointXY(Point2D pt) {
+<b class="fc">&nbsp;			m_point.setCoords(pt);</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		@Override
+&nbsp;		int compare(Treap treap, int node) {
+<b class="fc">&nbsp;			int half_edge = treap.getElement(node);</b>
+&nbsp;
+&nbsp;			// can be sped up a little, because left or right stay the same
+&nbsp;			// while an edge is inserted into the tree.
+<b class="fc">&nbsp;			m_parent.querySegmentXY(half_edge, m_segment_buffer);</b>
+<b class="fc">&nbsp;			Segment seg = m_segment_buffer.get();</b>
+&nbsp;
+&nbsp;			// Simple test for faraway segments
+<b class="fc">&nbsp;			m_interval.setCoords(seg.getStartX(), seg.getEndX());</b>
+<b class="fc">&nbsp;			if (m_point.x &lt; m_interval.vmin)</b>
+<b class="fc">&nbsp;				return -1;</b>
+&nbsp;
+<b class="fc">&nbsp;			if (m_point.x &gt; m_interval.vmax)</b>
+<b class="fc">&nbsp;				return 1;</b>
+&nbsp;
+&nbsp;			// Now do actual intersections
+<b class="fc">&nbsp;			double x = seg.intersectionOfYMonotonicWithAxisX(m_point.y,</b>
+<b class="fc">&nbsp;					m_point.x);</b>
+&nbsp;
+<b class="fc">&nbsp;			assert (x != m_point.x);</b>
+&nbsp;
+<b class="fc">&nbsp;			return m_point.x &lt; x ? -1 : (m_point.x &gt; x ? 1 : 0);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	int newCluster_() {
+<b class="fc">&nbsp;		if (m_clusterData == null)</b>
+<b class="nc">&nbsp;			m_clusterData = new StridedIndexTypeCollection(8);</b>
+&nbsp;
+<b class="fc">&nbsp;		int cluster = m_clusterData.newElement();</b>
+&nbsp;		// m_clusterData-&gt;add(-1);//first vertex
+<b class="fc">&nbsp;		m_clusterData.setField(cluster, 1, 0);// parentage</b>
+&nbsp;		// m_clusterData-&gt;add(-1);//first half edge
+&nbsp;		// m_clusterData-&gt;add(-1);//prev cluster
+&nbsp;		// m_clusterData-&gt;add(-1);//next cluster
+<b class="fc">&nbsp;		return cluster;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	int newHalfEdgePair_() {
+<b class="fc">&nbsp;		if (m_halfEdgeData == null)</b>
+<b class="nc">&nbsp;			m_halfEdgeData = new StridedIndexTypeCollection(8);</b>
+&nbsp;
+<b class="fc">&nbsp;		int halfEdge = m_halfEdgeData.newElement();</b>
+&nbsp;		// m_halfEdgeData.add(-1);//origin cluster
+<b class="fc">&nbsp;		m_halfEdgeData.setField(halfEdge, 2, 0);// chain parentage</b>
+<b class="fc">&nbsp;		m_halfEdgeData.setField(halfEdge, 3, 0);// edge parentage</b>
+&nbsp;		// m_halfEdgeData.add(-1);//twin
+&nbsp;		// m_halfEdgeData.add(-1);//prev
+&nbsp;		// m_halfEdgeData.add(-1);//next
+<b class="fc">&nbsp;		int twinHalfEdge = m_halfEdgeData.newElement();</b>
+&nbsp;		// m_halfEdgeData.add(-1);//origin cluster
+<b class="fc">&nbsp;		m_halfEdgeData.setField(twinHalfEdge, 2, 0);// chain parentage</b>
+<b class="fc">&nbsp;		m_halfEdgeData.setField(twinHalfEdge, 3, 0);// edge parentage</b>
+&nbsp;		// m_halfEdgeData.add(-1);//twin
+&nbsp;		// m_halfEdgeData.add(-1);//prev
+&nbsp;		// m_halfEdgeData.add(-1);//next
+<b class="fc">&nbsp;		setHalfEdgeTwin_(halfEdge, twinHalfEdge);</b>
+<b class="fc">&nbsp;		setHalfEdgeTwin_(twinHalfEdge, halfEdge);</b>
+<b class="fc">&nbsp;		return halfEdge;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	int newChain_() {
+<b class="fc">&nbsp;		if (m_chainData == null)</b>
+<b class="nc">&nbsp;			m_chainData = new StridedIndexTypeCollection(8);</b>
+&nbsp;
+<b class="fc">&nbsp;		int chain = m_chainData.newElement();</b>
+&nbsp;		// m_chainData-&gt;write(chain, + 1, -1);//half_edge
+<b class="fc">&nbsp;		m_chainData.setField(chain, 2, 0);// parentage (geometric)</b>
+&nbsp;		// m_chainData-&gt;write(m_chainReserved + 3, -1);//parent chain
+&nbsp;		// m_chainData-&gt;write(m_chainReserved + 4, -1);//firstIsland
+&nbsp;		// m_chainData-&gt;write(m_chainReserved + 5, -1);//nextInParent
+&nbsp;		// m_chainData-&gt;write(m_chainReserved + 6, -1);//prev
+&nbsp;		// m_chainData-&gt;write(m_chainReserved + 7, -1);//next
+&nbsp;		// m_chainReserved += 8;
+<b class="fc">&nbsp;		return chain;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	int deleteChain_(int chain) {
+&nbsp;		// Note: this method cannot be after _PlaneSweep
+<b class="nc">&nbsp;		assert (m_universeChain != chain);</b>
+<b class="nc">&nbsp;		int n = getChainNext(chain);</b>
+<b class="nc">&nbsp;		m_chainData.deleteElement(chain);</b>
+&nbsp;		// Note: no need to update the first chain, because one should never try
+&nbsp;		// deleting the first (the universe) chain.
+<b class="nc">&nbsp;		return n;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	int getClusterIndex_(int cluster) {
+<b class="fc">&nbsp;		return m_clusterData.elementToIndex(cluster);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void setClusterVertexIterator_(int cluster, int verticeList) {
+<b class="fc">&nbsp;		m_clusterData.setField(cluster, 7, verticeList);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void setClusterHalfEdge_(int cluster, int half_edge) {
+<b class="fc">&nbsp;		m_clusterData.setField(cluster, 2, half_edge);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void setClusterParentage_(int cluster, int parentage) {
+<b class="fc">&nbsp;		m_clusterData.setField(cluster, 1, parentage);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void setPrevCluster_(int cluster, int nextCluster) {
+<b class="fc">&nbsp;		m_clusterData.setField(cluster, 3, nextCluster);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void setNextCluster_(int cluster, int nextCluster) {
+<b class="fc">&nbsp;		m_clusterData.setField(cluster, 4, nextCluster);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void setClusterVertexIndex_(int cluster, int index) {
+<b class="fc">&nbsp;		m_clusterData.setField(cluster, 5, index);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	int getClusterVertexIndex_(int cluster) {
+<b class="fc">&nbsp;		return m_clusterData.getField(cluster, 5);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void setClusterChain_(int cluster, int chain) {
+<b class="fc">&nbsp;		m_clusterData.setField(cluster, 6, chain);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void addClusterToExteriorChain_(int chain, int cluster) {
+<b class="fc">&nbsp;		assert (getClusterChain(cluster) == -1);</b>
+<b class="fc">&nbsp;		setClusterChain_(cluster, chain);</b>
+&nbsp;		// There is no link from the chain to the cluster. Only vice versa.
+&nbsp;		// Consider for change?
+&nbsp;	}
+&nbsp;
+&nbsp;	int getHalfEdgeIndex_(int he) {
+<b class="fc">&nbsp;		return m_halfEdgeData.elementToIndex(he);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void setHalfEdgeOrigin_(int half_edge, int cluster) {
+<b class="fc">&nbsp;		m_halfEdgeData.setField(half_edge, 1, cluster);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void setHalfEdgeTwin_(int half_edge, int twinHalfEdge) {
+<b class="fc">&nbsp;		m_halfEdgeData.setField(half_edge, 4, twinHalfEdge);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void setHalfEdgePrev_(int half_edge, int prevHalfEdge) {
+<b class="fc">&nbsp;		m_halfEdgeData.setField(half_edge, 5, prevHalfEdge);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void setHalfEdgeNext_(int half_edge, int nextHalfEdge) {
+<b class="fc">&nbsp;		m_halfEdgeData.setField(half_edge, 6, nextHalfEdge);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// void set_half_edge_chain_parentage_(int half_edge, int
+&nbsp;	// chainParentageMask) { m_halfEdgeData.setField(half_edge + 2,
+&nbsp;	// chainParentageMask); }
+&nbsp;	void setHalfEdgeChain_(int half_edge, int chain) {
+<b class="fc">&nbsp;		m_halfEdgeData.setField(half_edge, 2, chain);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void setHalfEdgeParentage_(int half_edge, int parentageMask) {
+<b class="fc">&nbsp;		m_halfEdgeData.setField(half_edge, 3, parentageMask);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	int getHalfEdgeParentageMask_(int half_edge) {
+<b class="fc">&nbsp;		return m_halfEdgeData.getField(half_edge, 3);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void setHalfEdgeVertexIterator_(int half_edge, int vertexIterator) {
+<b class="fc">&nbsp;		m_halfEdgeData.setField(half_edge, 7, vertexIterator);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void updateVertexToHalfEdgeConnectionHelper_(int half_edge, boolean bClear) {
+<b class="fc">&nbsp;		int viter = getHalfEdgeVertexIterator(half_edge);</b>
+<b class="fc">&nbsp;		if (viter != -1) {</b>
+<b class="fc">&nbsp;			int he = bClear ? -1 : half_edge;</b>
+<b class="fc">&nbsp;			for (int viter_ = getHalfEdgeVertexIterator(half_edge); viter_ != -1; viter_ = incrementVertexIterator(viter_)) {</b>
+<b class="fc">&nbsp;				int vertex = getVertexFromVertexIterator(viter_);</b>
+<b class="fc">&nbsp;				m_shape.setUserIndex(vertex, m_halfEdgeIndex, he);</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	void updateVertexToHalfEdgeConnection_(int half_edge, boolean bClear) {
+<b class="fc">&nbsp;		if (half_edge == -1)</b>
+&nbsp;			return;
+<b class="fc">&nbsp;		updateVertexToHalfEdgeConnectionHelper_(half_edge, bClear);</b>
+<b class="fc">&nbsp;		updateVertexToHalfEdgeConnectionHelper_(getHalfEdgeTwin(half_edge),</b>
+<b class="fc">&nbsp;				bClear);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	int getChainIndex_(int chain) {
+<b class="fc">&nbsp;		return m_chainData.elementToIndex(chain);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void setChainHalfEdge_(int chain, int half_edge) {
+<b class="fc">&nbsp;		m_chainData.setField(chain, 1, half_edge);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void setChainParentage_(int chain, int parentage) {
+<b class="fc">&nbsp;		m_chainData.setField(chain, 2, parentage);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void setChainParent_(int chain, int parentChain) {
+<b class="fc">&nbsp;		assert (m_chainData.getField(chain, 3) != parentChain);</b>
+<b class="fc">&nbsp;		m_chainData.setField(chain, 3, parentChain);</b>
+<b class="fc">&nbsp;		int firstIsland = getChainFirstIsland(parentChain);</b>
+<b class="fc">&nbsp;		setChainNextInParent_(chain, firstIsland);</b>
+<b class="fc">&nbsp;		setChainFirstIsland_(parentChain, chain);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void setChainFirstIsland_(int chain, int islandChain) {
+<b class="fc">&nbsp;		m_chainData.setField(chain, 4, islandChain);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void setChainNextInParent_(int chain, int nextInParent) {
+<b class="fc">&nbsp;		m_chainData.setField(chain, 5, nextInParent);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void setChainPrev_(int chain, int prev) {
+<b class="fc">&nbsp;		m_chainData.setField(chain, 6, prev);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void setChainNext_(int chain, int next) {
+<b class="fc">&nbsp;		m_chainData.setField(chain, 7, next);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void setChainArea_(int chain, double area) {
+<b class="fc">&nbsp;		int chainIndex = getChainIndex_(chain);</b>
+<b class="fc">&nbsp;		m_chainAreas.write(chainIndex, area);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void setChainPerimeter_(int chain, double perimeter) {
+<b class="fc">&nbsp;		int chainIndex = getChainIndex_(chain);</b>
+<b class="fc">&nbsp;		m_chainPerimeters.write(chainIndex, perimeter);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void updateChainAreaAndPerimeter_(int chain) {
+<b class="fc">&nbsp;		double area = 0;</b>
+<b class="fc">&nbsp;		double perimeter = 0;</b>
+<b class="fc">&nbsp;		int firstHalfEdge = getChainHalfEdge(chain);</b>
+<b class="fc">&nbsp;		Point2D origin = new Point2D(), from = new Point2D(), to = new Point2D();</b>
+<b class="fc">&nbsp;		getHalfEdgeFromXY(firstHalfEdge, origin);</b>
+<b class="fc">&nbsp;		from.setCoords(origin);</b>
+<b class="fc">&nbsp;		int half_edge = firstHalfEdge;</b>
+&nbsp;		do {
+<b class="fc">&nbsp;			getHalfEdgeToXY(half_edge, to);</b>
+<b class="fc">&nbsp;			perimeter += Point2D.distance(from, to);</b>
+<b class="fc">&nbsp;			int twinChain = getHalfEdgeChain(getHalfEdgeTwin(half_edge));</b>
+<b class="fc">&nbsp;			if (twinChain != chain)// only count edges are not dangling segments</b>
+&nbsp;									// of polylines
+&nbsp;			{
+<b class="fc">&nbsp;				area += ((to.x - origin.x) - (from.x - origin.x))</b>
+<b class="fc">&nbsp;						* ((to.y - origin.y) + (from.y - origin.y)) * 0.5;</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			from.setCoords(to);</b>
+<b class="fc">&nbsp;			half_edge = getHalfEdgeNext(half_edge);</b>
+<b class="fc">&nbsp;		} while (half_edge != firstHalfEdge);</b>
+&nbsp;
+<b class="fc">&nbsp;		int ind = getChainIndex_(chain);</b>
+<b class="fc">&nbsp;		m_chainAreas.write(ind, area);</b>
+<b class="fc">&nbsp;		m_chainPerimeters.write(ind, perimeter);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	int getChainTopMostEdge_(int chain) {
+<b class="nc">&nbsp;		int firstHalfEdge = getChainHalfEdge(chain);</b>
+<b class="nc">&nbsp;		Point2D top = new Point2D();</b>
+<b class="nc">&nbsp;		getHalfEdgeFromXY(firstHalfEdge, top);</b>
+<b class="nc">&nbsp;		int topEdge = firstHalfEdge;</b>
+<b class="nc">&nbsp;		Point2D v = new Point2D();</b>
+<b class="nc">&nbsp;		int half_edge = firstHalfEdge;</b>
+&nbsp;		do {
+<b class="nc">&nbsp;			getHalfEdgeFromXY(half_edge, v);</b>
+<b class="nc">&nbsp;			if (v.compare(top) &gt; 0) {</b>
+<b class="nc">&nbsp;				top.setCoords(v);</b>
+<b class="nc">&nbsp;				topEdge = half_edge;</b>
+&nbsp;			}
+<b class="nc">&nbsp;			half_edge = getHalfEdgeNext(half_edge);</b>
+<b class="nc">&nbsp;		} while (half_edge != firstHalfEdge);</b>
+<b class="nc">&nbsp;		return topEdge;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void planeSweepParentage_(int inputMode, ProgressTracker progress_tracker) {
+<b class="fc">&nbsp;		PlaneSweepComparator comparator = new PlaneSweepComparator(this);</b>
+<b class="fc">&nbsp;		Treap aet = new Treap();</b>
+<b class="fc">&nbsp;		aet.setCapacity(m_pointCount / 2);</b>
+<b class="fc">&nbsp;		aet.setComparator(comparator);</b>
+&nbsp;
+<b class="fc">&nbsp;		AttributeStreamOfInt32 new_edges = new AttributeStreamOfInt32(0);</b>
+<b class="fc">&nbsp;		int treeNodeIndex = createUserIndexForHalfEdges();</b>
+&nbsp;
+<b class="fc">&nbsp;		ClusterSweepMonikerComparator clusterMoniker = null;</b>
+<b class="fc">&nbsp;		int counter = 0;</b>
+&nbsp;		// Clusters are sorted by the y, x coordinate in ascending order.
+<b class="fc">&nbsp;		Point2D pt = new Point2D();</b>
+&nbsp;		// Each cluster is an event of the sweep-line algorithm.
+<b class="fc">&nbsp;		for (int cluster = getFirstCluster(); cluster != -1; cluster = getNextCluster(cluster)) {</b>
+<b class="fc">&nbsp;			counter++;</b>
+<b class="fc">&nbsp;			if ((counter &amp; 0xFF) == 0) {</b>
+<b class="fc">&nbsp;				if ((progress_tracker != null)</b>
+<b class="nc">&nbsp;						&amp;&amp; !(progress_tracker.progress(-1, -1)))</b>
+<b class="nc">&nbsp;					throw new UserCancelException();</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			int firstHalfEdge = getClusterHalfEdge(cluster);</b>
+<b class="fc">&nbsp;			if (firstHalfEdge != -1) {</b>
+<b class="fc">&nbsp;				new_edges.resizePreserveCapacity(0);</b>
+<b class="fc">&nbsp;				if (!tryOptimizedInsertion_(aet, treeNodeIndex, new_edges,</b>
+<b class="fc">&nbsp;						cluster, firstHalfEdge))// optimized insertion is for a</b>
+&nbsp;												// simple chain, in that case we
+&nbsp;												// simply replace an old edge
+&nbsp;												// with a new one in AET - O(1)
+&nbsp;				{// This is more complex than a simple chain of edges
+<b class="fc">&nbsp;					getXY(cluster, pt);</b>
+<b class="fc">&nbsp;					comparator.setY(pt.y);</b>
+<b class="fc">&nbsp;					int clusterHalfEdge = firstHalfEdge;</b>
+&nbsp;					// Delete all edges that end at the cluster.
+&nbsp;					do {// edges that end at the cluster have been assigned an
+&nbsp;						// AET node in the treeNodeIndex.
+<b class="fc">&nbsp;						int attachedTreeNode = getHalfEdgeUserIndex(</b>
+<b class="fc">&nbsp;								clusterHalfEdge, treeNodeIndex);</b>
+<b class="fc">&nbsp;						if (attachedTreeNode != -1) {</b>
+<b class="fc">&nbsp;							assert (attachedTreeNode != StridedIndexTypeCollection</b>
+<b class="fc">&nbsp;									.impossibleIndex2());</b>
+<b class="fc">&nbsp;							aet.deleteNode(attachedTreeNode, -1);</b>
+<b class="fc">&nbsp;							setHalfEdgeUserIndex(clusterHalfEdge,</b>
+<b class="fc">&nbsp;									treeNodeIndex,</b>
+&nbsp;									StridedIndexTypeCollection
+<b class="fc">&nbsp;											.impossibleIndex2());// set it to -2</b>
+&nbsp;						}
+&nbsp;
+<b class="fc">&nbsp;						clusterHalfEdge = getHalfEdgeNext(getHalfEdgeTwin(clusterHalfEdge));</b>
+<b class="fc">&nbsp;						assert (getHalfEdgeOrigin(clusterHalfEdge) == cluster);</b>
+<b class="fc">&nbsp;					} while (firstHalfEdge != clusterHalfEdge);</b>
+&nbsp;
+&nbsp;					// insert edges that start at the cluster.
+&nbsp;					// We need to insert only the edges that have the from point
+&nbsp;					// below the to point.
+&nbsp;					// This is ensured by the logic of the algorithm.
+<b class="fc">&nbsp;					clusterHalfEdge = firstHalfEdge;</b>
+&nbsp;					do {
+<b class="fc">&nbsp;						int attachedTreeNode = getHalfEdgeUserIndex(</b>
+<b class="fc">&nbsp;								clusterHalfEdge, treeNodeIndex);</b>
+<b class="fc">&nbsp;						if (attachedTreeNode == -1) {</b>
+<b class="fc">&nbsp;							int newTreeNode = aet.addElement(clusterHalfEdge,</b>
+<b class="fc">&nbsp;									-1);</b>
+<b class="fc">&nbsp;							new_edges.add(newTreeNode);</b>
+&nbsp;						}
+<b class="fc">&nbsp;						clusterHalfEdge = getHalfEdgeNext(getHalfEdgeTwin(clusterHalfEdge));</b>
+<b class="fc">&nbsp;						assert (getHalfEdgeOrigin(clusterHalfEdge) == cluster);</b>
+<b class="fc">&nbsp;					} while (firstHalfEdge != clusterHalfEdge);</b>
+&nbsp;				}
+&nbsp;
+&nbsp;				// Analyze new edges.
+&nbsp;				// We go in the opposite order, because of the way how the half
+&nbsp;				// edges are sorted on a cluster.
+&nbsp;				// We want to go from the left to the right.
+<b class="fc">&nbsp;				for (int i = new_edges.size() - 1; i &gt;= 0; i--) {</b>
+<b class="fc">&nbsp;					int newTreeNode = new_edges.get(i);</b>
+<b class="fc">&nbsp;					int clusterHalfEdge = aet.getElement(newTreeNode);</b>
+<b class="fc">&nbsp;					int twinEdge = getHalfEdgeTwin(clusterHalfEdge);</b>
+<b class="fc">&nbsp;					assert (getHalfEdgeUserIndex(twinEdge, treeNodeIndex) == -1);</b>
+<b class="fc">&nbsp;					setHalfEdgeUserIndex(twinEdge, treeNodeIndex, newTreeNode);</b>
+&nbsp;
+<b class="fc">&nbsp;					planeSweepParentagePropagateParentage_(aet, newTreeNode,</b>
+<b class="fc">&nbsp;							inputMode);</b>
+&nbsp;				}
+<b class="fc">&nbsp;			} else if (getClusterChain(cluster) == -1) {</b>
+&nbsp;				// get the left half edge of a face. The point belongs to the
+&nbsp;				// face.
+<b class="fc">&nbsp;				if (clusterMoniker == null)</b>
+<b class="fc">&nbsp;					clusterMoniker = new ClusterSweepMonikerComparator(this);</b>
+&nbsp;
+<b class="fc">&nbsp;				getXY(cluster, pt);</b>
+<b class="fc">&nbsp;				clusterMoniker.setPointXY(pt);</b>
+<b class="fc">&nbsp;				int leftNode = aet.searchLowerBound(clusterMoniker, -1);</b>
+<b class="fc">&nbsp;				int chain = m_universeChain;</b>
+&nbsp;
+<b class="fc">&nbsp;				if (leftNode != -1) {</b>
+<b class="fc">&nbsp;					int edge = aet.getElement(leftNode);</b>
+<b class="fc">&nbsp;					int leftChain = getHalfEdgeChain(edge);</b>
+<b class="fc">&nbsp;					if (leftChain == getHalfEdgeChain(getHalfEdgeTwin(edge))) {</b>
+<b class="fc">&nbsp;						edge = getLeftSkipPolylines_(aet, leftNode);</b>
+&nbsp;					}
+&nbsp;
+<b class="fc">&nbsp;					if (edge != -1)</b>
+<b class="fc">&nbsp;						chain = getHalfEdgeChain(edge);</b>
+&nbsp;				}
+&nbsp;
+<b class="fc">&nbsp;				addClusterToExteriorChain_(chain, cluster);</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		deleteUserIndexForHalfEdges(treeNodeIndex);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void planeSweepParentagePropagateParentage_(Treap aet, int treeNode,
+&nbsp;			int inputMode) {
+<b class="fc">&nbsp;		int edge = aet.getElement(treeNode);</b>
+<b class="fc">&nbsp;		int edgeChain = getHalfEdgeChain(edge);</b>
+<b class="fc">&nbsp;		int edgeChainParent = getChainParent(edgeChain);</b>
+<b class="fc">&nbsp;		if (edgeChainParent != -1)</b>
+&nbsp;			return;// this edge has been processed already.
+&nbsp;
+&nbsp;		// get contributing left edge.
+<b class="fc">&nbsp;		int leftEdge = getLeftSkipPolylines_(aet, treeNode);</b>
+&nbsp;
+<b class="fc">&nbsp;		int twinEdge = getHalfEdgeTwin(edge);</b>
+<b class="fc">&nbsp;		int twinHalfEdgeChain = getHalfEdgeChain(twinEdge);</b>
+&nbsp;
+<b class="fc">&nbsp;		double chainArea = getChainArea(edgeChain);</b>
+<b class="fc">&nbsp;		double twinChainArea = getChainArea(twinHalfEdgeChain);</b>
+&nbsp;
+<b class="fc">&nbsp;		int parentChain = getChainParent(edgeChain);</b>
+<b class="fc">&nbsp;		int twinParentChain = getChainParent(twinHalfEdgeChain);</b>
+<b class="fc">&nbsp;		if (leftEdge == -1 &amp;&amp; parentChain == -1) {</b>
+&nbsp;			// This edge/twin pair does not have a neighbour edge to the left.
+&nbsp;			// twin parent is not yet been assigned.
+<b class="fc">&nbsp;			if (twinHalfEdgeChain == edgeChain) {// set parentage of a polyline</b>
+&nbsp;													// edge (any edge for which
+&nbsp;													// the edge ant its twin
+&nbsp;													// belong to the same chain)
+<b class="fc">&nbsp;				setChainParent_(twinHalfEdgeChain, getFirstChain());</b>
+<b class="fc">&nbsp;				twinParentChain = getFirstChain();</b>
+<b class="fc">&nbsp;				parentChain = twinParentChain;</b>
+<b class="fc">&nbsp;			} else {</b>
+&nbsp;				// We have two touching chains that do not have parent chain
+&nbsp;				// set.
+&nbsp;				// The edge is directed up, the twin edge is directed down.
+&nbsp;				// There is no edge to the left. THat means there is no other
+&nbsp;				// than the universe surrounding this edge.
+&nbsp;				// The edge must belong to a clockwise chain, and the twin edge
+&nbsp;				// must belong to a ccw chain that encloses this edge. This
+&nbsp;				// follows from the way how we connect edges around clusters.
+<b class="fc">&nbsp;				assert (twinChainArea &lt; 0 &amp;&amp; chainArea &gt; 0);</b>
+<b class="fc">&nbsp;				if (twinParentChain == -1) {</b>
+<b class="fc">&nbsp;					setChainParent_(twinHalfEdgeChain, m_universeChain);</b>
+<b class="fc">&nbsp;					twinParentChain = m_universeChain;</b>
+<b class="fc">&nbsp;				} else {</b>
+<b class="fc">&nbsp;					assert (getFirstChain() == twinParentChain);</b>
+&nbsp;				}
+&nbsp;
+<b class="fc">&nbsp;				setChainParent_(edgeChain, twinHalfEdgeChain);</b>
+<b class="fc">&nbsp;				parentChain = twinHalfEdgeChain;</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (leftEdge != -1) {</b>
+<b class="fc">&nbsp;			int leftEdgeChain = getHalfEdgeChain(leftEdge);</b>
+&nbsp;			// the twin edge has not been processed yet
+<b class="fc">&nbsp;			if (twinParentChain == -1) {</b>
+<b class="fc">&nbsp;				double leftArea = getChainArea(leftEdgeChain);</b>
+<b class="fc">&nbsp;				if (leftArea &lt;= 0) {// if left Edge&#39;s chain area is negative,</b>
+&nbsp;									// then it is a chain that ends at the left
+&nbsp;									// edge, so we need to get the parent of the
+&nbsp;									// left chain and it will be the parent of
+&nbsp;									// this one.
+<b class="fc">&nbsp;					int leftChainParent = getChainParent(leftEdgeChain);</b>
+<b class="fc">&nbsp;					assert (leftChainParent != -1);</b>
+&nbsp;
+<b class="fc">&nbsp;					setChainParent_(twinHalfEdgeChain, leftChainParent);</b>
+<b class="fc">&nbsp;					twinParentChain = leftChainParent;</b>
+<b class="fc">&nbsp;				} else // (leftArea &gt; 0)</b>
+&nbsp;				{// left edge is an edge of positive chain. It surrounds the
+&nbsp;					// twin chain.
+<b class="fc">&nbsp;					setChainParent_(twinHalfEdgeChain, leftEdgeChain);</b>
+<b class="fc">&nbsp;					twinParentChain = leftEdgeChain;</b>
+&nbsp;				}
+&nbsp;
+<b class="fc">&nbsp;				if (twinHalfEdgeChain == edgeChain) // if this is a polyline</b>
+&nbsp;													// chain
+<b class="fc">&nbsp;					parentChain = twinParentChain;</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (parentChain == -1) {</b>
+<b class="fc">&nbsp;			trySetChainParentFromTwin_(edgeChain, twinHalfEdgeChain);</b>
+<b class="fc">&nbsp;			parentChain = getChainParent(edgeChain);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		assert (parentChain != -1);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (inputMode == EnumInputMode.enumInputModeBuildGraph) {</b>
+<b class="fc">&nbsp;			propagate_parentage_build_graph_(aet, treeNode, edge, leftEdge, edgeChain, edgeChainParent, twinHalfEdgeChain);</b>
+<b class="fc">&nbsp;		}</b>
+<b class="fc">&nbsp;		else if (inputMode == EnumInputMode.enumInputModeSimplifyWinding) {</b>
+<b class="fc">&nbsp;			propagate_parentage_winding_(aet, treeNode, edge, leftEdge, twinEdge, edgeChain, edgeChainParent, twinHalfEdgeChain);</b>
+<b class="fc">&nbsp;		}		</b>
+<b class="fc">&nbsp;		else if (inputMode == EnumInputMode.enumInputModeSimplifyAlternate) {</b>
+<b class="fc">&nbsp;			propagate_parentage_alternate_(aet, treeNode, edge, leftEdge, twinEdge, edgeChain, edgeChainParent, twinHalfEdgeChain);</b>
+&nbsp;		}		
+&nbsp;		
+&nbsp;	}
+&nbsp;	
+&nbsp;    void propagate_parentage_build_graph_(Treap aet, int treeNode, int edge, int leftEdge,
+&nbsp;    	      int edgeChain, int edgeChainParent, int twinHalfEdgeChain) {
+&nbsp;		// Now do specific sweep calculations
+<b class="fc">&nbsp;		int chainParentage = getChainParentage(edgeChain);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (leftEdge != -1) {</b>
+&nbsp;			// borrow the parentage from the left edge also
+<b class="fc">&nbsp;			int leftEdgeChain = getHalfEdgeChain(leftEdge);</b>
+&nbsp;	
+&nbsp;			// We take parentage from the left edge (that edge has been
+&nbsp;			// already processed), and move its face parentage accross this
+&nbsp;			// edge/twin pair.
+&nbsp;			// While the parentage is moved, accross, any bits of the
+&nbsp;			// parentage that is present in the twin are removed, because
+&nbsp;			// the twin is the right edge of the current face.
+&nbsp;			// The remaining bits are added to the face parentage of this
+&nbsp;			// edge, indicating that the face this edge borders, belongs to
+&nbsp;			// all the parents that are still active to the left.
+<b class="fc">&nbsp;			int twinChainParentage = getChainParentage(twinHalfEdgeChain);</b>
+<b class="fc">&nbsp;			int leftChainParentage = getChainParentage(leftEdgeChain);</b>
+&nbsp;
+<b class="fc">&nbsp;			int edgeParentage = getHalfEdgeParentage(edge);</b>
+<b class="fc">&nbsp;			int spikeParentage = chainParentage &amp; twinChainParentage</b>
+<b class="fc">&nbsp;					&amp; leftChainParentage; // parentage that needs to stay</b>
+<b class="fc">&nbsp;			leftChainParentage = leftChainParentage</b>
+<b class="fc">&nbsp;						^ (leftChainParentage &amp; edgeParentage);</b>
+<b class="fc">&nbsp;			leftChainParentage |= spikeParentage;</b>
+&nbsp;
+<b class="fc">&nbsp;			if (leftChainParentage != 0) {</b>
+&nbsp;				// propagate left parentage to the current edge and its
+&nbsp;				// twin.
+<b class="fc">&nbsp;				setChainParentage_(twinHalfEdgeChain, twinChainParentage</b>
+<b class="fc">&nbsp;							| leftChainParentage);</b>
+<b class="fc">&nbsp;				setChainParentage_(edgeChain, leftChainParentage</b>
+<b class="fc">&nbsp;							| chainParentage);</b>
+<b class="fc">&nbsp;				chainParentage |= leftChainParentage;</b>
+&nbsp;			}
+&nbsp;
+&nbsp;				// dbg_print_edge_(edge);
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		for (int rightNode = aet.getNext(treeNode); rightNode != -1; rightNode = aet</b>
+<b class="fc">&nbsp;					.getNext(rightNode)) {</b>
+<b class="fc">&nbsp;			int rightEdge = aet.getElement(rightNode);</b>
+<b class="fc">&nbsp;			int rightTwin = getHalfEdgeTwin(rightEdge);</b>
+&nbsp;
+<b class="fc">&nbsp;			int rightTwinChain = getHalfEdgeChain(rightTwin);</b>
+<b class="fc">&nbsp;			int rightTwinChainParentage = getChainParentage(rightTwinChain);</b>
+<b class="fc">&nbsp;			int rightEdgeParentage = getHalfEdgeParentage(rightEdge);</b>
+<b class="fc">&nbsp;			int rightEdgeChain = getHalfEdgeChain(rightEdge);</b>
+<b class="fc">&nbsp;			int rightChainParentage = getChainParentage(rightEdgeChain);</b>
+&nbsp;
+<b class="fc">&nbsp;			int spikeParentage = rightTwinChainParentage</b>
+<b class="fc">&nbsp;					&amp; rightChainParentage &amp; chainParentage; // parentage</b>
+&nbsp;															// that needs to
+&nbsp;															// stay
+<b class="fc">&nbsp;			chainParentage = chainParentage</b>
+<b class="fc">&nbsp;					^ (chainParentage &amp; rightEdgeParentage);// only</b>
+&nbsp;															// parentage
+&nbsp;															// that is
+&nbsp;															// abscent in
+&nbsp;															// the twin is
+&nbsp;															// propagated to
+&nbsp;															// the right
+<b class="fc">&nbsp;			chainParentage |= spikeParentage;</b>
+&nbsp;
+<b class="fc">&nbsp;			if (chainParentage == 0)</b>
+<b class="fc">&nbsp;				break;</b>
+&nbsp;
+<b class="fc">&nbsp;			setChainParentage_(rightTwinChain, rightTwinChainParentage</b>
+<b class="fc">&nbsp;						| chainParentage);</b>
+<b class="fc">&nbsp;			setChainParentage_(rightEdgeChain, rightChainParentage</b>
+<b class="fc">&nbsp;						| chainParentage);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;    void propagate_parentage_winding_(Treap aet, int treeNode, int edge, int leftEdge, int twinEdge,
+&nbsp;  	      int edgeChain, int edgeChainParent, int twinHalfEdgeChain) {
+&nbsp;    
+<b class="fc">&nbsp;    	if (edgeChain == twinHalfEdgeChain)</b>
+&nbsp;			return;
+&nbsp;		// starting from the left most edge, calculate winding.
+<b class="fc">&nbsp;		int edgeWinding = getHalfEdgeUserIndex(edge,</b>
+<b class="fc">&nbsp;				m_tmpHalfEdgeWindingNumberIndex);</b>
+<b class="fc">&nbsp;		edgeWinding += getHalfEdgeUserIndex(twinEdge,</b>
+<b class="fc">&nbsp;				m_tmpHalfEdgeWindingNumberIndex);</b>
+<b class="fc">&nbsp;		int winding = 0;</b>
+<b class="fc">&nbsp;		AttributeStreamOfInt32 chainStack = new AttributeStreamOfInt32(0);</b>
+<b class="fc">&nbsp;		AttributeStreamOfInt32 windingStack = new AttributeStreamOfInt32(0);</b>
+<b class="fc">&nbsp;		windingStack.add(0);</b>
+<b class="fc">&nbsp;		for (int leftNode = aet.getFirst(-1); leftNode != treeNode; leftNode = aet</b>
+<b class="fc">&nbsp;					.getNext(leftNode)) {</b>
+<b class="fc">&nbsp;			int leftEdge1 = aet.getElement(leftNode);</b>
+<b class="fc">&nbsp;			int leftTwin = getHalfEdgeTwin(leftEdge1);</b>
+<b class="fc">&nbsp;			int l_chain = getHalfEdgeChain(leftEdge1);</b>
+<b class="fc">&nbsp;			int lt_chain = getHalfEdgeChain(leftTwin);</b>
+&nbsp;
+<b class="fc">&nbsp;			if (l_chain != lt_chain) {</b>
+<b class="fc">&nbsp;				int leftWinding = getHalfEdgeUserIndex(leftEdge1,</b>
+<b class="fc">&nbsp;						m_tmpHalfEdgeWindingNumberIndex);</b>
+<b class="fc">&nbsp;				leftWinding += getHalfEdgeUserIndex(leftTwin,</b>
+<b class="fc">&nbsp;						m_tmpHalfEdgeWindingNumberIndex);</b>
+<b class="fc">&nbsp;				winding += leftWinding;</b>
+&nbsp;
+<b class="fc">&nbsp;				boolean popped = false;</b>
+<b class="fc">&nbsp;				if (chainStack.size() != 0</b>
+<b class="fc">&nbsp;						&amp;&amp; chainStack.getLast() == lt_chain) {</b>
+<b class="fc">&nbsp;					windingStack.removeLast();</b>
+<b class="fc">&nbsp;					chainStack.removeLast();</b>
+<b class="fc">&nbsp;					popped = true;</b>
+&nbsp;				}
+&nbsp;
+<b class="fc">&nbsp;				if (getChainParent(lt_chain) == -1)</b>
+<b class="nc">&nbsp;					throw GeometryException.GeometryInternalError();</b>
+&nbsp;
+<b class="fc">&nbsp;				if (!popped || getChainParent(lt_chain) != l_chain) {</b>
+<b class="fc">&nbsp;					windingStack.add(winding);</b>
+<b class="fc">&nbsp;					chainStack.add(l_chain);</b>
+&nbsp;				}
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		winding += edgeWinding;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (chainStack.size() != 0</b>
+<b class="fc">&nbsp;					&amp;&amp; chainStack.getLast() == twinHalfEdgeChain) {</b>
+<b class="fc">&nbsp;			windingStack.removeLast();</b>
+<b class="fc">&nbsp;			chainStack.removeLast();</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (winding != 0) {</b>
+<b class="fc">&nbsp;			if (windingStack.getLast() == 0) {</b>
+<b class="fc">&nbsp;				int geometry = m_shape.getFirstGeometry();</b>
+<b class="fc">&nbsp;				int geometryID = getGeometryID(geometry);</b>
+<b class="fc">&nbsp;				setChainParentage_(edgeChain, geometryID);</b>
+&nbsp;			}
+<b class="fc">&nbsp;		} else {</b>
+<b class="fc">&nbsp;			if (windingStack.getLast() != 0) {</b>
+<b class="fc">&nbsp;				int geometry = m_shape.getFirstGeometry();</b>
+<b class="fc">&nbsp;				int geometryID = getGeometryID(geometry);</b>
+<b class="fc">&nbsp;				setChainParentage_(edgeChain, geometryID);</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	void propagate_parentage_alternate_(Treap aet, int treeNode, int edge,
+&nbsp;			int leftEdge, int twinEdge, int edgeChain, int edgeChainParent,
+&nbsp;			int twinHalfEdgeChain) {
+&nbsp;		// Now do specific sweep calculations
+&nbsp;		// This one is done when we are doing a topological operation.
+<b class="fc">&nbsp;		int geometry = m_shape.getFirstGeometry();</b>
+<b class="fc">&nbsp;		int geometryID = getGeometryID(geometry);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (leftEdge == -1) {</b>
+&nbsp;			// no left edge neighbour means the twin chain is surrounded by the
+&nbsp;			// universe
+<b class="fc">&nbsp;			assert (getChainParent(twinHalfEdgeChain) == m_universeChain);</b>
+<b class="fc">&nbsp;			assert (getChainParentage(twinHalfEdgeChain) == 0 || getChainParentage(twinHalfEdgeChain) == m_universe_geomID);</b>
+<b class="fc">&nbsp;			assert (getChainParentage(edgeChain) == 0);</b>
+<b class="fc">&nbsp;			setChainParentage_(twinHalfEdgeChain, m_universe_geomID);</b>
+<b class="fc">&nbsp;			int parity = getHalfEdgeUserIndex(edge,</b>
+<b class="fc">&nbsp;					m_tmpHalfEdgeOddEvenNumberIndex);</b>
+<b class="fc">&nbsp;			if ((parity &amp; 1) != 0)</b>
+<b class="fc">&nbsp;				setChainParentage_(edgeChain, geometryID);// set the parenentage</b>
+&nbsp;															// from the parity
+&nbsp;			else
+<b class="nc">&nbsp;				setChainParentage_(edgeChain, m_universe_geomID);// this chain</b>
+&nbsp;																	// does not
+&nbsp;																	// belong to
+&nbsp;																	// geometry
+<b class="nc">&nbsp;		} else {</b>
+<b class="fc">&nbsp;			int twin_parentage = getChainParentage(twinHalfEdgeChain);</b>
+<b class="fc">&nbsp;			if (twin_parentage == 0) {</b>
+<b class="fc">&nbsp;				int leftEdgeChain = getHalfEdgeChain(leftEdge);</b>
+<b class="fc">&nbsp;				int left_parentage = getChainParentage(leftEdgeChain);</b>
+<b class="fc">&nbsp;				setChainParentage_(twinHalfEdgeChain, left_parentage);</b>
+<b class="fc">&nbsp;				int parity = getHalfEdgeUserIndex(edge,</b>
+<b class="fc">&nbsp;						m_tmpHalfEdgeOddEvenNumberIndex);</b>
+<b class="fc">&nbsp;				if ((parity &amp; 1) != 0)</b>
+<b class="fc">&nbsp;					setChainParentage_(edgeChain,</b>
+<b class="fc">&nbsp;							(left_parentage == geometryID) ? m_universe_geomID</b>
+<b class="fc">&nbsp;									: geometryID);</b>
+&nbsp;				else
+<b class="nc">&nbsp;					setChainParentage_(edgeChain, left_parentage);</b>
+&nbsp;
+<b class="nc">&nbsp;			} else {</b>
+<b class="fc">&nbsp;				int parity = getHalfEdgeUserIndex(edge,</b>
+<b class="fc">&nbsp;						m_tmpHalfEdgeOddEvenNumberIndex);</b>
+<b class="fc">&nbsp;				if ((parity &amp; 1) != 0)</b>
+<b class="fc">&nbsp;					setChainParentage_(edgeChain,</b>
+<b class="fc">&nbsp;							(twin_parentage == geometryID) ? m_universe_geomID</b>
+<b class="fc">&nbsp;									: geometryID);</b>
+&nbsp;				else
+<b class="nc">&nbsp;					setChainParentage_(edgeChain, twin_parentage);</b>
+&nbsp;			}
+&nbsp;
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	boolean tryOptimizedInsertion_(Treap aet, int treeNodeIndex,
+&nbsp;			AttributeStreamOfInt32 new_edges, int cluster, int firstHalfEdge) {
+<b class="fc">&nbsp;		int clusterHalfEdge = firstHalfEdge;</b>
+<b class="fc">&nbsp;		int attachedTreeNode = -1;</b>
+<b class="fc">&nbsp;		int newEdge = -1;</b>
+&nbsp;		// Delete all edges that end at the cluster.
+<b class="fc">&nbsp;		int count = 0;</b>
+&nbsp;		do {
+<b class="fc">&nbsp;			if (count == 2)</b>
+<b class="fc">&nbsp;				return false;</b>
+<b class="fc">&nbsp;			int n = getHalfEdgeUserIndex(clusterHalfEdge, treeNodeIndex);</b>
+<b class="fc">&nbsp;			if (n != -1) {</b>
+<b class="fc">&nbsp;				if (attachedTreeNode != -1)</b>
+<b class="fc">&nbsp;					return false;// two edges end at the cluster</b>
+<b class="fc">&nbsp;				attachedTreeNode = n;</b>
+<b class="fc">&nbsp;			} else {</b>
+<b class="fc">&nbsp;				if (newEdge != -1)</b>
+<b class="fc">&nbsp;					return false; // two edges start from the cluster</b>
+<b class="fc">&nbsp;				newEdge = clusterHalfEdge;</b>
+&nbsp;			}
+<b class="fc">&nbsp;			assert (getHalfEdgeOrigin(clusterHalfEdge) == cluster);</b>
+<b class="fc">&nbsp;			count++;</b>
+<b class="fc">&nbsp;			clusterHalfEdge = getHalfEdgeNext(getHalfEdgeTwin(clusterHalfEdge));</b>
+<b class="fc">&nbsp;		} while (firstHalfEdge != clusterHalfEdge);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (newEdge == -1 || attachedTreeNode == -1)</b>
+<b class="fc">&nbsp;			return false;</b>
+&nbsp;
+<b class="fc">&nbsp;		setHalfEdgeUserIndex(aet.getElement(attachedTreeNode), treeNodeIndex,</b>
+<b class="fc">&nbsp;				StridedIndexTypeCollection.impossibleIndex2());</b>
+<b class="fc">&nbsp;		aet.setElement(attachedTreeNode, newEdge);</b>
+<b class="fc">&nbsp;		new_edges.add(attachedTreeNode);</b>
+<b class="fc">&nbsp;		return true;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	boolean trySetChainParentFromTwin_(int chainToSet, int twinChain) {
+<b class="fc">&nbsp;		assert (getChainParent(chainToSet) == -1);</b>
+<b class="fc">&nbsp;		double area = getChainArea(chainToSet);</b>
+<b class="fc">&nbsp;		if (area == 0)</b>
+<b class="nc">&nbsp;			return false;</b>
+<b class="fc">&nbsp;		double twinArea = getChainArea(twinChain);</b>
+<b class="fc">&nbsp;		assert (twinArea != 0);</b>
+<b class="fc">&nbsp;		if (area &gt; 0 &amp;&amp; twinArea &lt; 0) {</b>
+<b class="fc">&nbsp;			setChainParent_(chainToSet, twinChain);</b>
+<b class="fc">&nbsp;			return true;</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (area &lt; 0 &amp;&amp; twinArea &gt; 0) {</b>
+<b class="nc">&nbsp;			setChainParent_(chainToSet, twinChain);</b>
+<b class="nc">&nbsp;			return true;</b>
+&nbsp;		} else {
+<b class="fc">&nbsp;			int twinParent = getChainParent(twinChain);</b>
+<b class="fc">&nbsp;			if (twinParent != -1) {</b>
+<b class="fc">&nbsp;				setChainParent_(chainToSet, twinParent);</b>
+<b class="fc">&nbsp;				return true;</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="nc">&nbsp;		return false;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void createHalfEdges_(int inputMode, AttributeStreamOfInt32 sorted_vertices) {
+&nbsp;		// After this loop all halfedges will be created.
+&nbsp;		// This loop also sets the known parentage on the edges.
+&nbsp;		// The half edges are connected with each other in a random order
+<b class="fc">&nbsp;		m_halfEdgeIndex = m_shape.createUserIndex();</b>
+&nbsp;
+<b class="fc">&nbsp;		for (int i = 0, nvert = sorted_vertices.size(); i &lt; nvert; i++) {</b>
+<b class="fc">&nbsp;			int vertex = sorted_vertices.get(i);</b>
+<b class="fc">&nbsp;			int cluster = m_shape.getUserIndex(vertex, m_clusterIndex);</b>
+&nbsp;
+<b class="fc">&nbsp;			int path = m_shape.getPathFromVertex(vertex);</b>
+<b class="fc">&nbsp;			int geometry = m_shape.getGeometryFromPath(path);</b>
+<b class="fc">&nbsp;			int gt = m_shape.getGeometryType(geometry);</b>
+<b class="fc">&nbsp;			if (Geometry.isMultiPath(gt)) {</b>
+<b class="fc">&nbsp;				int next = m_shape.getNextVertex(vertex);</b>
+<b class="fc">&nbsp;				if (next == -1)</b>
+<b class="fc">&nbsp;					continue;</b>
+&nbsp;
+<b class="fc">&nbsp;				int clusterTo = m_shape.getUserIndex(next, m_clusterIndex);</b>
+<b class="fc">&nbsp;				assert (clusterTo != -1);</b>
+<b class="fc">&nbsp;                if (cluster == clusterTo) {</b>
+<b class="fc">&nbsp;                    if (m_shape.getSegment(vertex) != null) {</b>
+<b class="nc">&nbsp;                        assert (m_shape.getSegment(vertex).calculateLength2D() == 0);</b>
+&nbsp;                    } else {
+<b class="fc">&nbsp;                        assert (m_shape.getXY(vertex).isEqual(m_shape.getXY(next)));</b>
+&nbsp;                    }
+&nbsp;
+&nbsp;                    continue;
+&nbsp;                }
+&nbsp;
+<b class="fc">&nbsp;				int half_edge = newHalfEdgePair_();</b>
+<b class="fc">&nbsp;				int twinEdge = getHalfEdgeTwin(half_edge);</b>
+&nbsp;
+&nbsp;				// add vertex to the half edge.
+<b class="fc">&nbsp;				int vertIndex = m_clusterVertices.newElement();</b>
+<b class="fc">&nbsp;				m_clusterVertices.setField(vertIndex, 0, vertex);</b>
+<b class="fc">&nbsp;				m_clusterVertices.setField(vertIndex, 1, -1);</b>
+<b class="fc">&nbsp;				setHalfEdgeVertexIterator_(half_edge, vertIndex);</b>
+&nbsp;
+<b class="fc">&nbsp;				setHalfEdgeOrigin_(half_edge, cluster);</b>
+<b class="fc">&nbsp;				int firstHalfEdge = getClusterHalfEdge(cluster);</b>
+<b class="fc">&nbsp;				if (firstHalfEdge == -1) {</b>
+<b class="fc">&nbsp;					setClusterHalfEdge_(cluster, half_edge);</b>
+<b class="fc">&nbsp;					setHalfEdgePrev_(half_edge, twinEdge);</b>
+<b class="fc">&nbsp;					setHalfEdgeNext_(twinEdge, half_edge);</b>
+<b class="fc">&nbsp;				} else {</b>
+&nbsp;					// It does not matter what order we insert the new edges in.
+&nbsp;					// We fix the order later.
+<b class="fc">&nbsp;					int firstPrev = getHalfEdgePrev(firstHalfEdge);</b>
+<b class="fc">&nbsp;					assert (getHalfEdgeNext(firstPrev) == firstHalfEdge);</b>
+<b class="fc">&nbsp;					setHalfEdgePrev_(firstHalfEdge, twinEdge);</b>
+<b class="fc">&nbsp;					setHalfEdgeNext_(twinEdge, firstHalfEdge);</b>
+<b class="fc">&nbsp;					assert (getHalfEdgePrev(firstHalfEdge) == twinEdge);</b>
+<b class="fc">&nbsp;					assert (getHalfEdgeNext(twinEdge) == firstHalfEdge);</b>
+<b class="fc">&nbsp;					setHalfEdgeNext_(firstPrev, half_edge);</b>
+<b class="fc">&nbsp;					setHalfEdgePrev_(half_edge, firstPrev);</b>
+<b class="fc">&nbsp;					assert (getHalfEdgePrev(half_edge) == firstPrev);</b>
+<b class="fc">&nbsp;					assert (getHalfEdgeNext(firstPrev) == half_edge);</b>
+&nbsp;				}
+&nbsp;
+<b class="fc">&nbsp;				setHalfEdgeOrigin_(twinEdge, clusterTo);</b>
+<b class="fc">&nbsp;				int firstTo = getClusterHalfEdge(clusterTo);</b>
+<b class="fc">&nbsp;				if (firstTo == -1) {</b>
+<b class="fc">&nbsp;					setClusterHalfEdge_(clusterTo, twinEdge);</b>
+<b class="fc">&nbsp;					setHalfEdgeNext_(half_edge, twinEdge);</b>
+<b class="fc">&nbsp;					setHalfEdgePrev_(twinEdge, half_edge);</b>
+<b class="fc">&nbsp;				} else {</b>
+<b class="fc">&nbsp;					int firstToPrev = getHalfEdgePrev(firstTo);</b>
+<b class="fc">&nbsp;					assert (getHalfEdgeNext(firstToPrev) == firstTo);</b>
+<b class="fc">&nbsp;					setHalfEdgePrev_(firstTo, half_edge);</b>
+<b class="fc">&nbsp;					setHalfEdgeNext_(half_edge, firstTo);</b>
+<b class="fc">&nbsp;					assert (getHalfEdgePrev(firstTo) == half_edge);</b>
+<b class="fc">&nbsp;					assert (getHalfEdgeNext(half_edge) == firstTo);</b>
+<b class="fc">&nbsp;					setHalfEdgeNext_(firstToPrev, twinEdge);</b>
+<b class="fc">&nbsp;					setHalfEdgePrev_(twinEdge, firstToPrev);</b>
+<b class="fc">&nbsp;					assert (getHalfEdgePrev(twinEdge) == firstToPrev);</b>
+<b class="fc">&nbsp;					assert (getHalfEdgeNext(firstToPrev) == twinEdge);</b>
+&nbsp;				}
+&nbsp;
+<b class="fc">&nbsp;				int geometryID = getGeometryID(geometry);</b>
+&nbsp;				// No chains yet exists, so we use a temporary user index to
+&nbsp;				// store chain parentage.
+&nbsp;				// The input polygons has been already simplified so their edges
+&nbsp;				// directed such that the hole is to the left from the edge
+&nbsp;				// (each edge is directed from the &quot;from&quot; to &quot;to&quot; point).
+<b class="fc">&nbsp;				if (inputMode == EnumInputMode.enumInputModeBuildGraph) {</b>
+<b class="fc">&nbsp;					setHalfEdgeUserIndex(twinEdge, m_tmpHalfEdgeParentageIndex,</b>
+<b class="fc">&nbsp;							0); // Hole is always to the left. left side here is</b>
+&nbsp;								// the twin.
+<b class="fc">&nbsp;					setHalfEdgeUserIndex(half_edge,</b>
+<b class="fc">&nbsp;							m_tmpHalfEdgeParentageIndex,</b>
+<b class="fc">&nbsp;							gt == Geometry.GeometryType.Polygon ? geometryID</b>
+<b class="fc">&nbsp;									: 0);</b>
+<b class="fc">&nbsp;				} else if (inputMode == EnumInputMode.enumInputModeSimplifyWinding) {</b>
+<b class="fc">&nbsp;					Point2D pt_1 = new Point2D();</b>
+<b class="fc">&nbsp;					m_shape.getXY(vertex, pt_1);</b>
+<b class="fc">&nbsp;					Point2D pt_2 = new Point2D();</b>
+<b class="fc">&nbsp;					m_shape.getXY(next, pt_2);</b>
+<b class="fc">&nbsp;					int windingNumber = 0;</b>
+<b class="fc">&nbsp;					int windingNumberTwin = 0;</b>
+<b class="fc">&nbsp;					if (pt_1.compare(pt_2) &lt; 0) {</b>
+&nbsp;						// The edge is directed bottom-up. That means it has the
+&nbsp;						// winding number of +1.
+&nbsp;						// The half-edge direction coincides with the edge
+&nbsp;						// direction. THe twin is directed top-down.
+&nbsp;						// The half edge will have the winding number of 1 and
+&nbsp;						// its twin the winding number of 0.
+&nbsp;						// When crossing the half-edge/twin pair from left to
+&nbsp;						// right, the winding number is changed by +1
+<b class="fc">&nbsp;						windingNumber = 1;</b>
+<b class="fc">&nbsp;					} else {</b>
+&nbsp;						// The edge is directed top-down. That means it has the
+&nbsp;						// winding number of -1.
+&nbsp;						// The half-edge direction coincides with the edge
+&nbsp;						// direction. The twin is directed bottom-up.
+&nbsp;						// The half edge will have the winding number of 0 and
+&nbsp;						// its twin the winding number of -1.
+&nbsp;						// When crossing the half-edge/twin pair from left to
+&nbsp;						// right, the winding number is changed by -1.
+<b class="fc">&nbsp;						windingNumberTwin = -1;</b>
+&nbsp;					}
+&nbsp;
+&nbsp;					// When we get a half-edge/twin pair, we can determine the
+&nbsp;					// winding number of the underlying edge
+&nbsp;					// by summing up the half-edge and twin&#39;s
+&nbsp;					// winding numbers.
+&nbsp;
+<b class="fc">&nbsp;					setHalfEdgeUserIndex(twinEdge, m_tmpHalfEdgeParentageIndex,</b>
+<b class="fc">&nbsp;							0);</b>
+<b class="fc">&nbsp;					setHalfEdgeUserIndex(half_edge,</b>
+<b class="fc">&nbsp;							m_tmpHalfEdgeParentageIndex, 0);</b>
+&nbsp;					// We split the winding number between the half edge and its
+&nbsp;					// twin.
+&nbsp;					// This allows us to determine which half edge goes in the
+&nbsp;					// direction of the edge, and also it allows to calculate
+&nbsp;					// the
+&nbsp;					// winging number by summing up the winding number of half
+&nbsp;					// edge and its twin.
+<b class="fc">&nbsp;					setHalfEdgeUserIndex(half_edge,</b>
+<b class="fc">&nbsp;							m_tmpHalfEdgeWindingNumberIndex, windingNumber);</b>
+<b class="fc">&nbsp;					setHalfEdgeUserIndex(twinEdge,</b>
+<b class="fc">&nbsp;							m_tmpHalfEdgeWindingNumberIndex, windingNumberTwin);</b>
+<b class="fc">&nbsp;				} else if (inputMode == EnumInputMode.enumInputModeIsSimplePolygon) {</b>
+<b class="nc">&nbsp;					setHalfEdgeUserIndex(twinEdge, m_tmpHalfEdgeParentageIndex,</b>
+<b class="nc">&nbsp;							m_universe_geomID);</b>
+<b class="nc">&nbsp;					setHalfEdgeUserIndex(half_edge,</b>
+<b class="nc">&nbsp;							m_tmpHalfEdgeParentageIndex,</b>
+<b class="nc">&nbsp;							gt == Geometry.GeometryType.Polygon ? geometryID</b>
+<b class="nc">&nbsp;									: 0);</b>
+<b class="nc">&nbsp;				} else if (inputMode == EnumInputMode.enumInputModeSimplifyAlternate) {</b>
+<b class="fc">&nbsp;					setHalfEdgeUserIndex(twinEdge, m_tmpHalfEdgeParentageIndex,</b>
+<b class="fc">&nbsp;							0);</b>
+<b class="fc">&nbsp;					setHalfEdgeUserIndex(half_edge,</b>
+<b class="fc">&nbsp;							m_tmpHalfEdgeParentageIndex, 0);</b>
+<b class="fc">&nbsp;					setHalfEdgeUserIndex(half_edge,</b>
+<b class="fc">&nbsp;							m_tmpHalfEdgeOddEvenNumberIndex, 1);</b>
+<b class="fc">&nbsp;					setHalfEdgeUserIndex(twinEdge,</b>
+<b class="fc">&nbsp;							m_tmpHalfEdgeOddEvenNumberIndex, 1);</b>
+&nbsp;				}
+&nbsp;
+<b class="fc">&nbsp;				int edgeBit = gt == Geometry.GeometryType.Polygon ? c_edgeBitMask</b>
+<b class="fc">&nbsp;						: 0;</b>
+<b class="fc">&nbsp;				setHalfEdgeParentage_(half_edge, geometryID | edgeBit);</b>
+<b class="fc">&nbsp;				setHalfEdgeParentage_(twinEdge, geometryID | edgeBit);</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	void mergeVertexListsOfEdges_(int eDst, int eSrc) {
+<b class="fc">&nbsp;		assert (getHalfEdgeTo(eDst) == getHalfEdgeTo(eSrc));</b>
+<b class="fc">&nbsp;		assert (getHalfEdgeOrigin(eDst) == getHalfEdgeOrigin(eSrc));</b>
+&nbsp;
+&nbsp;		{
+<b class="fc">&nbsp;			int vertFirst2 = getHalfEdgeVertexIterator(eSrc);</b>
+<b class="fc">&nbsp;			if (vertFirst2 != -1) {</b>
+<b class="fc">&nbsp;				int vertFirst1 = getHalfEdgeVertexIterator(eDst);</b>
+<b class="fc">&nbsp;				m_clusterVertices.setField(vertFirst2, 1, vertFirst1);</b>
+<b class="fc">&nbsp;				setHalfEdgeVertexIterator_(eDst, vertFirst2);</b>
+<b class="fc">&nbsp;				setHalfEdgeVertexIterator_(eSrc, -1);</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		int eDstTwin = getHalfEdgeTwin(eDst);</b>
+<b class="fc">&nbsp;		int eSrcTwin = getHalfEdgeTwin(eSrc);</b>
+&nbsp;		{
+<b class="fc">&nbsp;			int vertFirst2 = getHalfEdgeVertexIterator(eSrcTwin);</b>
+<b class="fc">&nbsp;			if (vertFirst2 != -1) {</b>
+<b class="fc">&nbsp;				int vertFirst1 = getHalfEdgeVertexIterator(eDstTwin);</b>
+<b class="fc">&nbsp;				m_clusterVertices.setField(vertFirst2, 1, vertFirst1);</b>
+<b class="fc">&nbsp;				setHalfEdgeVertexIterator_(eDstTwin, vertFirst2);</b>
+<b class="fc">&nbsp;				setHalfEdgeVertexIterator_(eSrcTwin, -1);</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	void sortHalfEdgesByAngle_(int inputMode) {
+<b class="fc">&nbsp;		AttributeStreamOfInt32 angleSorter = new AttributeStreamOfInt32(0);</b>
+<b class="fc">&nbsp;		angleSorter.reserve(10);</b>
+<b class="fc">&nbsp;		TopoGraphAngleComparer tgac = new TopoGraphAngleComparer(this);</b>
+&nbsp;		// Now go through the clusters, sort edges in each cluster by angle, and
+&nbsp;		// reconnect the halfedges of sorted edges in the sorted order.
+&nbsp;		// Also share the parentage information between coinciding edges and
+&nbsp;		// remove duplicates.
+<b class="fc">&nbsp;		for (int cluster = getFirstCluster(); cluster != -1; cluster = getNextCluster(cluster)) {</b>
+<b class="fc">&nbsp;			angleSorter.clear(false);</b>
+<b class="fc">&nbsp;			int first = getClusterHalfEdge(cluster);</b>
+<b class="fc">&nbsp;			if (first != -1) {</b>
+&nbsp;				// 1. sort edges originating at the cluster by angle (counter -
+&nbsp;				// clockwise).
+<b class="fc">&nbsp;				int edge = first;</b>
+&nbsp;				do {
+<b class="fc">&nbsp;					angleSorter.add(edge);// edges have the cluster in their</b>
+&nbsp;											// origin and are directed away from
+&nbsp;											// it. The twin edges are directed
+&nbsp;											// towards the cluster.
+<b class="fc">&nbsp;					edge = getHalfEdgeNext(getHalfEdgeTwin(edge));</b>
+<b class="fc">&nbsp;				} while (edge != first);</b>
+&nbsp;
+<b class="fc">&nbsp;				if (angleSorter.size() &gt; 1) {</b>
+<b class="fc">&nbsp;					boolean changed_order = true;</b>
+<b class="fc">&nbsp;					if (angleSorter.size() &gt; 2) {</b>
+<b class="fc">&nbsp;						angleSorter.Sort(0, angleSorter.size(),</b>
+<b class="fc">&nbsp;								tgac); // std::sort(angleSorter.get_ptr(),</b>
+&nbsp;																	// angleSorter.get_ptr()
+&nbsp;																	// +
+&nbsp;																	// angleSorter.size(),
+&nbsp;																	// TopoGraphAngleComparer(this));
+<b class="fc">&nbsp;						angleSorter.add(angleSorter.get(0));</b>
+<b class="fc">&nbsp;					} else {</b>
+&nbsp;						//no need to sort most two edge cases. we only need to make sure that edges going up are sorted
+<b class="fc">&nbsp;						if (compareEdgeAnglesForPair_(angleSorter.get(0),</b>
+<b class="fc">&nbsp;								angleSorter.get(1)) &gt; 0) {</b>
+<b class="fc">&nbsp;							int tmp = angleSorter.get(0);</b>
+<b class="fc">&nbsp;							angleSorter.set(0, angleSorter.get(1));</b>
+<b class="fc">&nbsp;							angleSorter.set(1, tmp);</b>
+<b class="fc">&nbsp;						}</b>
+&nbsp;						else {
+<b class="fc">&nbsp;							changed_order = false;</b>
+&nbsp;						}
+&nbsp;					}
+&nbsp;					// 2. get rid of duplicate edges by merging them (duplicate
+&nbsp;					// edges appear at this step because we converted all
+&nbsp;					// segments into the edges, including overlapping).
+<b class="fc">&nbsp;					int e0 = angleSorter.get(0);</b>
+<b class="fc">&nbsp;					int ePrev = e0;</b>
+<b class="fc">&nbsp;					int ePrevTo = getHalfEdgeTo(ePrev);</b>
+<b class="fc">&nbsp;					int ePrevTwin = getHalfEdgeTwin(ePrev);</b>
+<b class="fc">&nbsp;					int prevMerged = -1;</b>
+<b class="fc">&nbsp;					for (int i = 1, n = angleSorter.size(); i &lt; n; i++) {</b>
+<b class="fc">&nbsp;						int e = angleSorter.get(i);</b>
+<b class="fc">&nbsp;						int eTwin = getHalfEdgeTwin(e);</b>
+<b class="fc">&nbsp;						int eTo = getHalfEdgeOrigin(eTwin);</b>
+<b class="fc">&nbsp;						assert (getHalfEdgeOrigin(e) == getHalfEdgeOrigin(ePrev));// e</b>
+&nbsp;																					// origin
+&nbsp;																					// and
+&nbsp;																					// ePrev
+&nbsp;																					// origin
+&nbsp;																					// are
+&nbsp;																					// equal
+&nbsp;																					// by
+&nbsp;																					// definition
+&nbsp;																					// (e
+&nbsp;																					// and
+&nbsp;																					// ePrev
+&nbsp;																					// emanate
+&nbsp;																					// from
+&nbsp;																					// the
+&nbsp;																					// same
+&nbsp;																					// cluster)
+<b class="fc">&nbsp;						if (eTo == ePrevTo &amp;&amp; e != ePrev)// e&#39;s To cluster and</b>
+&nbsp;															// ePrev&#39;s To
+&nbsp;															// cluster are
+&nbsp;															// equal, means the
+&nbsp;															// edges coincide
+&nbsp;															// and need to be
+&nbsp;															// merged.
+&nbsp;						{// remove duplicate edge. Before removing, propagate
+&nbsp;							// the parentage to the remaning edge
+<b class="fc">&nbsp;							if (inputMode == EnumInputMode.enumInputModeBuildGraph) {</b>
+<b class="fc">&nbsp;								int newEdgeParentage = getHalfEdgeParentageMask_(ePrev)</b>
+<b class="fc">&nbsp;										| getHalfEdgeParentageMask_(e);</b>
+<b class="fc">&nbsp;								setHalfEdgeParentage_(ePrev, newEdgeParentage);</b>
+<b class="fc">&nbsp;								setHalfEdgeParentage_(ePrevTwin,</b>
+<b class="fc">&nbsp;										newEdgeParentage);</b>
+<b class="fc">&nbsp;								assert (getHalfEdgeParentageMask_(ePrev) == getHalfEdgeParentageMask_(ePrevTwin));</b>
+&nbsp;
+<b class="fc">&nbsp;								setHalfEdgeUserIndex(</b>
+<b class="fc">&nbsp;										ePrev,</b>
+<b class="fc">&nbsp;										m_tmpHalfEdgeParentageIndex,</b>
+<b class="fc">&nbsp;										getHalfEdgeUserIndex(ePrev,</b>
+<b class="fc">&nbsp;												m_tmpHalfEdgeParentageIndex)</b>
+<b class="fc">&nbsp;												| getHalfEdgeUserIndex(e,</b>
+<b class="fc">&nbsp;														m_tmpHalfEdgeParentageIndex));</b>
+<b class="fc">&nbsp;								setHalfEdgeUserIndex(</b>
+<b class="fc">&nbsp;										ePrevTwin,</b>
+<b class="fc">&nbsp;										m_tmpHalfEdgeParentageIndex,</b>
+<b class="fc">&nbsp;										getHalfEdgeUserIndex(ePrevTwin,</b>
+<b class="fc">&nbsp;												m_tmpHalfEdgeParentageIndex)</b>
+<b class="fc">&nbsp;												| getHalfEdgeUserIndex(eTwin,</b>
+<b class="fc">&nbsp;														m_tmpHalfEdgeParentageIndex));</b>
+<b class="fc">&nbsp;							} else if (m_tmpHalfEdgeWindingNumberIndex != -1) {</b>
+&nbsp;								// when doing simplify the
+&nbsp;								// m_tmpHalfEdgeWindingNumberIndex contains the
+&nbsp;								// winding number.
+&nbsp;								// When edges are merged their winding numbers
+&nbsp;								// are added.
+<b class="fc">&nbsp;								int newHalfEdgeWinding = getHalfEdgeUserIndex(</b>
+<b class="fc">&nbsp;										ePrev, m_tmpHalfEdgeWindingNumberIndex)</b>
+<b class="fc">&nbsp;										+ getHalfEdgeUserIndex(e,</b>
+<b class="fc">&nbsp;												m_tmpHalfEdgeWindingNumberIndex);</b>
+<b class="fc">&nbsp;								int newTwinEdgeWinding = getHalfEdgeUserIndex(</b>
+<b class="fc">&nbsp;										ePrevTwin,</b>
+<b class="fc">&nbsp;										m_tmpHalfEdgeWindingNumberIndex)</b>
+<b class="fc">&nbsp;										+ getHalfEdgeUserIndex(eTwin,</b>
+<b class="fc">&nbsp;												m_tmpHalfEdgeWindingNumberIndex);</b>
+<b class="fc">&nbsp;								setHalfEdgeUserIndex(ePrev,</b>
+<b class="fc">&nbsp;										m_tmpHalfEdgeWindingNumberIndex,</b>
+<b class="fc">&nbsp;										newHalfEdgeWinding);</b>
+<b class="fc">&nbsp;								setHalfEdgeUserIndex(ePrevTwin,</b>
+<b class="fc">&nbsp;										m_tmpHalfEdgeWindingNumberIndex,</b>
+<b class="fc">&nbsp;										newTwinEdgeWinding);</b>
+&nbsp;								// The winding number of an edge is a sum of the
+&nbsp;								// winding numbers of the half edge and its
+&nbsp;								// twin.
+&nbsp;								// To determine which half edge direction
+&nbsp;								// coincides with the edge direction, determine
+&nbsp;								// which half edge has larger abs value of
+&nbsp;								// winding number. If half edge and twin winding
+&nbsp;								// numbers cancel each other, the edge winding
+&nbsp;								// number is zero, meaning there are
+&nbsp;								// even number of edges coinciding there and
+&nbsp;								// half of them has opposite direction to
+&nbsp;								// another half.
+<b class="fc">&nbsp;							} else if (inputMode == EnumInputMode.enumInputModeIsSimplePolygon) {</b>
+<b class="nc">&nbsp;								m_non_simple_result = new NonSimpleResult(NonSimpleResult.Reason.CrossOver, cluster, -1);</b>
+&nbsp;								return;
+&nbsp;							}
+<b class="fc">&nbsp;							else if (m_tmpHalfEdgeOddEvenNumberIndex != -1) {</b>
+<b class="fc">&nbsp;								int newHalfEdgeWinding = getHalfEdgeUserIndex(</b>
+<b class="fc">&nbsp;										ePrev, m_tmpHalfEdgeOddEvenNumberIndex)</b>
+<b class="fc">&nbsp;										+ getHalfEdgeUserIndex(e,</b>
+<b class="fc">&nbsp;												m_tmpHalfEdgeOddEvenNumberIndex);</b>
+<b class="fc">&nbsp;								int newTwinEdgeWinding = getHalfEdgeUserIndex(</b>
+<b class="fc">&nbsp;										ePrevTwin,</b>
+<b class="fc">&nbsp;										m_tmpHalfEdgeOddEvenNumberIndex)</b>
+<b class="fc">&nbsp;										+ getHalfEdgeUserIndex(eTwin,</b>
+<b class="fc">&nbsp;												m_tmpHalfEdgeOddEvenNumberIndex);</b>
+<b class="fc">&nbsp;								setHalfEdgeUserIndex(ePrev,</b>
+<b class="fc">&nbsp;										m_tmpHalfEdgeOddEvenNumberIndex,</b>
+<b class="fc">&nbsp;										newHalfEdgeWinding);</b>
+<b class="fc">&nbsp;								setHalfEdgeUserIndex(ePrevTwin,</b>
+<b class="fc">&nbsp;										m_tmpHalfEdgeOddEvenNumberIndex,</b>
+<b class="fc">&nbsp;										newTwinEdgeWinding);</b>
+&nbsp;							}
+&nbsp;
+<b class="fc">&nbsp;							mergeVertexListsOfEdges_(ePrev, e);</b>
+<b class="fc">&nbsp;							deleteEdgeImpl_(e);</b>
+<b class="fc">&nbsp;							assert (n &lt; 3 || e0 == angleSorter.getLast());</b>
+<b class="fc">&nbsp;							prevMerged = ePrev;</b>
+<b class="fc">&nbsp;							angleSorter.set(i, -1);</b>
+<b class="fc">&nbsp;							if (e == e0) {</b>
+<b class="nc">&nbsp;								angleSorter.set(0, -1);</b>
+<b class="nc">&nbsp;								e0 = -1;</b>
+&nbsp;							}
+&nbsp;
+<b class="nc">&nbsp;							continue;</b>
+&nbsp;						}
+&nbsp;						else {
+&nbsp;							//edges do not coincide
+&nbsp;						}
+&nbsp;						
+<b class="fc">&nbsp;						updateVertexToHalfEdgeConnection_(prevMerged, false);</b>
+<b class="fc">&nbsp;						prevMerged = -1;</b>
+<b class="fc">&nbsp;						ePrev = e;</b>
+<b class="fc">&nbsp;						ePrevTo = eTo;</b>
+<b class="fc">&nbsp;						ePrevTwin = eTwin;</b>
+&nbsp;					}
+&nbsp;
+&nbsp;
+<b class="fc">&nbsp;					updateVertexToHalfEdgeConnection_(prevMerged, false);</b>
+<b class="fc">&nbsp;					prevMerged = -1;</b>
+&nbsp;					
+<b class="fc">&nbsp;					if (!changed_order) {</b>
+&nbsp;						//small optimization to avoid reconnecting if nothing changed
+<b class="fc">&nbsp;						e0 = -1;</b>
+<b class="fc">&nbsp;						for (int i = 0, n = angleSorter.size(); i &lt; n; i++) {</b>
+<b class="fc">&nbsp;							int e = angleSorter.get(i);</b>
+<b class="fc">&nbsp;							if (e == -1)</b>
+<b class="nc">&nbsp;								continue;</b>
+<b class="fc">&nbsp;							e0 = e;</b>
+<b class="fc">&nbsp;							break;</b>
+&nbsp;						}
+&nbsp;						
+<b class="fc">&nbsp;						if (first != e0)</b>
+<b class="nc">&nbsp;							setClusterHalfEdge_(cluster, e0);</b>
+&nbsp;						
+<b class="nc">&nbsp;						continue; //next cluster </b>
+&nbsp;					}
+&nbsp;						
+&nbsp;
+&nbsp;					// 3. Reconnect edges in the sorted order. The edges are
+&nbsp;					// sorted counter clockwise.
+&nbsp;					// We connect them such that every right turn is made in the
+&nbsp;					// clockwise order.
+&nbsp;					// This guarantees that the smallest faces are clockwise.
+<b class="fc">&nbsp;					e0 = -1;</b>
+<b class="fc">&nbsp;					for (int i = 0, n = angleSorter.size(); i &lt; n; i++) {</b>
+<b class="fc">&nbsp;						int e = angleSorter.get(i);</b>
+<b class="fc">&nbsp;						if (e == -1)</b>
+<b class="fc">&nbsp;							continue;</b>
+<b class="fc">&nbsp;						if (e0 == -1) {</b>
+<b class="fc">&nbsp;							e0 = e;</b>
+<b class="fc">&nbsp;							ePrev = e0;</b>
+<b class="fc">&nbsp;							ePrevTo = getHalfEdgeTo(ePrev);</b>
+<b class="fc">&nbsp;							ePrevTwin = getHalfEdgeTwin(ePrev);</b>
+<b class="fc">&nbsp;							continue;</b>
+&nbsp;						}
+&nbsp;						
+<b class="fc">&nbsp;						if (e == ePrev) {</b>
+&nbsp;							// This condition can only happen if all edges in
+&nbsp;							// the bunch coincide.
+<b class="nc">&nbsp;							assert (i == n - 1);</b>
+&nbsp;							continue;
+&nbsp;						}
+&nbsp;						
+<b class="fc">&nbsp;						int eTwin = getHalfEdgeTwin(e);</b>
+<b class="fc">&nbsp;						int eTo = getHalfEdgeOrigin(eTwin);</b>
+<b class="fc">&nbsp;						assert (getHalfEdgeOrigin(e) == getHalfEdgeOrigin(ePrev));</b>
+<b class="fc">&nbsp;						assert (eTo != ePrevTo);</b>
+<b class="fc">&nbsp;						setHalfEdgeNext_(ePrevTwin, e);</b>
+<b class="fc">&nbsp;						setHalfEdgePrev_(e, ePrevTwin);</b>
+<b class="fc">&nbsp;						ePrev = e;</b>
+<b class="fc">&nbsp;						ePrevTo = eTo;</b>
+<b class="fc">&nbsp;						ePrevTwin = eTwin;</b>
+<b class="fc">&nbsp;			            if (inputMode == EnumInputMode.enumInputModeIsSimplePolygon)</b>
+&nbsp;			              {
+<b class="nc">&nbsp;			                int par1 = getHalfEdgeUserIndex(e, m_tmpHalfEdgeParentageIndex) |</b>
+<b class="nc">&nbsp;			                		getHalfEdgeUserIndex(getHalfEdgePrev(e), m_tmpHalfEdgeParentageIndex);</b>
+<b class="nc">&nbsp;			                if (par1 == (m_universe_geomID | 1))</b>
+&nbsp;			                {
+&nbsp;			                  //violation of face parentage
+<b class="nc">&nbsp;			                  m_non_simple_result = new NonSimpleResult(NonSimpleResult.Reason.CrossOver, cluster, -1);</b>
+&nbsp;			                  return;
+&nbsp;			                }
+&nbsp;			              }
+&nbsp;						
+&nbsp;					}
+&nbsp;
+<b class="fc">&nbsp;					setClusterHalfEdge_(cluster, e0);// smallest angle goes</b>
+&nbsp;														// first.
+&nbsp;				}
+&nbsp;			}
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	void buildChains_(int inputMode) {
+&nbsp;		// Creates chains and puts them in the list of chains.
+&nbsp;		// Does not set the chain parentage
+&nbsp;		// Does not connect chains
+&nbsp;
+<b class="fc">&nbsp;		int firstChain = -1;</b>
+<b class="fc">&nbsp;		int visitedHalfEdgeIndex = createUserIndexForHalfEdges();</b>
+&nbsp;		// Visit all the clusters
+<b class="fc">&nbsp;		for (int cluster = getFirstCluster(); cluster != -1; cluster = getNextCluster(cluster)) {</b>
+&nbsp;			// For each cluster visit all half edges on the cluster
+<b class="fc">&nbsp;			int first = getClusterHalfEdge(cluster);</b>
+<b class="fc">&nbsp;			if (first != -1) {</b>
+<b class="fc">&nbsp;				int edge = first;</b>
+&nbsp;				do {
+<b class="fc">&nbsp;					if (getHalfEdgeUserIndex(edge, visitedHalfEdgeIndex) != 1)// check</b>
+&nbsp;																				// if
+&nbsp;																				// we
+&nbsp;																				// have
+&nbsp;																				// visited
+&nbsp;																				// this
+&nbsp;																				// halfedge
+&nbsp;																				// already
+&nbsp;					{// if we have not visited this halfedge yet, then we have
+&nbsp;						// not created a chain for it yet.
+<b class="fc">&nbsp;						int chain = newChain_();// new chain&#39;s parentage is set</b>
+&nbsp;												// to 0.
+<b class="fc">&nbsp;						setChainHalfEdge_(chain, edge);// Note, the half-edge&#39;s</b>
+&nbsp;														// Origin is the lowest
+&nbsp;														// point of the chain.
+<b class="fc">&nbsp;						setChainNext_(chain, firstChain);// add the new chain to</b>
+&nbsp;															// the list of
+&nbsp;															// chains.
+<b class="fc">&nbsp;						if (firstChain != -1) {</b>
+<b class="fc">&nbsp;							setChainPrev_(firstChain, chain);</b>
+&nbsp;						}
+<b class="fc">&nbsp;						firstChain = chain;</b>
+&nbsp;						// go thorough all halfedges until return back to the
+&nbsp;						// same one. Thus forming a chain.
+<b class="fc">&nbsp;						int parentage = 0;</b>
+<b class="fc">&nbsp;						int e = edge;</b>
+&nbsp;						do {
+&nbsp;							// accumulate chain parentage from all the chain
+&nbsp;							// edges m_tmpHalfEdgeParentageIndex.
+<b class="fc">&nbsp;							parentage |= getHalfEdgeUserIndex(e,</b>
+<b class="fc">&nbsp;									m_tmpHalfEdgeParentageIndex);</b>
+<b class="fc">&nbsp;							assert (getHalfEdgeUserIndex(e,</b>
+<b class="fc">&nbsp;									visitedHalfEdgeIndex) != 1);</b>
+<b class="fc">&nbsp;							setHalfEdgeChain_(e, chain);</b>
+<b class="fc">&nbsp;							setHalfEdgeUserIndex(e, visitedHalfEdgeIndex, 1);// mark</b>
+&nbsp;																				// the
+&nbsp;																				// edge
+&nbsp;																				// visited.
+<b class="fc">&nbsp;							e = getHalfEdgeNext(e);</b>
+<b class="fc">&nbsp;						} while (e != edge);</b>
+&nbsp;						
+<b class="fc">&nbsp;						assert(inputMode != EnumInputMode.enumInputModeIsSimplePolygon || parentage != (1 | m_universe_geomID));</b>
+&nbsp;						
+<b class="fc">&nbsp;						setChainParentage_(chain, parentage);</b>
+&nbsp;					}
+&nbsp;
+<b class="fc">&nbsp;					edge = getHalfEdgeNext(getHalfEdgeTwin(edge));// next</b>
+&nbsp;																	// halfedge
+&nbsp;																	// on the
+&nbsp;																	// cluster
+<b class="fc">&nbsp;				} while (edge != first);</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+&nbsp;		// add the Universe chain. We want it to be the one that getFirstChain
+&nbsp;		// returns.
+<b class="fc">&nbsp;		int chain = newChain_();</b>
+<b class="fc">&nbsp;		setChainHalfEdge_(chain, -1);</b>
+<b class="fc">&nbsp;		setChainNext_(chain, firstChain);</b>
+<b class="fc">&nbsp;		if (firstChain != -1)</b>
+<b class="fc">&nbsp;			setChainPrev_(firstChain, chain);</b>
+&nbsp;
+<b class="fc">&nbsp;		m_universeChain = chain;</b>
+&nbsp;
+<b class="fc">&nbsp;		m_chainAreas = new AttributeStreamOfDbl(m_chainData.size(),</b>
+<b class="fc">&nbsp;				NumberUtils.TheNaN);</b>
+<b class="fc">&nbsp;		m_chainPerimeters = new AttributeStreamOfDbl(m_chainData.size(),</b>
+<b class="fc">&nbsp;				NumberUtils.TheNaN);</b>
+&nbsp;
+<b class="fc">&nbsp;		setChainArea_(m_universeChain, NumberUtils.positiveInf());// the</b>
+&nbsp;																	// Universe
+&nbsp;																	// is
+&nbsp;																	// infinite
+<b class="fc">&nbsp;		setChainPerimeter_(m_universeChain, NumberUtils.positiveInf());// the</b>
+&nbsp;																		// Universe
+&nbsp;																		// is
+&nbsp;																		// infinite
+&nbsp;
+<b class="fc">&nbsp;		deleteUserIndexForHalfEdges(visitedHalfEdgeIndex);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void simplify_(int inputMode) {
+<b class="fc">&nbsp;		if (inputMode == EnumInputMode.enumInputModeSimplifyAlternate) {</b>
+<b class="fc">&nbsp;			simplifyAlternate_();</b>
+<b class="fc">&nbsp;		} else if (inputMode == EnumInputMode.enumInputModeSimplifyWinding) {</b>
+<b class="fc">&nbsp;			simplifyWinding_();</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	void simplifyAlternate_() {
+&nbsp;		//there is nothing to do
+<b class="fc">&nbsp;	}</b>
+&nbsp;
+&nbsp;	void simplifyWinding_() {
+&nbsp;		//there is nothing to do
+<b class="fc">&nbsp;	}</b>
+&nbsp;
+&nbsp;	private int getFirstUnvisitedHalfEdgeOnCluster_(int cluster, int hintEdge,
+&nbsp;			int vistiedEdgesIndex) {
+&nbsp;		// finds first half edge which is unvisited (index is not set to 1.
+&nbsp;		// when hintEdge != -1, it is used to start going around the edges.
+&nbsp;
+<b class="fc">&nbsp;		int edge = hintEdge != -1 ? hintEdge : getClusterHalfEdge(cluster);</b>
+<b class="fc">&nbsp;		if (edge == -1)</b>
+<b class="fc">&nbsp;			return -1;</b>
+&nbsp;
+<b class="fc">&nbsp;		int f = edge;</b>
+&nbsp;
+<b class="fc">&nbsp;		while (true) {</b>
+<b class="fc">&nbsp;			int v = getHalfEdgeUserIndex(edge, vistiedEdgesIndex);</b>
+<b class="fc">&nbsp;			if (v != 1) {</b>
+<b class="fc">&nbsp;				return edge;</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			int next = getHalfEdgeNext(getHalfEdgeTwin(edge));</b>
+<b class="fc">&nbsp;			if (next == f)</b>
+<b class="fc">&nbsp;				return -1;</b>
+&nbsp;
+<b class="fc">&nbsp;			edge = next;</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	boolean removeSpikes_() {
+<b class="fc">&nbsp;		boolean removed = false;</b>
+<b class="fc">&nbsp;		int visitedIndex = createUserIndexForHalfEdges();</b>
+<b class="fc">&nbsp;		for (int cluster = getFirstCluster(); cluster != -1; cluster = getNextCluster(cluster)) {</b>
+<b class="fc">&nbsp;			int nextClusterEdge = -1; //a hint</b>
+<b class="fc">&nbsp;			while (true) {</b>
+<b class="fc">&nbsp;				int firstHalfEdge = getFirstUnvisitedHalfEdgeOnCluster_(cluster, nextClusterEdge, visitedIndex);</b>
+<b class="fc">&nbsp;				if (firstHalfEdge == -1)</b>
+<b class="fc">&nbsp;					break;</b>
+&nbsp;	
+<b class="fc">&nbsp;				nextClusterEdge = getHalfEdgeNext(getHalfEdgeTwin(firstHalfEdge));</b>
+<b class="fc">&nbsp;				int faceHalfEdge = firstHalfEdge;</b>
+&nbsp;
+&nbsp;				while (true) {
+<b class="fc">&nbsp;					int faceHalfEdgeNext = getHalfEdgeNext(faceHalfEdge);</b>
+<b class="fc">&nbsp;					int faceHalfEdgePrev = getHalfEdgePrev(faceHalfEdge);</b>
+<b class="fc">&nbsp;					int faceHalfEdgeTwin = getHalfEdgeTwin(faceHalfEdge);</b>
+&nbsp;					
+<b class="fc">&nbsp;					if (faceHalfEdgePrev == faceHalfEdgeTwin) {</b>
+<b class="fc">&nbsp;						deleteEdgeInternal_(faceHalfEdge); //deletes the edge and its twin</b>
+<b class="fc">&nbsp;						removed = true;</b>
+&nbsp;					
+<b class="fc">&nbsp;						if (nextClusterEdge == faceHalfEdge || nextClusterEdge == faceHalfEdgeTwin)</b>
+<b class="fc">&nbsp;							nextClusterEdge = -1; //deleted the hint edge</b>
+&nbsp;
+<b class="fc">&nbsp;						if (faceHalfEdge == firstHalfEdge || faceHalfEdgePrev == firstHalfEdge) {</b>
+<b class="fc">&nbsp;							firstHalfEdge = faceHalfEdgeNext;</b>
+<b class="fc">&nbsp;							if (faceHalfEdge == firstHalfEdge || faceHalfEdgePrev == firstHalfEdge) {</b>
+&nbsp;								//deleted all edges in a face
+<b class="nc">&nbsp;								break;</b>
+&nbsp;							}
+&nbsp;							
+<b class="fc">&nbsp;							faceHalfEdge = faceHalfEdgeNext;</b>
+<b class="fc">&nbsp;							continue;</b>
+&nbsp;						}
+&nbsp;
+&nbsp;					}
+&nbsp;					else {
+<b class="fc">&nbsp;						setHalfEdgeUserIndex(faceHalfEdge, visitedIndex, 1);</b>
+&nbsp;					}
+&nbsp;
+<b class="fc">&nbsp;					faceHalfEdge = faceHalfEdgeNext;</b>
+<b class="fc">&nbsp;					if (faceHalfEdge == firstHalfEdge)</b>
+&nbsp;						break;
+&nbsp;				}
+&nbsp;
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return removed;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	void setEditShapeImpl_(EditShape shape, int inputMode,
+&nbsp;			AttributeStreamOfInt32 editShapeGeometries,
+&nbsp;			ProgressTracker progress_tracker, boolean bBuildChains) {
+<b class="fc">&nbsp;		assert(!m_dirty_check_failed);</b>
+<b class="fc">&nbsp;		assert (editShapeGeometries == null || editShapeGeometries.size() &gt; 0);</b>
+&nbsp;
+<b class="fc">&nbsp;		removeShape();</b>
+<b class="fc">&nbsp;		m_buildChains = bBuildChains;</b>
+<b class="fc">&nbsp;		assert (m_shape == null);</b>
+<b class="fc">&nbsp;		m_shape = shape;</b>
+<b class="fc">&nbsp;		m_geometryIDIndex = m_shape.createGeometryUserIndex();</b>
+&nbsp;		// sort vertices lexicographically
+&nbsp;		// Firstly copy all vertices to an array.
+<b class="fc">&nbsp;		AttributeStreamOfInt32 verticesSorter = new AttributeStreamOfInt32(0);</b>
+<b class="fc">&nbsp;		verticesSorter.reserve(editShapeGeometries != null ? m_shape</b>
+<b class="fc">&nbsp;				.getPointCount(editShapeGeometries.get(0)) : m_shape</b>
+<b class="fc">&nbsp;				.getTotalPointCount());</b>
+<b class="fc">&nbsp;		int path_count = 0;</b>
+<b class="fc">&nbsp;		int geomID = 1;</b>
+&nbsp;		{// scope
+<b class="fc">&nbsp;			int geometry = editShapeGeometries != null ? editShapeGeometries</b>
+<b class="fc">&nbsp;					.get(0) : m_shape.getFirstGeometry();</b>
+<b class="fc">&nbsp;			int ind = 1;</b>
+<b class="fc">&nbsp;			while (geometry != -1) {</b>
+<b class="fc">&nbsp;				m_shape.setGeometryUserIndex(geometry, m_geometryIDIndex,</b>
+<b class="fc">&nbsp;						geomID);</b>
+<b class="fc">&nbsp;				geomID = geomID &lt;&lt; 1;</b>
+<b class="fc">&nbsp;				for (int path = m_shape.getFirstPath(geometry); path != -1; path = m_shape</b>
+<b class="fc">&nbsp;						.getNextPath(path)) {</b>
+<b class="fc">&nbsp;					int vertex = m_shape.getFirstVertex(path);</b>
+<b class="fc">&nbsp;					for (int index = 0, n = m_shape.getPathSize(path); index &lt; n; index++) {</b>
+<b class="fc">&nbsp;						verticesSorter.add(vertex);</b>
+<b class="fc">&nbsp;						vertex = m_shape.getNextVertex(vertex);</b>
+&nbsp;					}
+&nbsp;				}
+&nbsp;
+<b class="fc">&nbsp;				if (!Geometry.isPoint(m_shape.getGeometryType(geometry)))</b>
+<b class="fc">&nbsp;					path_count += m_shape.getPathCount(geometry);</b>
+&nbsp;
+<b class="fc">&nbsp;				if (editShapeGeometries != null) {</b>
+<b class="fc">&nbsp;					geometry = ind &lt; editShapeGeometries.size() ? editShapeGeometries</b>
+<b class="nc">&nbsp;							.get(ind) : -1;</b>
+<b class="fc">&nbsp;					ind++;</b>
+<b class="fc">&nbsp;				} else</b>
+<b class="fc">&nbsp;					geometry = m_shape.getNextGeometry(geometry);</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		m_universe_geomID = geomID;</b>
+&nbsp;
+<b class="fc">&nbsp;		m_pointCount = verticesSorter.size();</b>
+&nbsp;
+&nbsp;		// sort
+<b class="fc">&nbsp;		m_shape.sortVerticesSimpleByY_(verticesSorter, 0, m_pointCount);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (m_clusterVertices == null) {</b>
+<b class="fc">&nbsp;			m_clusterVertices = new StridedIndexTypeCollection(2);</b>
+<b class="fc">&nbsp;			m_clusterData = new StridedIndexTypeCollection(8);</b>
+<b class="fc">&nbsp;			m_halfEdgeData = new StridedIndexTypeCollection(8);</b>
+<b class="fc">&nbsp;			m_chainData = new StridedIndexTypeCollection(8);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		m_clusterVertices.setCapacity(m_pointCount);</b>
+&nbsp;
+<b class="fc">&nbsp;		ProgressTracker.checkAndThrow(progress_tracker);</b>
+&nbsp;
+<b class="fc">&nbsp;		m_clusterData.setCapacity(m_pointCount + 10);// 10 for some self</b>
+&nbsp;														// intersections
+<b class="fc">&nbsp;		m_halfEdgeData.setCapacity(2 * m_pointCount + 32);</b>
+<b class="fc">&nbsp;		m_chainData.setCapacity(Math.max((int) 32, path_count));</b>
+&nbsp;
+&nbsp;		// create all clusters
+<b class="fc">&nbsp;		assert (m_clusterIndex == -1);// cleanup was incorrect</b>
+<b class="fc">&nbsp;		m_clusterIndex = m_shape.createUserIndex();</b>
+<b class="fc">&nbsp;		Point2D ptFirst = new Point2D();</b>
+<b class="fc">&nbsp;		int ifirst = 0;</b>
+<b class="fc">&nbsp;		Point2D pt = new Point2D();</b>
+<b class="fc">&nbsp;		ptFirst.setNaN();</b>
+<b class="fc">&nbsp;		for (int i = 0; i &lt;= m_pointCount; i++) {</b>
+<b class="fc">&nbsp;			if (i &lt; m_pointCount) {</b>
+<b class="fc">&nbsp;				int vertex = verticesSorter.get(i);</b>
+<b class="fc">&nbsp;				m_shape.getXY(vertex, pt);</b>
+<b class="fc">&nbsp;			} else {</b>
+<b class="fc">&nbsp;				pt.setNaN();// makes it to go into the following &quot;if&quot; statement.</b>
+&nbsp;			}
+<b class="fc">&nbsp;			if (!ptFirst.isEqual(pt)) {</b>
+<b class="fc">&nbsp;				if (ifirst &lt; i) {</b>
+<b class="fc">&nbsp;					int cluster = newCluster_();</b>
+<b class="fc">&nbsp;					int vertFirst = -1;</b>
+<b class="fc">&nbsp;					int vert = -1;</b>
+<b class="fc">&nbsp;					for (int ind = ifirst; ind &lt; i; ind++) {</b>
+<b class="fc">&nbsp;						vert = verticesSorter.get(ind);</b>
+<b class="fc">&nbsp;						m_shape.setUserIndex(vert, m_clusterIndex, cluster);</b>
+&nbsp;
+&nbsp;						// add vertex to the cluster&#39;s vertex list
+<b class="fc">&nbsp;						int vertIndex = m_clusterVertices.newElement();</b>
+<b class="fc">&nbsp;						m_clusterVertices.setField(vertIndex, 0, vert);</b>
+<b class="fc">&nbsp;						m_clusterVertices.setField(vertIndex, 1, vertFirst);</b>
+<b class="fc">&nbsp;						vertFirst = vertIndex;</b>
+&nbsp;
+<b class="fc">&nbsp;						int path = m_shape.getPathFromVertex(vert);</b>
+<b class="fc">&nbsp;						int geometry = m_shape.getGeometryFromPath(path);</b>
+<b class="fc">&nbsp;						int geometryID = getGeometryID(geometry);</b>
+<b class="fc">&nbsp;						setClusterParentage_(cluster,</b>
+<b class="fc">&nbsp;								getClusterParentage(cluster) | geometryID);</b>
+&nbsp;					}
+<b class="fc">&nbsp;					setClusterVertexIterator_(cluster, vertFirst);</b>
+<b class="fc">&nbsp;					setClusterVertexIndex_(cluster,</b>
+<b class="fc">&nbsp;							m_shape.getVertexIndex(vert));</b>
+&nbsp;
+<b class="fc">&nbsp;					if (m_lastCluster != -1)</b>
+<b class="fc">&nbsp;						setNextCluster_(m_lastCluster, cluster);</b>
+&nbsp;
+<b class="fc">&nbsp;					setPrevCluster_(cluster, m_lastCluster);</b>
+&nbsp;
+<b class="fc">&nbsp;					m_lastCluster = cluster;</b>
+<b class="fc">&nbsp;					if (m_firstCluster == -1)</b>
+<b class="fc">&nbsp;						m_firstCluster = cluster;</b>
+&nbsp;				}
+<b class="fc">&nbsp;				ifirst = i;</b>
+<b class="fc">&nbsp;				ptFirst.setCoords(pt);</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		ProgressTracker.checkAndThrow(progress_tracker);</b>
+&nbsp;
+<b class="fc">&nbsp;		m_tmpHalfEdgeParentageIndex = createUserIndexForHalfEdges();</b>
+<b class="fc">&nbsp;		if (inputMode == EnumInputMode.enumInputModeSimplifyWinding) {</b>
+<b class="fc">&nbsp;			m_tmpHalfEdgeWindingNumberIndex = createUserIndexForHalfEdges();</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (inputMode == EnumInputMode.enumInputModeSimplifyAlternate) {</b>
+<b class="fc">&nbsp;			m_tmpHalfEdgeOddEvenNumberIndex = createUserIndexForHalfEdges();</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		createHalfEdges_(inputMode, verticesSorter);// For each geometry produce</b>
+&nbsp;													// clusters and half edges
+&nbsp;
+<b class="fc">&nbsp;		if (m_non_simple_result.m_reason != NonSimpleResult.Reason.NotDetermined)</b>
+&nbsp;			return;
+&nbsp;		
+<b class="fc">&nbsp;		sortHalfEdgesByAngle_(inputMode);</b>
+<b class="fc">&nbsp;		if (m_non_simple_result.m_reason != NonSimpleResult.Reason.NotDetermined)</b>
+&nbsp;			return;
+&nbsp;
+<b class="fc">&nbsp;		if (!NumberUtils.isNaN(m_check_dirty_planesweep_tolerance)) {</b>
+<b class="fc">&nbsp;			if (!check_structure_after_dirty_sweep_())// checks the edges.</b>
+&nbsp;			{
+<b class="fc">&nbsp;				m_dirty_check_failed = true;// set m_dirty_check_failed when an</b>
+&nbsp;											// issue is found. We&#39;ll rerun the
+&nbsp;											// planesweep using robust crack and
+&nbsp;											// cluster approach.
+&nbsp;				return;
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		buildChains_(inputMode);</b>
+<b class="fc">&nbsp;		if (m_non_simple_result.m_reason != NonSimpleResult.Reason.NotDetermined)</b>
+&nbsp;			return;
+&nbsp;
+<b class="fc">&nbsp;		deleteUserIndexForHalfEdges(m_tmpHalfEdgeParentageIndex);</b>
+<b class="fc">&nbsp;		m_tmpHalfEdgeParentageIndex = -1;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (m_buildChains)</b>
+<b class="fc">&nbsp;			planeSweepParentage_(inputMode, progress_tracker);</b>
+&nbsp;		
+&nbsp;
+<b class="fc">&nbsp;		simplify_(inputMode);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void deleteEdgeImpl_(int half_edge) {
+<b class="fc">&nbsp;		int halfEdgeNext = getHalfEdgeNext(half_edge);</b>
+<b class="fc">&nbsp;		int halfEdgePrev = getHalfEdgePrev(half_edge);</b>
+<b class="fc">&nbsp;		int halfEdgeTwin = getHalfEdgeTwin(half_edge);</b>
+<b class="fc">&nbsp;		int halfEdgeTwinNext = getHalfEdgeNext(halfEdgeTwin);</b>
+<b class="fc">&nbsp;		int halfEdgeTwinPrev = getHalfEdgePrev(halfEdgeTwin);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (halfEdgeNext != halfEdgeTwin) {</b>
+<b class="fc">&nbsp;			setHalfEdgeNext_(halfEdgeTwinPrev, halfEdgeNext);</b>
+<b class="fc">&nbsp;			setHalfEdgePrev_(halfEdgeNext, halfEdgeTwinPrev);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (halfEdgePrev != halfEdgeTwin) {</b>
+<b class="fc">&nbsp;			setHalfEdgeNext_(halfEdgePrev, halfEdgeTwinNext);</b>
+<b class="fc">&nbsp;			setHalfEdgePrev_(halfEdgeTwinNext, halfEdgePrev);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		int cluster_1 = getHalfEdgeOrigin(half_edge);</b>
+<b class="fc">&nbsp;		int clusterFirstEdge1 = getClusterHalfEdge(cluster_1);</b>
+<b class="fc">&nbsp;		if (clusterFirstEdge1 == half_edge) {</b>
+<b class="fc">&nbsp;			if (halfEdgeTwinNext != half_edge)</b>
+<b class="fc">&nbsp;				setClusterHalfEdge_(cluster_1, halfEdgeTwinNext);</b>
+&nbsp;			else
+<b class="fc">&nbsp;				setClusterHalfEdge_(cluster_1, -1);// cluster has no more edges</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		int cluster2 = getHalfEdgeOrigin(halfEdgeTwin);</b>
+<b class="fc">&nbsp;		int clusterFirstEdge2 = getClusterHalfEdge(cluster2);</b>
+<b class="fc">&nbsp;		if (clusterFirstEdge2 == halfEdgeTwin) {</b>
+<b class="fc">&nbsp;			if (halfEdgeNext != halfEdgeTwin)</b>
+<b class="fc">&nbsp;				setClusterHalfEdge_(cluster2, halfEdgeNext);</b>
+&nbsp;			else
+<b class="fc">&nbsp;				setClusterHalfEdge_(cluster2, -1);// cluster has no more edges</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		m_halfEdgeData.deleteElement(half_edge);</b>
+<b class="fc">&nbsp;		m_halfEdgeData.deleteElement(halfEdgeTwin);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	int getLeftSkipPolylines_(Treap aet, int treeNode) {
+<b class="fc">&nbsp;		int leftNode = treeNode;</b>
+&nbsp;
+&nbsp;		for (;;) {
+<b class="fc">&nbsp;			leftNode = aet.getPrev(leftNode);</b>
+<b class="fc">&nbsp;			if (leftNode != -1) {</b>
+<b class="fc">&nbsp;				int e = aet.getElement(leftNode);</b>
+<b class="fc">&nbsp;				int leftChain = getHalfEdgeChain(e);</b>
+<b class="fc">&nbsp;				if (leftChain != getHalfEdgeChain(getHalfEdgeTwin(e))) {</b>
+<b class="fc">&nbsp;					return e;</b>
+&nbsp;				} else {
+&nbsp;					// the left edge is a piece of polyline - does not
+&nbsp;					// contribute to the face parentage
+&nbsp;				}
+&nbsp;			} else {
+<b class="fc">&nbsp;				return -1;</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+<b class="fc">&nbsp;	TopoGraph() {</b>
+<b class="fc">&nbsp;		c_edgeParentageMask = ((int) -1)</b>
+<b class="fc">&nbsp;				^ ((int) 1 &lt;&lt; (NumberUtils.sizeOf((int) 0) * 8 - 1));</b>
+<b class="fc">&nbsp;		c_edgeBitMask = (int) 1 &lt;&lt; (NumberUtils.sizeOf((int) 0) * 8 - 1);</b>
+<b class="fc">&nbsp;		m_firstCluster = -1;</b>
+<b class="fc">&nbsp;		m_lastCluster = -1;</b>
+<b class="fc">&nbsp;		m_geometryIDIndex = -1;</b>
+<b class="fc">&nbsp;		m_clusterIndex = -1;</b>
+<b class="fc">&nbsp;		m_halfEdgeIndex = -1;</b>
+<b class="fc">&nbsp;		m_universeChain = -1;</b>
+<b class="fc">&nbsp;		m_tmpHalfEdgeParentageIndex = -1;</b>
+<b class="fc">&nbsp;		m_tmpHalfEdgeWindingNumberIndex = -1;</b>
+<b class="fc">&nbsp;		m_pointCount = 0;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	EditShape getShape() {
+<b class="fc">&nbsp;		return m_shape;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Sets an edit shape. The geometry has to be cracked and clustered before
+&nbsp;	// calling this!
+&nbsp;	void setEditShape(EditShape shape, ProgressTracker progress_tracker) {
+<b class="fc">&nbsp;		setEditShapeImpl_(shape, EnumInputMode.enumInputModeBuildGraph, null,</b>
+<b class="fc">&nbsp;				progress_tracker, true);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void setEditShape(EditShape shape, ProgressTracker progress_tracker, boolean bBuildChains) {
+<b class="nc">&nbsp;		setEditShapeImpl_(shape, EnumInputMode.enumInputModeBuildGraph, null,</b>
+<b class="nc">&nbsp;				progress_tracker, bBuildChains);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	void setAndSimplifyEditShapeAlternate(EditShape shape, int geometry, ProgressTracker progressTracker) {
+<b class="fc">&nbsp;		AttributeStreamOfInt32 geoms = new AttributeStreamOfInt32(0);</b>
+<b class="fc">&nbsp;		geoms.add(geometry);</b>
+<b class="fc">&nbsp;		setEditShapeImpl_(shape, EnumInputMode.enumInputModeSimplifyAlternate,</b>
+<b class="fc">&nbsp;				geoms, progressTracker, shape.getGeometryType(geometry) == Geometry.Type.Polygon.value());</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void setAndSimplifyEditShapeWinding(EditShape shape, int geometry, ProgressTracker progressTracker) {
+<b class="fc">&nbsp;		AttributeStreamOfInt32 geoms = new AttributeStreamOfInt32(0);</b>
+<b class="fc">&nbsp;		geoms.add(geometry);</b>
+<b class="fc">&nbsp;		setEditShapeImpl_(shape, EnumInputMode.enumInputModeSimplifyWinding,</b>
+<b class="fc">&nbsp;				geoms, progressTracker, true);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Removes shape from the topograph and removes any user index created on
+&nbsp;	// the edit shape.
+&nbsp;	void removeShape() {
+<b class="fc">&nbsp;		if (m_shape == null)</b>
+&nbsp;			return;
+&nbsp;
+<b class="fc">&nbsp;		if (m_geometryIDIndex != -1) {</b>
+<b class="fc">&nbsp;			m_shape.removeGeometryUserIndex(m_geometryIDIndex);</b>
+<b class="fc">&nbsp;			m_geometryIDIndex = -1;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (m_clusterIndex != -1) {</b>
+<b class="fc">&nbsp;			m_shape.removeUserIndex(m_clusterIndex);</b>
+<b class="fc">&nbsp;			m_clusterIndex = -1;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (m_halfEdgeIndex != -1) {</b>
+<b class="fc">&nbsp;			m_shape.removeUserIndex(m_halfEdgeIndex);</b>
+<b class="fc">&nbsp;			m_halfEdgeIndex = -1;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (m_tmpHalfEdgeParentageIndex != -1) {</b>
+<b class="fc">&nbsp;			deleteUserIndexForHalfEdges(m_tmpHalfEdgeParentageIndex);</b>
+<b class="fc">&nbsp;			m_tmpHalfEdgeParentageIndex = -1;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (m_tmpHalfEdgeWindingNumberIndex != -1) {</b>
+<b class="fc">&nbsp;			deleteUserIndexForHalfEdges(m_tmpHalfEdgeWindingNumberIndex);</b>
+<b class="fc">&nbsp;			m_tmpHalfEdgeWindingNumberIndex = -1;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (m_tmpHalfEdgeOddEvenNumberIndex != -1) {</b>
+<b class="fc">&nbsp;			deleteUserIndexForHalfEdges(m_tmpHalfEdgeOddEvenNumberIndex);</b>
+<b class="fc">&nbsp;			m_tmpHalfEdgeOddEvenNumberIndex = -1;</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		m_shape = null;</b>
+<b class="fc">&nbsp;		m_clusterData.deleteAll(true);</b>
+<b class="fc">&nbsp;		m_clusterVertices.deleteAll(true);</b>
+<b class="fc">&nbsp;		m_firstCluster = -1;</b>
+<b class="fc">&nbsp;		m_lastCluster = -1;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (m_halfEdgeData != null)</b>
+<b class="fc">&nbsp;			m_halfEdgeData.deleteAll(true);</b>
+<b class="fc">&nbsp;		if (m_edgeIndices != null)</b>
+<b class="fc">&nbsp;			m_edgeIndices.clear();</b>
+<b class="fc">&nbsp;		if (m_clusterIndices != null)</b>
+<b class="fc">&nbsp;			m_clusterIndices.clear();</b>
+<b class="fc">&nbsp;		if (m_chainIndices != null)</b>
+<b class="nc">&nbsp;			m_chainIndices.clear();</b>
+<b class="fc">&nbsp;		if (m_chainData != null)</b>
+<b class="fc">&nbsp;			m_chainData.deleteAll(true);</b>
+<b class="fc">&nbsp;		m_universeChain = -1;</b>
+<b class="fc">&nbsp;		m_chainAreas = null;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Returns a half-edge emanating the cluster. All other half-edges can be
+&nbsp;	// visited with:
+&nbsp;	// incident_half_edge = getHalfEdgeTwin(half_edge);//get twin of the
+&nbsp;	// half_edge, it has the vertex as the end point.
+&nbsp;	// emanating_half_edge = getHalfEdgeTwin(incident_half_edge); //get next
+&nbsp;	// emanating half-edge
+&nbsp;	int getClusterHalfEdge(int cluster) {
+<b class="fc">&nbsp;		return m_clusterData.getField(cluster, 2);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Returns the coordinates of the cluster
+&nbsp;	void getXY(int cluster, Point2D pt) {
+<b class="fc">&nbsp;		int vindex = getClusterVertexIndex_(cluster);</b>
+<b class="fc">&nbsp;		m_shape.getXYWithIndex(vindex, pt);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Returns parentage mask of the cluster
+&nbsp;	int getClusterParentage(int cluster) {
+<b class="fc">&nbsp;		return m_clusterData.getField(cluster, 1);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Returns first cluster in the Topo_graph (has lowest y, x coordinates).
+&nbsp;	int getFirstCluster() {
+<b class="fc">&nbsp;		return m_firstCluster;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Returns previous cluster in the Topo_graph (in the sorted order of y,x
+&nbsp;	// coordinates).
+&nbsp;	int getPrevCluster(int cluster) {
+<b class="nc">&nbsp;		return m_clusterData.getField(cluster, 3);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Returns next cluster in the Topo_graph (in the sorted order of y,x
+&nbsp;	// coordinates).
+&nbsp;	int getNextCluster(int cluster) {
+<b class="fc">&nbsp;		return m_clusterData.getField(cluster, 4);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Returns an exterior chain of a face this cluster belongs to (belongs only
+&nbsp;	// to interior). set only for the clusters that are standalone clusters (do
+&nbsp;	// not have half-edges with them).
+&nbsp;	int getClusterChain(int cluster) {
+<b class="fc">&nbsp;		return m_clusterData.getField(cluster, 6);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Returns iterator for cluster vertices
+&nbsp;	int getClusterVertexIterator(int cluster) {
+<b class="fc">&nbsp;		return m_clusterData.getField(cluster, 7);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Increments iterator. Returns -1 if no more vertices in the cluster
+&nbsp;	int incrementVertexIterator(int vertexIterator) {
+<b class="fc">&nbsp;		return m_clusterVertices.getField(vertexIterator, 1);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Dereference the iterator
+&nbsp;	int getVertexFromVertexIterator(int vertexIterator) {
+<b class="fc">&nbsp;		return m_clusterVertices.getField(vertexIterator, 0);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Returns a user index value for the cluster.
+&nbsp;	int getClusterUserIndex(int cluster, int index) {
+<b class="fc">&nbsp;		int i = getClusterIndex_(cluster);</b>
+<b class="fc">&nbsp;		AttributeStreamOfInt32 stream = m_clusterIndices.get(index);</b>
+<b class="fc">&nbsp;		if (stream.size() &lt;= i)</b>
+<b class="nc">&nbsp;			return -1;</b>
+<b class="fc">&nbsp;		return stream.read(i);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Sets a user index value for the cluster.
+&nbsp;	void setClusterUserIndex(int cluster, int index, int value) {
+<b class="fc">&nbsp;		int i = getClusterIndex_(cluster);</b>
+<b class="fc">&nbsp;		AttributeStreamOfInt32 stream = m_clusterIndices.get(index);</b>
+<b class="fc">&nbsp;		if (stream.size() &lt;= i)</b>
+<b class="nc">&nbsp;			stream.resize(m_clusterData.size(), -1);</b>
+&nbsp;
+<b class="fc">&nbsp;		stream.write(i, value);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Creates a new user index for the cluster. The index values are set to -1.
+&nbsp;	int createUserIndexForClusters() {
+<b class="fc">&nbsp;		if (m_clusterIndices == null) {</b>
+<b class="fc">&nbsp;			m_clusterIndices = new ArrayList&lt;AttributeStreamOfInt32&gt;(3);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		AttributeStreamOfInt32 new_stream = new AttributeStreamOfInt32(</b>
+<b class="fc">&nbsp;				m_clusterData.capacity(), -1);</b>
+<b class="fc">&nbsp;		for (int i = 0, n = m_clusterIndices.size(); i &lt; n; i++) {</b>
+<b class="fc">&nbsp;			if (m_clusterIndices.get(i) == null) {</b>
+<b class="nc">&nbsp;				m_clusterIndices.set(i, new_stream);</b>
+<b class="nc">&nbsp;				return i;</b>
+&nbsp;			}
+&nbsp;		}
+<b class="fc">&nbsp;		m_clusterIndices.add(new_stream);</b>
+<b class="fc">&nbsp;		return m_clusterIndices.size() - 1;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Deletes user index
+&nbsp;	void deleteUserIndexForClusters(int userIndex) {
+<b class="fc">&nbsp;		assert (m_clusterIndices.get(userIndex) != null);</b>
+<b class="fc">&nbsp;		m_clusterIndices.set(userIndex, null);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Returns origin of this half edge. To get the other end:
+&nbsp;	// incident_half_edge = getHalfEdgeTwin(half_edge);
+&nbsp;	// edge_end_point = getHalfEdgeOrigin(incident_half_edge);
+&nbsp;	int getHalfEdgeOrigin(int half_edge) {
+<b class="fc">&nbsp;		return m_halfEdgeData.getField(half_edge, 1);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Returns the to point of the half edge
+&nbsp;	int getHalfEdgeTo(int half_edge) {
+<b class="fc">&nbsp;		return getHalfEdgeOrigin(getHalfEdgeTwin(half_edge));</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Twin of this halfedge, it has opposite direction and same endpoints
+&nbsp;	int getHalfEdgeTwin(int half_edge) {
+<b class="fc">&nbsp;		return m_halfEdgeData.getField(half_edge, 4);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Returns previous halfedge. It ends, where this halfedge starts.
+&nbsp;	int getHalfEdgePrev(int half_edge) {
+<b class="fc">&nbsp;		return m_halfEdgeData.getField(half_edge, 5);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Returns next halfedge. It starts, where this halfedge ends.
+&nbsp;	int getHalfEdgeNext(int half_edge) {
+<b class="fc">&nbsp;		return m_halfEdgeData.getField(half_edge, 6);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Returns half edge chain. Chain is on the right from the halfedge
+&nbsp;	int getHalfEdgeChain(int half_edge) {
+<b class="fc">&nbsp;		return m_halfEdgeData.getField(half_edge, 2);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Returns half edge chain parentage. The call is implemented as as
+&nbsp;	// getChainParentage(getHalfEdgeChain());
+&nbsp;	int getHalfEdgeFaceParentage(int half_edge) {
+<b class="fc">&nbsp;		return getChainParentage(m_halfEdgeData.getField(half_edge, 2));</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Returns iterator for cluster vertices
+&nbsp;	int getHalfEdgeVertexIterator(int half_edge) {
+<b class="fc">&nbsp;		return m_halfEdgeData.getField(half_edge, 7);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Returns the coordinates of the origin of the half_edge
+&nbsp;	void getHalfEdgeFromXY(int half_edge, Point2D pt) {
+<b class="fc">&nbsp;		getXY(getHalfEdgeOrigin(half_edge), pt);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Returns the coordinates of the end of the half_edge
+&nbsp;	void getHalfEdgeToXY(int half_edge, Point2D pt) {
+<b class="fc">&nbsp;		getXY(getHalfEdgeTo(half_edge), pt);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Returns parentage mask of this halfedge. Parentage mask of halfedge and
+&nbsp;	// its twin are the same
+&nbsp;	int getHalfEdgeParentage(int half_edge) {
+<b class="fc">&nbsp;		return m_halfEdgeData.getField(half_edge, 3) &amp; c_edgeParentageMask;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Returns a user index value for the half edge
+&nbsp;	int getHalfEdgeUserIndex(int half_edge, int index) {
+<b class="fc">&nbsp;		int i = getHalfEdgeIndex_(half_edge);</b>
+<b class="fc">&nbsp;		AttributeStreamOfInt32 stream = m_edgeIndices.get(index);</b>
+<b class="fc">&nbsp;		if (stream.size() &lt;= i)</b>
+<b class="nc">&nbsp;			return -1;</b>
+&nbsp;
+<b class="fc">&nbsp;		return stream.read(i);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Sets a user index value for a half edge
+&nbsp;	void setHalfEdgeUserIndex(int half_edge, int index, int value) {
+<b class="fc">&nbsp;		int i = getHalfEdgeIndex_(half_edge);</b>
+<b class="fc">&nbsp;		AttributeStreamOfInt32 stream = m_edgeIndices.get(index);</b>
+<b class="fc">&nbsp;		if (stream.size() &lt;= i)</b>
+<b class="nc">&nbsp;			stream.resize(m_halfEdgeData.size(), -1);</b>
+&nbsp;
+<b class="fc">&nbsp;		stream.write(i, value);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// create a new user index for half edges. The index values are set to -1.
+&nbsp;	int createUserIndexForHalfEdges() {
+<b class="fc">&nbsp;		if (m_edgeIndices == null)</b>
+<b class="fc">&nbsp;			m_edgeIndices = new ArrayList&lt;AttributeStreamOfInt32&gt;(3);</b>
+&nbsp;
+<b class="fc">&nbsp;		AttributeStreamOfInt32 new_stream = new AttributeStreamOfInt32(</b>
+<b class="fc">&nbsp;				m_halfEdgeData.capacity(), -1);</b>
+<b class="fc">&nbsp;		for (int i = 0, n = m_edgeIndices.size(); i &lt; n; i++) {</b>
+<b class="fc">&nbsp;			if (m_edgeIndices.get(i) == null) {</b>
+<b class="fc">&nbsp;				m_edgeIndices.set(i, new_stream);</b>
+<b class="fc">&nbsp;				return i;</b>
+&nbsp;			}
+&nbsp;		}
+<b class="fc">&nbsp;		m_edgeIndices.add(new_stream);</b>
+<b class="fc">&nbsp;		return m_edgeIndices.size() - 1;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Deletes the given user index for half edges
+&nbsp;	void deleteUserIndexForHalfEdges(int userIndex) {
+<b class="fc">&nbsp;		assert (m_edgeIndices.get(userIndex) != null);</b>
+<b class="fc">&nbsp;		m_edgeIndices.set(userIndex, null);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Deletes the half_edge and it&#39;s twin. It works presently when removing a
+&nbsp;	// spike only.
+&nbsp;	// Returns next valid half-edge, or -1 if no more half edges.
+&nbsp;	// Use with care.
+&nbsp;	int deleteEdgeInternal_(int half_edge) {
+<b class="fc">&nbsp;		int chain = getHalfEdgeChain(half_edge);</b>
+<b class="fc">&nbsp;		int halfEdgeTwin = getHalfEdgeTwin(half_edge);</b>
+<b class="fc">&nbsp;		int chainTwin = getHalfEdgeChain(halfEdgeTwin);</b>
+&nbsp;		// This function only works for spikes. These two asserts check for that
+<b class="fc">&nbsp;		assert (chainTwin == chain);</b>
+<b class="fc">&nbsp;		assert (half_edge == getHalfEdgeNext(halfEdgeTwin) || halfEdgeTwin == getHalfEdgeNext(half_edge));</b>
+&nbsp;
+<b class="fc">&nbsp;		int n = getHalfEdgeNext(half_edge);</b>
+<b class="fc">&nbsp;		if (n == halfEdgeTwin) {</b>
+<b class="nc">&nbsp;			n = getHalfEdgeNext(n);</b>
+<b class="nc">&nbsp;			if (n == half_edge)</b>
+<b class="nc">&nbsp;				n = -1;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (getChainHalfEdge(chain) == half_edge) {</b>
+<b class="fc">&nbsp;			setChainHalfEdge_(chain, n);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		int chainIndex = getChainIndex_(chain);</b>
+<b class="fc">&nbsp;		double v = m_chainAreas.read(chainIndex);</b>
+<b class="fc">&nbsp;		if (!NumberUtils.isNaN(v)) {</b>
+<b class="fc">&nbsp;			setChainArea_(chain, NumberUtils.TheNaN);</b>
+<b class="fc">&nbsp;			setChainPerimeter_(chain, NumberUtils.TheNaN);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		updateVertexToHalfEdgeConnection_(half_edge, true);</b>
+&nbsp;
+<b class="fc">&nbsp;		deleteEdgeImpl_(half_edge);// does not change chain information</b>
+<b class="fc">&nbsp;		return n;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Deletes the halfEdges and their twin. The chains are broken after this
+&nbsp;	// call.
+&nbsp;	// For every chain the halfedges belong to, it will set the first edge to
+&nbsp;	// -1.
+&nbsp;	// However, the halfedge will still reference the chain so one can get the
+&nbsp;	// parentage information still.
+&nbsp;	void deleteEdgesBreakFaces_(AttributeStreamOfInt32 edgesToDelete) {
+<b class="fc">&nbsp;		for (int i = 0, n = edgesToDelete.size(); i &lt; n; i++) {</b>
+<b class="fc">&nbsp;			int half_edge = edgesToDelete.get(i);</b>
+<b class="fc">&nbsp;			int chain = getHalfEdgeChain(half_edge);</b>
+<b class="fc">&nbsp;			int halfEdgeTwin = getHalfEdgeTwin(half_edge);</b>
+<b class="fc">&nbsp;			int chainTwin = getHalfEdgeChain(halfEdgeTwin);</b>
+<b class="fc">&nbsp;			setChainHalfEdge_(chain, -1);</b>
+<b class="fc">&nbsp;			setChainHalfEdge_(chainTwin, -1);</b>
+<b class="fc">&nbsp;			updateVertexToHalfEdgeConnection_(half_edge, true);</b>
+<b class="fc">&nbsp;			deleteEdgeImpl_(half_edge);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	boolean doesHalfEdgeBelongToAPolygonInterior(int half_edge, int polygonId) {
+&nbsp;		// Half edge belongs to polygon interior if both it and its twin belong
+&nbsp;		// to boundary of faces that have the polygon parentage (the poygon both
+&nbsp;		// to the left and to the right of the edge).
+<b class="nc">&nbsp;		int p_1 = getHalfEdgeFaceParentage(half_edge);</b>
+<b class="nc">&nbsp;		int p_2 = getHalfEdgeFaceParentage(getHalfEdgeTwin(half_edge));</b>
+<b class="nc">&nbsp;		return (p_1 &amp; polygonId) != 0 &amp;&amp; (p_2 &amp; polygonId) != 0;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	boolean doesHalfEdgeBelongToAPolygonExterior(int half_edge, int polygonId) {
+&nbsp;		// Half edge belongs to polygon interior if both it and its twin belong
+&nbsp;		// to boundary of faces that have the polygon parentage (the poygon both
+&nbsp;		// to the left and to the right of the edge).
+<b class="nc">&nbsp;		int p_1 = getHalfEdgeFaceParentage(half_edge);</b>
+<b class="nc">&nbsp;		int p_2 = getHalfEdgeFaceParentage(getHalfEdgeTwin(half_edge));</b>
+<b class="nc">&nbsp;		return (p_1 &amp; polygonId) == 0 &amp;&amp; (p_2 &amp; polygonId) == 0;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	boolean doesHalfEdgeBelongToAPolygonBoundary(int half_edge, int polygonId) {
+&nbsp;		// Half edge overlaps polygon boundary
+<b class="nc">&nbsp;		int p_1 = getHalfEdgeParentage(half_edge);</b>
+<b class="nc">&nbsp;		return (p_1 &amp; polygonId) != 0;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	boolean doesHalfEdgeBelongToAPolylineInterior(int half_edge, int polylineId) {
+&nbsp;		// Half-edge belongs to a polyline interioir if it has the polyline
+&nbsp;		// parentage (1D intersection (aka overlap)).
+<b class="nc">&nbsp;		int p_1 = getHalfEdgeParentage(half_edge);</b>
+<b class="nc">&nbsp;		if ((p_1 &amp; polylineId) != 0) {</b>
+<b class="nc">&nbsp;			return true;</b>
+&nbsp;		}
+&nbsp;
+<b class="nc">&nbsp;		return false;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	boolean doesHalfEdgeBelongToAPolylineExterior(int half_edge, int polylineId) {
+&nbsp;		// Half-edge belongs to a polyline Exterioir if it does not have the
+&nbsp;		// polyline parentage and both its clusters also do not have polyline&#39;s
+&nbsp;		// parentage (to exclude touch at point).
+<b class="nc">&nbsp;		int p_1 = getHalfEdgeParentage(half_edge);</b>
+<b class="nc">&nbsp;		if ((p_1 &amp; polylineId) == 0) {</b>
+<b class="nc">&nbsp;			int c = getHalfEdgeOrigin(half_edge);</b>
+<b class="nc">&nbsp;			int pc = getClusterParentage(c);</b>
+<b class="nc">&nbsp;			if ((pc &amp; polylineId) == 0) {</b>
+<b class="nc">&nbsp;				c = getHalfEdgeTo(half_edge);</b>
+<b class="nc">&nbsp;				pc = getClusterParentage(c);</b>
+<b class="nc">&nbsp;				if ((pc &amp; polylineId) == 0) {</b>
+<b class="nc">&nbsp;					return true;</b>
+&nbsp;				}
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="nc">&nbsp;		return false;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	boolean doesClusterBelongToAPolygonInterior(int cluster, int polygonId) {
+&nbsp;		// cluster belongs to a polygon interior when
+&nbsp;		// 1) It is a standalone cluster that has face parentage of this polygon
+&nbsp;		// GetClusterFaceParentage()
+&nbsp;		// 2) or It is a cluster with half edges attached and
+&nbsp;		// a) It is not on the polygon boundrary (get_cluster_parentage)
+&nbsp;		// b) Any half edge associated with it has face parentage of the polygon
+&nbsp;		// (get_half_edge_face_parentage(getClusterHalfEdge()))
+&nbsp;
+<b class="nc">&nbsp;		int chain = getClusterChain(cluster);</b>
+<b class="nc">&nbsp;		if (chain != -1) {</b>
+<b class="nc">&nbsp;			if ((getChainParentage(chain) &amp; polygonId) != 0) {</b>
+<b class="nc">&nbsp;				return true;</b>
+&nbsp;			}
+&nbsp;		} else {
+<b class="nc">&nbsp;			int p_1 = getClusterParentage(cluster);</b>
+<b class="nc">&nbsp;			if ((p_1 &amp; polygonId) == 0)// not on the polygon boundary</b>
+&nbsp;			{
+<b class="nc">&nbsp;				int half_edge = getClusterHalfEdge(cluster);</b>
+<b class="nc">&nbsp;				assert (half_edge != -1);</b>
+&nbsp;
+<b class="nc">&nbsp;				int p_2 = getHalfEdgeFaceParentage(half_edge);</b>
+<b class="nc">&nbsp;				if ((p_2 &amp; polygonId) != 0) {</b>
+<b class="nc">&nbsp;					return true;</b>
+&nbsp;				}
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="nc">&nbsp;		return false;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	boolean doesClusterBelongToAPolygonExterior(int cluster, int polygonId) {
+<b class="nc">&nbsp;		int p_1 = getClusterParentage(cluster);</b>
+<b class="nc">&nbsp;		if ((p_1 &amp; polygonId) == 0) {</b>
+<b class="nc">&nbsp;			return doesClusterBelongToAPolygonInterior(cluster, polygonId);</b>
+&nbsp;		}
+&nbsp;
+<b class="nc">&nbsp;		return false;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	boolean doesClusterBelongToAPolygonBoundary(int cluster, int polygonId) {
+<b class="nc">&nbsp;		int p_1 = getClusterParentage(cluster);</b>
+<b class="nc">&nbsp;		if ((p_1 &amp; polygonId) != 0) {</b>
+<b class="nc">&nbsp;			return true;</b>
+&nbsp;		}
+&nbsp;
+<b class="nc">&nbsp;		return false;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// bool DoesClusterBelongToAPolylineInterioir(int cluster, int polylineId);
+&nbsp;	// bool does_cluster_belong_to_a_polyline_exterior(int cluster, int
+&nbsp;	// polylineId);
+&nbsp;	// bool does_cluster_belong_to_a_polyline_boundary(int cluster, int
+&nbsp;	// polylineId);
+&nbsp;
+&nbsp;	// Returns the first chain, which is always the Universe chain.
+&nbsp;	int getFirstChain() {
+<b class="fc">&nbsp;		return m_universeChain;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Returns the chain half edge.
+&nbsp;	int getChainHalfEdge(int chain) {
+<b class="fc">&nbsp;		return m_chainData.getField(chain, 1);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Returns the chain&#39;s face parentage. That is the parentage of a face this
+&nbsp;	// chain borders with.
+&nbsp;	int getChainParentage(int chain) {
+<b class="fc">&nbsp;		return m_chainData.getField(chain, 2);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Returns the parent of the chain (the chain, this chain is inside of).
+&nbsp;	int getChainParent(int chain) {
+<b class="fc">&nbsp;		return m_chainData.getField(chain, 3);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Returns the first island chain in that chain. Island chains are always
+&nbsp;	// counterclockwise.
+&nbsp;	// Each island chain will have its complement chain, which is a chain of a
+&nbsp;	// twin of any halfedge of that chain.
+&nbsp;	int getChainFirstIsland(int chain) {
+<b class="fc">&nbsp;		return m_chainData.getField(chain, 4);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Returns the first island chain in that chain. Island chains are always
+&nbsp;	// counterclockwise.
+&nbsp;	int getChainNextInParent(int chain) {
+<b class="nc">&nbsp;		return m_chainData.getField(chain, 5);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Returns the next chain in arbitrary order.
+&nbsp;	int getChainNext(int chain) {
+<b class="nc">&nbsp;		return m_chainData.getField(chain, 7);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Returns the area of the chain. The area does not include any islands.
+&nbsp;	// +Inf is returned for the universe chain.
+&nbsp;	double getChainArea(int chain) {
+<b class="fc">&nbsp;		int chainIndex = getChainIndex_(chain);</b>
+<b class="fc">&nbsp;		double v = m_chainAreas.read(chainIndex);</b>
+<b class="fc">&nbsp;		if (NumberUtils.isNaN(v)) {</b>
+<b class="fc">&nbsp;			updateChainAreaAndPerimeter_(chain);</b>
+<b class="fc">&nbsp;			v = m_chainAreas.read(chainIndex);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return v;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Returns the perimeter of the chain (&gt; 0). +Inf is returned for the
+&nbsp;	// universe chain.
+&nbsp;	double getChainPerimeter(int chain) {
+<b class="nc">&nbsp;		int chainIndex = getChainIndex_(chain);</b>
+<b class="nc">&nbsp;		double v = m_chainPerimeters.read(chainIndex);</b>
+<b class="nc">&nbsp;		if (NumberUtils.isNaN(v)) {</b>
+<b class="nc">&nbsp;			updateChainAreaAndPerimeter_(chain);</b>
+<b class="nc">&nbsp;			v = m_chainPerimeters.read(chainIndex);</b>
+&nbsp;		}
+&nbsp;
+<b class="nc">&nbsp;		return v;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Returns a user index value for the chain.
+&nbsp;	int getChainUserIndex(int chain, int index) {
+<b class="nc">&nbsp;		int i = getChainIndex_(chain);</b>
+<b class="nc">&nbsp;		AttributeStreamOfInt32 stream = m_chainIndices.get(index);</b>
+<b class="nc">&nbsp;		if (stream.size() &lt;= i)</b>
+<b class="nc">&nbsp;			return -1;</b>
+<b class="nc">&nbsp;		return stream.read(i);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Sets a user index value for the chain.
+&nbsp;	void setChainUserIndex(int chain, int index, int value) {
+<b class="nc">&nbsp;		int i = getChainIndex_(chain);</b>
+<b class="nc">&nbsp;		AttributeStreamOfInt32 stream = m_chainIndices.get(index);</b>
+<b class="nc">&nbsp;		if (stream.size() &lt;= i)</b>
+<b class="nc">&nbsp;			stream.resize(m_chainData.size(), -1);</b>
+&nbsp;
+<b class="nc">&nbsp;		stream.write(i, value);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Creates a new user index for the chains. The index values are set to -1.
+&nbsp;	int createUserIndexForChains() {
+<b class="nc">&nbsp;		if (m_chainIndices == null) {</b>
+<b class="nc">&nbsp;			m_chainIndices = new ArrayList&lt;AttributeStreamOfInt32&gt;(3);</b>
+&nbsp;		}
+&nbsp;
+<b class="nc">&nbsp;		AttributeStreamOfInt32 new_stream = new AttributeStreamOfInt32(</b>
+<b class="nc">&nbsp;				m_chainData.capacity(), -1);</b>
+<b class="nc">&nbsp;		for (int i = 0, n = m_chainIndices.size(); i &lt; n; i++) {</b>
+<b class="nc">&nbsp;			if (m_chainIndices.get(i) == null) {</b>
+<b class="nc">&nbsp;				m_chainIndices.set(i, new_stream);</b>
+<b class="nc">&nbsp;				return i;</b>
+&nbsp;			}
+&nbsp;		}
+<b class="nc">&nbsp;		m_chainIndices.add(new_stream);</b>
+<b class="nc">&nbsp;		return m_chainIndices.size() - 1;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Deletes user index
+&nbsp;	void deleteUserIndexForChains(int userIndex) {
+<b class="nc">&nbsp;		assert (m_chainIndices.get(userIndex) != null);</b>
+<b class="nc">&nbsp;		m_chainIndices.set(userIndex, null);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Returns geometry ID mask from the geometry handle.
+&nbsp;	// Topo_graph creates a user index for geometries in the shape, which exists
+&nbsp;	// until the topo graph is destroyed.
+&nbsp;	int getGeometryID(int geometry) {
+<b class="fc">&nbsp;		return m_shape.getGeometryUserIndex(geometry, m_geometryIDIndex);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Returns cluster from vertex handle.
+&nbsp;	// Topo_graph creates a user index for vertices in the shape to hold cluster
+&nbsp;	// handles. The index exists until the topo graph is destroyed.
+&nbsp;	int getClusterFromVertex(int vertex) {
+<b class="fc">&nbsp;		return m_shape.getUserIndex(vertex, m_clusterIndex);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	int getHalfEdgeFromVertex(int vertex) {
+<b class="fc">&nbsp;		return m_shape.getUserIndex(vertex, m_halfEdgeIndex);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Finds an edge connecting the two clusters. Returns -1 if not found.
+&nbsp;	// Could be a slow operation when valency of each cluster is high.
+&nbsp;	int getHalfEdgeConnector(int clusterFrom, int clusterTo) {
+<b class="fc">&nbsp;		int first_edge = getClusterHalfEdge(clusterFrom);</b>
+<b class="fc">&nbsp;		if (first_edge == -1)</b>
+<b class="fc">&nbsp;			return -1;</b>
+<b class="fc">&nbsp;		int edge = first_edge;</b>
+<b class="fc">&nbsp;		int firstEdgeTo = -1;</b>
+<b class="fc">&nbsp;		int eTo = -1;</b>
+&nbsp;		// Doing two loops in parallel - one on the half-edges attached to the
+&nbsp;		// clusterFrom, another - attached to clusterTo.
+&nbsp;		do {
+<b class="fc">&nbsp;			if (getHalfEdgeTo(edge) == clusterTo)</b>
+<b class="fc">&nbsp;				return edge;</b>
+&nbsp;
+<b class="fc">&nbsp;			if (firstEdgeTo == -1) {</b>
+<b class="fc">&nbsp;				firstEdgeTo = getClusterHalfEdge(clusterTo);</b>
+<b class="fc">&nbsp;				if (firstEdgeTo == -1)</b>
+<b class="fc">&nbsp;					return -1;</b>
+<b class="fc">&nbsp;				eTo = firstEdgeTo;</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			if (getHalfEdgeTo(eTo) == clusterFrom) {</b>
+<b class="fc">&nbsp;				edge = getHalfEdgeTwin(eTo);</b>
+<b class="fc">&nbsp;				assert (getHalfEdgeTo(edge) == clusterTo &amp;&amp; getHalfEdgeOrigin(edge) == clusterFrom);</b>
+<b class="fc">&nbsp;				return edge;</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			edge = getHalfEdgeNext(getHalfEdgeTwin(edge));</b>
+<b class="fc">&nbsp;			eTo = getHalfEdgeNext(getHalfEdgeTwin(eTo));</b>
+<b class="fc">&nbsp;		} while (edge != first_edge &amp;&amp; eTo != firstEdgeTo);</b>
+&nbsp;
+<b class="nc">&nbsp;		return -1;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Queries segment for the edge (only xy coordinates, no attributes)
+&nbsp;	void querySegmentXY(int half_edge, SegmentBuffer outBuffer) {
+<b class="fc">&nbsp;		outBuffer.createLine();</b>
+<b class="fc">&nbsp;		Segment seg = outBuffer.get();</b>
+<b class="fc">&nbsp;		Point2D pt = new Point2D();</b>
+<b class="fc">&nbsp;		getHalfEdgeFromXY(half_edge, pt);</b>
+<b class="fc">&nbsp;		seg.setStartXY(pt);</b>
+<b class="fc">&nbsp;		getHalfEdgeToXY(half_edge, pt);</b>
+<b class="fc">&nbsp;		seg.setEndXY(pt);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	int compareEdgeAngles_(int edge1, int edge2) {
+<b class="fc">&nbsp;		if (edge1 == edge2)</b>
+<b class="nc">&nbsp;			return 0;</b>
+&nbsp;
+<b class="fc">&nbsp;		Point2D pt_1 = new Point2D();</b>
+<b class="fc">&nbsp;		getHalfEdgeToXY(edge1, pt_1);</b>
+&nbsp;
+<b class="fc">&nbsp;		Point2D pt_2 = new Point2D();</b>
+<b class="fc">&nbsp;		getHalfEdgeToXY(edge2, pt_2);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (pt_1.isEqual(pt_2))</b>
+<b class="fc">&nbsp;			return 0;// overlap case</b>
+&nbsp;
+<b class="fc">&nbsp;		Point2D pt10 = new Point2D();</b>
+<b class="fc">&nbsp;		getHalfEdgeFromXY(edge1, pt10);</b>
+&nbsp;
+<b class="fc">&nbsp;		Point2D v_1 = new Point2D();</b>
+<b class="fc">&nbsp;		v_1.sub(pt_1, pt10);</b>
+<b class="fc">&nbsp;		Point2D v_2 = new Point2D();</b>
+<b class="fc">&nbsp;		v_2.sub(pt_2, pt10);</b>
+<b class="fc">&nbsp;		int result = Point2D._compareVectors(v_1, v_2);</b>
+<b class="fc">&nbsp;		return result;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	int compareEdgeAnglesForPair_(int edge1, int edge2) {
+<b class="fc">&nbsp;		if (edge1 == edge2)</b>
+<b class="nc">&nbsp;			return 0;</b>
+&nbsp;
+<b class="fc">&nbsp;		Point2D pt_1 = new Point2D();</b>
+<b class="fc">&nbsp;		getHalfEdgeToXY(edge1, pt_1);</b>
+&nbsp;
+<b class="fc">&nbsp;		Point2D pt_2 = new Point2D();</b>
+<b class="fc">&nbsp;		getHalfEdgeToXY(edge2, pt_2);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (pt_1.isEqual(pt_2))</b>
+<b class="fc">&nbsp;			return 0;// overlap case</b>
+&nbsp;
+<b class="fc">&nbsp;		Point2D pt10 = new Point2D();</b>
+<b class="fc">&nbsp;		getHalfEdgeFromXY(edge1, pt10);</b>
+&nbsp;
+<b class="fc">&nbsp;		Point2D v_1 = new Point2D();</b>
+<b class="fc">&nbsp;		v_1.sub(pt_1, pt10);</b>
+<b class="fc">&nbsp;		Point2D v_2 = new Point2D();</b>
+<b class="fc">&nbsp;		v_2.sub(pt_2, pt10);</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (v_2.y &gt;= 0 &amp;&amp; v_1.y &gt; 0) {</b>
+<b class="fc">&nbsp;			int result = Point2D._compareVectors(v_1, v_2);</b>
+<b class="fc">&nbsp;			return result;</b>
+&nbsp;		}
+&nbsp;		else {
+<b class="fc">&nbsp;			return 0;</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	boolean check_structure_after_dirty_sweep_() {
+&nbsp;		// for each cluster go through the cluster half edges and check that
+&nbsp;		// min(edge1_length, edge2_length) * angle_between is less than
+&nbsp;		// m_check_dirty_planesweep_tolerance.
+&nbsp;		// Doing this helps us weed out cases missed by the dirty plane sweep.
+&nbsp;		// We do not need absolute accuracy here.
+<b class="fc">&nbsp;		assert (!m_dirty_check_failed);</b>
+<b class="fc">&nbsp;		assert (!NumberUtils.isNaN(m_check_dirty_planesweep_tolerance));</b>
+<b class="fc">&nbsp;		double sqr_tol = MathUtils.sqr(m_check_dirty_planesweep_tolerance);</b>
+<b class="fc">&nbsp;		Point2D pt10 = new Point2D();</b>
+<b class="fc">&nbsp;		Point2D pt_2 = new Point2D();</b>
+<b class="fc">&nbsp;		Point2D pt_1 = new Point2D();</b>
+<b class="fc">&nbsp;		Point2D v_1 = new Point2D();</b>
+<b class="fc">&nbsp;		Point2D v_2 = new Point2D();</b>
+<b class="fc">&nbsp;		for (int cluster = getFirstCluster(); cluster != -1; cluster = getNextCluster(cluster)) {</b>
+<b class="fc">&nbsp;			int first = getClusterHalfEdge(cluster);</b>
+<b class="fc">&nbsp;			if (first != -1) {</b>
+<b class="fc">&nbsp;				int edge = first;</b>
+<b class="fc">&nbsp;				getHalfEdgeFromXY(edge, pt10);</b>
+<b class="fc">&nbsp;				getHalfEdgeToXY(edge, pt_2);</b>
+<b class="fc">&nbsp;				v_2.sub(pt_2, pt10);</b>
+<b class="fc">&nbsp;				double sqr_len2 = v_2.sqrLength();</b>
+&nbsp;
+&nbsp;				do {
+<b class="fc">&nbsp;					int prev = edge;</b>
+<b class="fc">&nbsp;					edge = getHalfEdgeNext(getHalfEdgeTwin(edge));</b>
+&nbsp;
+<b class="fc">&nbsp;					if (edge != prev) {</b>
+<b class="fc">&nbsp;						getHalfEdgeToXY(edge, pt_1);</b>
+<b class="fc">&nbsp;						assert (!pt_1.isEqual(pt_2));</b>
+<b class="fc">&nbsp;						v_1.sub(pt_1, pt10);</b>
+<b class="fc">&nbsp;						double sqr_len1 = v_1.sqrLength();</b>
+&nbsp;
+<b class="fc">&nbsp;						double cross = v_1.crossProduct(v_2); // cross_prod =</b>
+&nbsp;																// len1 * len2 *
+&nbsp;																// sinA =&gt; sinA
+&nbsp;																// = cross_prod
+&nbsp;																// / (len1 *
+&nbsp;																// len2);
+<b class="fc">&nbsp;						double sqr_sinA = (cross * cross)</b>
+<b class="fc">&nbsp;								/ (sqr_len1 * sqr_len2); // sqr_sinA is</b>
+&nbsp;															// approximately A^2
+&nbsp;															// especially for
+&nbsp;															// smaller angles
+<b class="fc">&nbsp;						double sqr_dist = Math.min(sqr_len1, sqr_len2)</b>
+<b class="fc">&nbsp;								* sqr_sinA;</b>
+<b class="fc">&nbsp;						if (sqr_dist &lt;= sqr_tol) {</b>
+&nbsp;							// these edges incident on the cluster form a narrow
+&nbsp;							// wedge and thei require cracking event that was
+&nbsp;							// missed.
+<b class="fc">&nbsp;							return false;</b>
+&nbsp;						}
+&nbsp;
+<b class="fc">&nbsp;						v_2.setCoords(v_1);</b>
+<b class="fc">&nbsp;						sqr_len2 = sqr_len1;</b>
+<b class="fc">&nbsp;						pt_2.setCoords(pt_1);</b>
+&nbsp;					}
+<b class="fc">&nbsp;				} while (edge != first);</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return true;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-02-21 15:02</div>
+</div>
+</body>
+</html>

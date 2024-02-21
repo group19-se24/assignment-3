@@ -1,0 +1,885 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > MultiPath</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.esri.core.geometry</a>
+</div>
+
+<h1>Coverage Summary for Class: MultiPath (com.esri.core.geometry)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">MultiPath</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    72,7%
+  </span>
+  <span class="absValue">
+    (64/88)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    71,7%
+  </span>
+  <span class="absValue">
+    (71/99)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; Copyright 1995-2015 Esri
+&nbsp;
+&nbsp;   Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp;   you may not use this file except in compliance with the License.
+&nbsp;   You may obtain a copy of the License at
+&nbsp;
+&nbsp;       http://www.apache.org/licenses/LICENSE-2.0
+&nbsp;
+&nbsp;   Unless required by applicable law or agreed to in writing, software
+&nbsp;   distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp;   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp;   See the License for the specific language governing permissions and
+&nbsp;   limitations under the License.
+&nbsp;
+&nbsp; For additional information, contact:
+&nbsp; Environmental Systems Research Institute, Inc.
+&nbsp; Attn: Contracts Dept
+&nbsp; 380 New York Street
+&nbsp; Redlands, California, USA 92373
+&nbsp;
+&nbsp; email: contracts@esri.com
+&nbsp; */
+&nbsp;
+&nbsp;package com.esri.core.geometry;
+&nbsp;
+&nbsp;import java.io.Serializable;
+&nbsp;
+&nbsp;/**
+&nbsp; * The MulitPath class is a base class for polygons and polylines.
+&nbsp; */
+<b class="fc">&nbsp;public abstract class MultiPath extends MultiVertexGeometry implements</b>
+&nbsp;		Serializable {
+&nbsp;	MultiPathImpl m_impl;
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public VertexDescription getDescription() {
+<b class="fc">&nbsp;		return m_impl.getDescription();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public void assignVertexDescription(VertexDescription src) {
+<b class="nc">&nbsp;		m_impl.assignVertexDescription(src);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public void mergeVertexDescription(VertexDescription src) {
+<b class="fc">&nbsp;		m_impl.mergeVertexDescription(src);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public void addAttribute(int semantics) {
+<b class="fc">&nbsp;		m_impl.addAttribute(semantics);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public void dropAttribute(int semantics) {
+<b class="fc">&nbsp;		m_impl.dropAttribute(semantics);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public void dropAllAttributes() {
+<b class="fc">&nbsp;		m_impl.dropAllAttributes();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public int getPointCount() {
+<b class="fc">&nbsp;		return m_impl.getPointCount();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public Point getPoint(int index) {
+<b class="fc">&nbsp;		return m_impl.getPoint(index);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public void setPoint(int index, Point point) {
+<b class="nc">&nbsp;		m_impl.setPoint(index, point);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public boolean isEmpty() {
+<b class="fc">&nbsp;		return m_impl.isEmptyImpl();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public double calculateArea2D() {
+<b class="fc">&nbsp;		return m_impl.calculateArea2D();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public double calculateLength2D() {
+<b class="fc">&nbsp;		return m_impl.calculateLength2D();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public double calculatePathLength2D(int pathIndex) {
+<b class="nc">&nbsp;		return m_impl.calculatePathLength2D(pathIndex);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public double getAttributeAsDbl(int semantics, int index, int ordinate) {
+<b class="fc">&nbsp;		return m_impl.getAttributeAsDbl(semantics, index, ordinate);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public int getAttributeAsInt(int semantics, int index, int ordinate) {
+<b class="nc">&nbsp;		return m_impl.getAttributeAsInt(semantics, index, ordinate);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public void setAttribute(int semantics, int index, int ordinate,
+&nbsp;			double value) {
+<b class="fc">&nbsp;		m_impl.setAttribute(semantics, index, ordinate, value);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public void setAttribute(int semantics, int index, int ordinate, int value) {
+<b class="fc">&nbsp;		m_impl.setAttribute(semantics, index, ordinate, value);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public Point2D getXY(int index) {
+<b class="fc">&nbsp;		return m_impl.getXY(index);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public void getXY(int index, Point2D pt) {
+<b class="fc">&nbsp;		m_impl.getXY(index, pt);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public void setXY(int index, Point2D pt) {
+<b class="fc">&nbsp;		m_impl.setXY(index, pt);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	Point3D getXYZ(int index) {
+<b class="fc">&nbsp;		return m_impl.getXYZ(index);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	void setXYZ(int index, Point3D pt) {
+<b class="nc">&nbsp;		m_impl.setXYZ(index, pt);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public void queryEnvelope(Envelope env) {
+<b class="fc">&nbsp;		m_impl.queryEnvelope(env);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public void queryEnvelope2D(Envelope2D env) {
+<b class="fc">&nbsp;		m_impl.queryEnvelope2D(env);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void queryPathEnvelope2D(int pathIndex, Envelope2D env) {
+<b class="fc">&nbsp;		m_impl.queryPathEnvelope2D(pathIndex, env);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	void queryEnvelope3D(Envelope3D env) {
+<b class="nc">&nbsp;		m_impl.queryEnvelope3D(env);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public void queryLooseEnvelope(Envelope2D env) {
+<b class="fc">&nbsp;		m_impl.queryLooseEnvelope2D(env);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void queryLooseEnvelope(Envelope3D env) {
+<b class="nc">&nbsp;		m_impl.queryLooseEnvelope3D(env);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public Envelope1D queryInterval(int semantics, int ordinate) {
+<b class="fc">&nbsp;		return m_impl.queryInterval(semantics, ordinate);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public void copyTo(Geometry dst) {
+<b class="fc">&nbsp;		if (getType() != dst.getType())</b>
+<b class="nc">&nbsp;			throw new IllegalArgumentException();</b>
+&nbsp;
+<b class="fc">&nbsp;		m_impl.copyTo((Geometry) dst._getImpl());</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public Geometry getBoundary() {
+<b class="fc">&nbsp;		return m_impl.getBoundary();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public void queryCoordinates(Point2D[] dst) {
+<b class="fc">&nbsp;		m_impl.queryCoordinates(dst);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void queryCoordinates(Point2D[] dst, int dstSize, int beginIndex, int endIndex) {
+<b class="nc">&nbsp;	  m_impl.queryCoordinates(dst, dstSize, beginIndex, endIndex);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	void queryCoordinates(Point3D[] dst) {
+<b class="nc">&nbsp;		m_impl.queryCoordinates(dst);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public void queryCoordinates(Point[] dst) {
+<b class="nc">&nbsp;		m_impl.queryCoordinates(dst);</b>
+&nbsp;
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns TRUE if the multipath contains non-linear segments.
+&nbsp;	 */
+&nbsp;	boolean hasNonLinearSegments() {
+<b class="fc">&nbsp;		return m_impl.hasNonLinearSegments();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns total segment count in the MultiPath.
+&nbsp;	 */
+&nbsp;	public int getSegmentCount() {
+<b class="fc">&nbsp;		return m_impl.getSegmentCount();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns the segment count in the given multipath path.
+&nbsp;	 * 
+&nbsp;	 * @param pathIndex
+&nbsp;	 *            The path to determine the segment.
+&nbsp;	 * @return The segment of the multipath.
+&nbsp;	 */
+&nbsp;	public int getSegmentCount(int pathIndex) {
+<b class="fc">&nbsp;		int segCount = getPathSize(pathIndex);</b>
+<b class="fc">&nbsp;		if (!isClosedPath(pathIndex))</b>
+<b class="fc">&nbsp;			segCount--;</b>
+<b class="fc">&nbsp;		return segCount;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Appends all paths from another multipath.
+&nbsp;	 * 
+&nbsp;	 * @param src
+&nbsp;	 *            The multipath to append to this multipath.
+&nbsp;	 * @param bReversePaths
+&nbsp;	 *            TRUE if the multipath is added should be added with its paths
+&nbsp;	 *            reversed.
+&nbsp;	 */
+&nbsp;	public void add(MultiPath src, boolean bReversePaths) {
+<b class="fc">&nbsp;		m_impl.add((MultiPathImpl) src._getImpl(), bReversePaths);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Copies a path from another multipath.
+&nbsp;	 * 
+&nbsp;	 * @param src
+&nbsp;	 *            The multipath to copy from.
+&nbsp;	 * @param srcPathIndex
+&nbsp;	 *            The index of the path in the the source MultiPath.
+&nbsp;	 * @param bForward
+&nbsp;	 *            When FALSE, the points are inserted in reverse order.
+&nbsp;	 */
+&nbsp;	public void addPath(MultiPath src, int srcPathIndex, boolean bForward) {
+<b class="fc">&nbsp;		m_impl.addPath((MultiPathImpl) src._getImpl(), srcPathIndex, bForward);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Adds a new path to this multipath.
+&nbsp;	 * 
+&nbsp;	 * @param points
+&nbsp;	 *            The array of points to add to this multipath.
+&nbsp;	 * @param count
+&nbsp;	 *            The number of points added to the mulitpath.
+&nbsp;	 * @param bForward
+&nbsp;	 *            When FALSE, the points are inserted in reverse order.
+&nbsp;	 */
+&nbsp;	void addPath(Point2D[] points, int count, boolean bForward) {
+<b class="fc">&nbsp;		m_impl.addPath(points, count, bForward);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Adds segments from a source multipath to this MultiPath.
+&nbsp;	 *
+&nbsp;	 * @param src
+&nbsp;	 *            The source MultiPath to add segments from.
+&nbsp;	 * @param srcPathIndex
+&nbsp;	 *            The index of the path in the the source MultiPath.
+&nbsp;	 * @param srcSegmentFrom
+&nbsp;	 *            The index of first segment in the path to start adding from.
+&nbsp;	 *            The value has to be between 0 and
+&nbsp;	 *            src.getSegmentCount(srcPathIndex) - 1.
+&nbsp;	 * @param srcSegmentCount
+&nbsp;	 *            The number of segments to add. If 0, the function does
+&nbsp;	 *            nothing.
+&nbsp;	 * @param bStartNewPath
+&nbsp;	 *            When true, a new path is added and segments are added to it.
+&nbsp;	 *            Otherwise the segments are added to the last path of this
+&nbsp;	 *            MultiPath.
+&nbsp;	 *
+&nbsp;	 *            If bStartNewPath false, the first point of the first source
+&nbsp;	 *            segment is not added. This is done to ensure proper connection
+&nbsp;	 *            to existing segments. When the source path is closed, and the
+&nbsp;	 *            closing segment is among those to be added, it is added also
+&nbsp;	 *            as a closing segment, not as a real segment. Use add_segment
+&nbsp;	 *            instead if you do not like that behavior.
+&nbsp;	 *
+&nbsp;	 *            This MultiPath obtains all missing attributes from the src
+&nbsp;	 *            MultiPath.
+&nbsp;	 */
+&nbsp;	public void addSegmentsFromPath(MultiPath src, int srcPathIndex,
+&nbsp;			int srcSegmentFrom, int srcSegmentCount, boolean bStartNewPath) {
+<b class="nc">&nbsp;		m_impl.addSegmentsFromPath((MultiPathImpl) src._getImpl(),</b>
+<b class="nc">&nbsp;				srcPathIndex, srcSegmentFrom, srcSegmentCount, bStartNewPath);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Adds a new segment to this multipath.
+&nbsp;	 * 
+&nbsp;	 * @param segment
+&nbsp;	 *            The segment to be added to this mulitpath.
+&nbsp;	 * @param bStartNewPath
+&nbsp;	 *            TRUE if a new path will be added.
+&nbsp;	 */
+&nbsp;	public void addSegment(Segment segment, boolean bStartNewPath) {
+<b class="fc">&nbsp;		m_impl.addSegment(segment, bStartNewPath);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Reverses the order of the vertices in each path.
+&nbsp;	 */
+&nbsp;	public void reverseAllPaths() {
+<b class="fc">&nbsp;		m_impl.reverseAllPaths();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Reverses the order of vertices in the path.
+&nbsp;	 * 
+&nbsp;	 * @param pathIndex
+&nbsp;	 *            The start index of the path to reverse the order.
+&nbsp;	 */
+&nbsp;	public void reversePath(int pathIndex) {
+<b class="fc">&nbsp;		m_impl.reversePath(pathIndex);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Removes the path at the given index.
+&nbsp;	 * 
+&nbsp;	 * @param pathIndex
+&nbsp;	 *            The start index to remove the path.
+&nbsp;	 */
+&nbsp;	public void removePath(int pathIndex) {
+<b class="fc">&nbsp;		m_impl.removePath(pathIndex);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Inserts a path from another multipath.
+&nbsp;	 * 
+&nbsp;	 * @param pathIndex
+&nbsp;	 *            The start index of the multipath to insert.
+&nbsp;	 * @param src
+&nbsp;	 *            The multipath to insert into this multipath. Can be the same
+&nbsp;	 *            as the multipath being modified.
+&nbsp;	 * @param srcPathIndex
+&nbsp;	 *            The start index to insert the path into the multipath.
+&nbsp;	 * @param bForward
+&nbsp;	 *            When FALSE, the points are inserted in reverse order.
+&nbsp;	 */
+&nbsp;	public void insertPath(int pathIndex, MultiPath src, int srcPathIndex,
+&nbsp;			boolean bForward) {
+<b class="fc">&nbsp;		m_impl.insertPath(pathIndex, (MultiPathImpl) src._getImpl(),</b>
+<b class="fc">&nbsp;				srcPathIndex, bForward);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Inserts a path from an array of 2D Points.
+&nbsp;	 * 
+&nbsp;	 * @param pathIndex
+&nbsp;	 *            The path index of the multipath to place the new path.
+&nbsp;	 * @param points
+&nbsp;	 *            The array of points defining the new path.
+&nbsp;	 * @param pointsOffset
+&nbsp;	 *            The offset into the array to start reading.
+&nbsp;	 * @param count
+&nbsp;	 *            The number of points to insert into the new path.
+&nbsp;	 * @param bForward
+&nbsp;	 *            When FALSE, the points are inserted in reverse order.
+&nbsp;	 */
+&nbsp;	void insertPath(int pathIndex, Point2D[] points, int pointsOffset,
+&nbsp;			int count, boolean bForward) {
+<b class="nc">&nbsp;		m_impl.insertPath(pathIndex, points, pointsOffset, count, bForward);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Inserts vertices from the given multipath into this multipath. All added
+&nbsp;	 * vertices are connected by linear segments with each other and with the
+&nbsp;	 * existing vertices.
+&nbsp;	 * 
+&nbsp;	 * @param pathIndex
+&nbsp;	 *            The path index in this multipath to insert points to. Must
+&nbsp;	 *            correspond to an existing path.
+&nbsp;	 * @param beforePointIndex
+&nbsp;	 *            The point index before all other vertices to insert in the
+&nbsp;	 *            given path of this multipath. This value must be between 0 and
+&nbsp;	 *            GetPathSize(pathIndex), or -1 to insert points at the end of
+&nbsp;	 *            the given path.
+&nbsp;	 * @param src
+&nbsp;	 *            The source multipath.
+&nbsp;	 * @param srcPathIndex
+&nbsp;	 *            The source path index to copy points from.
+&nbsp;	 * @param srcPointIndexFrom
+&nbsp;	 *            The start point in the source path to start copying from.
+&nbsp;	 * @param srcPointCount
+&nbsp;	 *            The count of points to add.
+&nbsp;	 * @param bForward
+&nbsp;	 *            When FALSE, the points are inserted in reverse order.
+&nbsp;	 */
+&nbsp;	public void insertPoints(int pathIndex, int beforePointIndex,
+&nbsp;			MultiPath src, int srcPathIndex, int srcPointIndexFrom,
+&nbsp;			int srcPointCount, boolean bForward) {
+<b class="fc">&nbsp;		m_impl.insertPoints(pathIndex, beforePointIndex,</b>
+<b class="fc">&nbsp;				(MultiPathImpl) src._getImpl(), srcPathIndex,</b>
+<b class="fc">&nbsp;				srcPointIndexFrom, srcPointCount, bForward);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Inserts a part of a path from the given array.
+&nbsp;	 * 
+&nbsp;	 * @param pathIndex
+&nbsp;	 *            The path index in this class to insert points to. Must
+&nbsp;	 *            correspond to an existing path.
+&nbsp;	 * @param beforePointIndex
+&nbsp;	 *            The point index in the given path of this MultiPath before
+&nbsp;	 *            which the vertices need to be inserted. This value must be
+&nbsp;	 *            between 0 and GetPathSize(pathIndex), or -1 to insert points
+&nbsp;	 *            at the end of the given path.
+&nbsp;	 * @param src
+&nbsp;	 *            The source array
+&nbsp;	 * @param srcPointIndexFrom
+&nbsp;	 *            The start point in the source array to start copying from.
+&nbsp;	 * @param srcPointCount
+&nbsp;	 *            The count of points to add.
+&nbsp;	 * @param bForward
+&nbsp;	 *            When FALSE, the points are inserted in reverse order.
+&nbsp;	 */
+&nbsp;	void insertPoints(int pathIndex, int beforePointIndex, Point2D[] src,
+&nbsp;			int srcPointIndexFrom, int srcPointCount, boolean bForward) {
+<b class="nc">&nbsp;		m_impl.insertPoints(pathIndex, beforePointIndex, src,</b>
+<b class="nc">&nbsp;				srcPointIndexFrom, srcPointCount, bForward);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Inserts a point.
+&nbsp;	 * 
+&nbsp;	 * @param pathIndex
+&nbsp;	 *            The path index in this class to insert the point to. Must
+&nbsp;	 *            correspond to an existing path.
+&nbsp;	 * @param beforePointIndex
+&nbsp;	 *            The point index in the given path of this multipath. This
+&nbsp;	 *            value must be between 0 and GetPathSize(pathIndex), or -1 to
+&nbsp;	 *            insert the point at the end of the given path.
+&nbsp;	 * @param pt
+&nbsp;	 *            The point to be inserted.
+&nbsp;	 */
+&nbsp;	void insertPoint(int pathIndex, int beforePointIndex, Point2D pt) {
+<b class="fc">&nbsp;		m_impl.insertPoint(pathIndex, beforePointIndex, pt);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Inserts a point.
+&nbsp;	 * 
+&nbsp;	 * @param pathIndex
+&nbsp;	 *            The path index in this class to insert the point to. Must
+&nbsp;	 *            correspond to an existing path.
+&nbsp;	 * @param beforePointIndex
+&nbsp;	 *            The point index in the given path of this multipath. This
+&nbsp;	 *            value must be between 0 and GetPathSize(pathIndex), or -1 to
+&nbsp;	 *            insert the point at the end of the given path.
+&nbsp;	 * @param pt
+&nbsp;	 *            The point to be inserted.
+&nbsp;	 */
+&nbsp;	public void insertPoint(int pathIndex, int beforePointIndex, Point pt) {
+<b class="fc">&nbsp;		m_impl.insertPoint(pathIndex, beforePointIndex, pt);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Removes a point at a given index.
+&nbsp;	 * 
+&nbsp;	 * @param pathIndex
+&nbsp;	 *            The path from whom to remove the point.
+&nbsp;	 * @param pointIndex
+&nbsp;	 *            The index of the point to be removed.
+&nbsp;	 */
+&nbsp;	public void removePoint(int pathIndex, int pointIndex) {
+<b class="fc">&nbsp;		m_impl.removePoint(pathIndex, pointIndex);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns the number of paths in this multipath.
+&nbsp;	 * 
+&nbsp;	 * @return The number of paths in this multipath.
+&nbsp;	 */
+&nbsp;	public int getPathCount() {
+<b class="fc">&nbsp;		return m_impl.getPathCount();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns the number of vertices in a path.
+&nbsp;	 * 
+&nbsp;	 * @param pathIndex
+&nbsp;	 *            The index of the path to return the number of vertices from.
+&nbsp;	 * @return The number of vertices in a path.
+&nbsp;	 */
+&nbsp;	public int getPathSize(int pathIndex) {
+<b class="fc">&nbsp;		return m_impl.getPathSize(pathIndex);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns the start index of the path.
+&nbsp;	 * 
+&nbsp;	 * @param pathIndex
+&nbsp;	 *            The index of the path to return the start index from.
+&nbsp;	 * @return The start index of the path.
+&nbsp;	 * 
+&nbsp;	 */
+&nbsp;	public int getPathStart(int pathIndex) {
+<b class="fc">&nbsp;		return m_impl.getPathStart(pathIndex);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns the index immediately following the last index of the path.
+&nbsp;	 * 
+&nbsp;	 * @param pathIndex
+&nbsp;	 *            The index of the path to return the end index from.
+&nbsp;	 * @return Integer index after last index of path
+&nbsp;	 */
+&nbsp;	public int getPathEnd(int pathIndex) {
+<b class="fc">&nbsp;		return m_impl.getPathEnd(pathIndex);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns the path index from the point index. This is O(log N) operation.
+&nbsp;	 * 
+&nbsp;	 * @param pointIndex
+&nbsp;	 *            The index of the point.
+&nbsp;	 * @return The index of the path.
+&nbsp;	 */
+&nbsp;	public int getPathIndexFromPointIndex(int pointIndex) {
+<b class="nc">&nbsp;		return m_impl.getPathIndexFromPointIndex(pointIndex);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Starts a new path at given coordinates.
+&nbsp;	 * 
+&nbsp;	 * @param x
+&nbsp;	 *            The X coordinate of the start point.
+&nbsp;	 * @param y
+&nbsp;	 *            The Y coordinate of the start point.
+&nbsp;	 */
+&nbsp;	public void startPath(double x, double y) {
+<b class="fc">&nbsp;		m_impl.startPath(x, y);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void startPath(Point2D point) {
+<b class="fc">&nbsp;		m_impl.startPath(point);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void startPath(Point3D point) {
+<b class="nc">&nbsp;		m_impl.startPath(point);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Starts a new path at a point.
+&nbsp;	 * 
+&nbsp;	 * @param point
+&nbsp;	 *            The point to start the path from.
+&nbsp;	 */
+&nbsp;	public void startPath(Point point) {
+<b class="fc">&nbsp;		m_impl.startPath(point);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Adds a line segment from the last point to the given end coordinates.
+&nbsp;	 * 
+&nbsp;	 * @param x
+&nbsp;	 *            The X coordinate to the end point.
+&nbsp;	 * @param y
+&nbsp;	 *            The Y coordinate to the end point.
+&nbsp;	 */
+&nbsp;	public void lineTo(double x, double y) {
+<b class="fc">&nbsp;		m_impl.lineTo(x, y);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void lineTo(Point2D endPoint) {
+<b class="fc">&nbsp;		m_impl.lineTo(endPoint);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void lineTo(Point3D endPoint) {
+<b class="nc">&nbsp;		m_impl.lineTo(endPoint);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Adds a Line Segment to the given end point.
+&nbsp;	 * 
+&nbsp;	 * @param endPoint
+&nbsp;	 *            The end point to which the newly added line segment should
+&nbsp;	 *            point.
+&nbsp;	 */
+&nbsp;	public void lineTo(Point endPoint) {
+<b class="fc">&nbsp;		m_impl.lineTo(endPoint);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Adds a Cubic Bezier Segment to the current Path. The Bezier Segment
+&nbsp;	 * connects the current last Point and the given endPoint.
+&nbsp;	 */
+&nbsp;	void bezierTo(Point2D controlPoint1, Point2D controlPoint2, Point2D endPoint) {
+<b class="nc">&nbsp;		m_impl.bezierTo(controlPoint1, controlPoint2, endPoint);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Closes the last path of this multipath with a line segment. The closing
+&nbsp;	 * segment is a segment that connects the last and the first points of the
+&nbsp;	 * path. This is a virtual segment. The first point is not duplicated to
+&nbsp;	 * close the path.
+&nbsp;	 * 
+&nbsp;	 * Call this method only for polylines. For polygons this method is
+&nbsp;	 * implicitly called for the Polygon class.
+&nbsp;	 */
+&nbsp;	public void closePathWithLine() {
+<b class="fc">&nbsp;		m_impl.closePathWithLine();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Closes last path of the MultiPath with the Bezier Segment.
+&nbsp;	 * 
+&nbsp;	 * The start point of the Bezier is the last point of the path and the last
+&nbsp;	 * point of the bezier is the first point of the path.
+&nbsp;	 */
+&nbsp;	void closePathWithBezier(Point2D controlPoint1, Point2D controlPoint2) {
+<b class="nc">&nbsp;		m_impl.closePathWithBezier(controlPoint1, controlPoint2);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Closes last path of the MultiPath with the Arc Segment.
+&nbsp;	 */
+&nbsp;	void closePathWithArc() {
+<b class="nc">&nbsp;		throw new RuntimeException(&quot;not implemented&quot;);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Closes all open paths by adding an implicit line segment from the end
+&nbsp;	 * point to the start point. Call this method only for polylines.For
+&nbsp;	 * polygons this method is implicitly called for the Polygon class.
+&nbsp;	 */
+&nbsp;	public void closeAllPaths() {
+<b class="fc">&nbsp;		m_impl.closeAllPaths();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Indicates if the given path is closed (represents a ring). A closed path
+&nbsp;	 * has a virtual segment that connects the last and the first points of the
+&nbsp;	 * path. The first point is not duplicated to close the path. Polygons
+&nbsp;	 * always have all paths closed.
+&nbsp;	 * 
+&nbsp;	 * @param pathIndex
+&nbsp;	 *            The index of the path to check to be closed.
+&nbsp;	 * @return TRUE if the given path is closed (represents a Ring).
+&nbsp;	 */
+&nbsp;	public boolean isClosedPath(int pathIndex) {
+<b class="fc">&nbsp;		return m_impl.isClosedPath(pathIndex);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public boolean isClosedPathInXYPlane(int pathIndex) {
+<b class="fc">&nbsp;		return m_impl.isClosedPathInXYPlane(pathIndex);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns TRUE if the given path might have non-linear segments.
+&nbsp;	 */
+&nbsp;	boolean hasNonLinearSegments(int pathIndex) {
+<b class="nc">&nbsp;		return m_impl.hasNonLinearSegments(pathIndex);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Adds a rectangular closed Path to the MultiPathImpl.
+&nbsp;	 * 
+&nbsp;	 * @param envSrc
+&nbsp;	 *            is the source rectangle.
+&nbsp;	 * @param bReverse
+&nbsp;	 *            Creates reversed path.
+&nbsp;	 */
+&nbsp;	public void addEnvelope(Envelope2D envSrc, boolean bReverse) {
+<b class="fc">&nbsp;		m_impl.addEnvelope(envSrc, bReverse);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Adds a rectangular closed path to this multipath.
+&nbsp;	 * 
+&nbsp;	 * @param envSrc
+&nbsp;	 *            Is the envelope to add to this mulitpath.
+&nbsp;	 * @param bReverse
+&nbsp;	 *            Adds the path reversed (counter-clockwise).
+&nbsp;	 */
+&nbsp;	public void addEnvelope(Envelope envSrc, boolean bReverse) {
+<b class="fc">&nbsp;		m_impl.addEnvelope(envSrc, bReverse);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns a SegmentIterator that is set right before the beginning of the
+&nbsp;	 * multipath. Calling nextPath() will set the iterator to the first path of
+&nbsp;	 * this multipath.
+&nbsp;	 * 
+&nbsp;	 * @return The SegmentIterator for this mulitpath.
+&nbsp;	 */
+&nbsp;	public SegmentIterator querySegmentIterator() {
+<b class="fc">&nbsp;		return new SegmentIterator(m_impl.querySegmentIterator());</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns a SegmentIterator that is set to a specific vertex of the
+&nbsp;	 * MultiPath. The call to nextSegment() will return the segment that starts
+&nbsp;	 * at the vertex. Calling PreviousSegment () will return the segment that
+&nbsp;	 * starts at the previous vertex.
+&nbsp;	 * 
+&nbsp;	 * @param startVertexIndex
+&nbsp;	 *            The start index of the SegementIterator.
+&nbsp;	 * @return The SegmentIterator for this mulitpath at the specified vertex.
+&nbsp;	 */
+&nbsp;	public SegmentIterator querySegmentIteratorAtVertex(int startVertexIndex) {
+<b class="nc">&nbsp;		return new SegmentIterator(</b>
+<b class="nc">&nbsp;				m_impl.querySegmentIteratorAtVertex(startVertexIndex));</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public void setEmpty() {
+<b class="fc">&nbsp;		m_impl.setEmpty();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public void applyTransformation(Transformation2D transform) {
+<b class="fc">&nbsp;		m_impl.applyTransformation(transform);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	void applyTransformation(Transformation3D transform) {
+<b class="nc">&nbsp;		m_impl.applyTransformation(transform);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	protected Object _getImpl() {
+<b class="fc">&nbsp;		return m_impl;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns the hash code for the multipath.
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public int hashCode() {
+<b class="nc">&nbsp;		return m_impl.hashCode();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public void getPointByVal(int index, Point outPoint) {
+<b class="fc">&nbsp;		m_impl.getPointByVal(index, outPoint);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public void setPointByVal(int index, Point point) {
+<b class="nc">&nbsp;		m_impl.setPointByVal(index, point);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public int getStateFlag() {
+<b class="fc">&nbsp;		return m_impl.getStateFlag();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public void replaceNaNs(int semantics, double value) {
+<b class="fc">&nbsp;    	m_impl.replaceNaNs(semantics, value);</b>
+&nbsp;    }
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-02-21 15:02</div>
+</div>
+</body>
+</html>

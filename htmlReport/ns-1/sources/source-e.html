@@ -1,0 +1,733 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > Clusterer</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.esri.core.geometry</a>
+</div>
+
+<h1>Coverage Summary for Class: Clusterer (com.esri.core.geometry)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">Clusterer</td>
+<td class="coverageStat">
+  <span class="percent">
+    73,3%
+  </span>
+  <span class="absValue">
+    (11/15)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    67,5%
+  </span>
+  <span class="absValue">
+    (181/268)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">Clusterer$ClusterCandidate</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">Clusterer$ClusterHashFunction</td>
+<td class="coverageStat">
+  <span class="percent">
+    37,5%
+  </span>
+  <span class="absValue">
+    (3/8)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    57,6%
+  </span>
+  <span class="absValue">
+    (19/33)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    58,3%
+  </span>
+  <span class="absValue">
+    (14/24)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    66,2%
+  </span>
+  <span class="absValue">
+    (200/302)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; Copyright 1995-2015 Esri
+&nbsp;
+&nbsp;   Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp;   you may not use this file except in compliance with the License.
+&nbsp;   You may obtain a copy of the License at
+&nbsp;
+&nbsp;       http://www.apache.org/licenses/LICENSE-2.0
+&nbsp;
+&nbsp;   Unless required by applicable law or agreed to in writing, software
+&nbsp;   distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp;   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp;   See the License for the specific language governing permissions and
+&nbsp;   limitations under the License.
+&nbsp;
+&nbsp; For additional information, contact:
+&nbsp; Environmental Systems Research Institute, Inc.
+&nbsp; Attn: Contracts Dept
+&nbsp; 380 New York Street
+&nbsp; Redlands, California, USA 92373
+&nbsp;
+&nbsp; email: contracts@esri.com
+&nbsp; */
+&nbsp;package com.esri.core.geometry;
+&nbsp;
+&nbsp;/**
+&nbsp; * Implementation for the vertex clustering.
+&nbsp; * 
+&nbsp; * Used by the TopoGraph and Simplify.
+&nbsp; */
+<b class="fc">&nbsp;final class Clusterer {</b>
+&nbsp;	// Clusters vertices of the shape. Returns True, if some vertices were moved
+&nbsp;	// (clustered).
+&nbsp;	// Uses reciprocal clustering (cluster vertices that are mutual nearest
+&nbsp;	// neighbours)
+&nbsp;	/*
+&nbsp;	 * static boolean executeReciprocal(EditShape shape, double tolerance) {
+&nbsp;	 * Clusterer clusterer = new Clusterer(); clusterer.m_shape = shape;
+&nbsp;	 * clusterer.m_tolerance = tolerance; clusterer.m_sqr_tolerance = tolerance
+&nbsp;	 * * tolerance; clusterer.m_cell_size = 2 * tolerance;
+&nbsp;	 * clusterer.m_inv_cell_size = 1.0 / clusterer.m_cell_size; return
+&nbsp;	 * clusterer.clusterReciprocal_(); }
+&nbsp;	 */
+&nbsp;
+&nbsp;	// Clusters vertices of the shape. Returns True, if some vertices were moved
+&nbsp;	// (clustered).
+&nbsp;	// Uses non-reciprocal clustering (cluster any vertices that are closer than
+&nbsp;	// the tolerance in the first-found-first-clustered order)
+&nbsp;	static boolean executeNonReciprocal(EditShape shape, double tolerance) {
+<b class="fc">&nbsp;		Clusterer clusterer = new Clusterer();</b>
+<b class="fc">&nbsp;		clusterer.m_shape = shape;</b>
+<b class="fc">&nbsp;		clusterer.m_tolerance = tolerance;</b>
+<b class="fc">&nbsp;		clusterer.m_sqr_tolerance = tolerance * tolerance;</b>
+<b class="fc">&nbsp;		clusterer.m_cell_size = 2 * tolerance;</b>
+<b class="fc">&nbsp;		clusterer.m_inv_cell_size = 1.0 / clusterer.m_cell_size;</b>
+<b class="fc">&nbsp;		return clusterer.clusterNonReciprocal_();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Use b_conservative == True for simplify, and False for IsSimple. This
+&nbsp;	// makes sure Simplified shape is more robust to transformations.
+&nbsp;	static boolean isClusterCandidate_(double x_1, double y1, double x2,
+&nbsp;			double y2, double sqr_tolerance) {
+<b class="fc">&nbsp;		double dx = x_1 - x2;</b>
+<b class="fc">&nbsp;		double dy = y1 - y2;</b>
+<b class="fc">&nbsp;		return dx * dx + dy * dy &lt;= sqr_tolerance;</b>
+&nbsp;	}
+&nbsp;
+<b class="fc">&nbsp;	Point2D m_origin = new Point2D();</b>
+&nbsp;	double m_tolerance;
+&nbsp;	double m_sqr_tolerance;
+&nbsp;	double m_cell_size;
+&nbsp;	double m_inv_cell_size;
+<b class="fc">&nbsp;	int[] m_bucket_array = new int[4];// temporary 4 element array</b>
+<b class="fc">&nbsp;	int[] m_bucket_hash = new int[4];// temporary 4 element array</b>
+<b class="fc">&nbsp;	int m_dbg_candidate_check_count = 0;</b>
+<b class="fc">&nbsp;	int m_hash_values = -1;</b>
+<b class="fc">&nbsp;	int m_new_clusters = -1;</b>
+&nbsp;
+&nbsp;	static int hashFunction_(int xi, int yi) {
+<b class="fc">&nbsp;		int h = NumberUtils.hash(xi);</b>
+<b class="fc">&nbsp;		return NumberUtils.hash(h, yi);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	final class ClusterHashFunction extends IndexHashTable.HashFunction {
+&nbsp;		EditShape m_shape;
+&nbsp;		double m_sqr_tolerance;
+&nbsp;		double m_inv_cell_size;
+<b class="fc">&nbsp;		Point2D m_origin = new Point2D();</b>
+<b class="fc">&nbsp;		Point2D m_pt = new Point2D();</b>
+<b class="fc">&nbsp;		Point2D m_pt_2 = new Point2D();</b>
+&nbsp;		int m_hash_values;
+&nbsp;
+<b class="fc">&nbsp;		public ClusterHashFunction(EditShape shape, Point2D origin,</b>
+<b class="fc">&nbsp;				double sqr_tolerance, double inv_cell_size, int hash_values) {</b>
+<b class="fc">&nbsp;			m_shape = shape;</b>
+<b class="fc">&nbsp;			m_sqr_tolerance = sqr_tolerance;</b>
+<b class="fc">&nbsp;			m_inv_cell_size = inv_cell_size;</b>
+<b class="fc">&nbsp;			m_origin = origin;</b>
+<b class="fc">&nbsp;			m_hash_values = hash_values;</b>
+<b class="fc">&nbsp;			m_pt.setNaN();</b>
+<b class="fc">&nbsp;			m_pt_2.setNaN();</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		int calculate_hash(int element) {
+<b class="nc">&nbsp;			return calculate_hash_from_vertex(element);</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		int dbg_calculate_hash_from_xy(double x, double y) {
+<b class="nc">&nbsp;			double dx = x - m_origin.x;</b>
+<b class="nc">&nbsp;			int xi = (int) (dx * m_inv_cell_size + 0.5);</b>
+<b class="nc">&nbsp;			double dy = y - m_origin.y;</b>
+<b class="nc">&nbsp;			int yi = (int) (dy * m_inv_cell_size + 0.5);</b>
+<b class="nc">&nbsp;			return hashFunction_(xi, yi);</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		int calculate_hash_from_vertex(int vertex) {
+<b class="fc">&nbsp;			m_shape.getXY(vertex, m_pt);</b>
+<b class="fc">&nbsp;			double dx = m_pt.x - m_origin.x;</b>
+<b class="fc">&nbsp;			int xi = (int) (dx * m_inv_cell_size + 0.5);</b>
+<b class="fc">&nbsp;			double dy = m_pt.y - m_origin.y;</b>
+<b class="fc">&nbsp;			int yi = (int) (dy * m_inv_cell_size + 0.5);</b>
+<b class="fc">&nbsp;			return hashFunction_(xi, yi);</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		@Override
+&nbsp;		public int getHash(int element) {
+<b class="fc">&nbsp;			return m_shape.getUserIndex(element, m_hash_values);</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		@Override
+&nbsp;		public boolean equal(int element_1, int element_2) {
+<b class="nc">&nbsp;			int xyindex_1 = element_1;</b>
+<b class="nc">&nbsp;			int xyindex_2 = element_2;</b>
+<b class="nc">&nbsp;			m_shape.getXY(xyindex_1, m_pt);</b>
+<b class="nc">&nbsp;			m_shape.getXY(xyindex_2, m_pt_2);</b>
+<b class="nc">&nbsp;			return isClusterCandidate_(m_pt.x, m_pt.y, m_pt_2.x, m_pt_2.y,</b>
+<b class="nc">&nbsp;					m_sqr_tolerance);</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		@Override
+&nbsp;		public int getHash(Object element_descriptor) {
+&nbsp;			// UNUSED
+<b class="nc">&nbsp;			return 0;</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		@Override
+&nbsp;		public boolean equal(Object element_descriptor, int element) {
+&nbsp;			// UNUSED
+<b class="nc">&nbsp;			return false;</b>
+&nbsp;		}
+&nbsp;	};
+&nbsp;
+&nbsp;	EditShape m_shape;
+&nbsp;	IndexMultiList m_clusters;
+&nbsp;	ClusterHashFunction m_hash_function;
+&nbsp;	IndexHashTable m_hash_table;
+&nbsp;
+<b class="nc">&nbsp;	static class ClusterCandidate {</b>
+&nbsp;		public int vertex;
+&nbsp;		double distance;
+&nbsp;	};
+&nbsp;
+&nbsp;	void getNearestNeighbourCandidate_(int xyindex, Point2D pointOfInterest,
+&nbsp;			int bucket_ptr, ClusterCandidate candidate) {
+<b class="nc">&nbsp;		candidate.vertex = -1;</b>
+<b class="nc">&nbsp;		candidate.distance = NumberUtils.doubleMax();</b>
+&nbsp;
+<b class="nc">&nbsp;		Point2D pt = new Point2D();</b>
+<b class="nc">&nbsp;		for (int node = bucket_ptr; node != -1; node = m_hash_table</b>
+<b class="nc">&nbsp;				.getNextInBucket(node)) {</b>
+<b class="nc">&nbsp;			int xyind = m_hash_table.getElement(node);</b>
+<b class="nc">&nbsp;			if (xyindex == xyind)</b>
+<b class="nc">&nbsp;				continue;</b>
+&nbsp;
+<b class="nc">&nbsp;			m_shape.getXY(xyind, pt);</b>
+<b class="nc">&nbsp;			if (isClusterCandidate_(pointOfInterest.x, pointOfInterest.y, pt.x,</b>
+<b class="nc">&nbsp;					pt.y, m_sqr_tolerance)) {</b>
+<b class="nc">&nbsp;				pt.sub(pointOfInterest);</b>
+<b class="nc">&nbsp;				double l = pt.length();</b>
+<b class="nc">&nbsp;				if (l &lt; candidate.distance) {</b>
+<b class="nc">&nbsp;					candidate.distance = l;</b>
+<b class="nc">&nbsp;					candidate.vertex = xyind;</b>
+&nbsp;				}
+&nbsp;			}
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	void findClusterCandidate_(int xyindex, ClusterCandidate candidate) {
+<b class="nc">&nbsp;		Point2D pointOfInterest = new Point2D();</b>
+<b class="nc">&nbsp;		m_shape.getXY(xyindex, pointOfInterest);</b>
+<b class="nc">&nbsp;		double x_0 = pointOfInterest.x - m_origin.x;</b>
+<b class="nc">&nbsp;		double x = x_0 * m_inv_cell_size;</b>
+<b class="nc">&nbsp;		double y0 = pointOfInterest.y - m_origin.y;</b>
+<b class="nc">&nbsp;		double y = y0 * m_inv_cell_size;</b>
+&nbsp;
+<b class="nc">&nbsp;		int xi = (int) x;</b>
+<b class="nc">&nbsp;		int yi = (int) y;</b>
+&nbsp;
+&nbsp;		// find the nearest neighbour in the 4 neigbouring cells.
+&nbsp;
+<b class="nc">&nbsp;		candidate.vertex = -1;</b>
+<b class="nc">&nbsp;		candidate.distance = NumberUtils.doubleMax();</b>
+<b class="nc">&nbsp;		ClusterCandidate c = new ClusterCandidate();</b>
+<b class="nc">&nbsp;		for (int dx = 0; dx &lt;= 1; dx += 1) {</b>
+<b class="nc">&nbsp;			for (int dy = 0; dy &lt;= 1; dy += 1) {</b>
+<b class="nc">&nbsp;				int bucket_ptr = m_hash_table.getFirstInBucket(hashFunction_(xi</b>
+<b class="nc">&nbsp;						+ dx, yi + dy));</b>
+<b class="nc">&nbsp;				if (bucket_ptr != IndexHashTable.nullNode()) {</b>
+<b class="nc">&nbsp;					getNearestNeighbourCandidate_(xyindex, pointOfInterest,</b>
+<b class="nc">&nbsp;							bucket_ptr, c);</b>
+<b class="nc">&nbsp;					if (c.vertex != IndexHashTable.nullNode()</b>
+<b class="nc">&nbsp;							&amp;&amp; c.distance &lt; candidate.distance) {</b>
+<b class="nc">&nbsp;						candidate = c;</b>
+&nbsp;					}
+&nbsp;				}
+&nbsp;			}
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	void collectClusterCandidates_(int xyindex,
+&nbsp;			AttributeStreamOfInt32 candidates) {
+<b class="fc">&nbsp;		Point2D pointOfInterest = new Point2D();</b>
+<b class="fc">&nbsp;		m_shape.getXY(xyindex, pointOfInterest);</b>
+<b class="fc">&nbsp;		double x_0 = pointOfInterest.x - m_origin.x;</b>
+<b class="fc">&nbsp;		double x = x_0 * m_inv_cell_size;</b>
+<b class="fc">&nbsp;		double y0 = pointOfInterest.y - m_origin.y;</b>
+<b class="fc">&nbsp;		double y = y0 * m_inv_cell_size;</b>
+&nbsp;
+<b class="fc">&nbsp;		int xi = (int) x;</b>
+<b class="fc">&nbsp;		int yi = (int) y;</b>
+&nbsp;
+<b class="fc">&nbsp;		int bucket_count = 0;</b>
+&nbsp;		// find all nearest neighbours in the 4 neigbouring cells.
+&nbsp;		// Note, because we check four neighbours, there should be 4 times more
+&nbsp;		// bins in the hash table to reduce collision probability in this loop.
+<b class="fc">&nbsp;		for (int dx = 0; dx &lt;= 1; dx += 1) {</b>
+<b class="fc">&nbsp;			for (int dy = 0; dy &lt;= 1; dy += 1) {</b>
+<b class="fc">&nbsp;				int hash = hashFunction_(xi + dx, yi + dy);</b>
+<b class="fc">&nbsp;				int bucket_ptr = m_hash_table.getFirstInBucket(hash);</b>
+<b class="fc">&nbsp;				if (bucket_ptr != -1) {</b>
+&nbsp;					// Check if we already have this bucket.
+&nbsp;					// There could be a hash collision for neighbouring buckets.
+<b class="fc">&nbsp;					m_bucket_array[bucket_count] = bucket_ptr;</b>
+<b class="fc">&nbsp;					m_bucket_hash[bucket_count] = hash;</b>
+&nbsp;
+<b class="fc">&nbsp;					bucket_count++;</b>
+&nbsp;				}
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+&nbsp;		// Clear duplicate buckets
+&nbsp;		// There could be a hash collision for neighboring buckets.
+<b class="fc">&nbsp;		for (int j = bucket_count - 1; j &gt;= 1; j--) {</b>
+<b class="fc">&nbsp;			int bucket_ptr = m_bucket_array[j];</b>
+<b class="fc">&nbsp;			for (int i = j - 1; i &gt;= 0; i--) {</b>
+<b class="fc">&nbsp;				if (bucket_ptr == m_bucket_array[i])// hash values for two</b>
+&nbsp;													// neighbouring cells have
+&nbsp;													// collided.
+&nbsp;				{
+<b class="fc">&nbsp;					m_bucket_hash[i] = -1; // forget collided hash</b>
+<b class="fc">&nbsp;					bucket_count--;</b>
+<b class="fc">&nbsp;					if (j != bucket_count) {</b>
+<b class="fc">&nbsp;						m_bucket_hash[j] = m_bucket_hash[bucket_count];</b>
+<b class="fc">&nbsp;						m_bucket_array[j] = m_bucket_array[bucket_count];</b>
+&nbsp;					}
+<b class="fc">&nbsp;					break;// duplicate</b>
+&nbsp;				}
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		for (int i = 0; i &lt; bucket_count; i++) {</b>
+<b class="fc">&nbsp;			collectNearestNeighbourCandidates_(xyindex, m_bucket_hash[i],</b>
+<b class="fc">&nbsp;					pointOfInterest, m_bucket_array[i], candidates);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	void collectNearestNeighbourCandidates_(int xyindex, int hash,
+&nbsp;			Point2D pointOfInterest, int bucket_ptr,
+&nbsp;			AttributeStreamOfInt32 candidates) {
+<b class="fc">&nbsp;		Point2D pt = new Point2D();</b>
+<b class="fc">&nbsp;		for (int node = bucket_ptr; node != -1; node = m_hash_table</b>
+<b class="fc">&nbsp;				.getNextInBucket(node)) {</b>
+<b class="fc">&nbsp;			int xyind = m_hash_table.getElement(node);</b>
+<b class="fc">&nbsp;			if (xyindex == xyind || hash != -1</b>
+<b class="fc">&nbsp;					&amp;&amp; m_shape.getUserIndex(xyind, m_hash_values) != hash)</b>
+<b class="fc">&nbsp;				continue;// processing same vertex, or the bucket hash modulo</b>
+&nbsp;							// bin count collides.
+&nbsp;
+<b class="fc">&nbsp;			m_shape.getXY(xyind, pt);</b>
+<b class="fc">&nbsp;			m_dbg_candidate_check_count++;</b>
+<b class="fc">&nbsp;			if (isClusterCandidate_(pointOfInterest.x, pointOfInterest.y, pt.x,</b>
+<b class="fc">&nbsp;					pt.y, m_sqr_tolerance)) {</b>
+<b class="fc">&nbsp;				candidates.add(node);// note that we add the cluster node</b>
+&nbsp;										// instead of the cluster.
+&nbsp;			}
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	boolean mergeClusters_(int vertex1, int vertex2, boolean update_hash) {
+<b class="fc">&nbsp;		int cluster_1 = m_shape.getUserIndex(vertex1, m_new_clusters);</b>
+<b class="fc">&nbsp;		int cluster_2 = m_shape.getUserIndex(vertex2, m_new_clusters);</b>
+<b class="fc">&nbsp;		assert (cluster_1 != StridedIndexTypeCollection.impossibleIndex2());</b>
+<b class="fc">&nbsp;		assert (cluster_2 != StridedIndexTypeCollection.impossibleIndex2());</b>
+&nbsp;
+<b class="fc">&nbsp;		if (cluster_1 == -1) {</b>
+<b class="fc">&nbsp;			cluster_1 = m_clusters.createList();</b>
+<b class="fc">&nbsp;			m_clusters.addElement(cluster_1, vertex1);</b>
+<b class="fc">&nbsp;			m_shape.setUserIndex(vertex1, m_new_clusters, cluster_1);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (cluster_2 == -1) {</b>
+<b class="fc">&nbsp;			m_clusters.addElement(cluster_1, vertex2);</b>
+<b class="fc">&nbsp;		} else {</b>
+<b class="nc">&nbsp;			m_clusters.concatenateLists(cluster_1, cluster_2);</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		// ensure only single vertex refers to the cluster.
+<b class="fc">&nbsp;		m_shape.setUserIndex(vertex2, m_new_clusters,</b>
+<b class="fc">&nbsp;				StridedIndexTypeCollection.impossibleIndex2());</b>
+&nbsp;
+&nbsp;		// merge cordinates
+<b class="fc">&nbsp;		boolean res = mergeVertices_(vertex1, vertex2);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (update_hash) {</b>
+<b class="fc">&nbsp;			int hash = m_hash_function.calculate_hash_from_vertex(vertex1);</b>
+<b class="fc">&nbsp;			m_shape.setUserIndex(vertex1, m_hash_values, hash);</b>
+&nbsp;		} else {
+&nbsp;
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return res;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// recalculate coordinates of the vertices by averaging them using weights.
+&nbsp;	// return true if the coordinates has changed.
+&nbsp;	static boolean mergeVertices(Point pt_1, Point pt_2, double w_1,
+&nbsp;			int rank_1, double w_2, int rank_2, Point pt_res, double[] w_res,
+&nbsp;			int[] rank_res) {
+<b class="nc">&nbsp;		assert (!pt_1.isEmpty() &amp;&amp; !pt_2.isEmpty());</b>
+<b class="nc">&nbsp;		boolean res = pt_1.equals(pt_2);</b>
+&nbsp;
+<b class="nc">&nbsp;		if (rank_1 &gt; rank_2) {</b>
+<b class="nc">&nbsp;			pt_res = pt_1;</b>
+<b class="nc">&nbsp;			if (w_res != null) {</b>
+<b class="nc">&nbsp;				rank_res[0] = rank_1;</b>
+<b class="nc">&nbsp;				w_res[0] = w_1;</b>
+&nbsp;			}
+<b class="nc">&nbsp;			return res;</b>
+<b class="nc">&nbsp;		} else if (rank_2 &gt; rank_1) {</b>
+<b class="nc">&nbsp;			pt_res = pt_2;</b>
+<b class="nc">&nbsp;			if (w_res != null) {</b>
+<b class="nc">&nbsp;				rank_res[0] = rank_1;</b>
+<b class="nc">&nbsp;				w_res[0] = w_1;</b>
+&nbsp;			}
+<b class="nc">&nbsp;			return res;</b>
+&nbsp;		}
+&nbsp;
+<b class="nc">&nbsp;		pt_res = pt_1;</b>
+<b class="nc">&nbsp;		Point2D pt2d = new Point2D();</b>
+<b class="nc">&nbsp;		mergeVertices2D(pt_1.getXY(), pt_2.getXY(), w_1, rank_1, w_2, rank_2,</b>
+<b class="nc">&nbsp;				pt2d, w_res, rank_res);</b>
+<b class="nc">&nbsp;		pt_res.setXY(pt2d);</b>
+<b class="nc">&nbsp;		return res;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	static boolean mergeVertices2D(Point2D pt_1, Point2D pt_2, double w_1,
+&nbsp;			int rank_1, double w_2, int rank_2, Point2D pt_res, double[] w_res,
+&nbsp;			int[] rank_res) {
+<b class="nc">&nbsp;		double w = w_1 + w_2;</b>
+<b class="nc">&nbsp;		boolean r = false;</b>
+<b class="nc">&nbsp;		double x = pt_1.x;</b>
+<b class="nc">&nbsp;		if (pt_1.x != pt_2.x) {</b>
+<b class="nc">&nbsp;			if (rank_1 == rank_2)</b>
+<b class="nc">&nbsp;				x = (pt_1.x * w_1 + pt_2.x * w_2) / w;</b>
+&nbsp;
+<b class="nc">&nbsp;			r = true;</b>
+&nbsp;		}
+<b class="nc">&nbsp;		double y = pt_1.y;</b>
+<b class="nc">&nbsp;		if (pt_1.y != pt_2.y) {</b>
+<b class="nc">&nbsp;			if (rank_1 == rank_2)</b>
+<b class="nc">&nbsp;				y = (pt_1.y * w_1 + pt_2.y * w_2) / w;</b>
+&nbsp;
+<b class="nc">&nbsp;			r = true;</b>
+&nbsp;		}
+&nbsp;
+<b class="nc">&nbsp;		if (rank_1 != rank_2) {</b>
+<b class="nc">&nbsp;			if (rank_1 &gt; rank_2) {</b>
+<b class="nc">&nbsp;				if (w_res != null) {</b>
+<b class="nc">&nbsp;					rank_res[0] = rank_1;</b>
+<b class="nc">&nbsp;					w_res[0] = w_1;</b>
+&nbsp;				}
+<b class="nc">&nbsp;				pt_res = pt_1;</b>
+<b class="nc">&nbsp;			} else {</b>
+<b class="nc">&nbsp;				if (w_res != null) {</b>
+<b class="nc">&nbsp;					rank_res[0] = rank_2;</b>
+<b class="nc">&nbsp;					w_res[0] = w_2;</b>
+&nbsp;				}
+<b class="nc">&nbsp;				pt_res = pt_2;</b>
+&nbsp;			}
+<b class="nc">&nbsp;		} else {</b>
+<b class="nc">&nbsp;			pt_res.setCoords(x, y);</b>
+<b class="nc">&nbsp;			if (w_res != null) {</b>
+<b class="nc">&nbsp;				w_res[0] = w;</b>
+<b class="nc">&nbsp;				rank_res[0] = rank_1;</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="nc">&nbsp;		return r;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	boolean mergeVertices_(int vert_1, int vert_2) {
+<b class="fc">&nbsp;		Point2D pt_1 = new Point2D();</b>
+<b class="fc">&nbsp;		m_shape.getXY(vert_1, pt_1);</b>
+<b class="fc">&nbsp;		Point2D pt_2 = new Point2D();</b>
+<b class="fc">&nbsp;		m_shape.getXY(vert_2, pt_2);</b>
+&nbsp;
+<b class="fc">&nbsp;		double w_1 = m_shape.getWeight(vert_1);</b>
+<b class="fc">&nbsp;		double w_2 = m_shape.getWeight(vert_2);</b>
+<b class="fc">&nbsp;		double w = w_1 + w_2;</b>
+<b class="fc">&nbsp;		int r = 0;</b>
+<b class="fc">&nbsp;		double x = pt_1.x;</b>
+<b class="fc">&nbsp;		if (pt_1.x != pt_2.x) {</b>
+<b class="fc">&nbsp;			x = (pt_1.x * w_1 + pt_2.x * w_2) / w;</b>
+<b class="fc">&nbsp;			r++;</b>
+&nbsp;		}
+<b class="fc">&nbsp;		double y = pt_1.y;</b>
+<b class="fc">&nbsp;		if (pt_1.y != pt_2.y) {</b>
+<b class="fc">&nbsp;			y = (pt_1.y * w_1 + pt_2.y * w_2) / w;</b>
+<b class="fc">&nbsp;			r++;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (r &gt; 0)</b>
+<b class="fc">&nbsp;			m_shape.setXY(vert_1, x, y);</b>
+&nbsp;
+<b class="fc">&nbsp;		m_shape.setWeight(vert_1, w);</b>
+<b class="fc">&nbsp;		return r != 0;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	boolean clusterNonReciprocal_() {
+<b class="fc">&nbsp;		int point_count = m_shape.getTotalPointCount();</b>
+<b class="fc">&nbsp;		Envelope2D env = m_shape.getEnvelope2D();</b>
+<b class="fc">&nbsp;		m_origin = env.getLowerLeft();</b>
+<b class="fc">&nbsp;		double dim = Math.max(env.getHeight(), env.getWidth());</b>
+<b class="fc">&nbsp;		double mincell = dim / (NumberUtils.intMax() - 1);</b>
+<b class="fc">&nbsp;		if (m_cell_size &lt; mincell) {</b>
+<b class="fc">&nbsp;			m_cell_size = mincell;</b>
+<b class="fc">&nbsp;			m_inv_cell_size = 1.0 / m_cell_size;</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		// This holds clusters.
+<b class="fc">&nbsp;		m_clusters = new IndexMultiList();</b>
+<b class="fc">&nbsp;		m_clusters.reserveLists(m_shape.getTotalPointCount() / 3 + 1);</b>
+<b class="fc">&nbsp;		m_clusters.reserveNodes(m_shape.getTotalPointCount() / 3 + 1);</b>
+&nbsp;
+<b class="fc">&nbsp;		m_hash_values = m_shape.createUserIndex();</b>
+<b class="fc">&nbsp;		m_new_clusters = m_shape.createUserIndex();</b>
+&nbsp;
+&nbsp;		// Make the hash table. It serves a purpose of fine grain grid.
+&nbsp;		// Make it 25% larger than the 4 times point count to reduce the chance
+&nbsp;		// of collision.
+&nbsp;		// The 4 times comes from the fact that we check four neighbouring cells
+&nbsp;		// in the grid for each point.
+<b class="fc">&nbsp;		m_hash_function = new ClusterHashFunction(m_shape, m_origin,</b>
+<b class="fc">&nbsp;				m_sqr_tolerance, m_inv_cell_size, m_hash_values);</b>
+<b class="fc">&nbsp;		m_hash_table = new IndexHashTable(4 * point_count / 3, m_hash_function);</b>
+<b class="fc">&nbsp;		m_hash_table.reserveElements(m_shape.getTotalPointCount());</b>
+<b class="fc">&nbsp;		boolean b_clustered = false;</b>
+&nbsp;
+&nbsp;		// Go through all vertices stored in the m_shape and put the handles of
+&nbsp;		// the vertices into the clusters and the hash table.
+<b class="fc">&nbsp;		for (int geometry = m_shape.getFirstGeometry(); geometry != -1; geometry = m_shape</b>
+<b class="fc">&nbsp;				.getNextGeometry(geometry)) {</b>
+<b class="fc">&nbsp;			for (int path = m_shape.getFirstPath(geometry); path != -1; path = m_shape</b>
+<b class="fc">&nbsp;					.getNextPath(path)) {</b>
+<b class="fc">&nbsp;				int vertex = m_shape.getFirstVertex(path);</b>
+<b class="fc">&nbsp;				for (int index = 0, nindex = m_shape.getPathSize(path); index &lt; nindex; index++) {</b>
+<b class="fc">&nbsp;					assert (vertex != -1);</b>
+<b class="fc">&nbsp;					int hash = m_hash_function</b>
+<b class="fc">&nbsp;							.calculate_hash_from_vertex(vertex);</b>
+<b class="fc">&nbsp;					m_shape.setUserIndex(vertex, m_hash_values, hash);</b>
+<b class="fc">&nbsp;					m_hash_table.addElement(vertex, hash); // add cluster to the</b>
+&nbsp;															// hash table
+<b class="fc">&nbsp;					assert (m_shape.getUserIndex(vertex, m_new_clusters) == -1);</b>
+<b class="fc">&nbsp;					vertex = m_shape.getNextVertex(vertex);</b>
+&nbsp;				}
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+&nbsp;		// m_hash_table-&gt;dbg_print_bucket_histogram_();
+&nbsp;
+&nbsp;		{// scope for candidates array
+<b class="fc">&nbsp;			AttributeStreamOfInt32 candidates = new AttributeStreamOfInt32(0);</b>
+<b class="fc">&nbsp;			candidates.reserve(10);</b>
+&nbsp;
+<b class="fc">&nbsp;			for (int geometry = m_shape.getFirstGeometry(); geometry != -1; geometry = m_shape</b>
+<b class="fc">&nbsp;					.getNextGeometry(geometry)) {</b>
+<b class="fc">&nbsp;				for (int path = m_shape.getFirstPath(geometry); path != -1; path = m_shape</b>
+<b class="fc">&nbsp;						.getNextPath(path)) {</b>
+<b class="fc">&nbsp;					int vertex = m_shape.getFirstVertex(path);</b>
+<b class="fc">&nbsp;					for (int index = 0, nindex = m_shape.getPathSize(path); index &lt; nindex; index++) {</b>
+<b class="fc">&nbsp;						if (m_shape.getUserIndex(vertex, m_new_clusters) == StridedIndexTypeCollection</b>
+<b class="fc">&nbsp;								.impossibleIndex2()) {</b>
+<b class="fc">&nbsp;							vertex = m_shape.getNextVertex(vertex);</b>
+<b class="fc">&nbsp;							continue;// this vertex was merged with another</b>
+&nbsp;										// cluster. It also was removed from the
+&nbsp;										// hash table.
+&nbsp;						}
+&nbsp;
+<b class="fc">&nbsp;						int hash = m_shape.getUserIndex(vertex, m_hash_values);</b>
+<b class="fc">&nbsp;						m_hash_table.deleteElement(vertex, hash);</b>
+&nbsp;
+&nbsp;						while (true) {
+<b class="fc">&nbsp;							collectClusterCandidates_(vertex, candidates);</b>
+<b class="fc">&nbsp;							if (candidates.size() == 0) {// no candidate for</b>
+&nbsp;															// clustering has
+&nbsp;															// been found for
+&nbsp;															// the cluster_1.
+<b class="fc">&nbsp;								break;</b>
+&nbsp;							}
+&nbsp;
+<b class="fc">&nbsp;							boolean clustered = false;</b>
+<b class="fc">&nbsp;							for (int candidate_index = 0, ncandidates = candidates</b>
+<b class="fc">&nbsp;									.size(); candidate_index &lt; ncandidates; candidate_index++) {</b>
+<b class="fc">&nbsp;								int cluster_node = candidates</b>
+<b class="fc">&nbsp;										.get(candidate_index);</b>
+<b class="fc">&nbsp;								int other_vertex = m_hash_table</b>
+<b class="fc">&nbsp;										.getElement(cluster_node);</b>
+<b class="fc">&nbsp;								m_hash_table.deleteNode(cluster_node);</b>
+<b class="fc">&nbsp;								clustered |= mergeClusters_(vertex,</b>
+<b class="fc">&nbsp;										other_vertex,</b>
+<b class="fc">&nbsp;										candidate_index + 1 == ncandidates);</b>
+&nbsp;							}
+&nbsp;
+<b class="fc">&nbsp;							b_clustered |= clustered;</b>
+<b class="fc">&nbsp;							candidates.clear(false);</b>
+&nbsp;							// repeat search for the cluster candidates for
+&nbsp;							// cluster_1
+<b class="fc">&nbsp;							if (!clustered)</b>
+&nbsp;								break;// positions did not change
+&nbsp;						}
+&nbsp;
+&nbsp;						// m_shape-&gt;set_user_index(vertex, m_new_clusters,
+&nbsp;						// Strided_index_type_collection::impossible_index_2());
+<b class="fc">&nbsp;						vertex = m_shape.getNextVertex(vertex);</b>
+&nbsp;					}
+&nbsp;				}
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (b_clustered) {</b>
+<b class="fc">&nbsp;			applyClusterPositions_();</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		m_hash_table = null;</b>
+<b class="fc">&nbsp;		m_hash_function = null;</b>
+<b class="fc">&nbsp;		m_shape.removeUserIndex(m_hash_values);</b>
+<b class="fc">&nbsp;		m_shape.removeUserIndex(m_new_clusters);</b>
+&nbsp;
+&nbsp;		// output_debug_printf(&quot;total: %d\n&quot;,m_shape-&gt;get_total_point_count());
+&nbsp;		// output_debug_printf(&quot;clustered: %d\n&quot;,m_dbg_candidate_check_count);
+<b class="fc">&nbsp;		return b_clustered;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void applyClusterPositions_() {
+<b class="fc">&nbsp;		Point2D cluster_pt = new Point2D();</b>
+&nbsp;		// move vertices to the clustered positions.
+<b class="fc">&nbsp;		for (int list = m_clusters.getFirstList(); list != -1; list = m_clusters</b>
+<b class="fc">&nbsp;				.getNextList(list)) {</b>
+<b class="fc">&nbsp;			int node = m_clusters.getFirst(list);</b>
+<b class="fc">&nbsp;			assert (node != -1);</b>
+<b class="fc">&nbsp;			int vertex = m_clusters.getElement(node);</b>
+<b class="fc">&nbsp;			m_shape.getXY(vertex, cluster_pt);</b>
+<b class="fc">&nbsp;			for (node = m_clusters.getNext(node); node != -1; node = m_clusters</b>
+<b class="fc">&nbsp;					.getNext(node)) {</b>
+<b class="fc">&nbsp;				int vertex_1 = m_clusters.getElement(node);</b>
+<b class="fc">&nbsp;				m_shape.setXY(vertex_1, cluster_pt);</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+<b class="fc">&nbsp;	Clusterer() {</b>
+&nbsp;	}
+&nbsp;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-02-21 15:02</div>
+</div>
+</body>
+</html>

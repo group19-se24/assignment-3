@@ -1,0 +1,1366 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > Envelope2D</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.esri.core.geometry</a>
+</div>
+
+<h1>Coverage Summary for Class: Envelope2D (com.esri.core.geometry)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">Envelope2D</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    64,8%
+  </span>
+  <span class="absValue">
+    (57/88)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    65,1%
+  </span>
+  <span class="absValue">
+    (347/533)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; Copyright 1995-2018 Esri
+&nbsp;
+&nbsp;   Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp;   you may not use this file except in compliance with the License.
+&nbsp;   You may obtain a copy of the License at
+&nbsp;
+&nbsp;       http://www.apache.org/licenses/LICENSE-2.0
+&nbsp;
+&nbsp;   Unless required by applicable law or agreed to in writing, software
+&nbsp;   distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp;   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp;   See the License for the specific language governing permissions and
+&nbsp;   limitations under the License.
+&nbsp;
+&nbsp; For additional information, contact:
+&nbsp; Environmental Systems Research Institute, Inc.
+&nbsp; Attn: Contracts Dept
+&nbsp; 380 New York Street
+&nbsp; Redlands, California, USA 92373
+&nbsp;
+&nbsp; email: contracts@esri.com
+&nbsp; */
+&nbsp;
+&nbsp;package com.esri.core.geometry;
+&nbsp;
+&nbsp;import java.io.IOException;
+&nbsp;import java.io.ObjectStreamException;
+&nbsp;import java.io.Serializable;
+&nbsp;
+&nbsp;import static com.esri.core.geometry.SizeOf.SIZE_OF_ENVELOPE2D;
+&nbsp;
+&nbsp;/**
+&nbsp; * An axis parallel 2-dimensional rectangle.
+&nbsp; */
+&nbsp;public final class Envelope2D implements Serializable {
+&nbsp;	private static final long serialVersionUID = 1L;
+&nbsp;
+&nbsp;	private final static int XLESSXMIN = 1;
+&nbsp;	// private final int XGREATERXMAX = 2;
+&nbsp;	private final static int YLESSYMIN = 4;
+&nbsp;	// private final int YGREATERYMAX = 8;
+&nbsp;	private final static int XMASK = 3;
+&nbsp;	private final static int YMASK = 12;
+&nbsp;
+&nbsp;	public double xmin;
+&nbsp;
+&nbsp;	public double ymin;
+&nbsp;
+&nbsp;	public double xmax;
+&nbsp;
+&nbsp;	public double ymax;
+&nbsp;
+&nbsp;	public static Envelope2D construct(double _xmin, double _ymin,
+&nbsp;			double _xmax, double _ymax) {
+<b class="fc">&nbsp;		Envelope2D env = new Envelope2D();</b>
+<b class="fc">&nbsp;		env.xmin = _xmin;</b>
+<b class="fc">&nbsp;		env.ymin = _ymin;</b>
+<b class="fc">&nbsp;		env.xmax = _xmax;</b>
+<b class="fc">&nbsp;		env.ymax = _ymax;</b>
+<b class="fc">&nbsp;		return env;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public static Envelope2D construct(Envelope2D other) {
+<b class="nc">&nbsp;		Envelope2D env = new Envelope2D();</b>
+<b class="nc">&nbsp;		env.setCoords(other);</b>
+<b class="nc">&nbsp;		return env;</b>
+&nbsp;	}
+&nbsp;	
+<b class="fc">&nbsp;	public Envelope2D() {</b>
+<b class="fc">&nbsp;		setEmpty();</b>
+&nbsp;	}
+&nbsp;
+<b class="fc">&nbsp;	public Envelope2D(double _xmin, double _ymin, double _xmax, double _ymax) {</b>
+<b class="fc">&nbsp;		xmin = _xmin;</b>
+<b class="fc">&nbsp;		ymin = _ymin;</b>
+<b class="fc">&nbsp;		xmax = _xmax;</b>
+<b class="fc">&nbsp;		ymax = _ymax;</b>
+&nbsp;	}
+&nbsp;
+<b class="nc">&nbsp;	public Envelope2D(Envelope2D other) {</b>
+<b class="nc">&nbsp;		setCoords(other);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public int estimateMemorySize()
+&nbsp;	{
+<b class="fc">&nbsp;		return SIZE_OF_ENVELOPE2D;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public void setCoords(double _x, double _y) {
+<b class="fc">&nbsp;		xmin = _x;</b>
+<b class="fc">&nbsp;		ymin = _y;</b>
+<b class="fc">&nbsp;		xmax = _x;</b>
+<b class="fc">&nbsp;		ymax = _y;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public void setCoords(double _xmin, double _ymin, double _xmax, double _ymax) {
+<b class="fc">&nbsp;		xmin = _xmin;</b>
+<b class="fc">&nbsp;		ymin = _ymin;</b>
+<b class="fc">&nbsp;		xmax = _xmax;</b>
+<b class="fc">&nbsp;		ymax = _ymax;</b>
+<b class="fc">&nbsp;		normalize();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public void setCoords(Point2D center, double width, double height) {
+<b class="fc">&nbsp;		xmin = center.x - width * 0.5;</b>
+<b class="fc">&nbsp;		xmax = xmin + width;</b>
+<b class="fc">&nbsp;		ymin = center.y - height * 0.5;</b>
+<b class="fc">&nbsp;		ymax = ymin + height;</b>
+<b class="fc">&nbsp;		normalize();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public void setCoords(Point2D pt) {
+<b class="fc">&nbsp;		xmin = pt.x;</b>
+<b class="fc">&nbsp;		ymin = pt.y;</b>
+<b class="fc">&nbsp;		xmax = pt.x;</b>
+<b class="fc">&nbsp;		ymax = pt.y;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public void setCoords(Envelope2D envSrc) {
+<b class="fc">&nbsp;		setCoords(envSrc.xmin, envSrc.ymin, envSrc.xmax, envSrc.ymax);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public Envelope2D getInflated(double dx, double dy) {
+<b class="nc">&nbsp;		Envelope2D env = new Envelope2D();</b>
+<b class="nc">&nbsp;		env.setCoords(this.xmin, this.ymin, this.xmax, this.ymax);</b>
+<b class="nc">&nbsp;		env.inflate(dx, dy);</b>
+<b class="nc">&nbsp;		return env;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Sets the envelope from the array of points. The envelope will be set to
+&nbsp;	 * empty if the array is null.
+&nbsp;	 * @param points The points to set the envelope from. No element in the array can be null.
+&nbsp;	 */
+&nbsp;	public void setFromPoints(Point2D[] points) {
+<b class="nc">&nbsp;		if (points == null || points.length == 0) {</b>
+<b class="nc">&nbsp;			setEmpty();</b>
+&nbsp;			return;
+&nbsp;		}
+&nbsp;
+<b class="nc">&nbsp;		Point2D pt = points[0];</b>
+<b class="nc">&nbsp;		setCoords(pt.x, pt.y);</b>
+<b class="nc">&nbsp;		for (int i = 1; i &lt; points.length; i++) {</b>
+<b class="nc">&nbsp;			Point2D pt2d = points[i];</b>
+<b class="nc">&nbsp;			mergeNE(pt2d.x, pt2d.y);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	public void setEmpty() {
+<b class="fc">&nbsp;		xmin = NumberUtils.TheNaN;</b>
+<b class="fc">&nbsp;		ymin = NumberUtils.TheNaN;</b>
+<b class="fc">&nbsp;		xmax = NumberUtils.TheNaN;</b>
+<b class="fc">&nbsp;		ymax = NumberUtils.TheNaN;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public void setInfinite() {
+<b class="nc">&nbsp;		xmin = NumberUtils.negativeInf();</b>
+<b class="nc">&nbsp;		xmax = NumberUtils.positiveInf();</b>
+<b class="nc">&nbsp;		ymin = NumberUtils.negativeInf();</b>
+<b class="nc">&nbsp;		ymax = NumberUtils.positiveInf();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public boolean isEmpty() {
+<b class="fc">&nbsp;		return NumberUtils.isNaN(xmin) || NumberUtils.isNaN(ymin) || NumberUtils.isNaN(xmax) || NumberUtils.isNaN(ymax);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public void setCoords(Envelope1D xinterval, Envelope1D yinterval) {
+<b class="nc">&nbsp;		if (xinterval.isEmpty() || yinterval.isEmpty()) {</b>
+<b class="nc">&nbsp;			setEmpty();</b>
+&nbsp;			return;
+&nbsp;		}
+&nbsp;
+<b class="nc">&nbsp;		xmin = xinterval.vmin;</b>
+<b class="nc">&nbsp;		xmax = xinterval.vmax;</b>
+<b class="nc">&nbsp;		ymin = yinterval.vmin;</b>
+<b class="nc">&nbsp;		ymax = yinterval.vmax;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public void merge(double x, double y) {
+<b class="fc">&nbsp;		if (isEmpty()) {</b>
+<b class="fc">&nbsp;			xmin = x;</b>
+<b class="fc">&nbsp;			ymin = y;</b>
+<b class="fc">&nbsp;			xmax = x;</b>
+<b class="fc">&nbsp;			ymax = y;</b>
+<b class="fc">&nbsp;		} else {</b>
+<b class="fc">&nbsp;			if (xmin &gt; x)</b>
+<b class="fc">&nbsp;				xmin = x;</b>
+<b class="fc">&nbsp;			else if (xmax &lt; x)</b>
+<b class="fc">&nbsp;				xmax = x;</b>
+&nbsp;
+<b class="fc">&nbsp;			if (ymin &gt; y)</b>
+<b class="fc">&nbsp;				ymin = y;</b>
+<b class="fc">&nbsp;			else if (ymax &lt; y)</b>
+<b class="fc">&nbsp;				ymax = y;</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Merges a point with this envelope without checking if the envelope is
+&nbsp;	 * empty. Use with care.
+&nbsp;	 * @param x The x coord of the point
+&nbsp;	 * @param y the y coord in the point
+&nbsp;	 */
+&nbsp;	public void mergeNE(double x, double y) {
+<b class="fc">&nbsp;		if (xmin &gt; x)</b>
+<b class="fc">&nbsp;			xmin = x;</b>
+<b class="fc">&nbsp;		else if (xmax &lt; x)</b>
+<b class="fc">&nbsp;			xmax = x;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (ymin &gt; y)</b>
+<b class="fc">&nbsp;			ymin = y;</b>
+<b class="fc">&nbsp;		else if (ymax &lt; y)</b>
+<b class="fc">&nbsp;			ymax = y;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public void merge(Point2D pt) {
+<b class="fc">&nbsp;		merge(pt.x, pt.y);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public void merge(Point3D pt) {
+<b class="nc">&nbsp;		merge(pt.x, pt.y);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public void merge(Envelope2D other) {
+<b class="fc">&nbsp;		if (other.isEmpty())</b>
+&nbsp;			return;
+&nbsp;
+<b class="fc">&nbsp;		merge(other.xmin, other.ymin);</b>
+<b class="fc">&nbsp;		merge(other.xmax, other.ymax);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public void inflate(double dx, double dy) {
+<b class="fc">&nbsp;		if (isEmpty())</b>
+&nbsp;			return;
+<b class="fc">&nbsp;		xmin -= dx;</b>
+<b class="fc">&nbsp;		xmax += dx;</b>
+<b class="fc">&nbsp;		ymin -= dy;</b>
+<b class="fc">&nbsp;		ymax += dy;</b>
+<b class="fc">&nbsp;		if (xmin &gt; xmax || ymin &gt; ymax)</b>
+<b class="nc">&nbsp;			setEmpty();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public void scale(double f) {
+<b class="nc">&nbsp;		if (f &lt; 0.0)</b>
+<b class="nc">&nbsp;			setEmpty();</b>
+&nbsp;
+<b class="nc">&nbsp;		if (isEmpty())</b>
+&nbsp;			return;
+&nbsp;
+<b class="nc">&nbsp;		xmin *= f;</b>
+<b class="nc">&nbsp;		xmax *= f;</b>
+<b class="nc">&nbsp;		ymin *= f;</b>
+<b class="nc">&nbsp;		ymax *= f;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public void zoom(double factorX, double factorY) {
+<b class="nc">&nbsp;		if (!isEmpty())</b>
+<b class="nc">&nbsp;			setCoords(getCenter(), factorX * getWidth(), factorY * getHeight());</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Checks if this envelope intersects the other.
+&nbsp;	 * @param other The other envelope.
+&nbsp;	 * @return True if this envelope intersects the other.
+&nbsp;	 */
+&nbsp;	public boolean isIntersecting(Envelope2D other) {
+&nbsp;		// No need to check if empty, this will work for empty envelopes too
+&nbsp;		// (IEEE math)
+<b class="fc">&nbsp;		return ((xmin &lt;= other.xmin) ? xmax &gt;= other.xmin : other.xmax &gt;= xmin)</b>
+&nbsp;				&amp;&amp; // check that x projections overlap
+<b class="fc">&nbsp;				((ymin &lt;= other.ymin) ? ymax &gt;= other.ymin : other.ymax &gt;= ymin); // check</b>
+&nbsp;																					// that
+&nbsp;																					// y
+&nbsp;																					// projections
+&nbsp;																					// overlap
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Checks if this envelope intersects the other assuming neither one is empty.
+&nbsp;	 * @param other The other envelope.
+&nbsp;	 * @return True if this envelope intersects the other. Assumes this and
+&nbsp;	 * other envelopes are not empty.
+&nbsp;	 */
+&nbsp;	public boolean isIntersectingNE(Envelope2D other) {
+<b class="fc">&nbsp;		return ((xmin &lt;= other.xmin) ? xmax &gt;= other.xmin : other.xmax &gt;= xmin)</b>
+&nbsp;				&amp;&amp; // check that x projections overlap
+<b class="fc">&nbsp;				((ymin &lt;= other.ymin) ? ymax &gt;= other.ymin : other.ymax &gt;= ymin); // check</b>
+&nbsp;																					// that
+&nbsp;																					// y
+&nbsp;																					// projections
+&nbsp;																					// overlap
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Checks if this envelope intersects the other.
+&nbsp;	 * @param xmin_
+&nbsp;	 * @param ymin_
+&nbsp;	 * @param xmax_
+&nbsp;	 * @param ymax_
+&nbsp;	 * @return True if this envelope intersects the other.
+&nbsp;	 */
+&nbsp;	public boolean isIntersecting(double xmin_, double ymin_, double xmax_, double ymax_) {
+&nbsp;		// No need to check if empty, this will work for empty geoms too (IEEE
+&nbsp;		// math)
+<b class="nc">&nbsp;		return ((xmin &lt;= xmin_) ? xmax &gt;= xmin_ : xmax_ &gt;= xmin) &amp;&amp; // check</b>
+&nbsp;																	// that x
+&nbsp;																	// projections
+&nbsp;																	// overlap
+<b class="nc">&nbsp;				((ymin &lt;= ymin_) ? ymax &gt;= ymin_ : ymax_ &gt;= ymin); // check that</b>
+&nbsp;																	// y
+&nbsp;																	// projections
+&nbsp;																	// overlap
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Intersects this envelope with the other and stores result in this
+&nbsp;	 * envelope.
+&nbsp;	 * @param other The other envelope.
+&nbsp;	 * @return True if this envelope intersects the other, otherwise sets this
+&nbsp;	 *         envelope to empty state and returns False.
+&nbsp;	 */
+&nbsp;	public boolean intersect(Envelope2D other) {
+<b class="fc">&nbsp;		if (isEmpty() || other.isEmpty()) {</b>
+<b class="fc">&nbsp;			setEmpty();</b>
+<b class="fc">&nbsp;			return false;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (other.xmin &gt; xmin)</b>
+<b class="fc">&nbsp;			xmin = other.xmin;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (other.xmax &lt; xmax)</b>
+<b class="fc">&nbsp;			xmax = other.xmax;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (other.ymin &gt; ymin)</b>
+<b class="fc">&nbsp;			ymin = other.ymin;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (other.ymax &lt; ymax)</b>
+<b class="fc">&nbsp;			ymax = other.ymax;</b>
+&nbsp;
+<b class="fc">&nbsp;		boolean bIntersecting = xmin &lt;= xmax &amp;&amp; ymin &lt;= ymax;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (!bIntersecting)</b>
+<b class="fc">&nbsp;			setEmpty();</b>
+&nbsp;
+<b class="fc">&nbsp;		return bIntersecting;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Queries a corner of the envelope.
+&nbsp;	 * 
+&nbsp;	 * @param index
+&nbsp;	 *            Indicates a corner of the envelope.
+&nbsp;	 *            &lt;p&gt;
+&nbsp;	 *            0 means lower left or (xmin, ymin)
+&nbsp;	 *            &lt;p&gt;
+&nbsp;	 *            1 means upper left or (xmin, ymax)
+&nbsp;	 *            &lt;p&gt;
+&nbsp;	 *            2 means upper right or (xmax, ymax)
+&nbsp;	 *            &lt;p&gt;
+&nbsp;	 *            3 means lower right or (xmax, ymin)
+&nbsp;	 * @return Point at a corner of the envelope.
+&nbsp;	 * 
+&nbsp;	 */
+&nbsp;	public Point2D queryCorner(int index) {
+<b class="fc">&nbsp;		switch (index) {</b>
+&nbsp;		case 0:
+<b class="fc">&nbsp;			return Point2D.construct(xmin, ymin);</b>
+&nbsp;		case 1:
+<b class="fc">&nbsp;			return Point2D.construct(xmin, ymax);</b>
+&nbsp;		case 2:
+<b class="fc">&nbsp;			return Point2D.construct(xmax, ymax);</b>
+&nbsp;		case 3:
+<b class="fc">&nbsp;			return Point2D.construct(xmax, ymin);</b>
+&nbsp;		default:
+<b class="nc">&nbsp;			throw new IndexOutOfBoundsException();</b>
+&nbsp;
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Queries corners into a given array. The array length must be at least
+&nbsp;	 * 4. Starts from the lower left corner and goes clockwise.
+&nbsp;	 * @param corners The array of four points.
+&nbsp;	 */
+&nbsp;	public void queryCorners(Point2D[] corners) {
+<b class="fc">&nbsp;		if ((corners == null) || (corners.length &lt; 4))</b>
+<b class="nc">&nbsp;			throw new IllegalArgumentException();</b>
+<b class="fc">&nbsp;		if (corners[0] != null)</b>
+<b class="fc">&nbsp;			corners[0].setCoords(xmin, ymin);</b>
+&nbsp;		else
+<b class="fc">&nbsp;			corners[0] = new Point2D(xmin, ymin);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (corners[1] != null)</b>
+<b class="fc">&nbsp;			corners[1].setCoords(xmin, ymax);</b>
+&nbsp;		else
+<b class="fc">&nbsp;			corners[1] = new Point2D(xmin, ymax);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (corners[2] != null)</b>
+<b class="fc">&nbsp;			corners[2].setCoords(xmax, ymax);</b>
+&nbsp;		else
+<b class="fc">&nbsp;			corners[2] = new Point2D(xmax, ymax);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (corners[3] != null)</b>
+<b class="fc">&nbsp;			corners[3].setCoords(xmax, ymin);</b>
+&nbsp;		else
+<b class="fc">&nbsp;			corners[3] = new Point2D(xmax, ymin);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Queries corners into a given array in reversed order. The array length
+&nbsp;	 * must be at least 4. Starts from the lower left corner and goes
+&nbsp;	 * counterclockwise.
+&nbsp;	 * @param corners The array of four points.
+&nbsp;	 */
+&nbsp;	public void queryCornersReversed(Point2D[] corners) {
+<b class="fc">&nbsp;		if (corners == null || ((corners != null) &amp;&amp; (corners.length &lt; 4)))</b>
+<b class="nc">&nbsp;			throw new IllegalArgumentException();</b>
+<b class="fc">&nbsp;		if (corners[0] != null)</b>
+<b class="fc">&nbsp;			corners[0].setCoords(xmin, ymin);</b>
+&nbsp;		else
+<b class="fc">&nbsp;			corners[0] = new Point2D(xmin, ymin);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (corners[1] != null)</b>
+<b class="fc">&nbsp;			corners[1].setCoords(xmax, ymin);</b>
+&nbsp;		else
+<b class="fc">&nbsp;			corners[1] = new Point2D(xmax, ymin);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (corners[2] != null)</b>
+<b class="fc">&nbsp;			corners[2].setCoords(xmax, ymax);</b>
+&nbsp;		else
+<b class="fc">&nbsp;			corners[2] = new Point2D(xmax, ymax);</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (corners[3] != null)</b>
+<b class="fc">&nbsp;			corners[3].setCoords(xmin, ymax);</b>
+&nbsp;		else
+<b class="fc">&nbsp;			corners[3] = new Point2D(xmin, ymax);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public double getArea() {
+<b class="fc">&nbsp;		if (isEmpty())</b>
+<b class="nc">&nbsp;			return 0;</b>
+<b class="fc">&nbsp;		return getWidth() * getHeight();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public double getLength() {
+<b class="nc">&nbsp;		if (isEmpty())</b>
+<b class="nc">&nbsp;			return 0;</b>
+<b class="nc">&nbsp;		return 2.0 * (getWidth() + getHeight());</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public void setFromPoints(Point2D[] points, int count) {
+<b class="nc">&nbsp;		if (count == 0) {</b>
+<b class="nc">&nbsp;			setEmpty();</b>
+&nbsp;			return;
+&nbsp;		}
+<b class="nc">&nbsp;		xmin = points[0].x;</b>
+<b class="nc">&nbsp;		ymin = points[0].y;</b>
+<b class="nc">&nbsp;		xmax = xmin;</b>
+<b class="nc">&nbsp;		ymax = ymin;</b>
+<b class="nc">&nbsp;		for (int i = 1; i &lt; count; i++) {</b>
+<b class="nc">&nbsp;			Point2D pt = points[i];</b>
+<b class="nc">&nbsp;			if (pt.x &lt; xmin)</b>
+<b class="nc">&nbsp;				xmin = pt.x;</b>
+<b class="nc">&nbsp;			else if (pt.x &gt; xmax)</b>
+<b class="nc">&nbsp;				xmax = pt.x;</b>
+<b class="nc">&nbsp;			if (pt.y &lt; ymin)</b>
+<b class="nc">&nbsp;				ymin = pt.y;</b>
+<b class="nc">&nbsp;			else if (pt.y &gt; ymax)</b>
+<b class="nc">&nbsp;				ymax = pt.y;</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	public void reaspect(double arWidth, double arHeight) {
+<b class="nc">&nbsp;		if (isEmpty())</b>
+&nbsp;			return;
+<b class="nc">&nbsp;		double newAspectRatio = arWidth / arHeight;</b>
+<b class="nc">&nbsp;		double widthHalf = getWidth() * 0.5;</b>
+<b class="nc">&nbsp;		double heightHalf = getHeight() * 0.5;</b>
+&nbsp;
+<b class="nc">&nbsp;		double newWidthHalf = heightHalf * newAspectRatio;</b>
+<b class="nc">&nbsp;		if (widthHalf &lt;= newWidthHalf) {// preserve height, increase width</b>
+<b class="nc">&nbsp;			double xc = getCenterX();</b>
+<b class="nc">&nbsp;			xmin = xc - newWidthHalf;</b>
+<b class="nc">&nbsp;			xmax = xc + newWidthHalf;</b>
+<b class="nc">&nbsp;		} else {// preserve the width, increase height</b>
+<b class="nc">&nbsp;			double newHeightHalf = widthHalf / newAspectRatio;</b>
+<b class="nc">&nbsp;			double yc = getCenterY();</b>
+<b class="nc">&nbsp;			ymin = yc - newHeightHalf;</b>
+<b class="nc">&nbsp;			ymax = yc + newHeightHalf;</b>
+&nbsp;		}
+&nbsp;
+<b class="nc">&nbsp;		normalize();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public double getCenterX() {
+<b class="fc">&nbsp;		double cx = (xmax + xmin) / 2d;</b>
+<b class="fc">&nbsp;		return cx;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public double getCenterY() {
+<b class="fc">&nbsp;		double cy = (ymax + ymin) / 2d;</b>
+<b class="fc">&nbsp;		return cy;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public double getWidth() {
+<b class="fc">&nbsp;		return xmax - xmin;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public double getHeight() {
+<b class="fc">&nbsp;		return ymax - ymin;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Moves the Envelope by given distance.
+&nbsp;	 * @param dx
+&nbsp;	 * @param dy
+&nbsp;	 */
+&nbsp;	public void move(double dx, double dy) {
+<b class="nc">&nbsp;		if (isEmpty())</b>
+&nbsp;			return;
+<b class="nc">&nbsp;		xmin += dx;</b>
+<b class="nc">&nbsp;		ymin += dy;</b>
+<b class="nc">&nbsp;		xmax += dx;</b>
+<b class="nc">&nbsp;		ymax += dy;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public void centerAt(double x, double y) {
+<b class="nc">&nbsp;		move(x - getCenterX(), y - getCenterY());</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void centerAt(Point2D pt) {
+<b class="nc">&nbsp;		centerAt(pt.x, pt.y);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public void offset(double dx, double dy) {
+<b class="nc">&nbsp;		xmin += dx;// NaN remains NaN</b>
+<b class="nc">&nbsp;		xmax += dx;</b>
+<b class="nc">&nbsp;		ymin += dy;</b>
+<b class="nc">&nbsp;		ymax += dy;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public void normalize() {
+<b class="fc">&nbsp;		if (isEmpty())</b>
+&nbsp;			return;
+&nbsp;
+<b class="fc">&nbsp;		double min = Math.min(xmin, xmax);</b>
+<b class="fc">&nbsp;		double max = Math.max(xmin, xmax);</b>
+<b class="fc">&nbsp;		xmin = min;</b>
+<b class="fc">&nbsp;		xmax = max;</b>
+<b class="fc">&nbsp;		min = Math.min(ymin, ymax);</b>
+<b class="fc">&nbsp;		max = Math.max(ymin, ymax);</b>
+<b class="fc">&nbsp;		ymin = min;</b>
+<b class="fc">&nbsp;		ymax = max;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public void queryLowerLeft(Point2D pt) {
+<b class="fc">&nbsp;		pt.setCoords(xmin, ymin);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public void queryLowerRight(Point2D pt) {
+<b class="fc">&nbsp;		pt.setCoords(xmax, ymin);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public void queryUpperLeft(Point2D pt) {
+<b class="fc">&nbsp;		pt.setCoords(xmin, ymax);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public void queryUpperRight(Point2D pt) {
+<b class="fc">&nbsp;		pt.setCoords(xmax, ymax);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns True if this envelope is valid (empty, or has xmin less or equal
+&nbsp;	 * to xmax, or ymin less or equal to ymax).
+&nbsp;	 * @return True if the envelope is valid.
+&nbsp;	 */
+&nbsp;	public boolean isValid() {
+<b class="fc">&nbsp;		return isEmpty() || (xmin &lt;= xmax &amp;&amp; ymin &lt;= ymax);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Gets the center point of the envelope. The Center Point occurs at: ((XMin
+&nbsp;	 * + XMax) / 2, (YMin + YMax) / 2).
+&nbsp;	 * 
+&nbsp;	 * @return the center point
+&nbsp;	 */
+&nbsp;	public Point2D getCenter() {
+<b class="fc">&nbsp;		return new Point2D((xmax + xmin) / 2d, (ymax + ymin) / 2d);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public void queryCenter(Point2D center) {
+<b class="nc">&nbsp;		center.x = (xmax + xmin) / 2d;</b>
+<b class="nc">&nbsp;		center.y = (ymax + ymin) / 2d;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public void centerAt(Point c) {
+<b class="nc">&nbsp;		double cx = (xmax - xmin) / 2d;</b>
+<b class="nc">&nbsp;		double cy = (ymax - ymin) / 2d;</b>
+&nbsp;
+<b class="nc">&nbsp;		xmin = c.getX() - cx;</b>
+<b class="nc">&nbsp;		xmax = c.getX() + cx;</b>
+<b class="nc">&nbsp;		ymin = c.getY() - cy;</b>
+<b class="nc">&nbsp;		ymax = c.getY() + cy;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public Point2D getLowerLeft() {
+<b class="fc">&nbsp;		return new Point2D(xmin, ymin);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public Point2D getUpperLeft() {
+<b class="fc">&nbsp;		return new Point2D(xmin, ymax);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public Point2D getLowerRight() {
+<b class="fc">&nbsp;		return new Point2D(xmax, ymin);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public Point2D getUpperRight() {
+<b class="fc">&nbsp;		return new Point2D(xmax, ymax);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public boolean contains(Point p) {
+<b class="nc">&nbsp;		return contains(p.getX(), p.getY());</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public boolean contains(Point2D p) {
+<b class="fc">&nbsp;		return contains(p.x, p.y);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public boolean contains(double x, double y) {
+&nbsp;		// Note: This will return False, if envelope is empty, thus no need to
+&nbsp;		// call is_empty().
+<b class="fc">&nbsp;		return x &gt;= xmin &amp;&amp; x &lt;= xmax &amp;&amp; y &gt;= ymin &amp;&amp; y &lt;= ymax;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns True if the envelope contains the other envelope (boundary
+&nbsp;	 * inclusive).
+&nbsp;	 * @param other The other envelope.
+&nbsp;	 * @return True if this contains the other.
+&nbsp;	 */
+&nbsp;	public boolean contains(Envelope2D other) {// Note: Will return False, if
+&nbsp;												// either envelope is empty.
+<b class="fc">&nbsp;		return other.xmin &gt;= xmin &amp;&amp; other.xmax &lt;= xmax &amp;&amp; other.ymin &gt;= ymin</b>
+<b class="fc">&nbsp;				&amp;&amp; other.ymax &lt;= ymax;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns True if the envelope contains the point (boundary exclusive).
+&nbsp;	 * @param x
+&nbsp;	 * @param y
+&nbsp;	 * @return True if this contains the point.
+&nbsp;	 * */
+&nbsp;	public boolean containsExclusive(double x, double y) {
+&nbsp;		// Note: This will return False, if envelope is empty, thus no need to
+&nbsp;		// call is_empty().
+<b class="fc">&nbsp;		return x &gt; xmin &amp;&amp; x &lt; xmax &amp;&amp; y &gt; ymin &amp;&amp; y &lt; ymax;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns True if the envelope contains the point (boundary exclusive).
+&nbsp;	 */
+&nbsp;	public boolean containsExclusive(Point2D pt) {
+<b class="fc">&nbsp;		return containsExclusive(pt.x, pt.y);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns True if the envelope contains the other envelope (boundary
+&nbsp;	 * exclusive).
+&nbsp;	 * @param other The other envelope
+&nbsp;	 * @return True if this contains the other, boundary exclusive.
+&nbsp;	 */
+&nbsp;	boolean containsExclusive(Envelope2D other) {
+&nbsp;		// Note: This will return False, if either envelope is empty, thus no
+&nbsp;		// need to call is_empty().
+<b class="fc">&nbsp;		return other.xmin &gt; xmin &amp;&amp; other.xmax &lt; xmax &amp;&amp; other.ymin &gt; ymin</b>
+<b class="fc">&nbsp;				&amp;&amp; other.ymax &lt; ymax;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public boolean equals(Object _other) {
+<b class="fc">&nbsp;		if (_other == this)</b>
+<b class="nc">&nbsp;			return true;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (!(_other instanceof Envelope2D))</b>
+<b class="fc">&nbsp;			return false;</b>
+&nbsp;
+<b class="fc">&nbsp;		Envelope2D other = (Envelope2D) _other;</b>
+<b class="fc">&nbsp;		if (isEmpty() &amp;&amp; other.isEmpty())</b>
+<b class="nc">&nbsp;			return true;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (xmin != other.xmin || ymin != other.ymin || xmax != other.xmax</b>
+<b class="fc">&nbsp;				|| ymax != other.ymax)</b>
+<b class="fc">&nbsp;			return false;</b>
+&nbsp;
+<b class="fc">&nbsp;		return true;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public int hashCode() {
+<b class="nc">&nbsp;		if (isEmpty()) {</b>
+<b class="nc">&nbsp;			return NumberUtils.hash(NumberUtils.TheNaN);</b>
+&nbsp;		}
+&nbsp;		
+<b class="nc">&nbsp;		int hash = NumberUtils.hash(xmin);</b>
+<b class="nc">&nbsp;		hash = NumberUtils.hash(hash, xmax);</b>
+<b class="nc">&nbsp;		hash = NumberUtils.hash(hash, ymin);</b>
+<b class="nc">&nbsp;		hash = NumberUtils.hash(hash, ymax);</b>
+&nbsp;
+<b class="nc">&nbsp;		return hash;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	Point2D _snapToBoundary(Point2D pt) {
+<b class="fc">&nbsp;		Point2D p = new Point2D();</b>
+<b class="fc">&nbsp;		p.setCoords(pt);</b>
+<b class="fc">&nbsp;		if (p._isNan())</b>
+<b class="nc">&nbsp;			return p;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (isEmpty()) {</b>
+<b class="nc">&nbsp;			p._setNan();</b>
+<b class="nc">&nbsp;			return p;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (p.x &lt; xmin)</b>
+<b class="nc">&nbsp;			p.x = xmin;</b>
+<b class="fc">&nbsp;		else if (p.x &gt; xmax)</b>
+<b class="nc">&nbsp;			p.x = xmax;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (p.y &lt; ymin)</b>
+<b class="nc">&nbsp;			p.y = ymin;</b>
+<b class="fc">&nbsp;		else if (p.y &gt; ymax)</b>
+<b class="nc">&nbsp;			p.y = ymax;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (!p.equals(pt))</b>
+<b class="nc">&nbsp;			return p;</b>
+&nbsp;
+&nbsp;		// p is inside envelope
+<b class="fc">&nbsp;		Point2D center = getCenter();</b>
+<b class="fc">&nbsp;		double deltax = p.x &lt; center.x ? p.x - xmin : xmax - p.x;</b>
+<b class="fc">&nbsp;		double deltay = p.y &lt; center.y ? p.y - ymin : ymax - p.y;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (deltax &lt; deltay)</b>
+<b class="nc">&nbsp;			p.x = p.x &lt; center.x ? xmin : xmax;</b>
+&nbsp;		else
+<b class="fc">&nbsp;			p.y = p.y &lt; center.y ? ymin : ymax;</b>
+&nbsp;
+<b class="fc">&nbsp;		return p;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Calculates distance of point from lower left corner of envelope,
+&nbsp;	// moving clockwise along the envelope boundary.
+&nbsp;	// The input point is assumed to lie exactly on envelope boundary
+&nbsp;	// If this is not the case then a projection to the nearest position on the
+&nbsp;	// envelope boundary is performed.
+&nbsp;	// (If the user knows that the input point does most likely not lie on the
+&nbsp;	// boundary,
+&nbsp;	// it is more efficient to perform ProjectToBoundary before using this
+&nbsp;	// function).
+&nbsp;	double _boundaryDistance(Point2D pt) {
+<b class="fc">&nbsp;		if (isEmpty())</b>
+<b class="nc">&nbsp;			return NumberUtils.NaN();</b>
+&nbsp;
+<b class="fc">&nbsp;		if (pt.x == xmin)</b>
+<b class="fc">&nbsp;			return pt.y - ymin;</b>
+&nbsp;
+<b class="fc">&nbsp;		double height = ymax - ymin;</b>
+<b class="fc">&nbsp;		double width = xmax - xmin;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (pt.y == ymax)</b>
+<b class="fc">&nbsp;			return height + pt.x - xmin;</b>
+&nbsp;
+<b class="nc">&nbsp;		if (pt.x == xmax)</b>
+<b class="nc">&nbsp;			return height + width + ymax - pt.y;</b>
+&nbsp;
+<b class="nc">&nbsp;		if (pt.y == ymin)</b>
+<b class="nc">&nbsp;			return height * 2.0 + width + xmax - pt.x;</b>
+&nbsp;
+<b class="nc">&nbsp;		return _boundaryDistance(_snapToBoundary(pt));</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// returns 0,..3 depending on which side pt lies.
+&nbsp;	int _envelopeSide(Point2D pt) {
+&nbsp;
+<b class="nc">&nbsp;		if (isEmpty())</b>
+<b class="nc">&nbsp;			return -1;</b>
+&nbsp;
+<b class="nc">&nbsp;		double boundaryDist = _boundaryDistance(pt);</b>
+<b class="nc">&nbsp;		double height = ymax - ymin;</b>
+<b class="nc">&nbsp;		double width = xmax - xmin;</b>
+&nbsp;
+<b class="nc">&nbsp;		if (boundaryDist &lt; height)</b>
+<b class="nc">&nbsp;			return 0;</b>
+&nbsp;
+<b class="nc">&nbsp;		if ((boundaryDist -= height) &lt; width)</b>
+<b class="nc">&nbsp;			return 1;</b>
+&nbsp;
+<b class="nc">&nbsp;		return boundaryDist - width &lt; height ? 2 : 3;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	double _calculateToleranceFromEnvelope() {
+<b class="fc">&nbsp;		if (isEmpty())</b>
+<b class="fc">&nbsp;			return NumberUtils.doubleEps() * 100.0; // GEOMTERYX_EPSFACTOR</b>
+&nbsp;													// 100.0;
+<b class="fc">&nbsp;		double r = Math.abs(xmin) + Math.abs(xmax) + Math.abs(ymin)</b>
+<b class="fc">&nbsp;				+ Math.abs(ymax) + 1;</b>
+<b class="fc">&nbsp;		return r * NumberUtils.doubleEps() * 100.0; // GEOMTERYX_EPSFACTOR</b>
+&nbsp;													// 100.0;
+&nbsp;	}
+&nbsp;
+&nbsp;	public int clipLine(Point2D p1, Point2D p2)
+&nbsp;	// Modified Cohen-Sutherland Line-Clipping Algorithm
+&nbsp;	// returns:
+&nbsp;	// 0 - the segment is outside of the clipping window
+&nbsp;	// 1 - p1 was modified
+&nbsp;	// 2 - p2 was modified
+&nbsp;	// 3 - p1 and p2 were modified
+&nbsp;	// 4 - the segment is complitely inside of the clipping window
+&nbsp;	{
+<b class="fc">&nbsp;		int c1 = _clipCode(p1), c2 = _clipCode(p2);</b>
+&nbsp;
+<b class="fc">&nbsp;		if ((c1 &amp; c2) != 0)// (c1 &amp; c2)</b>
+<b class="fc">&nbsp;			return 0;</b>
+&nbsp;
+<b class="fc">&nbsp;		if ((c1 | c2) == 0)// (!(c1 | c2))</b>
+<b class="fc">&nbsp;			return 4;</b>
+&nbsp;
+<b class="fc">&nbsp;		final int res = ((c1 != 0) ? 1 : 0) | ((c2 != 0) ? 2 : 0);// (c1 ? 1 :</b>
+&nbsp;																	// 0) | (c2
+&nbsp;																	// ? 2 : 0);
+&nbsp;
+&nbsp;		do {
+<b class="fc">&nbsp;			double dx = p2.x - p1.x, dy = p2.y - p1.y;</b>
+&nbsp;
+<b class="fc">&nbsp;			boolean bDX = dx &gt; dy;</b>
+&nbsp;
+<b class="fc">&nbsp;			if (bDX) {</b>
+<b class="fc">&nbsp;				if ((c1 &amp; XMASK) != 0)// (c1 &amp; XMASK)</b>
+&nbsp;				{
+<b class="fc">&nbsp;					if ((c1 &amp; XLESSXMIN) != 0)// (c1 &amp; XLESSXMIN)</b>
+&nbsp;					{
+<b class="fc">&nbsp;						p1.y += dy * (xmin - p1.x) / dx;</b>
+<b class="fc">&nbsp;						p1.x = xmin;</b>
+<b class="fc">&nbsp;					} else {</b>
+<b class="nc">&nbsp;						p1.y += dy * (xmax - p1.x) / dx;</b>
+<b class="nc">&nbsp;						p1.x = xmax;</b>
+&nbsp;					}
+&nbsp;
+<b class="fc">&nbsp;					c1 = _clipCode(p1);</b>
+<b class="fc">&nbsp;				} else if ((c2 &amp; XMASK) != 0)// (c2 &amp; XMASK)</b>
+&nbsp;				{
+<b class="fc">&nbsp;					if ((c2 &amp; XLESSXMIN) != 0) {</b>
+<b class="nc">&nbsp;						p2.y += dy * (xmin - p2.x) / dx;</b>
+<b class="nc">&nbsp;						p2.x = xmin;</b>
+<b class="nc">&nbsp;					} else {</b>
+<b class="fc">&nbsp;						p2.y += dy * (xmax - p2.x) / dx;</b>
+<b class="fc">&nbsp;						p2.x = xmax;</b>
+&nbsp;					}
+&nbsp;
+<b class="fc">&nbsp;					c2 = _clipCode(p2);</b>
+<b class="fc">&nbsp;				} else if (c1 != 0)// (c1)</b>
+&nbsp;				{
+<b class="fc">&nbsp;					if ((c1 &amp; YLESSYMIN) != 0)// (c1 &amp; YLESSYMIN)</b>
+&nbsp;					{
+<b class="fc">&nbsp;						p1.x += dx * (ymin - p1.y) / dy;</b>
+<b class="fc">&nbsp;						p1.y = ymin;</b>
+<b class="fc">&nbsp;					} else {</b>
+<b class="fc">&nbsp;						p1.x += dx * (ymax - p1.y) / dy;</b>
+<b class="fc">&nbsp;						p1.y = ymax;</b>
+&nbsp;					}
+&nbsp;
+<b class="fc">&nbsp;					c1 = _clipCode(p1);</b>
+<b class="fc">&nbsp;				} else {</b>
+<b class="fc">&nbsp;					if ((c2 &amp; YLESSYMIN) != 0)// (c2 &amp; YLESSYMIN)</b>
+&nbsp;					{
+<b class="fc">&nbsp;						p2.x += dx * (ymin - p2.y) / dy;</b>
+<b class="fc">&nbsp;						p2.y = ymin;</b>
+<b class="fc">&nbsp;					} else {</b>
+<b class="fc">&nbsp;						p2.x += dx * (ymax - p2.y) / dy;</b>
+<b class="fc">&nbsp;						p2.y = ymax;</b>
+&nbsp;					}
+&nbsp;
+<b class="fc">&nbsp;					c2 = _clipCode(p2);</b>
+&nbsp;				}
+<b class="fc">&nbsp;			} else {</b>
+<b class="fc">&nbsp;				if ((c1 &amp; YMASK) != 0)// (c1 &amp; YMASK)</b>
+&nbsp;				{
+<b class="fc">&nbsp;					if ((c1 &amp; YLESSYMIN) != 0)// (c1 &amp; YLESSYMIN)</b>
+&nbsp;					{
+<b class="fc">&nbsp;						p1.x += dx * (ymin - p1.y) / dy;</b>
+<b class="fc">&nbsp;						p1.y = ymin;</b>
+<b class="fc">&nbsp;					} else {</b>
+<b class="fc">&nbsp;						p1.x += dx * (ymax - p1.y) / dy;</b>
+<b class="fc">&nbsp;						p1.y = ymax;</b>
+&nbsp;					}
+&nbsp;
+<b class="fc">&nbsp;					c1 = _clipCode(p1);</b>
+<b class="fc">&nbsp;				} else if ((c2 &amp; YMASK) != 0)// (c2 &amp; YMASK)</b>
+&nbsp;				{
+<b class="fc">&nbsp;					if ((c2 &amp; YLESSYMIN) != 0) // (c2 &amp; YLESSYMIN)</b>
+&nbsp;					{
+<b class="fc">&nbsp;						p2.x += dx * (ymin - p2.y) / dy;</b>
+<b class="fc">&nbsp;						p2.y = ymin;</b>
+<b class="fc">&nbsp;					} else {</b>
+<b class="fc">&nbsp;						p2.x += dx * (ymax - p2.y) / dy;</b>
+<b class="fc">&nbsp;						p2.y = ymax;</b>
+&nbsp;					}
+&nbsp;
+<b class="fc">&nbsp;					c2 = _clipCode(p2);</b>
+<b class="fc">&nbsp;				} else if (c1 != 0)// (c1)</b>
+&nbsp;				{
+<b class="fc">&nbsp;					if ((c1 &amp; XLESSXMIN) != 0)// (c1 &amp; XLESSXMIN)</b>
+&nbsp;					{
+<b class="fc">&nbsp;						p1.y += dy * (xmin - p1.x) / dx;</b>
+<b class="fc">&nbsp;						p1.x = xmin;</b>
+<b class="fc">&nbsp;					} else {</b>
+<b class="fc">&nbsp;						p1.y += dy * (xmax - p1.x) / dx;</b>
+<b class="fc">&nbsp;						p1.x = xmax;</b>
+&nbsp;					}
+&nbsp;
+<b class="fc">&nbsp;					c1 = _clipCode(p1);</b>
+<b class="fc">&nbsp;				} else {</b>
+<b class="fc">&nbsp;					if ((c2 &amp; XLESSXMIN) != 0)// (c2 &amp; XLESSXMIN)</b>
+&nbsp;					{
+<b class="fc">&nbsp;						p2.y += dy * (xmin - p2.x) / dx;</b>
+<b class="fc">&nbsp;						p2.x = xmin;</b>
+<b class="fc">&nbsp;					} else {</b>
+<b class="fc">&nbsp;						p2.y += dy * (xmax - p2.x) / dx;</b>
+<b class="fc">&nbsp;						p2.x = xmax;</b>
+&nbsp;					}
+&nbsp;
+<b class="fc">&nbsp;					c2 = _clipCode(p2);</b>
+&nbsp;				}
+&nbsp;
+&nbsp;				/*
+&nbsp;				 * if (c1) //original code. Faster, but less robust numerically.
+&nbsp;				 * ( //The Cohen-Sutherland Line-Clipping Algorithm) { if (c1 &amp;
+&nbsp;				 * XLESSXMIN) { p1.y += dy * (xmin - p1.x) / dx; p1.x = xmin; }
+&nbsp;				 * else if (c1 &amp; XGREATERXMAX) { p1.y += dy * (xmax - p1.x) /
+&nbsp;				 * dx; p1.x = xmax; } else if (c1 &amp; YLESSYMIN) { p1.x += dx *
+&nbsp;				 * (ymin - p1.y) / dy; p1.y = ymin; } else if (c1 &amp;
+&nbsp;				 * YGREATERYMAX) { p1.x += dx * (ymax - p1.y) / dy; p1.y = ymax;
+&nbsp;				 * }
+&nbsp;				 * 
+&nbsp;				 * c1 = _clipCode(p1, ClipRect); } else { if (c2 &amp; XLESSXMIN) {
+&nbsp;				 * p2.y += dy * (xmin - p2.x) / dx; p2.x = xmin; } else if (c2 &amp;
+&nbsp;				 * XGREATERXMAX) { p2.y += dy * (xmax - p2.x) / dx; p2.x = xmax;
+&nbsp;				 * } else if (c2 &amp; YLESSYMIN) { p2.x += dx * (ymin - p2.y) / dy;
+&nbsp;				 * p2.y = ymin; } else if (c2 &amp; YGREATERYMAX) { p2.x += dx *
+&nbsp;				 * (ymax - p2.y) / dy; p2.y = ymax; }
+&nbsp;				 * 
+&nbsp;				 * c2 = _clipCode(p2, ClipRect); }
+&nbsp;				 */
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			if ((c1 &amp; c2) != 0)// (c1 &amp; c2)</b>
+<b class="fc">&nbsp;				return 0;</b>
+&nbsp;
+<b class="fc">&nbsp;		} while ((c1 | c2) != 0);// (c1 | c2);</b>
+&nbsp;
+<b class="fc">&nbsp;		return res;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	int _clipCode(Point2D p)// returns a code from the Cohen-Sutherland (0000 is
+&nbsp;							// boundary inclusive)
+&nbsp;	{
+<b class="fc">&nbsp;		int left = (p.x &lt; xmin) ? 1 : 0;</b>
+<b class="fc">&nbsp;		int right = (p.x &gt; xmax) ? 1 : 0;</b>
+<b class="fc">&nbsp;		int bottom = (p.y &lt; ymin) ? 1 : 0;</b>
+<b class="fc">&nbsp;		int top = (p.y &gt; ymax) ? 1 : 0;</b>
+<b class="fc">&nbsp;		return left | right &lt;&lt; 1 | bottom &lt;&lt; 2 | top &lt;&lt; 3;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Clips and optionally extends line within envelope; modifies point &#39;from&#39;,
+&nbsp;	// &#39;to&#39;.
+&nbsp;	// Algorithm: Liang-Barsky parametric line-clipping (Foley, vanDam, Feiner,
+&nbsp;	// Hughes, second edition, 117-124)
+&nbsp;	// lineExtension: 0 no line eExtension, 1 extend line at from point, 2
+&nbsp;	// extend line at endpoint, 3 extend line at both ends
+&nbsp;	// boundaryDistances can be NULLPTR.
+&nbsp;	// returns:
+&nbsp;	// 0 - the segment is outside of the clipping window
+&nbsp;	// 1 - p1 was modified
+&nbsp;	// 2 - p2 was modified
+&nbsp;	// 3 - p1 and p2 were modified
+&nbsp;	// 4 - the segment is complitely inside of the clipping window
+&nbsp;	int clipLine(Point2D p0, Point2D p1, int lineExtension, double[] segParams,
+&nbsp;			double[] boundaryDistances) {
+<b class="fc">&nbsp;		if (boundaryDistances != null) {</b>
+<b class="fc">&nbsp;			boundaryDistances[0] = -1.0;</b>
+<b class="fc">&nbsp;			boundaryDistances[1] = -1.0;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		double[] tOld = new double[2];// LOCALREFCLASS1(ArrayOf(double), int,</b>
+&nbsp;										// tOld, 2);
+<b class="fc">&nbsp;		int modified = 0;</b>
+&nbsp;
+<b class="fc">&nbsp;		Point2D delta = new Point2D(p1.x - p0.x, p1.y - p0.y);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (delta.x == 0.0 &amp;&amp; delta.y == 0.0) // input line degenerates to a</b>
+&nbsp;												// point
+&nbsp;		{
+<b class="fc">&nbsp;			segParams[0] = 0.0;</b>
+<b class="fc">&nbsp;			segParams[1] = 0.0;</b>
+<b class="fc">&nbsp;			return contains(p0) ? 4 : 0;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		segParams[0] = ((lineExtension &amp; 1) != 0) ? NumberUtils.negativeInf()</b>
+<b class="fc">&nbsp;				: 0.0;</b>
+<b class="fc">&nbsp;		segParams[1] = ((lineExtension &amp; 2) != 0) ? NumberUtils.positiveInf()</b>
+<b class="fc">&nbsp;				: 1.0;</b>
+<b class="fc">&nbsp;		tOld[0] = segParams[0];</b>
+<b class="fc">&nbsp;		tOld[1] = segParams[1];</b>
+&nbsp;
+<b class="fc">&nbsp;		if (clipLineAuxiliary(delta.x, xmin - p0.x, segParams)</b>
+<b class="fc">&nbsp;				&amp;&amp; clipLineAuxiliary(-delta.x, p0.x - xmax, segParams)</b>
+<b class="fc">&nbsp;				&amp;&amp; clipLineAuxiliary(delta.y, ymin - p0.y, segParams)</b>
+<b class="fc">&nbsp;				&amp;&amp; clipLineAuxiliary(-delta.y, p0.y - ymax, segParams)) {</b>
+<b class="fc">&nbsp;			if (segParams[1] &lt; tOld[1]) {</b>
+<b class="fc">&nbsp;				p1.scaleAdd(segParams[1], delta, p0);</b>
+<b class="fc">&nbsp;				_snapToBoundary(p1); // needed for accuracy</b>
+<b class="fc">&nbsp;				modified |= 2;</b>
+&nbsp;
+<b class="fc">&nbsp;				if (boundaryDistances != null)</b>
+<b class="fc">&nbsp;					boundaryDistances[1] = _boundaryDistance(p1);</b>
+&nbsp;			}
+<b class="fc">&nbsp;			if (segParams[0] &gt; tOld[0]) {</b>
+<b class="fc">&nbsp;				p0.scaleAdd(segParams[0], delta, p0);</b>
+<b class="fc">&nbsp;				_snapToBoundary(p0); // needed for accuracy</b>
+<b class="fc">&nbsp;				modified |= 1;</b>
+&nbsp;
+<b class="fc">&nbsp;				if (boundaryDistances != null)</b>
+<b class="fc">&nbsp;					boundaryDistances[0] = _boundaryDistance(p0);</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return modified;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	boolean clipLineAuxiliary(double denominator, double numerator,
+&nbsp;			double[] segParams) {
+<b class="fc">&nbsp;		double t = numerator / denominator;</b>
+<b class="fc">&nbsp;		if (denominator &gt; 0.0) {</b>
+<b class="fc">&nbsp;			if (t &gt; segParams[1])</b>
+<b class="fc">&nbsp;				return false;</b>
+&nbsp;
+<b class="fc">&nbsp;			if (t &gt; segParams[0]) {</b>
+<b class="fc">&nbsp;				segParams[0] = t;</b>
+<b class="fc">&nbsp;				return true;</b>
+&nbsp;			}
+<b class="fc">&nbsp;		} else if (denominator &lt; 0.0) {</b>
+<b class="fc">&nbsp;			if (t &lt; segParams[0])</b>
+<b class="nc">&nbsp;				return false;</b>
+&nbsp;
+<b class="fc">&nbsp;			if (t &lt; segParams[1]) {</b>
+<b class="fc">&nbsp;				segParams[1] = t;</b>
+<b class="fc">&nbsp;				return true;</b>
+&nbsp;			}
+&nbsp;		} else
+<b class="fc">&nbsp;			return numerator &lt;= 0.0;</b>
+&nbsp;
+<b class="fc">&nbsp;		return true;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns True, envelope is degenerate (Width or Height are less than
+&nbsp;	 * tolerance). Note: this returns False for Empty envelope.
+&nbsp;	 */
+&nbsp;	public boolean isDegenerate(double tolerance) {
+<b class="fc">&nbsp;		return !isEmpty()</b>
+<b class="fc">&nbsp;				&amp;&amp; (getWidth() &lt;= tolerance || getHeight() &lt;= tolerance);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	Point2D _snapClip(Point2D pt)// clips the point if it is outside, then snaps
+&nbsp;									// it to the boundary.
+&nbsp;	{
+<b class="nc">&nbsp;		double x = NumberUtils.snap(pt.x, xmin, xmax);</b>
+<b class="nc">&nbsp;		double y = NumberUtils.snap(pt.y, ymin, ymax);</b>
+<b class="nc">&nbsp;		return new Point2D(x, y);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public boolean isPointOnBoundary(Point2D pt, double tolerance) {
+<b class="nc">&nbsp;		return Math.abs(pt.x - xmin) &lt;= tolerance</b>
+<b class="nc">&nbsp;				|| Math.abs(pt.x - xmax) &lt;= tolerance</b>
+<b class="nc">&nbsp;				|| Math.abs(pt.y - ymin) &lt;= tolerance</b>
+<b class="nc">&nbsp;				|| Math.abs(pt.y - ymax) &lt;= tolerance;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Calculates minimum distance from this envelope to the other.
+&nbsp;	 * Returns 0 for empty envelopes.
+&nbsp;	 * @param other The other envelope.
+&nbsp;	 * @return Returns the distance
+&nbsp;	 */
+&nbsp;	public double distance(Envelope2D other)
+&nbsp;	{
+<b class="nc">&nbsp;		return Math.sqrt(sqrDistance(other));</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Calculates minimum distance from this envelope to the point.
+&nbsp;	 * Returns 0 for empty envelopes.
+&nbsp;	 * @param pt2D The other point.
+&nbsp;	 * @return Returns the distance
+&nbsp;	 */
+&nbsp;	public double distance(Point2D pt2D)
+&nbsp;	{
+<b class="nc">&nbsp;		return Math.sqrt(sqrDistance(pt2D));</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Calculates minimum squared distance from this envelope to the other.
+&nbsp;	 * Returns 0 for empty envelopes.
+&nbsp;	 * @param other The other envelope.
+&nbsp;	 * @return Returns the squared distance
+&nbsp;	 */
+&nbsp;	public double sqrDistance(Envelope2D other)
+&nbsp;	{
+<b class="fc">&nbsp;		double dx = 0;</b>
+<b class="fc">&nbsp;		double dy = 0;</b>
+&nbsp;		double nn;
+&nbsp;
+<b class="fc">&nbsp;		nn = xmin - other.xmax;</b>
+<b class="fc">&nbsp;		if (nn &gt; dx)</b>
+<b class="fc">&nbsp;			dx = nn;</b>
+&nbsp;
+<b class="fc">&nbsp;		nn = ymin - other.ymax;</b>
+<b class="fc">&nbsp;		if (nn &gt; dy)</b>
+<b class="fc">&nbsp;			dy = nn;</b>
+&nbsp;
+<b class="fc">&nbsp;		nn = other.xmin - xmax;</b>
+<b class="fc">&nbsp;		if (nn &gt; dx)</b>
+<b class="fc">&nbsp;			dx = nn;</b>
+&nbsp;
+<b class="fc">&nbsp;		nn = other.ymin - ymax;</b>
+<b class="fc">&nbsp;		if (nn &gt; dy)</b>
+<b class="fc">&nbsp;			dy = nn;</b>
+&nbsp;
+<b class="fc">&nbsp;		return dx * dx + dy * dy;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Calculates minimum squared distance from this envelope to the other.
+&nbsp;	 * Returns 0 for empty envelopes.
+&nbsp;	 * @param xmin_
+&nbsp;	 * @param ymin_
+&nbsp;	 * @param xmax_
+&nbsp;	 * @param ymax_
+&nbsp;	 * @return Returns the squared distance.
+&nbsp;	 */
+&nbsp;	public double sqrDistance(double xmin_, double ymin_, double xmax_, double ymax_)
+&nbsp;	{
+<b class="nc">&nbsp;		double dx = 0;</b>
+<b class="nc">&nbsp;		double dy = 0;</b>
+&nbsp;		double nn;
+&nbsp;
+<b class="nc">&nbsp;		nn = xmin - xmax_;</b>
+<b class="nc">&nbsp;		if (nn &gt; dx)</b>
+<b class="nc">&nbsp;			dx = nn;</b>
+&nbsp;
+<b class="nc">&nbsp;		nn = ymin - ymax_;</b>
+<b class="nc">&nbsp;		if (nn &gt; dy)</b>
+<b class="nc">&nbsp;			dy = nn;</b>
+&nbsp;
+<b class="nc">&nbsp;		nn = xmin_ - xmax;</b>
+<b class="nc">&nbsp;		if (nn &gt; dx)</b>
+<b class="nc">&nbsp;			dx = nn;</b>
+&nbsp;
+<b class="nc">&nbsp;		nn = ymin_ - ymax;</b>
+<b class="nc">&nbsp;		if (nn &gt; dy)</b>
+<b class="nc">&nbsp;			dy = nn;</b>
+&nbsp;
+<b class="nc">&nbsp;		return dx * dx + dy * dy;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 *Returns squared max distance between two bounding boxes. This is furthest distance between points on the two envelopes.
+&nbsp;	 *
+&nbsp;	 *@param other The bounding box to calculate the max distance two.
+&nbsp;	 *@return Squared distance value.
+&nbsp;	 */
+&nbsp;	public double sqrMaxDistance(Envelope2D other) {
+<b class="nc">&nbsp;		if (isEmpty() || other.isEmpty())</b>
+<b class="nc">&nbsp;			return NumberUtils.TheNaN;</b>
+&nbsp;
+<b class="nc">&nbsp;		double dist = 0;</b>
+<b class="nc">&nbsp;		Point2D[] points = new Point2D[4];</b>
+<b class="nc">&nbsp;		queryCorners(points);</b>
+<b class="nc">&nbsp;		Point2D[] points_o = new Point2D[4];</b>
+<b class="nc">&nbsp;		other.queryCorners(points_o);</b>
+<b class="nc">&nbsp;		for (int i = 0; i &lt; 4; i++) {</b>
+<b class="nc">&nbsp;			for (int j = 0; j &lt; 4; j++) {</b>
+<b class="nc">&nbsp;				double d = Point2D.sqrDistance(points[i], points_o[j]);</b>
+<b class="nc">&nbsp;				if (d &gt; dist) {</b>
+<b class="nc">&nbsp;					dist = d;</b>
+&nbsp;				}
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="nc">&nbsp;		return dist;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Calculates minimum squared distance from this envelope to the point.
+&nbsp;	 * Returns 0 for empty envelopes.
+&nbsp;	 * @param pt2D The point.
+&nbsp;	 * @return Returns the squared distance
+&nbsp;	 */
+&nbsp;	public double sqrDistance(Point2D pt2D)
+&nbsp;	{
+<b class="fc">&nbsp;		double dx = 0;</b>
+<b class="fc">&nbsp;		double dy = 0;</b>
+&nbsp;		double nn;
+&nbsp;
+<b class="fc">&nbsp;		nn = xmin - pt2D.x;</b>
+<b class="fc">&nbsp;		if (nn &gt; dx)</b>
+<b class="nc">&nbsp;			dx = nn;</b>
+&nbsp;
+<b class="fc">&nbsp;		nn = ymin - pt2D.y;</b>
+<b class="fc">&nbsp;		if (nn &gt; dy)</b>
+<b class="fc">&nbsp;			dy = nn;</b>
+&nbsp;
+<b class="fc">&nbsp;		nn = pt2D.x - xmax;</b>
+<b class="fc">&nbsp;		if (nn &gt; dx)</b>
+<b class="nc">&nbsp;			dx = nn;</b>
+&nbsp;
+<b class="fc">&nbsp;		nn = pt2D.y - ymax;</b>
+<b class="fc">&nbsp;		if (nn &gt; dy)</b>
+<b class="nc">&nbsp;			dy = nn;</b>
+&nbsp;
+<b class="fc">&nbsp;		return dx * dx + dy * dy;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public void queryIntervalX(Envelope1D env1D)
+&nbsp;	{
+<b class="nc">&nbsp;		if (isEmpty()) {</b>
+<b class="nc">&nbsp;			env1D.setEmpty();</b>
+<b class="nc">&nbsp;		} else {</b>
+<b class="nc">&nbsp;			env1D.setCoords(xmin, xmax);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	public void queryIntervalY(Envelope1D env1D)
+&nbsp;	{
+<b class="nc">&nbsp;		if (isEmpty()) {</b>
+<b class="nc">&nbsp;			env1D.setEmpty();</b>
+<b class="nc">&nbsp;		} else {</b>
+<b class="nc">&nbsp;			env1D.setCoords(ymin, ymax);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	 private void writeObject(java.io.ObjectOutputStream out) throws IOException {
+<b class="fc">&nbsp;		 out.defaultWriteObject();</b>
+&nbsp;	 }
+&nbsp;	 private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+<b class="fc">&nbsp;		 in.defaultReadObject();</b>
+&nbsp;	 }
+&nbsp;	 private void readObjectNoData() throws ObjectStreamException {
+<b class="nc">&nbsp;		 setEmpty();</b>
+&nbsp;	 }
+&nbsp;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-02-21 15:02</div>
+</div>
+</body>
+</html>

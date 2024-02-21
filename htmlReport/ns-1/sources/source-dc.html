@@ -1,0 +1,238 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > SweepMonkierComparator</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.esri.core.geometry</a>
+</div>
+
+<h1>Coverage Summary for Class: SweepMonkierComparator (com.esri.core.geometry)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">SweepMonkierComparator</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    85,7%
+  </span>
+  <span class="absValue">
+    (6/7)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    81,5%
+  </span>
+  <span class="absValue">
+    (44/54)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; Copyright 1995-2015 Esri
+&nbsp;
+&nbsp;   Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp;   you may not use this file except in compliance with the License.
+&nbsp;   You may obtain a copy of the License at
+&nbsp;
+&nbsp;       http://www.apache.org/licenses/LICENSE-2.0
+&nbsp;
+&nbsp;   Unless required by applicable law or agreed to in writing, software
+&nbsp;   distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp;   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp;   See the License for the specific language governing permissions and
+&nbsp;   limitations under the License.
+&nbsp;
+&nbsp; For additional information, contact:
+&nbsp; Environmental Systems Research Institute, Inc.
+&nbsp; Attn: Contracts Dept
+&nbsp; 380 New York Street
+&nbsp; Redlands, California, USA 92373
+&nbsp;
+&nbsp; email: contracts@esri.com
+&nbsp; */
+&nbsp;/*
+&nbsp; * To change this template, choose Tools | Templates
+&nbsp; * and open the template in the editor.
+&nbsp; */
+&nbsp;package com.esri.core.geometry;
+&nbsp;
+&nbsp;class SweepMonkierComparator extends Treap.MonikerComparator {
+&nbsp;	protected EditShape m_shape;
+&nbsp;	protected boolean m_b_intersection_detected;
+&nbsp;	protected Point2D m_point_of_interest;
+&nbsp;	protected Line m_line_1;
+&nbsp;	protected Envelope1D m_env;
+&nbsp;	protected int m_vertex_1;
+&nbsp;	protected int m_current_node;
+&nbsp;	protected double m_min_dist;
+&nbsp;	protected double m_tolerance;
+&nbsp;
+<b class="fc">&nbsp;	SweepMonkierComparator(EditShape shape, double tol) {</b>
+<b class="fc">&nbsp;		m_shape = shape;</b>
+<b class="fc">&nbsp;		m_tolerance = tol;</b>
+<b class="fc">&nbsp;		m_b_intersection_detected = false;</b>
+<b class="fc">&nbsp;		m_vertex_1 = -1;</b>
+<b class="fc">&nbsp;		m_env = new Envelope1D();</b>
+<b class="fc">&nbsp;		m_point_of_interest = new Point2D();</b>
+<b class="fc">&nbsp;		m_point_of_interest.setNaN();</b>
+<b class="fc">&nbsp;		m_line_1 = new Line();</b>
+<b class="fc">&nbsp;		m_current_node = -1;</b>
+<b class="fc">&nbsp;		m_min_dist = NumberUtils.doubleMax();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	int getCurrentNode() {
+<b class="fc">&nbsp;		return m_current_node;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Makes the comparator to forget about the last detected intersection.
+&nbsp;	// Need to be called after the intersection has been resolved.
+&nbsp;	void clearIntersectionDetectedFlag() {
+<b class="fc">&nbsp;		m_b_intersection_detected = false;</b>
+<b class="fc">&nbsp;		m_min_dist = NumberUtils.doubleMax();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Returns True if there has been intersection detected during compare call.
+&nbsp;	// Once intersection is detected subsequent calls to compare method do
+&nbsp;	// nothing until clear_intersection_detected_flag is called.
+&nbsp;	boolean intersectionDetected() {
+<b class="fc">&nbsp;		return m_b_intersection_detected;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void setPoint(Point2D pt) {
+<b class="fc">&nbsp;		m_point_of_interest.setCoords(pt);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Compares the moniker, contained in the Moniker_comparator with the
+&nbsp;	// element contained in the given node.
+&nbsp;	@Override
+&nbsp;	int compare(Treap treap, int node) {
+<b class="nc">&nbsp;		int vertex = treap.getElement(node);</b>
+<b class="nc">&nbsp;		return compareVertex_(treap, node, vertex);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	protected int compareVertex_(Treap treap, int node, int vertex) {
+<b class="fc">&nbsp;		boolean bCurve = m_shape.getSegment(vertex) != null;</b>
+<b class="fc">&nbsp;		if (!bCurve) {</b>
+<b class="fc">&nbsp;			m_shape.queryLineConnector(vertex, m_line_1);</b>
+<b class="fc">&nbsp;			m_env.setCoordsNoNaN_(m_line_1.getStartX(), m_line_1.getEndX());</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (bCurve) {</b>
+<b class="nc">&nbsp;			throw new GeometryException(&quot;not implemented&quot;);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (m_point_of_interest.x + m_tolerance &lt; m_env.vmin)</b>
+<b class="fc">&nbsp;			return -1;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (m_point_of_interest.x - m_tolerance &gt; m_env.vmax)</b>
+<b class="nc">&nbsp;			return 1;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (m_line_1.getStartY() == m_line_1.getEndY()) {</b>
+<b class="nc">&nbsp;			m_current_node = node;</b>
+<b class="nc">&nbsp;			m_b_intersection_detected = true;</b>
+<b class="nc">&nbsp;			return 0;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		m_line_1.orientBottomUp_();</b>
+<b class="fc">&nbsp;		Point2D start = m_line_1.getStartXY();</b>
+<b class="fc">&nbsp;		Point2D vector = new Point2D();</b>
+<b class="fc">&nbsp;		vector.sub(m_line_1.getEndXY(), start);</b>
+<b class="fc">&nbsp;		vector.rightPerpendicular();</b>
+<b class="fc">&nbsp;		Point2D v_2 = new Point2D();</b>
+<b class="fc">&nbsp;		v_2.sub(m_point_of_interest, start);</b>
+<b class="fc">&nbsp;		double dot = vector.dotProduct(v_2);</b>
+<b class="fc">&nbsp;		dot /= vector.length();</b>
+<b class="fc">&nbsp;		if (dot &lt; -m_tolerance * 10)</b>
+<b class="nc">&nbsp;			return -1;</b>
+<b class="fc">&nbsp;		if (dot &gt; m_tolerance * 10)</b>
+<b class="nc">&nbsp;			return 1;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (m_line_1.isIntersecting(m_point_of_interest, m_tolerance)) {</b>
+<b class="fc">&nbsp;			double absDot = Math.abs(dot);</b>
+<b class="fc">&nbsp;			if (absDot &lt; m_min_dist) {</b>
+<b class="fc">&nbsp;				m_current_node = node;</b>
+<b class="fc">&nbsp;				m_min_dist = absDot;</b>
+&nbsp;			}
+<b class="fc">&nbsp;			m_b_intersection_detected = true;</b>
+<b class="fc">&nbsp;			if (absDot &lt; 0.25 * m_tolerance)</b>
+<b class="fc">&nbsp;				return 0;</b>
+&nbsp;		}
+&nbsp;
+<b class="nc">&nbsp;		return dot &lt; 0 ? -1 : 1;</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-02-21 15:02</div>
+</div>
+</body>
+</html>

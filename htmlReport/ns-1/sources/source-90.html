@@ -1,0 +1,912 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > OperatorIntersectionCursor</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.esri.core.geometry</a>
+</div>
+
+<h1>Coverage Summary for Class: OperatorIntersectionCursor (com.esri.core.geometry)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">OperatorIntersectionCursor</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    85,7%
+  </span>
+  <span class="absValue">
+    (12/14)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    79,2%
+  </span>
+  <span class="absValue">
+    (370/467)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; Copyright 1995-2015 Esri
+&nbsp;
+&nbsp;   Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp;   you may not use this file except in compliance with the License.
+&nbsp;   You may obtain a copy of the License at
+&nbsp;
+&nbsp;       http://www.apache.org/licenses/LICENSE-2.0
+&nbsp;
+&nbsp;   Unless required by applicable law or agreed to in writing, software
+&nbsp;   distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp;   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp;   See the License for the specific language governing permissions and
+&nbsp;   limitations under the License.
+&nbsp;
+&nbsp; For additional information, contact:
+&nbsp; Environmental Systems Research Institute, Inc.
+&nbsp; Attn: Contracts Dept
+&nbsp; 380 New York Street
+&nbsp; Redlands, California, USA 92373
+&nbsp;
+&nbsp; email: contracts@esri.com
+&nbsp; */
+&nbsp;
+&nbsp;package com.esri.core.geometry;
+&nbsp;
+&nbsp;import java.util.ArrayList;
+&nbsp;
+<b class="fc">&nbsp;class OperatorIntersectionCursor extends GeometryCursor {</b>
+&nbsp;
+&nbsp;	GeometryCursor m_inputGeoms;
+&nbsp;	GeometryCursor m_smallCursor;
+&nbsp;	ProgressTracker m_progress_tracker;
+&nbsp;	SpatialReference m_spatial_reference;
+&nbsp;	Geometry m_geomIntersector;
+&nbsp;	Geometry m_geomIntersectorEmptyGeom;// holds empty geometry of intersector
+&nbsp;										// type.
+&nbsp;	int m_geomIntersectorType;
+&nbsp;	int m_currentGeomType;
+&nbsp;	int m_index;
+&nbsp;	int m_dimensionMask;
+&nbsp;	boolean m_bEmpty;
+&nbsp;
+<b class="fc">&nbsp;	OperatorIntersectionCursor(GeometryCursor inputGeoms,</b>
+&nbsp;			GeometryCursor geomIntersector, SpatialReference sr,
+&nbsp;			ProgressTracker progress_tracker, int dimensionMask) {
+<b class="fc">&nbsp;		m_bEmpty = geomIntersector == null;</b>
+<b class="fc">&nbsp;		m_index = -1;</b>
+<b class="fc">&nbsp;		m_inputGeoms = inputGeoms;</b>
+<b class="fc">&nbsp;		m_spatial_reference = sr;</b>
+<b class="fc">&nbsp;		m_geomIntersector = geomIntersector.next();</b>
+<b class="fc">&nbsp;		m_geomIntersectorType = m_geomIntersector.getType().value();</b>
+<b class="fc">&nbsp;		m_currentGeomType = Geometry.Type.Unknown.value();</b>
+<b class="fc">&nbsp;		m_progress_tracker = progress_tracker;</b>
+<b class="fc">&nbsp;		m_dimensionMask = dimensionMask;</b>
+<b class="fc">&nbsp;		if (m_dimensionMask != -1</b>
+<b class="fc">&nbsp;				&amp;&amp; (m_dimensionMask &lt;= 0 || m_dimensionMask &gt; 7))</b>
+<b class="nc">&nbsp;			throw new IllegalArgumentException(&quot;bad dimension mask&quot;);// dimension</b>
+&nbsp;																		// mask
+&nbsp;																		// can
+&nbsp;																		// be
+&nbsp;																		// -1,
+&nbsp;																		// for
+&nbsp;																		// the
+&nbsp;																		// default
+&nbsp;																		// behavior,
+&nbsp;																		// or a
+&nbsp;																		// value
+&nbsp;																		// between
+&nbsp;																		// 1 and
+&nbsp;																		// 7.
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public Geometry next() {
+<b class="fc">&nbsp;		if (m_bEmpty)</b>
+<b class="nc">&nbsp;			return null;</b>
+&nbsp;
+&nbsp;		Geometry geom;
+<b class="fc">&nbsp;		if (m_smallCursor != null) {// when dimension mask is used, we produce a</b>
+<b class="fc">&nbsp;			geom = m_smallCursor.next();</b>
+<b class="fc">&nbsp;			if (geom != null)</b>
+<b class="fc">&nbsp;				return geom;</b>
+&nbsp;			else
+<b class="fc">&nbsp;				m_smallCursor = null;// done with the small cursor</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		while ((geom = m_inputGeoms.next()) != null) {</b>
+<b class="fc">&nbsp;			m_index = m_inputGeoms.getGeometryID();</b>
+<b class="fc">&nbsp;			if (m_dimensionMask == -1) {</b>
+<b class="fc">&nbsp;				Geometry resGeom = intersect(geom);</b>
+<b class="fc">&nbsp;				assert (resGeom != null);</b>
+<b class="fc">&nbsp;				return resGeom;</b>
+&nbsp;			} else {
+<b class="fc">&nbsp;				m_smallCursor = intersectEx(geom);</b>
+<b class="fc">&nbsp;				Geometry resGeom = m_smallCursor.next();</b>
+<b class="fc">&nbsp;				assert (resGeom != null);</b>
+<b class="fc">&nbsp;				return resGeom;</b>
+&nbsp;			}
+&nbsp;		}
+<b class="fc">&nbsp;		return null;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public int getGeometryID() {
+<b class="nc">&nbsp;		return m_index;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	Geometry intersect(Geometry input_geom) {
+<b class="fc">&nbsp;		Geometry dst_geom = tryNativeImplementation_(input_geom);</b>
+<b class="fc">&nbsp;		if (dst_geom != null)</b>
+<b class="fc">&nbsp;			return dst_geom;</b>
+&nbsp;
+<b class="fc">&nbsp;		Envelope2D commonExtent = InternalUtils.getMergedExtent(</b>
+<b class="fc">&nbsp;				m_geomIntersector, input_geom);</b>
+&nbsp;
+&nbsp;		// return Topological_operations::intersection(input_geom,
+&nbsp;		// m_geomIntersector, m_spatial_reference, m_progress_tracker);
+&nbsp;		// Preprocess geometries to be clipped to the extent of intersection to
+&nbsp;		// get rid of extra segments.
+<b class="fc">&nbsp;		double t = InternalUtils.calculateToleranceFromGeometry(m_spatial_reference, commonExtent, true);</b>
+<b class="fc">&nbsp;		Envelope2D env = new Envelope2D();</b>
+<b class="fc">&nbsp;		m_geomIntersector.queryEnvelope2D(env);</b>
+<b class="fc">&nbsp;		Envelope2D env1 = new Envelope2D();</b>
+<b class="fc">&nbsp;		input_geom.queryEnvelope2D(env1);</b>
+<b class="fc">&nbsp;		env.inflate(2.0 * t, 2.0 * t);</b>
+<b class="fc">&nbsp;		env.intersect(env1);</b>
+<b class="fc">&nbsp;		assert (!env.isEmpty());</b>
+<b class="fc">&nbsp;		env.inflate(100 * t, 100 * t);</b>
+<b class="fc">&nbsp;		double tol = 0;</b>
+<b class="fc">&nbsp;		Geometry clippedIntersector = Clipper.clip(m_geomIntersector, env, tol,</b>
+<b class="fc">&nbsp;				0.0);</b>
+<b class="fc">&nbsp;		Geometry clippedInputGeom = Clipper.clip(input_geom, env, tol, 0.0);</b>
+&nbsp;		// perform the clip
+<b class="fc">&nbsp;		return TopologicalOperations.intersection(clippedInputGeom,</b>
+<b class="fc">&nbsp;				clippedIntersector, m_spatial_reference, m_progress_tracker);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Parses the input vector to ensure the out result contains only geometries
+&nbsp;	// as indicated with the dimensionMask
+&nbsp;	GeometryCursor prepareVector_(VertexDescription descr, int dimensionMask,
+&nbsp;			Geometry[] res_vec) {
+<b class="fc">&nbsp;		int inext = 0;</b>
+<b class="fc">&nbsp;		if ((dimensionMask &amp; 1) != 0) {</b>
+<b class="fc">&nbsp;			if (res_vec[0] == null)</b>
+<b class="fc">&nbsp;				res_vec[0] = new MultiPoint(descr);</b>
+<b class="fc">&nbsp;			inext++;</b>
+<b class="fc">&nbsp;		} else {</b>
+<b class="fc">&nbsp;			for (int i = 0; i &lt; res_vec.length - 1; i++)</b>
+<b class="fc">&nbsp;				res_vec[i] = res_vec[i + 1];</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if ((dimensionMask &amp; 2) != 0) {</b>
+<b class="fc">&nbsp;			if (res_vec[inext] == null)</b>
+<b class="fc">&nbsp;				res_vec[inext] = new Polyline(descr);</b>
+<b class="fc">&nbsp;			inext++;</b>
+<b class="fc">&nbsp;		} else {</b>
+<b class="fc">&nbsp;			for (int i = inext; i &lt; res_vec.length - 1; i++)</b>
+<b class="fc">&nbsp;				res_vec[i] = res_vec[i + 1];</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if ((dimensionMask &amp; 4) != 0) {</b>
+<b class="fc">&nbsp;			if (res_vec[inext] == null)</b>
+<b class="fc">&nbsp;				res_vec[inext] = new Polygon(descr);</b>
+<b class="fc">&nbsp;			inext++;</b>
+<b class="fc">&nbsp;		} else {</b>
+<b class="fc">&nbsp;			for (int i = inext; i &lt; res_vec.length - 1; i++)</b>
+<b class="fc">&nbsp;				res_vec[i] = res_vec[i + 1];</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		if (inext != 3) {</b>
+<b class="fc">&nbsp;			Geometry[] r = new Geometry[inext];</b>
+<b class="fc">&nbsp;			for (int i = 0; i &lt; inext; i++)</b>
+<b class="fc">&nbsp;				r[i] = res_vec[i];</b>
+&nbsp;
+<b class="fc">&nbsp;			return new SimpleGeometryCursor(r);</b>
+&nbsp;		} else {
+<b class="fc">&nbsp;			return new SimpleGeometryCursor(res_vec);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	GeometryCursor intersectEx(Geometry input_geom) {
+<b class="fc">&nbsp;		assert (m_dimensionMask != -1);</b>
+<b class="fc">&nbsp;		Geometry dst_geom = tryNativeImplementation_(input_geom);</b>
+<b class="fc">&nbsp;		if (dst_geom != null) {</b>
+<b class="fc">&nbsp;			Geometry[] res_vec = new Geometry[3];</b>
+<b class="fc">&nbsp;			res_vec[dst_geom.getDimension()] = dst_geom;</b>
+<b class="fc">&nbsp;			return prepareVector_(input_geom.getDescription(), m_dimensionMask,</b>
+<b class="fc">&nbsp;					res_vec);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		Envelope2D commonExtent = InternalUtils.getMergedExtent(</b>
+<b class="fc">&nbsp;				m_geomIntersector, input_geom);</b>
+<b class="fc">&nbsp;		double t = InternalUtils.calculateToleranceFromGeometry(</b>
+<b class="fc">&nbsp;				m_spatial_reference, commonExtent, true);</b>
+&nbsp;
+&nbsp;		// Preprocess geometries to be clipped to the extent of intersection to
+&nbsp;		// get rid of extra segments.
+&nbsp;		
+<b class="fc">&nbsp;		Envelope2D env = new Envelope2D();</b>
+<b class="fc">&nbsp;		m_geomIntersector.queryEnvelope2D(env);</b>
+<b class="fc">&nbsp;		env.inflate(2 * t, 2 * t);</b>
+<b class="fc">&nbsp;		Envelope2D env1 = new Envelope2D();</b>
+<b class="fc">&nbsp;		input_geom.queryEnvelope2D(env1);</b>
+<b class="fc">&nbsp;		env.intersect(env1);</b>
+<b class="fc">&nbsp;		assert (!env.isEmpty());</b>
+<b class="fc">&nbsp;		env.inflate(100 * t, 100 * t);</b>
+<b class="fc">&nbsp;		double tol = 0;</b>
+<b class="fc">&nbsp;		Geometry clippedIntersector = Clipper.clip(m_geomIntersector, env, tol,</b>
+<b class="fc">&nbsp;				0.0);</b>
+<b class="fc">&nbsp;		Geometry clippedInputGeom = Clipper.clip(input_geom, env, tol, 0.0);</b>
+&nbsp;		// perform the clip
+&nbsp;		Geometry[] res_vec;
+<b class="fc">&nbsp;		res_vec = TopologicalOperations.intersectionEx(clippedInputGeom,</b>
+<b class="fc">&nbsp;				clippedIntersector, m_spatial_reference, m_progress_tracker);</b>
+<b class="fc">&nbsp;		return prepareVector_(input_geom.getDescription(), m_dimensionMask,</b>
+<b class="fc">&nbsp;				res_vec);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	Geometry tryNativeImplementation_(Geometry input_geom) {
+&nbsp;		// A note on attributes:
+&nbsp;		// 1. The geometry with lower dimension wins in regard to the
+&nbsp;		// attributes.
+&nbsp;		// 2. If the dimensions are the same, the input_geometry attributes win.
+&nbsp;		// 3. The exception to the 2. is when the input is an Envelope, and the
+&nbsp;		// intersector is a polygon, then the intersector wins.
+&nbsp;
+&nbsp;		// A note on the tolerance:
+&nbsp;		// This operator performs a simple intersection operation. Should it use
+&nbsp;		// the tolerance?
+&nbsp;		// Example: Point is intersected by the envelope.
+&nbsp;		// If it is slightly outside of the envelope, should we still return it
+&nbsp;		// if it is closer than the tolerance?
+&nbsp;		// Should we do crack and cluster and snap the point coordinates to the
+&nbsp;		// envelope boundary?
+&nbsp;		//
+&nbsp;		// Consider floating point arithmetics approach. When you compare
+&nbsp;		// doubles, you should use an epsilon (equals means ::fabs(a - b) &lt;
+&nbsp;		// eps), however when you add/subtract, etc them, you do not use
+&nbsp;		// epsilon.
+&nbsp;		// Shouldn&#39;t we do same here? Relational operators use tolerance, but
+&nbsp;		// the action operators don&#39;t.
+&nbsp;
+<b class="fc">&nbsp;		Envelope2D mergedExtent = InternalUtils.getMergedExtent(input_geom,</b>
+<b class="fc">&nbsp;				m_geomIntersector);</b>
+<b class="fc">&nbsp;		double tolerance = InternalUtils.calculateToleranceFromGeometry(</b>
+<b class="fc">&nbsp;				m_spatial_reference, mergedExtent, false);</b>
+&nbsp;
+<b class="fc">&nbsp;		int gtInput = input_geom.getType().value();</b>
+<b class="fc">&nbsp;		boolean bInputEmpty = input_geom.isEmpty();</b>
+<b class="fc">&nbsp;		boolean bGeomIntersectorEmpty = m_geomIntersector.isEmpty();</b>
+<b class="fc">&nbsp;		boolean bResultIsEmpty = bInputEmpty || bGeomIntersectorEmpty;</b>
+<b class="fc">&nbsp;		if (!bResultIsEmpty) {// test envelopes</b>
+<b class="fc">&nbsp;			Envelope2D env2D1 = new Envelope2D();</b>
+<b class="fc">&nbsp;			input_geom.queryEnvelope2D(env2D1);</b>
+<b class="fc">&nbsp;			Envelope2D env2D2 = new Envelope2D();</b>
+<b class="fc">&nbsp;			m_geomIntersector.queryEnvelope2D(env2D2);</b>
+<b class="fc">&nbsp;                        env2D2.inflate(2.0 * tolerance, 2.0 * tolerance);</b>
+<b class="fc">&nbsp;			bResultIsEmpty = !env2D1.isIntersecting(env2D2);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (!bResultIsEmpty) {// try accelerated test</b>
+<b class="fc">&nbsp;			int res = OperatorInternalRelationUtils</b>
+<b class="fc">&nbsp;					.quickTest2D_Accelerated_DisjointOrContains(</b>
+<b class="fc">&nbsp;							m_geomIntersector, input_geom, tolerance);</b>
+<b class="fc">&nbsp;			if (res == OperatorInternalRelationUtils.Relation.Disjoint) {// disjoint</b>
+<b class="nc">&nbsp;				bResultIsEmpty = true;</b>
+<b class="nc">&nbsp;			} else if ((res &amp; OperatorInternalRelationUtils.Relation.Within) != 0) {// intersector</b>
+&nbsp;																					// is
+&nbsp;																					// within
+&nbsp;																					// the
+&nbsp;																					// input_geom
+&nbsp;																					// TODO:
+&nbsp;																					// assign
+&nbsp;																					// input_geom
+&nbsp;																					// attributes
+&nbsp;																					// first
+<b class="nc">&nbsp;				return m_geomIntersector;</b>
+<b class="fc">&nbsp;			} else if ((res &amp; OperatorInternalRelationUtils.Relation.Contains) != 0) {// intersector</b>
+&nbsp;																						// contains
+&nbsp;																						// input_geom
+<b class="nc">&nbsp;				return input_geom;</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (bResultIsEmpty) {// When one geometry or both are empty, we need to</b>
+&nbsp;								// return an empty geometry.
+&nbsp;								// Here we do that end also ensure the type is
+&nbsp;								// correct.
+&nbsp;								// That is the lower dimension need to be
+&nbsp;								// returned. Also, for Point vs Multi_point, an
+&nbsp;								// empty Point need to be returned.
+<b class="fc">&nbsp;			int dim1 = Geometry.getDimensionFromType(gtInput);</b>
+<b class="fc">&nbsp;			int dim2 = Geometry.getDimensionFromType(m_geomIntersectorType);</b>
+<b class="fc">&nbsp;			if (dim1 &lt; dim2)</b>
+<b class="fc">&nbsp;				return returnEmpty_(input_geom, bInputEmpty);</b>
+<b class="fc">&nbsp;			else if (dim1 &gt; dim2)</b>
+<b class="fc">&nbsp;				return returnEmptyIntersector_();</b>
+<b class="fc">&nbsp;			else if (dim1 == 0) {</b>
+<b class="fc">&nbsp;				if (gtInput == Geometry.GeometryType.MultiPoint</b>
+<b class="fc">&nbsp;						&amp;&amp; m_geomIntersectorType == Geometry.GeometryType.Point) {// point</b>
+&nbsp;																					// vs
+&nbsp;																					// Multi_point
+&nbsp;																					// need
+&nbsp;																					// special
+&nbsp;																					// treatment
+&nbsp;																					// to
+&nbsp;																					// ensure
+&nbsp;																					// Point
+&nbsp;																					// is
+&nbsp;																					// returned
+&nbsp;																					// always.
+<b class="fc">&nbsp;					return returnEmptyIntersector_();</b>
+&nbsp;				} else
+&nbsp;					// Both input and intersector have same gtype, or input is
+&nbsp;					// Point.
+<b class="fc">&nbsp;					return returnEmpty_(input_geom, bInputEmpty);</b>
+&nbsp;			} else
+<b class="fc">&nbsp;				return returnEmpty_(input_geom, bInputEmpty);</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		// Note: No empty geometries after this point!
+&nbsp;
+&nbsp;		// Warning: Do not try clip for polylines and polygons.
+&nbsp;
+&nbsp;		// Try clip of Envelope with Envelope.
+<b class="fc">&nbsp;		if ((m_dimensionMask == -1 || m_dimensionMask == (1 &lt;&lt; 2))</b>
+<b class="fc">&nbsp;				&amp;&amp; gtInput == Geometry.GeometryType.Envelope</b>
+<b class="fc">&nbsp;				&amp;&amp; m_geomIntersectorType == Geometry.GeometryType.Envelope) {</b>
+<b class="fc">&nbsp;			Envelope env1 = (Envelope) input_geom;</b>
+<b class="fc">&nbsp;			Envelope env2 = (Envelope) m_geomIntersector;</b>
+<b class="fc">&nbsp;			Envelope2D env2D_1 = new Envelope2D();</b>
+<b class="fc">&nbsp;			env1.queryEnvelope2D(env2D_1);</b>
+<b class="fc">&nbsp;			Envelope2D env2D_2 = new Envelope2D();</b>
+<b class="fc">&nbsp;			env2.queryEnvelope2D(env2D_2);</b>
+<b class="fc">&nbsp;			env2D_1.intersect(env2D_2);</b>
+<b class="fc">&nbsp;			Envelope result_env = new Envelope();</b>
+<b class="fc">&nbsp;			env1.copyTo(result_env);</b>
+<b class="fc">&nbsp;			result_env.setEnvelope2D(env2D_1);</b>
+<b class="fc">&nbsp;			return result_env;</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		// Use clip for Point and Multi_point with Envelope
+<b class="fc">&nbsp;		if ((gtInput == Geometry.GeometryType.Envelope &amp;&amp; Geometry</b>
+<b class="nc">&nbsp;				.getDimensionFromType(m_geomIntersectorType) == 0)</b>
+<b class="fc">&nbsp;				|| (m_geomIntersectorType == Geometry.GeometryType.Envelope &amp;&amp; Geometry</b>
+<b class="fc">&nbsp;						.getDimensionFromType(gtInput) == 0)) {</b>
+<b class="fc">&nbsp;			Envelope env = gtInput == Geometry.GeometryType.Envelope ? (Envelope) input_geom</b>
+<b class="fc">&nbsp;					: (Envelope) m_geomIntersector;</b>
+<b class="fc">&nbsp;			Geometry other = gtInput == Geometry.GeometryType.Envelope ? m_geomIntersector</b>
+<b class="fc">&nbsp;					: input_geom;</b>
+<b class="fc">&nbsp;			Envelope2D env_2D = new Envelope2D();</b>
+<b class="fc">&nbsp;			env.queryEnvelope2D(env_2D);</b>
+<b class="fc">&nbsp;			return Clipper.clip(other, env_2D, tolerance, 0);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if ((Geometry.getDimensionFromType(gtInput) == 0 &amp;&amp; Geometry</b>
+<b class="fc">&nbsp;				.getDimensionFromType(m_geomIntersectorType) &gt; 0)</b>
+<b class="fc">&nbsp;				|| (Geometry.getDimensionFromType(gtInput) &gt; 0 &amp;&amp; Geometry</b>
+<b class="fc">&nbsp;						.getDimensionFromType(m_geomIntersectorType) == 0)) {// multipoint</b>
+&nbsp;																				// intersection
+<b class="fc">&nbsp;			double tolerance1 = InternalUtils.calculateToleranceFromGeometry(</b>
+<b class="fc">&nbsp;					m_spatial_reference, input_geom, false);</b>
+<b class="fc">&nbsp;			if (gtInput == Geometry.GeometryType.MultiPoint)</b>
+<b class="fc">&nbsp;				return TopologicalOperations.intersection(</b>
+<b class="fc">&nbsp;						(MultiPoint) input_geom, m_geomIntersector, tolerance1);</b>
+<b class="fc">&nbsp;			if (gtInput == Geometry.GeometryType.Point)</b>
+<b class="fc">&nbsp;				return TopologicalOperations.intersection((Point) input_geom,</b>
+<b class="fc">&nbsp;						m_geomIntersector, tolerance1);</b>
+<b class="fc">&nbsp;			if (m_geomIntersectorType == Geometry.GeometryType.MultiPoint)</b>
+<b class="fc">&nbsp;				return TopologicalOperations.intersection(</b>
+<b class="fc">&nbsp;						(MultiPoint) m_geomIntersector, input_geom, tolerance1);</b>
+<b class="fc">&nbsp;			if (m_geomIntersectorType == Geometry.GeometryType.Point)</b>
+<b class="fc">&nbsp;				return TopologicalOperations.intersection(</b>
+<b class="fc">&nbsp;						(Point) m_geomIntersector, input_geom, tolerance1);</b>
+<b class="nc">&nbsp;			throw GeometryException.GeometryInternalError();</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		// Try Polyline vs Polygon
+<b class="fc">&nbsp;		if ((m_dimensionMask == -1 || m_dimensionMask == (1 &lt;&lt; 1))</b>
+<b class="fc">&nbsp;				&amp;&amp; (gtInput == Geometry.GeometryType.Polyline)</b>
+<b class="fc">&nbsp;				&amp;&amp; (m_geomIntersectorType == Geometry.GeometryType.Polygon)) {</b>
+<b class="fc">&nbsp;			return tryFastIntersectPolylinePolygon_((Polyline) (input_geom),</b>
+<b class="fc">&nbsp;					(Polygon) (m_geomIntersector));</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		// Try Polygon vs Polyline
+<b class="fc">&nbsp;		if ((m_dimensionMask == -1 || m_dimensionMask == (1 &lt;&lt; 1))</b>
+<b class="fc">&nbsp;				&amp;&amp; (gtInput == Geometry.GeometryType.Polygon)</b>
+<b class="fc">&nbsp;				&amp;&amp; (m_geomIntersectorType == Geometry.GeometryType.Polyline)) {</b>
+<b class="fc">&nbsp;			return tryFastIntersectPolylinePolygon_(</b>
+<b class="fc">&nbsp;					(Polyline) (m_geomIntersector), (Polygon) (input_geom));</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return null;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	Geometry tryFastIntersectPolylinePolygon_(Polyline polyline, Polygon polygon) {
+<b class="fc">&nbsp;		MultiPathImpl polylineImpl = (MultiPathImpl) polyline._getImpl();</b>
+<b class="fc">&nbsp;		MultiPathImpl polygonImpl = (MultiPathImpl) polygon._getImpl();</b>
+&nbsp;
+<b class="fc">&nbsp;		double tolerance = InternalUtils.calculateToleranceFromGeometry(</b>
+<b class="fc">&nbsp;				m_spatial_reference, polygon, false);</b>
+<b class="fc">&nbsp;		Envelope2D clipEnvelope = new Envelope2D();</b>
+&nbsp;		{
+<b class="fc">&nbsp;			polygonImpl.queryEnvelope2D(clipEnvelope);</b>
+<b class="fc">&nbsp;			Envelope2D env1 = new Envelope2D();</b>
+<b class="fc">&nbsp;			polylineImpl.queryEnvelope2D(env1);</b>
+<b class="fc">&nbsp;                        env1.inflate(2.0 * tolerance, 2.0 * tolerance);</b>
+<b class="fc">&nbsp;			clipEnvelope.intersect(env1);</b>
+<b class="fc">&nbsp;			assert (!clipEnvelope.isEmpty());</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		clipEnvelope.inflate(10 * tolerance, 10 * tolerance);</b>
+&nbsp;
+&nbsp;		if (true) {
+<b class="fc">&nbsp;			double tol = 0;</b>
+<b class="fc">&nbsp;			Geometry clippedPolyline = Clipper.clip(polyline, clipEnvelope,</b>
+<b class="fc">&nbsp;					tol, 0.0);</b>
+<b class="fc">&nbsp;			polyline = (Polyline) clippedPolyline;</b>
+<b class="fc">&nbsp;			polylineImpl = (MultiPathImpl) polyline._getImpl();</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		AttributeStreamOfInt32 clipResult = new AttributeStreamOfInt32(0);</b>
+<b class="fc">&nbsp;		int unresolvedSegments = -1;</b>
+<b class="fc">&nbsp;		GeometryAccelerators accel = polygonImpl._getAccelerators();</b>
+<b class="fc">&nbsp;		if (accel != null) {</b>
+<b class="nc">&nbsp;			RasterizedGeometry2D rgeom = accel.getRasterizedGeometry();</b>
+<b class="nc">&nbsp;			if (rgeom != null) {</b>
+<b class="nc">&nbsp;				unresolvedSegments = 0;</b>
+<b class="nc">&nbsp;				clipResult.reserve(polylineImpl.getPointCount()</b>
+<b class="nc">&nbsp;						+ polylineImpl.getPathCount());</b>
+<b class="nc">&nbsp;				Envelope2D seg_env = new Envelope2D();</b>
+<b class="nc">&nbsp;				SegmentIteratorImpl iter = polylineImpl.querySegmentIterator();</b>
+<b class="nc">&nbsp;				while (iter.nextPath()) {</b>
+<b class="nc">&nbsp;					while (iter.hasNextSegment()) {</b>
+<b class="nc">&nbsp;						Segment seg = iter.nextSegment();</b>
+<b class="nc">&nbsp;						seg.queryEnvelope2D(seg_env);</b>
+<b class="nc">&nbsp;						RasterizedGeometry2D.HitType hit = rgeom</b>
+<b class="nc">&nbsp;								.queryEnvelopeInGeometry(seg_env);</b>
+<b class="nc">&nbsp;						if (hit == RasterizedGeometry2D.HitType.Inside) {</b>
+<b class="nc">&nbsp;							clipResult.add(1);</b>
+<b class="nc">&nbsp;						} else if (hit == RasterizedGeometry2D.HitType.Outside) {</b>
+<b class="nc">&nbsp;							clipResult.add(0);</b>
+<b class="nc">&nbsp;						} else {</b>
+<b class="nc">&nbsp;							clipResult.add(-1);</b>
+<b class="nc">&nbsp;							unresolvedSegments++;</b>
+&nbsp;						}
+&nbsp;					}
+&nbsp;				}
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (polygon.getPointCount() &gt; 5) {</b>
+<b class="nc">&nbsp;			double tol = 0;</b>
+<b class="nc">&nbsp;			Geometry clippedPolygon = Clipper.clip(polygon, clipEnvelope, tol,</b>
+<b class="nc">&nbsp;					0.0);</b>
+&nbsp;
+<b class="nc">&nbsp;			polygon = (Polygon) clippedPolygon;</b>
+<b class="nc">&nbsp;			polygonImpl = (MultiPathImpl) polygon._getImpl();</b>
+<b class="nc">&nbsp;            accel = polygonImpl._getAccelerators();//update accelerators</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (unresolvedSegments &lt; 0) {</b>
+<b class="fc">&nbsp;			unresolvedSegments = polylineImpl.getSegmentCount();</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		// Some heuristics to decide if it makes sense to go with fast intersect
+&nbsp;		// vs going with the regular planesweep.
+<b class="fc">&nbsp;		double totalPoints = (double) (polylineImpl.getPointCount() + polygonImpl</b>
+<b class="fc">&nbsp;				.getPointCount());</b>
+<b class="fc">&nbsp;		double thisAlgorithmComplexity = ((double) unresolvedSegments * polygonImpl</b>
+<b class="fc">&nbsp;				.getPointCount());// assume the worst case.</b>
+<b class="fc">&nbsp;		double planesweepComplexity = Math.log(totalPoints) * totalPoints;</b>
+<b class="fc">&nbsp;		double empiricConstantFactorPlaneSweep = 4;</b>
+<b class="fc">&nbsp;		if (thisAlgorithmComplexity &gt; planesweepComplexity</b>
+<b class="fc">&nbsp;				* empiricConstantFactorPlaneSweep) {</b>
+&nbsp;			// Based on the number of input points, we deduced that the
+&nbsp;			// plansweep performance should be better than the brute force
+&nbsp;			// performance.
+<b class="nc">&nbsp;			return null; // resort to planesweep if quadtree does not help</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		QuadTreeImpl polygonQuadTree = null;</b>
+<b class="fc">&nbsp;		SegmentIteratorImpl polygonIter = polygonImpl.querySegmentIterator();</b>
+&nbsp;		// Some logic to decide if it makes sense to build a quadtree on the
+&nbsp;		// polygon segments
+<b class="fc">&nbsp;		if (accel != null &amp;&amp; accel.getQuadTree() != null)</b>
+<b class="nc">&nbsp;			polygonQuadTree = accel.getQuadTree();</b>
+&nbsp;
+<b class="fc">&nbsp;		if (polygonQuadTree == null &amp;&amp; polygonImpl.getPointCount() &gt; 20) {</b>
+<b class="nc">&nbsp;			polygonQuadTree = InternalUtils.buildQuadTree(polygonImpl);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		Polyline result_polyline = (Polyline) polyline.createInstance();</b>
+<b class="fc">&nbsp;		MultiPathImpl resultPolylineImpl = (MultiPathImpl) result_polyline</b>
+<b class="fc">&nbsp;				._getImpl();</b>
+<b class="fc">&nbsp;		QuadTreeImpl.QuadTreeIteratorImpl qIter = null;</b>
+<b class="fc">&nbsp;		SegmentIteratorImpl polylineIter = polylineImpl.querySegmentIterator();</b>
+<b class="fc">&nbsp;		double[] params = new double[9];</b>
+<b class="fc">&nbsp;		AttributeStreamOfDbl intersections = new AttributeStreamOfDbl(0);</b>
+<b class="fc">&nbsp;		SegmentBuffer segmentBuffer = new SegmentBuffer();</b>
+<b class="fc">&nbsp;		int start_index = -1;</b>
+<b class="fc">&nbsp;		int inCount = 0;</b>
+<b class="fc">&nbsp;		int segIndex = 0;</b>
+<b class="fc">&nbsp;		boolean bOptimized = clipResult.size() &gt; 0;</b>
+&nbsp;
+&nbsp;		// The algorithm is like that:
+&nbsp;		// Loop through all the segments of the polyline.
+&nbsp;		// For each polyline segment, intersect it with each of the polygon
+&nbsp;		// segments.
+&nbsp;		// If no intersections found then,
+&nbsp;		// If the polyline segment is completely inside, it is added to the
+&nbsp;		// result polyline.
+&nbsp;		// If it is outside, it is thrown out.
+&nbsp;		// If it intersects, then cut the polyline segment to pieces and test
+&nbsp;		// each part of the intersected result.
+&nbsp;		// The cut pieces will either have one point inside, or one point
+&nbsp;		// outside, or the middle point inside/outside.
+&nbsp;		//
+<b class="fc">&nbsp;		int polylinePathIndex = -1;</b>
+&nbsp;
+<b class="fc">&nbsp;		while (polylineIter.nextPath()) {</b>
+<b class="fc">&nbsp;			polylinePathIndex = polylineIter.getPathIndex();</b>
+<b class="fc">&nbsp;			int stateNewPath = 0;</b>
+<b class="fc">&nbsp;			int stateAddSegment = 1;</b>
+<b class="fc">&nbsp;			int stateManySegments = 2;</b>
+<b class="fc">&nbsp;			int stateManySegmentsContinuePath = 2;</b>
+<b class="fc">&nbsp;			int stateManySegmentsNewPath = 3;</b>
+<b class="fc">&nbsp;			int state = stateNewPath;</b>
+<b class="fc">&nbsp;			start_index = -1;</b>
+<b class="fc">&nbsp;			inCount = 0;</b>
+&nbsp;
+<b class="fc">&nbsp;			while (polylineIter.hasNextSegment()) {</b>
+<b class="fc">&nbsp;				int clipStatus = bOptimized ? (int) clipResult.get(segIndex)</b>
+<b class="fc">&nbsp;						: -1;</b>
+<b class="fc">&nbsp;				segIndex++;</b>
+<b class="fc">&nbsp;				Segment polylineSeg = polylineIter.nextSegment();</b>
+<b class="fc">&nbsp;				if (clipStatus &lt; 0) {</b>
+<b class="fc">&nbsp;					assert (clipStatus == -1);</b>
+&nbsp;					// Analyse polyline segment for intersection with the
+&nbsp;					// polygon.
+<b class="fc">&nbsp;					if (polygonQuadTree != null) {</b>
+<b class="nc">&nbsp;						if (qIter == null) {</b>
+<b class="nc">&nbsp;							qIter = polygonQuadTree.getIterator(polylineSeg,</b>
+<b class="nc">&nbsp;									tolerance);</b>
+<b class="nc">&nbsp;						} else {</b>
+<b class="nc">&nbsp;							qIter.resetIterator(polylineSeg, tolerance);</b>
+&nbsp;						}
+&nbsp;
+<b class="nc">&nbsp;						int path_index = -1;</b>
+<b class="nc">&nbsp;						for (int ind = qIter.next(); ind != -1; ind = qIter</b>
+<b class="nc">&nbsp;								.next()) {</b>
+<b class="nc">&nbsp;							polygonIter.resetToVertex(polygonQuadTree</b>
+<b class="nc">&nbsp;									.getElement(ind)); // path_index</b>
+<b class="nc">&nbsp;							path_index = polygonIter.getPathIndex();</b>
+<b class="nc">&nbsp;							Segment polygonSeg = polygonIter.nextSegment();</b>
+&nbsp;							// intersect polylineSeg and polygonSeg.
+<b class="nc">&nbsp;							int count = polylineSeg.intersect(polygonSeg, null,</b>
+<b class="nc">&nbsp;									params, null, tolerance);</b>
+<b class="nc">&nbsp;							for (int i = 0; i &lt; count; i++)</b>
+<b class="nc">&nbsp;								intersections.add(params[i]);</b>
+&nbsp;						}
+<b class="nc">&nbsp;					} else {// no quadtree built</b>
+<b class="fc">&nbsp;						polygonIter.resetToFirstPath();</b>
+<b class="fc">&nbsp;						while (polygonIter.nextPath()) {</b>
+<b class="fc">&nbsp;							while (polygonIter.hasNextSegment()) {</b>
+<b class="fc">&nbsp;								Segment polygonSeg = polygonIter.nextSegment();</b>
+&nbsp;								// intersect polylineSeg and polygonSeg.
+<b class="fc">&nbsp;								int count = polylineSeg.intersect(polygonSeg,</b>
+<b class="fc">&nbsp;										null, params, null, tolerance);</b>
+<b class="fc">&nbsp;								for (int i = 0; i &lt; count; i++)</b>
+<b class="fc">&nbsp;									intersections.add(params[i]);</b>
+&nbsp;							}
+&nbsp;						}
+&nbsp;					}
+&nbsp;
+<b class="fc">&nbsp;					if (intersections.size() &gt; 0) {// intersections detected.</b>
+<b class="fc">&nbsp;						intersections.sort(0, intersections.size()); // std::sort(intersections.begin(),</b>
+&nbsp;																		// intersections.end());
+&nbsp;
+<b class="fc">&nbsp;						double t0 = 0;</b>
+<b class="fc">&nbsp;						intersections.add(1.0);</b>
+<b class="fc">&nbsp;						int status = -1;</b>
+<b class="fc">&nbsp;						for (int i = 0, n = intersections.size(); i &lt; n; i++) {</b>
+<b class="fc">&nbsp;							double t = intersections.get(i);</b>
+<b class="fc">&nbsp;							if (t == t0) {</b>
+<b class="fc">&nbsp;								continue;</b>
+&nbsp;							}
+<b class="fc">&nbsp;							boolean bWholeSegment = false;</b>
+&nbsp;							Segment resSeg;
+<b class="fc">&nbsp;							if (t0 != 0 || t != 1.0) {</b>
+<b class="fc">&nbsp;								polylineSeg.cut(t0, t, segmentBuffer);</b>
+<b class="fc">&nbsp;								resSeg = segmentBuffer.get();</b>
+<b class="fc">&nbsp;							} else {</b>
+<b class="fc">&nbsp;								resSeg = polylineSeg;</b>
+<b class="fc">&nbsp;								bWholeSegment = true;</b>
+&nbsp;							}
+&nbsp;
+<b class="fc">&nbsp;							if (state &gt;= stateManySegments) {</b>
+<b class="fc">&nbsp;								resultPolylineImpl.addSegmentsFromPath(</b>
+<b class="fc">&nbsp;										polylineImpl, polylinePathIndex,</b>
+<b class="fc">&nbsp;										start_index, inCount,</b>
+<b class="fc">&nbsp;										state == stateManySegmentsNewPath);</b>
+<b class="fc">&nbsp;								if (analyseClipSegment_(polygon,</b>
+<b class="fc">&nbsp;										resSeg.getStartXY(), tolerance) != 1) {</b>
+<b class="fc">&nbsp;									if (analyseClipSegment_(polygon, resSeg,</b>
+<b class="fc">&nbsp;											tolerance) != 1) {</b>
+<b class="nc">&nbsp;										return null;  //someting went wrong we&#39;ll falback to slower but robust planesweep code.</b>
+&nbsp;									}
+&nbsp;								}
+&nbsp;
+<b class="fc">&nbsp;								resultPolylineImpl.addSegment(resSeg, false);</b>
+<b class="fc">&nbsp;								state = stateAddSegment;</b>
+<b class="fc">&nbsp;								inCount = 0;</b>
+<b class="fc">&nbsp;							} else {</b>
+<b class="fc">&nbsp;								status = analyseClipSegment_(polygon, resSeg,</b>
+<b class="fc">&nbsp;										tolerance);</b>
+<b class="fc">&nbsp;								switch (status) {</b>
+&nbsp;								case 1:
+<b class="fc">&nbsp;									if (!bWholeSegment) {</b>
+<b class="fc">&nbsp;										resultPolylineImpl.addSegment(resSeg,</b>
+<b class="fc">&nbsp;												state == stateNewPath);</b>
+<b class="fc">&nbsp;										state = stateAddSegment;</b>
+<b class="fc">&nbsp;									} else {</b>
+<b class="fc">&nbsp;										if (state &lt; stateManySegments) {</b>
+<b class="fc">&nbsp;											start_index = polylineIter</b>
+<b class="fc">&nbsp;													.getStartPointIndex()</b>
+<b class="fc">&nbsp;													- polylineImpl</b>
+<b class="fc">&nbsp;															.getPathStart(polylinePathIndex);</b>
+<b class="fc">&nbsp;											inCount = 1;</b>
+&nbsp;
+<b class="fc">&nbsp;											if (state == stateNewPath)</b>
+<b class="fc">&nbsp;												state = stateManySegmentsNewPath;</b>
+&nbsp;											else {
+<b class="nc">&nbsp;												assert (state == stateAddSegment);</b>
+<b class="nc">&nbsp;												state = stateManySegmentsContinuePath;</b>
+&nbsp;											}
+<b class="nc">&nbsp;										} else</b>
+<b class="nc">&nbsp;											inCount++;</b>
+&nbsp;									}
+&nbsp;
+<b class="nc">&nbsp;									break;</b>
+&nbsp;								case 0:
+<b class="fc">&nbsp;									state = stateNewPath;</b>
+<b class="fc">&nbsp;									start_index = -1;</b>
+<b class="fc">&nbsp;									inCount = 0;</b>
+<b class="fc">&nbsp;									break;</b>
+&nbsp;								default:
+<b class="fc">&nbsp;									return null;// may happen if a segment</b>
+&nbsp;												// coincides with the border.
+&nbsp;								}
+&nbsp;							}
+&nbsp;
+<b class="fc">&nbsp;							t0 = t;</b>
+&nbsp;						}
+<b class="fc">&nbsp;					} else {</b>
+<b class="fc">&nbsp;						clipStatus = analyseClipSegment_(polygon,</b>
+<b class="fc">&nbsp;								polylineSeg.getStartXY(), tolerance);// simple</b>
+&nbsp;																		// case
+&nbsp;																		// no
+&nbsp;																		// intersection.
+&nbsp;																		// Both
+&nbsp;																		// points
+&nbsp;																		// must
+&nbsp;																		// be
+&nbsp;																		// inside.
+<b class="fc">&nbsp;						if (clipStatus &lt; 0) {</b>
+<b class="nc">&nbsp;							assert (clipStatus &gt;= 0);</b>
+<b class="nc">&nbsp;							return null;// something goes wrong, resort to</b>
+&nbsp;										// planesweep
+&nbsp;						}
+&nbsp;
+<b class="fc">&nbsp;						assert (analyseClipSegment_(polygon,</b>
+<b class="fc">&nbsp;								polylineSeg.getEndXY(), tolerance) == clipStatus);</b>
+<b class="fc">&nbsp;						if (clipStatus == 1) {// the whole segment inside</b>
+<b class="fc">&nbsp;							if (state &lt; stateManySegments) {</b>
+<b class="fc">&nbsp;								assert (inCount == 0);</b>
+<b class="fc">&nbsp;								start_index = polylineIter.getStartPointIndex()</b>
+<b class="fc">&nbsp;										- polylineImpl</b>
+<b class="fc">&nbsp;												.getPathStart(polylinePathIndex);</b>
+<b class="fc">&nbsp;								if (state == stateNewPath)</b>
+<b class="fc">&nbsp;									state = stateManySegmentsNewPath;</b>
+&nbsp;								else {
+<b class="fc">&nbsp;									assert (state == stateAddSegment);</b>
+<b class="fc">&nbsp;									state = stateManySegmentsContinuePath;</b>
+&nbsp;								}
+&nbsp;							}
+&nbsp;
+<b class="fc">&nbsp;							inCount++;</b>
+<b class="fc">&nbsp;						} else {</b>
+<b class="fc">&nbsp;							assert (state &lt; stateManySegments);</b>
+<b class="fc">&nbsp;							start_index = -1;</b>
+<b class="fc">&nbsp;							inCount = 0;</b>
+&nbsp;						}
+&nbsp;					}
+&nbsp;
+<b class="fc">&nbsp;					intersections.clear(false);</b>
+<b class="fc">&nbsp;				} else {// clip status is determined by other means</b>
+<b class="nc">&nbsp;					if (clipStatus == 0) {// outside</b>
+<b class="nc">&nbsp;						assert (analyseClipSegment_(polygon, polylineSeg,</b>
+<b class="nc">&nbsp;								tolerance) == 0);</b>
+<b class="nc">&nbsp;						assert (start_index &lt; 0);</b>
+<b class="nc">&nbsp;						assert (inCount == 0);</b>
+&nbsp;						continue;
+&nbsp;					}
+&nbsp;
+<b class="nc">&nbsp;					if (clipStatus == 1) {</b>
+<b class="nc">&nbsp;						assert (analyseClipSegment_(polygon, polylineSeg,</b>
+<b class="nc">&nbsp;								tolerance) == 1);</b>
+<b class="nc">&nbsp;						if (state == stateNewPath) {</b>
+<b class="nc">&nbsp;							state = stateManySegmentsNewPath;</b>
+<b class="nc">&nbsp;							start_index = polylineIter.getStartPointIndex()</b>
+<b class="nc">&nbsp;									- polylineImpl</b>
+<b class="nc">&nbsp;											.getPathStart(polylinePathIndex);</b>
+<b class="nc">&nbsp;						} else if (state == stateAddSegment) {</b>
+<b class="nc">&nbsp;							state = stateManySegmentsContinuePath;</b>
+<b class="nc">&nbsp;							start_index = polylineIter.getStartPointIndex()</b>
+<b class="nc">&nbsp;									- polylineImpl</b>
+<b class="nc">&nbsp;											.getPathStart(polylinePathIndex);</b>
+<b class="nc">&nbsp;						} else</b>
+<b class="nc">&nbsp;							assert (state &gt;= stateManySegments);</b>
+&nbsp;
+<b class="nc">&nbsp;						inCount++;</b>
+&nbsp;						continue;
+&nbsp;					}
+&nbsp;				}
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			if (state &gt;= stateManySegments) {</b>
+<b class="fc">&nbsp;				resultPolylineImpl.addSegmentsFromPath(polylineImpl,</b>
+<b class="fc">&nbsp;						polylinePathIndex, start_index, inCount,</b>
+<b class="fc">&nbsp;						state == stateManySegmentsNewPath);</b>
+<b class="fc">&nbsp;				start_index = -1;</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return result_polyline;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	int analyseClipSegment_(Polygon polygon, Point2D pt, double tol) {
+<b class="fc">&nbsp;		int v = PointInPolygonHelper.isPointInPolygon(polygon, pt, tol);</b>
+<b class="fc">&nbsp;		return v;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	int analyseClipSegment_(Polygon polygon, Segment seg, double tol) {
+<b class="fc">&nbsp;		Point2D pt_1 = seg.getStartXY();</b>
+<b class="fc">&nbsp;		Point2D pt_2 = seg.getEndXY();</b>
+<b class="fc">&nbsp;		int v_1 = PointInPolygonHelper.isPointInPolygon(polygon, pt_1, tol);</b>
+<b class="fc">&nbsp;		int v_2 = PointInPolygonHelper.isPointInPolygon(polygon, pt_2, tol);</b>
+<b class="fc">&nbsp;		if ((v_1 == 1 &amp;&amp; v_2 == 0) || (v_1 == 0 &amp;&amp; v_2 == 1)) {</b>
+&nbsp;			// Operator_factory_local::SaveJSONToTextFileDbg(&quot;c:/temp/badPointInPolygon.json&quot;,
+&nbsp;			// polygon, m_spatial_reference);
+<b class="nc">&nbsp;			assert (false);// if happens</b>
+<b class="nc">&nbsp;			return -1;// something went wrong. One point is inside, the other is</b>
+&nbsp;						// outside. Should not happen. We&#39;ll resort to
+&nbsp;						// planesweep.
+&nbsp;		}
+<b class="fc">&nbsp;		if (v_1 == 0 || v_2 == 0)</b>
+<b class="fc">&nbsp;			return 0;</b>
+<b class="fc">&nbsp;		if (v_1 == 1 || v_2 == 1)</b>
+<b class="fc">&nbsp;			return 1;</b>
+&nbsp;
+<b class="fc">&nbsp;		Point2D midPt = new Point2D();</b>
+<b class="fc">&nbsp;		midPt.add(pt_1, pt_2);</b>
+<b class="fc">&nbsp;		midPt.scale(0.5);// calculate midpoint</b>
+<b class="fc">&nbsp;		int v = PointInPolygonHelper.isPointInPolygon(polygon, midPt, tol);</b>
+<b class="fc">&nbsp;		if (v == 0) {</b>
+<b class="nc">&nbsp;			return 0;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (v == 1) {</b>
+<b class="fc">&nbsp;			return 1;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return -1;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	Geometry normalizeIntersectionOutput(Geometry geom, int GT_1, int GT_2) {
+<b class="nc">&nbsp;		if (GT_1 == Geometry.GeometryType.Point</b>
+<b class="nc">&nbsp;				|| GT_2 == Geometry.GeometryType.Point) {</b>
+<b class="nc">&nbsp;			assert (geom.getType().value() == Geometry.GeometryType.Point);</b>
+&nbsp;		}
+<b class="nc">&nbsp;		if (GT_1 == Geometry.GeometryType.MultiPoint) {</b>
+<b class="nc">&nbsp;			if (geom.getType().value() == Geometry.GeometryType.Point) {</b>
+<b class="nc">&nbsp;				MultiPoint mp = new MultiPoint(geom.getDescription());</b>
+<b class="nc">&nbsp;				if (!geom.isEmpty())</b>
+<b class="nc">&nbsp;					mp.add((Point) geom);</b>
+<b class="nc">&nbsp;				return mp;</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="nc">&nbsp;		return geom;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	static Geometry returnEmpty_(Geometry geom, boolean bEmpty) {
+<b class="fc">&nbsp;		return bEmpty ? geom : geom.createInstance();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	Geometry returnEmptyIntersector_() {
+<b class="fc">&nbsp;		if (m_geomIntersectorEmptyGeom == null)</b>
+<b class="fc">&nbsp;			m_geomIntersectorEmptyGeom = m_geomIntersector.createInstance();</b>
+&nbsp;
+<b class="fc">&nbsp;		return m_geomIntersectorEmptyGeom;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// virtual boolean IsRecycling() OVERRIDE { return false; }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-02-21 15:02</div>
+</div>
+</body>
+</html>
