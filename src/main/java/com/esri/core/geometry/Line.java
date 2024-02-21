@@ -735,111 +735,86 @@ public final class Line extends Segment implements Serializable {
 	}
 
 	int _intersectLineLineExact(Line line1, Line line2,
-			Point2D[] intersectionPoints, double[] param1, double[] param2) {
+								Point2D[] intersectionPoints, double[] param1, double[] param2) {
 		int counter = 0;
-		// TODO: Unit test with two non-intersecting lines.
-		if (line1.m_xStart == line2.m_xStart
-				&& line1.m_yStart == line2.m_yStart) {
-			// TODO: Unit test with two lines with the same start point.
-			if (param1 != null)// if (param1)
-				param1[counter] = 0.0;
-			if (param2 != null)// if (param2)
-				param2[counter] = 0.0;
-
-			if (intersectionPoints != null)// if (intersectionPoints)
-				intersectionPoints[counter] = Point2D.construct(line1.m_xStart,
-						line1.m_yStart);
+		if (line1.m_xStart == line2.m_xStart && line1.m_yStart == line2.m_yStart) {
+			setParams(0.0, 0.0, param1, param2, counter);
+			setIntersectionPoints(intersectionPoints, line1.m_xStart, line1.m_yStart, counter);
 
 			counter++;
 		}
 
 		if (line1.m_xStart == line2.m_xEnd && line1.m_yStart == line2.m_yEnd) {
-			// TODO: Unit test where line1 start point == line2 end point.
-			if (param1 != null)// if (param1)
-				param1[counter] = 0.0;
-			if (param2 != null)// if (param2)
-				param2[counter] = 1.0;
-
-			if (intersectionPoints != null)// if (intersectionPoints)
-				intersectionPoints[counter] = Point2D.construct(line1.m_xStart,
-						line1.m_yStart);
+			setParams(0.0, 1.0, param1, param2, counter);
+			setIntersectionPoints(intersectionPoints, line1.m_xStart, line1.m_yStart, counter);
 
 			counter++;
 		}
 
 		if (line1.m_xEnd == line2.m_xStart && line1.m_yEnd == line2.m_yStart) {
-			// TODO: Unit test where line 1end == line2 start
-			if (counter == 2) {// both segments a degenerate
-				// TODO: Unit test where both lines degenerates.
-				if (param1 != null)// if (param1)
-				{
-					param1[0] = 0.0;
-					param1[1] = 1.0;
-				}
-				if (param2 != null)// if (param2)
-				{
-					param2[0] = 1.0;
-				}
-
-				if (intersectionPoints != null)// if (intersectionPoints)
-				{
-					intersectionPoints[0] = Point2D.construct(line1.m_xEnd,
-							line1.m_yEnd);
-					intersectionPoints[1] = Point2D.construct(line1.m_xEnd,
-							line1.m_yEnd);
-				}
-
-				return counter;
-			}
-
-			if (param1 != null)// if (param1)
-				param1[counter] = 1.0;
-			if (param2 != null)// if (param2)
-				param2[counter] = 0.0;
-
-			if (intersectionPoints != null)// if (intersectionPoints)
-				intersectionPoints[counter] = Point2D.construct(line1.m_xEnd,
-						line1.m_yEnd);
+			if (finalPoint(line1, intersectionPoints, param1, param2, counter)) return counter;
+			setParams(param1[counter], 0.0, param1, param2, counter);
+			setIntersectionPoints(intersectionPoints, line1.m_xEnd, line1.m_yEnd, counter);
 
 			counter++;
 		}
 
 		if (line1.m_xEnd == line2.m_xEnd && line1.m_yEnd == line2.m_yEnd) {
-			// TODO: Unit test where line1 end == line2 end
-			if (counter == 2) {// both segments are degenerate
-				if (param1 != null)// if (param1)
-				{
-					param1[0] = 0.0;
-					param1[1] = 1.0;
-				}
-				if (param2 != null)// if (param2)
-				{
-					param2[0] = 1.0;
-				}
+			if (finalPoint(line1, intersectionPoints, param1, param2, counter)) return counter;
+			setParams(param1[counter], 1.0, param1, param2, counter);
+			setIntersectionPoints(intersectionPoints, line1.m_xEnd, line1.m_yEnd, counter);
 
-				if (intersectionPoints != null)// if (intersectionPoints)
-				{
-					intersectionPoints[0] = Point2D.construct(line1.m_xEnd,
-							line1.m_yEnd);
-					intersectionPoints[1] = Point2D.construct(line1.m_xEnd,
-							line1.m_yEnd);
-				}
-
-				return counter;
-			}
-
-			if (param1 != null)// if (param1)
-				param1[counter] = 1.0;
-			if (param2 != null)// if (param2)
-				param2[counter] = 1.0;
-
-			if (intersectionPoints != null)// if (intersectionPoints)
-				intersectionPoints[counter] = Point2D.construct(line1.m_xEnd,
-						line1.m_yEnd);
 			counter++;
 		}
 
 		return counter;
+	}
+
+	private void setIntersectionPoints(Point2D[] intersectionPoints, double mX, double mY, int counter) {
+		if (intersectionPoints != null) {
+			intersectionPoints[counter] = Point2D.construct(mX, mY);
+		}
+	}
+
+	private void setParams(double p1, double p2, double[] param1, double[] param2, int counter) {
+		if (param1 != null) param1[counter] = p1;
+		if (param2 != null) param2[counter] = p2;
+
+	}
+
+	private void updateData(double p1, double p2, double x, double y,
+							Point2D[] intersectionPoints, double[] param1, double[] param2, int counter) {
+		if (param1 != null) param1[counter] = p1;
+		if (param2 != null) param2[counter] = p2;
+		if (intersectionPoints != null) intersectionPoints[counter] = Point2D.construct(x, y);
+	}
+
+	private boolean finalPoint(Line line1, Point2D[] intersectionPoints, double[] param1, double[] param2, int counter) {
+		if (counter == 2) {// both segments a degenerate
+			if (param1 != null)// if (param1)
+			{
+				param1[0] = 0.0;
+				param1[1] = 1.0;
+			}
+			if (param2 != null)// if (param2)
+			{
+				param2[0] = 1.0;
+			}
+
+			if (intersectionPoints != null)// if (intersectionPoints)
+			{
+				intersectionPoints[0] = Point2D.construct(line1.m_xEnd,
+						line1.m_yEnd);
+				intersectionPoints[1] = Point2D.construct(line1.m_xEnd,
+						line1.m_yEnd);
+			}
+
+			return true;
+		}
+
+		if (param1 != null)// if (param1)
+			param1[counter] = 1.0;
+		return false;
 	}
 
 	static int _intersectLineLine(Line line1, Line line2,
