@@ -78,23 +78,27 @@ public class TestClipNEW{
     @Test
     public void testClipEmptyGeometry() {
         //added
+        // Requirement: Clipping an empty geometry should return an empty geometry
         Geometry emptyGeom = new Polygon();
         assertTrue(emptyGeom.isEmpty());
 
         Geometry result = Clipper.clip(emptyGeom, new Envelope2D(0, 0, 10, 10), 0, 0);
         assertTrue(result.isEmpty());
-
+        // Validates that the clipping operation correctly handles empty input geometries.
         //assertTrue(BranchCC.visitedBranch[0]);
+
     }
 
     @Test
     public void testClipWithEmptyExtent() {
         //added
+        // Requirement: Clipping any geometry with an empty extent should result in an empty geometry
         Point pointGeom = new Point(5, 5);
         Envelope2D emptyExtent = new Envelope2D();
 
         Geometry result = Clipper.clip(pointGeom, emptyExtent, 0, 0);
         assertTrue(result.isEmpty());
+        // Validates that an empty clipping extent results in no output geometry
 
         //assertTrue(BranchCC.visitedBranch[2]);
     }
@@ -102,11 +106,13 @@ public class TestClipNEW{
     @Test
     public void testGeometryFullyInsideExtent() {
         //added
+        // Requirement: A geometry fully inside the clipping extent should remain unchanged after clipping
         Point pointGeom = new Point(5, 5);
         Envelope2D extent = new Envelope2D(0, 0, 10, 10);
 
         Geometry result = Clipper.clip(pointGeom, extent, 0, 0);
         assertFalse(result.isEmpty());
+        // Validates/verifies that geometry completely within the extent are preserved by the clipping process
 
         //assertTrue(BranchCC.visitedBranch[10] || BranchCC.visitedBranch[5]);
     }
@@ -115,11 +121,15 @@ public class TestClipNEW{
     public void testEnvelopePartiallyIntersectingExtent() {
         //added
         //create an envelope that partially intersects the clipping extent
+        // Requirement: A envelope partially intersecting the clipping extent should be clipped by its intersection area.
+
         Envelope envelopeGeom = new Envelope(5, 5, 15, 15); // This envelope extends beyond the extent
         Envelope2D extent = new Envelope2D(0, 0, 10, 10);
 
         Geometry result = Clipper.clip(envelopeGeom, extent, 0, 0);
         assertFalse("The clipped geometry should not be empty when the envelope partially intersects the extent", result.isEmpty());
+
+        // validates/checks that envelopes that only partially intersect the clipping extent dont give nothing back.
 
         //assertTrue("Branch 7 (Envelope type check) should be visited", BranchCC.visitedBranch[7]);
         //assertTrue("Branch 8 (Envelope intersects extent) should be visited", BranchCC.visitedBranch[8]);
