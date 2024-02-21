@@ -1,0 +1,368 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > MathUtils</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.esri.core.geometry</a>
+</div>
+
+<h1>Coverage Summary for Class: MathUtils (com.esri.core.geometry)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">MathUtils</td>
+<td class="coverageStat">
+  <span class="percent">
+    60%
+  </span>
+  <span class="absValue">
+    (6/10)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    74,2%
+  </span>
+  <span class="absValue">
+    (23/31)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">MathUtils$KahanSummator</td>
+<td class="coverageStat">
+  <span class="percent">
+    36,4%
+  </span>
+  <span class="absValue">
+    (4/11)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    36,7%
+  </span>
+  <span class="absValue">
+    (11/30)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    47,6%
+  </span>
+  <span class="absValue">
+    (10/21)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    55,7%
+  </span>
+  <span class="absValue">
+    (34/61)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; Copyright 1995-2015 Esri
+&nbsp;
+&nbsp;   Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp;   you may not use this file except in compliance with the License.
+&nbsp;   You may obtain a copy of the License at
+&nbsp;
+&nbsp;       http://www.apache.org/licenses/LICENSE-2.0
+&nbsp;
+&nbsp;   Unless required by applicable law or agreed to in writing, software
+&nbsp;   distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp;   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp;   See the License for the specific language governing permissions and
+&nbsp;   limitations under the License.
+&nbsp;
+&nbsp; For additional information, contact:
+&nbsp; Environmental Systems Research Institute, Inc.
+&nbsp; Attn: Contracts Dept
+&nbsp; 380 New York Street
+&nbsp; Redlands, California, USA 92373
+&nbsp;
+&nbsp; email: contracts@esri.com
+&nbsp; */
+&nbsp;
+&nbsp;package com.esri.core.geometry;
+&nbsp;
+<b class="fc">&nbsp;final class MathUtils {</b>
+&nbsp;	/**
+&nbsp;	 * The implementation of the Kahan summation algorithm. Use to get better
+&nbsp;	 * precision when adding a lot of values.
+&nbsp;	 */
+&nbsp;	static final class KahanSummator {
+&nbsp;		private double sum; // the accumulated sum
+&nbsp;		private double compensation;
+&nbsp;		private double startValue; // the Base (the class returns sum +
+&nbsp;									// startValue)
+&nbsp;
+&nbsp;		/**
+&nbsp;		 * initialize to the given start value. \param startValue_ The value to
+&nbsp;		 * be added to the accumulated sum.
+&nbsp;		 */
+<b class="fc">&nbsp;		KahanSummator(double startValue_) {</b>
+<b class="fc">&nbsp;			startValue = startValue_;</b>
+<b class="fc">&nbsp;			reset();</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		/**
+&nbsp;		 * Resets the accumulated sum to zero. The getResult() returns
+&nbsp;		 * startValue_ after this call.
+&nbsp;		 */
+&nbsp;		void reset() {
+<b class="fc">&nbsp;			sum = 0;</b>
+<b class="fc">&nbsp;			compensation = 0;</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		/**
+&nbsp;		 * add a value.
+&nbsp;		 */
+&nbsp;		void add(double v) {
+<b class="fc">&nbsp;			double y = v - compensation;</b>
+<b class="fc">&nbsp;			double t = sum + y;</b>
+<b class="fc">&nbsp;			double h = t - sum;</b>
+<b class="fc">&nbsp;			compensation = h - y;</b>
+<b class="fc">&nbsp;			sum = t;</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		/**
+&nbsp;		 * Subtracts a value.
+&nbsp;		 */
+&nbsp;		void sub(double v) {
+<b class="nc">&nbsp;			add(-v);</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		/**
+&nbsp;		 * add another summator.
+&nbsp;		 */
+&nbsp;		void add(/* const */KahanSummator v) {
+<b class="nc">&nbsp;			double y = (v.getResult() + v.compensation) - compensation;</b>
+<b class="nc">&nbsp;			double t = sum + y;</b>
+<b class="nc">&nbsp;			double h = t - sum;</b>
+<b class="nc">&nbsp;			compensation = h - y;</b>
+<b class="nc">&nbsp;			sum = t;</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		/**
+&nbsp;		 * Subtracts another summator.
+&nbsp;		 */
+&nbsp;		void sub(/* const */KahanSummator v) {
+<b class="nc">&nbsp;			double y = -(v.getResult() - v.compensation) - compensation;</b>
+<b class="nc">&nbsp;			double t = sum + y;</b>
+<b class="nc">&nbsp;			double h = t - sum;</b>
+<b class="nc">&nbsp;			compensation = h - y;</b>
+<b class="nc">&nbsp;			sum = t;</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		/**
+&nbsp;		 * Returns current value of the sum.
+&nbsp;		 */
+&nbsp;		double getResult() /* const */{
+<b class="fc">&nbsp;			return startValue + sum;</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		KahanSummator plusEquals(double v) {
+<b class="nc">&nbsp;			add(v);</b>
+<b class="nc">&nbsp;			return this;</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		KahanSummator minusEquals(double v) {
+<b class="nc">&nbsp;			add(-v);</b>
+<b class="nc">&nbsp;			return this;</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		KahanSummator plusEquals(/* const */KahanSummator v) {
+<b class="nc">&nbsp;			add(v);</b>
+<b class="nc">&nbsp;			return this;</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		KahanSummator minusEquals(/* const */KahanSummator v) {
+<b class="nc">&nbsp;			sub(v);</b>
+<b class="nc">&nbsp;			return this;</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns one value with the sign of another (like copysign).
+&nbsp;	 */
+&nbsp;	static double copySign(double x, double y) {
+<b class="nc">&nbsp;		return y &gt;= 0.0 ? Math.abs(x) : -Math.abs(x);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Calculates sign of the given value. Returns 0 if the value is equal to 0.
+&nbsp;	 */
+&nbsp;	static int sign(double value) {
+<b class="fc">&nbsp;		return value &lt; 0 ? -1 : (value &gt; 0) ? 1 : 0;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Rounds towards zero.
+&nbsp;	 */
+&nbsp;	static double truncate(double v) {
+<b class="nc">&nbsp;		if (v &gt;= 0)</b>
+<b class="nc">&nbsp;			return Math.floor(v);</b>
+&nbsp;		else
+<b class="nc">&nbsp;			return -Math.floor(-v);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * C fmod function.
+&nbsp;	 */
+&nbsp;	static double FMod(double x, double y) {
+<b class="nc">&nbsp;		return x - truncate(x / y) * y;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;
+&nbsp;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Rounds double to the closest integer value.
+&nbsp;	 */
+&nbsp;	static double round(double v) {
+<b class="nc">&nbsp;		return Math.floor(v + 0.5);</b>
+&nbsp;	}
+&nbsp;	static double sqr(double v) {
+<b class="fc">&nbsp;		return v * v;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;    /**
+&nbsp;    *Computes interpolation between two values, using the interpolation factor t.
+&nbsp;    *The interpolation formula is (end - start) * t + start.
+&nbsp;    *However, the computation ensures that t = 0 produces exactly start, and t = 1, produces exactly end.
+&nbsp;    *It also guarantees that for 0 &lt;= t &lt;= 1, the interpolated value v is between start and end.
+&nbsp;    */
+&nbsp;	static double lerp(double start_, double end_, double t) {
+&nbsp;		// When end == start, we want result to be equal to start, for all t
+&nbsp;		// values. At the same time, when end != start, we want the result to be
+&nbsp;		// equal to start for t==0 and end for t == 1.0
+&nbsp;		// The regular formula end_ * t + (1.0 - t) * start_, when end_ ==
+&nbsp;		// start_, and t at 1/3, produces value different from start
+&nbsp;		double v;
+<b class="fc">&nbsp;		if (t &lt;= 0.5)</b>
+<b class="fc">&nbsp;			v = start_ + (end_ - start_) * t;</b>
+&nbsp;		else
+<b class="fc">&nbsp;			v = end_ - (end_ - start_) * (1.0 - t);</b>
+&nbsp;
+<b class="fc">&nbsp;		assert (t &lt; 0 || t &gt; 1.0 || (v &gt;= start_ &amp;&amp; v &lt;= end_) || (v &lt;= start_ &amp;&amp; v &gt;= end_) || NumberUtils.isNaN(start_) || NumberUtils.isNaN(end_));</b>
+<b class="fc">&nbsp;		return v;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;    /**
+&nbsp;    *Computes interpolation between two values, using the interpolation factor t.
+&nbsp;    *The interpolation formula is (end - start) * t + start.
+&nbsp;    *However, the computation ensures that t = 0 produces exactly start, and t = 1, produces exactly end.
+&nbsp;    *It also guarantees that for 0 &lt;= t &lt;= 1, the interpolated value v is between start and end.
+&nbsp;    */
+&nbsp;	static void lerp(Point2D start_, Point2D end_, double t, Point2D result) {
+<b class="fc">&nbsp;		assert(start_ != result);</b>
+&nbsp;		// When end == start, we want result to be equal to start, for all t
+&nbsp;		// values. At the same time, when end != start, we want the result to be
+&nbsp;		// equal to start for t==0 and end for t == 1.0
+&nbsp;		// The regular formula end_ * t + (1.0 - t) * start_, when end_ ==
+&nbsp;		// start_, and t at 1/3, produces value different from start
+&nbsp;		double rx, ry;
+<b class="fc">&nbsp;		if (t &lt;= 0.5) {</b>
+<b class="fc">&nbsp;			rx = start_.x + (end_.x - start_.x) * t;</b>
+<b class="fc">&nbsp;			ry = start_.y + (end_.y - start_.y) * t;</b>
+&nbsp;		}
+&nbsp;		else {
+<b class="nc">&nbsp;			rx = end_.x - (end_.x - start_.x) * (1.0 - t);</b>
+<b class="nc">&nbsp;			ry = end_.y - (end_.y - start_.y) * (1.0 - t);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		assert (t &lt; 0 || t &gt; 1.0 || (rx &gt;= start_.x &amp;&amp; rx &lt;= end_.x) || (rx &lt;= start_.x &amp;&amp; rx &gt;= end_.x));</b>
+<b class="fc">&nbsp;		assert (t &lt; 0 || t &gt; 1.0 || (ry &gt;= start_.y &amp;&amp; ry &lt;= end_.y) || (ry &lt;= start_.y &amp;&amp; ry &gt;= end_.y));</b>
+<b class="fc">&nbsp;		result.x = rx;</b>
+<b class="fc">&nbsp;		result.y = ry;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	static void lerp(double start_x, double start_y, double end_x, double end_y, double t, Point2D result) {
+&nbsp;		// When end == start, we want result to be equal to start, for all t
+&nbsp;		// values. At the same time, when end != start, we want the result to be
+&nbsp;		// equal to start for t==0 and end for t == 1.0
+&nbsp;		// The regular formula end_ * t + (1.0 - t) * start_, when end_ ==
+&nbsp;		// start_, and t at 1/3, produces value different from start
+<b class="fc">&nbsp;		if (t &lt;= 0.5) {</b>
+<b class="fc">&nbsp;			result.x = start_x + (end_x - start_x) * t;</b>
+<b class="fc">&nbsp;			result.y = start_y + (end_y - start_y) * t;</b>
+&nbsp;		}
+&nbsp;		else {
+<b class="fc">&nbsp;			result.x = end_x - (end_x - start_x) * (1.0 - t);</b>
+<b class="fc">&nbsp;			result.y = end_y - (end_y - start_y) * (1.0 - t);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		assert (t &lt; 0 || t &gt; 1.0 || (result.x &gt;= start_x &amp;&amp; result.x &lt;= end_x) || (result.x &lt;= start_x &amp;&amp; result.x &gt;= end_x));</b>
+<b class="fc">&nbsp;		assert (t &lt; 0 || t &gt; 1.0 || (result.y &gt;= start_y &amp;&amp; result.y &lt;= end_y) || (result.y &lt;= start_y &amp;&amp; result.y &gt;= end_y));</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-02-21 16:04</div>
+</div>
+</body>
+</html>

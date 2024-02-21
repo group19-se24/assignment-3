@@ -1,0 +1,1116 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > OperatorImportFromESRIShapeCursor</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.esri.core.geometry</a>
+</div>
+
+<h1>Coverage Summary for Class: OperatorImportFromESRIShapeCursor (com.esri.core.geometry)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">OperatorImportFromESRIShapeCursor</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    85,7%
+  </span>
+  <span class="absValue">
+    (6/7)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    83,9%
+  </span>
+  <span class="absValue">
+    (505/602)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; Copyright 1995-2015 Esri
+&nbsp;
+&nbsp;   Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp;   you may not use this file except in compliance with the License.
+&nbsp;   You may obtain a copy of the License at
+&nbsp;
+&nbsp;       http://www.apache.org/licenses/LICENSE-2.0
+&nbsp;
+&nbsp;   Unless required by applicable law or agreed to in writing, software
+&nbsp;   distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp;   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp;   See the License for the specific language governing permissions and
+&nbsp;   limitations under the License.
+&nbsp;
+&nbsp; For additional information, contact:
+&nbsp; Environmental Systems Research Institute, Inc.
+&nbsp; Attn: Contracts Dept
+&nbsp; 380 New York Street
+&nbsp; Redlands, California, USA 92373
+&nbsp;
+&nbsp; email: contracts@esri.com
+&nbsp; */
+&nbsp;
+&nbsp;package com.esri.core.geometry;
+&nbsp;
+&nbsp;import com.esri.core.geometry.MultiVertexGeometryImpl.GeometryXSimple;
+&nbsp;import com.esri.core.geometry.VertexDescription.Semantics;
+&nbsp;import java.nio.ByteBuffer;
+&nbsp;import java.nio.ByteOrder;
+&nbsp;
+&nbsp;class OperatorImportFromESRIShapeCursor extends GeometryCursor {
+&nbsp;
+&nbsp;	ByteBufferCursor m_inputShapeBuffers;
+&nbsp;	int m_importFlags;
+&nbsp;	int m_type;
+&nbsp;	int m_index;
+&nbsp;
+&nbsp;	public OperatorImportFromESRIShapeCursor(int importFlags, int type,
+<b class="fc">&nbsp;			ByteBufferCursor shapeBuffers) {</b>
+<b class="fc">&nbsp;		m_index = -1;</b>
+<b class="fc">&nbsp;		if (shapeBuffers == null)</b>
+<b class="nc">&nbsp;			throw new GeometryException(&quot;invalid argument&quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;		m_importFlags = importFlags;</b>
+<b class="fc">&nbsp;		m_type = type;</b>
+<b class="fc">&nbsp;		m_inputShapeBuffers = shapeBuffers;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public Geometry next() {
+<b class="fc">&nbsp;		ByteBuffer shapeBuffer = m_inputShapeBuffers.next();</b>
+<b class="fc">&nbsp;		if (shapeBuffer != null) {</b>
+<b class="fc">&nbsp;			m_index = m_inputShapeBuffers.getByteBufferID();</b>
+<b class="fc">&nbsp;			return importFromESRIShape(shapeBuffer);</b>
+&nbsp;		}
+<b class="nc">&nbsp;		return null;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public int getGeometryID() {
+<b class="nc">&nbsp;		return m_index;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private Geometry importFromESRIShape(ByteBuffer shapeBuffer) {
+<b class="fc">&nbsp;		ByteOrder initialOrder = shapeBuffer.order();</b>
+<b class="fc">&nbsp;		shapeBuffer.order(ByteOrder.LITTLE_ENDIAN);</b>
+&nbsp;
+&nbsp;		try {
+&nbsp;			// read type
+<b class="fc">&nbsp;			int shapetype = shapeBuffer.getInt(0);</b>
+&nbsp;
+&nbsp;			// Extract general type and modifiers
+&nbsp;			int generaltype;
+&nbsp;			int modifiers;
+<b class="fc">&nbsp;			switch (shapetype &amp; ShapeModifiers.ShapeBasicTypeMask) {</b>
+&nbsp;			// Polygon
+&nbsp;			case ShapeType.ShapePolygon:
+<b class="fc">&nbsp;				generaltype = ShapeType.ShapeGeneralPolygon;</b>
+<b class="fc">&nbsp;				modifiers = 0;</b>
+<b class="fc">&nbsp;				break;</b>
+&nbsp;			case ShapeType.ShapePolygonZM:
+<b class="fc">&nbsp;				generaltype = ShapeType.ShapeGeneralPolygon;</b>
+<b class="fc">&nbsp;				modifiers = ShapeModifiers.ShapeHasZs | ShapeModifiers.ShapeHasMs;</b>
+<b class="fc">&nbsp;				break;</b>
+&nbsp;			case ShapeType.ShapePolygonM:
+<b class="nc">&nbsp;				generaltype = ShapeType.ShapeGeneralPolygon;</b>
+<b class="nc">&nbsp;				modifiers = ShapeModifiers.ShapeHasMs;</b>
+<b class="nc">&nbsp;				break;</b>
+&nbsp;			case ShapeType.ShapePolygonZ:
+<b class="nc">&nbsp;				generaltype = ShapeType.ShapeGeneralPolygon;</b>
+<b class="nc">&nbsp;				modifiers = ShapeModifiers.ShapeHasZs;</b>
+<b class="nc">&nbsp;				break;</b>
+&nbsp;			case ShapeType.ShapeGeneralPolygon:
+<b class="fc">&nbsp;				generaltype = ShapeType.ShapeGeneralPolygon;</b>
+<b class="fc">&nbsp;				modifiers = shapetype &amp; ShapeModifiers.ShapeModifierMask;</b>
+<b class="fc">&nbsp;				break;</b>
+&nbsp;
+&nbsp;			// Polyline
+&nbsp;			case ShapeType.ShapePolyline:
+<b class="fc">&nbsp;				generaltype = ShapeType.ShapeGeneralPolyline;</b>
+<b class="fc">&nbsp;				modifiers = 0;</b>
+<b class="fc">&nbsp;				break;</b>
+&nbsp;			case ShapeType.ShapePolylineZM:
+<b class="nc">&nbsp;				generaltype = ShapeType.ShapeGeneralPolyline;</b>
+<b class="nc">&nbsp;				modifiers = ShapeModifiers.ShapeHasZs</b>
+&nbsp;						| (int) ShapeModifiers.ShapeHasMs;
+<b class="nc">&nbsp;				break;</b>
+&nbsp;			case ShapeType.ShapePolylineM:
+<b class="nc">&nbsp;				generaltype = ShapeType.ShapeGeneralPolyline;</b>
+<b class="nc">&nbsp;				modifiers = ShapeModifiers.ShapeHasMs;</b>
+<b class="nc">&nbsp;				break;</b>
+&nbsp;			case ShapeType.ShapePolylineZ:
+<b class="nc">&nbsp;				generaltype = ShapeType.ShapeGeneralPolyline;</b>
+<b class="nc">&nbsp;				modifiers = ShapeModifiers.ShapeHasZs;</b>
+<b class="nc">&nbsp;				break;</b>
+&nbsp;			case ShapeType.ShapeGeneralPolyline:
+<b class="fc">&nbsp;				generaltype = ShapeType.ShapeGeneralPolyline;</b>
+<b class="fc">&nbsp;				modifiers = shapetype &amp; ShapeModifiers.ShapeModifierMask;</b>
+<b class="fc">&nbsp;				break;</b>
+&nbsp;
+&nbsp;			// MultiPoint
+&nbsp;			case ShapeType.ShapeMultiPoint:
+<b class="fc">&nbsp;				generaltype = ShapeType.ShapeGeneralMultiPoint;</b>
+<b class="fc">&nbsp;				modifiers = 0;</b>
+<b class="fc">&nbsp;				break;</b>
+&nbsp;			case ShapeType.ShapeMultiPointZM:
+<b class="nc">&nbsp;				generaltype = ShapeType.ShapeGeneralMultiPoint;</b>
+<b class="nc">&nbsp;				modifiers = (int) ShapeModifiers.ShapeHasZs</b>
+&nbsp;						| (int) ShapeModifiers.ShapeHasMs;
+<b class="nc">&nbsp;				break;</b>
+&nbsp;			case ShapeType.ShapeMultiPointM:
+<b class="nc">&nbsp;				generaltype = ShapeType.ShapeGeneralMultiPoint;</b>
+<b class="nc">&nbsp;				modifiers = ShapeModifiers.ShapeHasMs;</b>
+<b class="nc">&nbsp;				break;</b>
+&nbsp;			case ShapeType.ShapeMultiPointZ:
+<b class="nc">&nbsp;				generaltype = ShapeType.ShapeGeneralMultiPoint;</b>
+<b class="nc">&nbsp;				modifiers = ShapeModifiers.ShapeHasZs;</b>
+<b class="nc">&nbsp;				break;</b>
+&nbsp;			case ShapeType.ShapeGeneralMultiPoint:
+<b class="fc">&nbsp;				generaltype = ShapeType.ShapeGeneralMultiPoint;</b>
+<b class="fc">&nbsp;				modifiers = shapetype &amp; ShapeModifiers.ShapeModifierMask;</b>
+<b class="fc">&nbsp;				break;</b>
+&nbsp;
+&nbsp;			// Point
+&nbsp;			case ShapeType.ShapePoint:
+<b class="fc">&nbsp;				generaltype = ShapeType.ShapeGeneralPoint;</b>
+<b class="fc">&nbsp;				modifiers = 0;</b>
+<b class="fc">&nbsp;				break;</b>
+&nbsp;			case ShapeType.ShapePointZM:
+<b class="nc">&nbsp;				generaltype = ShapeType.ShapeGeneralPoint;</b>
+<b class="nc">&nbsp;				modifiers = ShapeModifiers.ShapeHasZs</b>
+&nbsp;						| (int) ShapeModifiers.ShapeHasMs;
+<b class="nc">&nbsp;				break;</b>
+&nbsp;			case ShapeType.ShapePointM:
+<b class="nc">&nbsp;				generaltype = ShapeType.ShapeGeneralPoint;</b>
+<b class="nc">&nbsp;				modifiers = ShapeModifiers.ShapeHasMs;</b>
+<b class="nc">&nbsp;				break;</b>
+&nbsp;			case ShapeType.ShapePointZ:
+<b class="nc">&nbsp;				generaltype = ShapeType.ShapeGeneralPoint;</b>
+<b class="nc">&nbsp;				modifiers = ShapeModifiers.ShapeHasZs;</b>
+<b class="nc">&nbsp;				break;</b>
+&nbsp;			case ShapeType.ShapeGeneralPoint:
+<b class="fc">&nbsp;				generaltype = ShapeType.ShapeGeneralPoint;</b>
+<b class="fc">&nbsp;				modifiers = shapetype &amp; ShapeModifiers.ShapeModifierMask;</b>
+<b class="fc">&nbsp;				break;</b>
+&nbsp;
+&nbsp;			// Null Geometry
+&nbsp;			case ShapeType.ShapeNull:
+<b class="nc">&nbsp;				return null;</b>
+&nbsp;
+&nbsp;			default:
+<b class="nc">&nbsp;				throw new GeometryException(&quot;invalid shape type&quot;);</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			switch (generaltype) {</b>
+&nbsp;			case ShapeType.ShapeGeneralPolygon:
+<b class="fc">&nbsp;				if (m_type != Geometry.GeometryType.Polygon</b>
+&nbsp;						&amp;&amp; m_type != Geometry.GeometryType.Unknown
+&nbsp;						&amp;&amp; m_type != Geometry.GeometryType.Envelope)
+<b class="nc">&nbsp;					throw new GeometryException(&quot;invalid shape type&quot;);</b>
+<b class="fc">&nbsp;				return importFromESRIShapeMultiPath(true, modifiers,</b>
+&nbsp;						shapeBuffer);
+&nbsp;
+&nbsp;			case ShapeType.ShapeGeneralPolyline:
+<b class="fc">&nbsp;				if (m_type != Geometry.GeometryType.Polyline</b>
+&nbsp;						&amp;&amp; m_type != Geometry.GeometryType.Unknown
+&nbsp;						&amp;&amp; m_type != Geometry.GeometryType.Envelope)
+<b class="nc">&nbsp;					throw new GeometryException(&quot;invalid shape type&quot;);</b>
+<b class="fc">&nbsp;				return importFromESRIShapeMultiPath(false, modifiers,</b>
+&nbsp;						shapeBuffer);
+&nbsp;
+&nbsp;			case ShapeType.ShapeGeneralMultiPoint:
+<b class="fc">&nbsp;				if (m_type != Geometry.GeometryType.MultiPoint</b>
+&nbsp;						&amp;&amp; m_type != Geometry.GeometryType.Unknown
+&nbsp;						&amp;&amp; m_type != Geometry.GeometryType.Envelope)
+<b class="nc">&nbsp;					throw new GeometryException(&quot;invalid shape type&quot;);</b>
+<b class="fc">&nbsp;				return importFromESRIShapeMultiPoint(modifiers, shapeBuffer);</b>
+&nbsp;
+&nbsp;			case ShapeType.ShapeGeneralPoint:
+<b class="fc">&nbsp;				if (m_type != Geometry.GeometryType.Point</b>
+&nbsp;						&amp;&amp; m_type != Geometry.GeometryType.MultiPoint
+&nbsp;						&amp;&amp; m_type != Geometry.GeometryType.Unknown
+&nbsp;						&amp;&amp; m_type != Geometry.GeometryType.Envelope)
+<b class="nc">&nbsp;					throw new GeometryException(&quot;invalid shape type&quot;);</b>
+<b class="fc">&nbsp;				return importFromESRIShapePoint(modifiers, shapeBuffer);</b>
+&nbsp;			}
+&nbsp;
+<b class="nc">&nbsp;			return null;</b>
+&nbsp;		} finally {
+<b class="fc">&nbsp;			shapeBuffer.order(initialOrder);</b>
+<b class="nc">&nbsp;		}</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private Geometry importFromESRIShapeMultiPath(boolean bPolygon,
+&nbsp;			int modifiers, ByteBuffer shapeBuffer) {
+<b class="fc">&nbsp;		int offset = 4;</b>
+&nbsp;
+<b class="fc">&nbsp;		boolean bZs = (modifiers &amp; (int) ShapeModifiers.ShapeHasZs) != 0;</b>
+<b class="fc">&nbsp;		boolean bMs = (modifiers &amp; (int) ShapeModifiers.ShapeHasMs) != 0;</b>
+<b class="fc">&nbsp;		boolean bIDs = (modifiers &amp; (int) ShapeModifiers.ShapeHasIDs) != 0;</b>
+&nbsp;
+<b class="fc">&nbsp;		boolean bHasAttributes = bZs || bMs || bIDs;</b>
+<b class="fc">&nbsp;		boolean bHasBadRings = false;</b>
+&nbsp;
+&nbsp;		// read Envelope
+<b class="fc">&nbsp;		double xmin = shapeBuffer.getDouble(offset);</b>
+<b class="fc">&nbsp;		offset += 8;</b>
+<b class="fc">&nbsp;		double ymin = shapeBuffer.getDouble(offset);</b>
+<b class="fc">&nbsp;		offset += 8;</b>
+<b class="fc">&nbsp;		double xmax = shapeBuffer.getDouble(offset);</b>
+<b class="fc">&nbsp;		offset += 8;</b>
+<b class="fc">&nbsp;		double ymax = shapeBuffer.getDouble(offset);</b>
+<b class="fc">&nbsp;		offset += 8;</b>
+&nbsp;
+&nbsp;		// read part count
+<b class="fc">&nbsp;		int originalPartCount = shapeBuffer.getInt(offset);</b>
+<b class="fc">&nbsp;		offset += 4;</b>
+<b class="fc">&nbsp;		int partCount = 0;</b>
+&nbsp;
+&nbsp;		// read point count
+<b class="fc">&nbsp;		int pointCount = shapeBuffer.getInt(offset);</b>
+<b class="fc">&nbsp;		offset += 4;</b>
+&nbsp;
+<b class="fc">&nbsp;		AttributeStreamOfDbl position = null;</b>
+<b class="fc">&nbsp;		AttributeStreamOfDbl zs = null;</b>
+<b class="fc">&nbsp;		AttributeStreamOfDbl ms = null;</b>
+<b class="fc">&nbsp;		AttributeStreamOfInt32 ids = null;</b>
+<b class="fc">&nbsp;		AttributeStreamOfInt32 parts = null;</b>
+<b class="fc">&nbsp;		AttributeStreamOfInt8 pathFlags = null;</b>
+&nbsp;
+<b class="fc">&nbsp;		Envelope bbox = null;</b>
+<b class="fc">&nbsp;		MultiPath multipath = null;</b>
+<b class="fc">&nbsp;		MultiPathImpl multipathImpl = null;</b>
+<b class="fc">&nbsp;		if (m_type == Geometry.GeometryType.Polygon</b>
+&nbsp;				|| m_type == Geometry.GeometryType.Polyline
+&nbsp;				|| m_type == Geometry.GeometryType.Unknown) {
+<b class="fc">&nbsp;			if (bPolygon)</b>
+<b class="fc">&nbsp;				multipath = new Polygon();</b>
+&nbsp;			else
+<b class="fc">&nbsp;				multipath = new Polyline();</b>
+&nbsp;
+<b class="fc">&nbsp;			multipathImpl = (MultiPathImpl) multipath._getImpl();</b>
+&nbsp;
+<b class="fc">&nbsp;			if (pointCount &gt; 0) {</b>
+<b class="fc">&nbsp;				bbox = new Envelope();</b>
+<b class="fc">&nbsp;				bbox.setCoords(xmin, ymin, xmax, ymax);</b>
+<b class="fc">&nbsp;				parts = (AttributeStreamOfInt32) AttributeStreamBase</b>
+<b class="fc">&nbsp;						.createIndexStream(originalPartCount + 1);</b>
+&nbsp;
+<b class="fc">&nbsp;				int previstart = -1;</b>
+<b class="fc">&nbsp;				int lastCount = 0;</b>
+<b class="fc">&nbsp;				for (int i = 0; i &lt; originalPartCount; i++) {</b>
+<b class="fc">&nbsp;					int istart = shapeBuffer.getInt(offset);</b>
+<b class="fc">&nbsp;					offset += 4;</b>
+<b class="fc">&nbsp;					lastCount = istart;</b>
+<b class="fc">&nbsp;					if (previstart &gt; istart || istart &lt; 0)// check that the part</b>
+&nbsp;															// indices in the
+&nbsp;															// buffer are not
+&nbsp;															// corrupted
+<b class="nc">&nbsp;						throw new GeometryException(&quot;corrupted geometry&quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;					if (istart != previstart) {</b>
+<b class="fc">&nbsp;						parts.write(partCount, istart);</b>
+<b class="fc">&nbsp;						previstart = istart;</b>
+<b class="fc">&nbsp;						partCount++;</b>
+&nbsp;					}
+&nbsp;				}
+&nbsp;
+<b class="fc">&nbsp;				parts.resize(partCount + 1);</b>
+<b class="fc">&nbsp;				if (pointCount &lt; lastCount)// check that the point count in the</b>
+&nbsp;											// buffer is not corrupted
+<b class="nc">&nbsp;					throw new GeometryException(&quot;corrupted geometry&quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;				parts.write(partCount, pointCount);</b>
+<b class="fc">&nbsp;				pathFlags = (AttributeStreamOfInt8) AttributeStreamBase</b>
+<b class="fc">&nbsp;						.createByteStream(parts.size(), (byte) 0);</b>
+&nbsp;
+&nbsp;				// Create empty position stream
+<b class="fc">&nbsp;				position = (AttributeStreamOfDbl) AttributeStreamBase</b>
+<b class="fc">&nbsp;						.createAttributeStreamWithSemantics(Semantics.POSITION,</b>
+&nbsp;								pointCount);
+&nbsp;
+<b class="fc">&nbsp;				int startpart = parts.read(0);</b>
+&nbsp;				// read xy coordinates
+<b class="fc">&nbsp;				int xyindex = 0;</b>
+<b class="fc">&nbsp;				for (int ipart = 0; ipart &lt; partCount; ipart++) {</b>
+<b class="fc">&nbsp;					int endpartActual = parts.read(ipart + 1);</b>
+&nbsp;					// for polygons we read one point less, then analyze if the
+&nbsp;					// polygon is closed.
+<b class="fc">&nbsp;					int endpart = (bPolygon) ? endpartActual - 1</b>
+<b class="fc">&nbsp;							: endpartActual;</b>
+&nbsp;
+<b class="fc">&nbsp;					double startx = shapeBuffer.getDouble(offset);</b>
+<b class="fc">&nbsp;					offset += 8;</b>
+<b class="fc">&nbsp;					double starty = shapeBuffer.getDouble(offset);</b>
+<b class="fc">&nbsp;					offset += 8;</b>
+<b class="fc">&nbsp;					position.write(2 * xyindex, startx);</b>
+<b class="fc">&nbsp;					position.write(2 * xyindex + 1, starty);</b>
+<b class="fc">&nbsp;					xyindex++;</b>
+&nbsp;
+<b class="fc">&nbsp;					for (int i = startpart + 1; i &lt; endpart; i++) {</b>
+<b class="fc">&nbsp;						double x = shapeBuffer.getDouble(offset);</b>
+<b class="fc">&nbsp;						offset += 8;</b>
+<b class="fc">&nbsp;						double y = shapeBuffer.getDouble(offset);</b>
+<b class="fc">&nbsp;						offset += 8;</b>
+<b class="fc">&nbsp;						position.write(2 * xyindex, x);</b>
+<b class="fc">&nbsp;						position.write(2 * xyindex + 1, y);</b>
+<b class="fc">&nbsp;						xyindex++;</b>
+&nbsp;					}
+&nbsp;
+<b class="fc">&nbsp;					if (endpart - startpart &lt; 2) {// a part with only one point</b>
+<b class="nc">&nbsp;						multipathImpl.setIsSimple(GeometryXSimple.Unknown, 0.0,</b>
+&nbsp;								false);
+&nbsp;					}
+&nbsp;
+<b class="fc">&nbsp;					if (bPolygon) {// read the last point of the part to decide</b>
+&nbsp;									// if we need to close the polygon
+<b class="fc">&nbsp;						if (startpart == endpart) {// a part with only one point</b>
+<b class="nc">&nbsp;							parts.write(ipart + 1, xyindex);</b>
+&nbsp;						} else {
+<b class="fc">&nbsp;							double x = shapeBuffer.getDouble(offset);</b>
+<b class="fc">&nbsp;							offset += 8;</b>
+<b class="fc">&nbsp;							double y = shapeBuffer.getDouble(offset);</b>
+<b class="fc">&nbsp;							offset += 8;</b>
+&nbsp;
+<b class="fc">&nbsp;							if (x != startx || y != starty) {// bad polygon. The</b>
+&nbsp;																// last point is
+&nbsp;																// not the same
+&nbsp;																// as the last
+&nbsp;																// one. We need
+&nbsp;																// to add it so
+&nbsp;																// that we do
+&nbsp;																// not loose it.
+<b class="nc">&nbsp;								position.write(2 * xyindex, x);</b>
+<b class="nc">&nbsp;								position.write(2 * xyindex + 1, y);</b>
+<b class="nc">&nbsp;								xyindex++;</b>
+<b class="nc">&nbsp;								multipathImpl.setIsSimple(</b>
+&nbsp;										GeometryXSimple.Unknown, 0.0, false);
+<b class="nc">&nbsp;								bHasBadRings = true;</b>
+&nbsp;								// write part count to indicate we need to
+&nbsp;								// account for one extra point
+&nbsp;								// The count will be fixed after the attributes
+&nbsp;								// are processed. So we write negative only when
+&nbsp;								// there are attributes.
+<b class="nc">&nbsp;								parts.write(ipart + 1,</b>
+<b class="nc">&nbsp;										bHasAttributes ? -xyindex : xyindex);</b>
+&nbsp;							} else
+<b class="fc">&nbsp;								parts.write(ipart + 1, xyindex);</b>
+&nbsp;						}
+&nbsp;
+<b class="fc">&nbsp;						pathFlags.setBits(ipart, (byte) PathFlags.enumClosed);</b>
+&nbsp;					}
+&nbsp;
+<b class="fc">&nbsp;					startpart = endpartActual;</b>
+&nbsp;				}
+&nbsp;
+<b class="fc">&nbsp;				if (bZs)</b>
+<b class="fc">&nbsp;					bbox.addAttribute(Semantics.Z);</b>
+&nbsp;
+<b class="fc">&nbsp;				if (bMs)</b>
+<b class="fc">&nbsp;					bbox.addAttribute(Semantics.M);</b>
+&nbsp;
+<b class="fc">&nbsp;				if (bIDs)</b>
+<b class="fc">&nbsp;					bbox.addAttribute(Semantics.ID);</b>
+<b class="fc">&nbsp;			}</b>
+&nbsp;		} else {
+<b class="fc">&nbsp;			bbox = new Envelope();</b>
+&nbsp;
+<b class="fc">&nbsp;			if (bZs)</b>
+<b class="fc">&nbsp;				bbox.addAttribute(Semantics.Z);</b>
+&nbsp;
+<b class="fc">&nbsp;			if (bMs)</b>
+<b class="fc">&nbsp;				bbox.addAttribute(Semantics.M);</b>
+&nbsp;
+<b class="fc">&nbsp;			if (bIDs)</b>
+<b class="fc">&nbsp;				bbox.addAttribute(Semantics.ID);</b>
+&nbsp;
+<b class="fc">&nbsp;			if (pointCount &gt; 0) {</b>
+<b class="fc">&nbsp;				bbox.setCoords(xmin, ymin, xmax, ymax);</b>
+<b class="fc">&nbsp;				offset += pointCount * 16 + originalPartCount * 4;</b>
+&nbsp;			} else
+<b class="nc">&nbsp;				return (Geometry) bbox;</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		// read Zs
+<b class="fc">&nbsp;		if (bZs) {</b>
+<b class="fc">&nbsp;			if (pointCount &gt; 0) {</b>
+<b class="fc">&nbsp;				double zmin = Interop.translateFromAVNaN(shapeBuffer</b>
+<b class="fc">&nbsp;						.getDouble(offset));</b>
+<b class="fc">&nbsp;				offset += 8;</b>
+<b class="fc">&nbsp;				double zmax = Interop.translateFromAVNaN(shapeBuffer</b>
+<b class="fc">&nbsp;						.getDouble(offset));</b>
+<b class="fc">&nbsp;				offset += 8;</b>
+&nbsp;
+<b class="fc">&nbsp;				Envelope1D env = new Envelope1D();</b>
+<b class="fc">&nbsp;				env.setCoords(zmin, zmax);</b>
+<b class="fc">&nbsp;				bbox.setInterval(Semantics.Z, 0, env);</b>
+&nbsp;
+<b class="fc">&nbsp;				if (m_type == Geometry.GeometryType.Polygon</b>
+&nbsp;						|| m_type == Geometry.GeometryType.Polyline
+&nbsp;						|| m_type == Geometry.GeometryType.Unknown) {
+<b class="fc">&nbsp;					zs = (AttributeStreamOfDbl) AttributeStreamBase</b>
+<b class="fc">&nbsp;							.createAttributeStreamWithSemantics(Semantics.Z,</b>
+&nbsp;									pointCount);
+&nbsp;
+<b class="fc">&nbsp;					boolean bCreate = false;</b>
+<b class="fc">&nbsp;					int startpart = parts.read(0);</b>
+<b class="fc">&nbsp;					for (int ipart = 0; ipart &lt; partCount; ipart++) {</b>
+<b class="fc">&nbsp;						int endpartActual = parts.read(ipart + 1);</b>
+<b class="fc">&nbsp;						int endpart = Math.abs(endpartActual);</b>
+&nbsp;
+<b class="fc">&nbsp;						double startz = Interop.translateFromAVNaN(shapeBuffer</b>
+<b class="fc">&nbsp;								.getDouble(offset));</b>
+<b class="fc">&nbsp;						offset += 8;</b>
+<b class="fc">&nbsp;						zs.write(startpart, startz);</b>
+<b class="fc">&nbsp;						if (!VertexDescription.isDefaultValue(Semantics.Z,</b>
+&nbsp;								startz))
+<b class="fc">&nbsp;							bCreate = true;</b>
+&nbsp;
+<b class="fc">&nbsp;						for (int i = startpart + 1; i &lt; endpart; i++) {</b>
+<b class="fc">&nbsp;							double z = Interop.translateFromAVNaN(shapeBuffer</b>
+<b class="fc">&nbsp;									.getDouble(offset));</b>
+<b class="fc">&nbsp;							offset += 8;</b>
+<b class="fc">&nbsp;							zs.write(i, z);</b>
+<b class="fc">&nbsp;							if (!VertexDescription.isDefaultValue(Semantics.Z,</b>
+&nbsp;									z))
+<b class="fc">&nbsp;								bCreate = true;</b>
+&nbsp;						}
+&nbsp;
+<b class="fc">&nbsp;						if (bPolygon &amp;&amp; endpartActual &gt; 0) {</b>
+<b class="fc">&nbsp;							offset += 8;</b>
+&nbsp;						}
+&nbsp;
+<b class="fc">&nbsp;						startpart = endpart;</b>
+&nbsp;					}
+&nbsp;
+<b class="fc">&nbsp;					if (!bCreate)</b>
+<b class="nc">&nbsp;						zs = null;</b>
+<b class="fc">&nbsp;				} else</b>
+<b class="fc">&nbsp;					offset += pointCount * 8;</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			if (m_type == Geometry.GeometryType.Polygon</b>
+&nbsp;					|| m_type == Geometry.GeometryType.Polyline
+&nbsp;					|| m_type == Geometry.GeometryType.Unknown)
+<b class="fc">&nbsp;				multipathImpl.setAttributeStreamRef(Semantics.Z, zs);</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		// read Ms
+<b class="fc">&nbsp;		if (bMs) {</b>
+<b class="fc">&nbsp;			if (pointCount &gt; 0) {</b>
+<b class="fc">&nbsp;				double mmin = Interop.translateFromAVNaN(shapeBuffer</b>
+<b class="fc">&nbsp;						.getDouble(offset));</b>
+<b class="fc">&nbsp;				offset += 8;</b>
+<b class="fc">&nbsp;				double mmax = Interop.translateFromAVNaN(shapeBuffer</b>
+<b class="fc">&nbsp;						.getDouble(offset));</b>
+<b class="fc">&nbsp;				offset += 8;</b>
+&nbsp;
+<b class="fc">&nbsp;				Envelope1D env = new Envelope1D();</b>
+<b class="fc">&nbsp;				env.setCoords(mmin, mmax);</b>
+<b class="fc">&nbsp;				bbox.setInterval(Semantics.M, 0, env);</b>
+&nbsp;
+<b class="fc">&nbsp;				if (m_type == Geometry.GeometryType.Polygon</b>
+&nbsp;						|| m_type == Geometry.GeometryType.Polyline
+&nbsp;						|| m_type == Geometry.GeometryType.Unknown) {
+<b class="fc">&nbsp;					ms = (AttributeStreamOfDbl) AttributeStreamBase</b>
+<b class="fc">&nbsp;							.createAttributeStreamWithSemantics(Semantics.M,</b>
+&nbsp;									pointCount);
+&nbsp;
+<b class="fc">&nbsp;					boolean bCreate = false;</b>
+<b class="fc">&nbsp;					int startpart = parts.read(0);</b>
+<b class="fc">&nbsp;					for (int ipart = 0; ipart &lt; partCount; ipart++) {</b>
+<b class="fc">&nbsp;						int endpartActual = parts.read(ipart + 1);</b>
+<b class="fc">&nbsp;						int endpart = Math.abs(endpartActual);</b>
+&nbsp;
+<b class="fc">&nbsp;						double startm = Interop.translateFromAVNaN(shapeBuffer</b>
+<b class="fc">&nbsp;								.getDouble(offset));</b>
+<b class="fc">&nbsp;						offset += 8;</b>
+<b class="fc">&nbsp;						ms.write(startpart, startm);</b>
+<b class="fc">&nbsp;						if (!VertexDescription.isDefaultValue(Semantics.M,</b>
+&nbsp;								startm))
+<b class="fc">&nbsp;							bCreate = true;</b>
+&nbsp;
+<b class="fc">&nbsp;						for (int i = startpart + 1; i &lt; endpart; i++) {</b>
+<b class="fc">&nbsp;							double m = Interop.translateFromAVNaN(shapeBuffer</b>
+<b class="fc">&nbsp;									.getDouble(offset));</b>
+<b class="fc">&nbsp;							offset += 8;</b>
+<b class="fc">&nbsp;							ms.write(i, m);</b>
+<b class="fc">&nbsp;							if (!VertexDescription.isDefaultValue(Semantics.M,</b>
+&nbsp;									m))
+<b class="fc">&nbsp;								bCreate = true;</b>
+&nbsp;						}
+&nbsp;
+<b class="fc">&nbsp;						if (bPolygon &amp;&amp; endpartActual &gt; 0) {</b>
+<b class="fc">&nbsp;							offset += 8;</b>
+&nbsp;						}
+&nbsp;
+<b class="fc">&nbsp;						startpart = endpart;</b>
+&nbsp;					}
+&nbsp;
+<b class="fc">&nbsp;					if (!bCreate)</b>
+<b class="nc">&nbsp;						ms = null;</b>
+<b class="fc">&nbsp;				} else</b>
+<b class="fc">&nbsp;					offset += pointCount * 8;</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			if (m_type == Geometry.GeometryType.Polygon</b>
+&nbsp;					|| m_type == Geometry.GeometryType.Polyline
+&nbsp;					|| m_type == Geometry.GeometryType.Unknown)
+<b class="fc">&nbsp;				multipathImpl.setAttributeStreamRef(Semantics.M, ms);</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		// read IDs
+<b class="fc">&nbsp;		if (bIDs) {</b>
+<b class="fc">&nbsp;			if (pointCount &gt; 0) {</b>
+<b class="fc">&nbsp;				double idmin = NumberUtils.doubleMax();</b>
+<b class="fc">&nbsp;				double idmax = -NumberUtils.doubleMax();</b>
+&nbsp;
+<b class="fc">&nbsp;				if (m_type == Geometry.GeometryType.Polygon</b>
+&nbsp;						|| m_type == Geometry.GeometryType.Polyline
+&nbsp;						|| m_type == Geometry.GeometryType.Unknown) {
+<b class="fc">&nbsp;					ids = (AttributeStreamOfInt32) AttributeStreamBase</b>
+<b class="fc">&nbsp;							.createAttributeStreamWithSemantics(Semantics.ID,</b>
+&nbsp;									pointCount);
+&nbsp;
+<b class="fc">&nbsp;					boolean bCreate = false;</b>
+<b class="fc">&nbsp;					int startpart = parts.read(0);</b>
+<b class="fc">&nbsp;					for (int ipart = 0; ipart &lt; partCount; ipart++) {</b>
+<b class="fc">&nbsp;						int endpartActual = parts.read(ipart + 1);</b>
+<b class="fc">&nbsp;						int endpart = Math.abs(endpartActual);</b>
+&nbsp;
+<b class="fc">&nbsp;						int startid = shapeBuffer.getInt(offset);</b>
+<b class="fc">&nbsp;						offset += 4;</b>
+<b class="fc">&nbsp;						ids.write(startpart, startid);</b>
+<b class="fc">&nbsp;						if (!VertexDescription.isDefaultValue(Semantics.ID,</b>
+&nbsp;								startid))
+<b class="fc">&nbsp;							bCreate = true;</b>
+&nbsp;
+<b class="fc">&nbsp;						for (int i = startpart + 1; i &lt; endpart; i++) {</b>
+<b class="fc">&nbsp;							int id = shapeBuffer.getInt(offset);</b>
+<b class="fc">&nbsp;							offset += 4;</b>
+<b class="fc">&nbsp;							ids.write(i, id);</b>
+<b class="fc">&nbsp;							if (!bCreate</b>
+<b class="nc">&nbsp;									&amp;&amp; !VertexDescription.isDefaultValue(</b>
+&nbsp;											Semantics.ID, id))
+<b class="nc">&nbsp;								bCreate = true;</b>
+&nbsp;
+<b class="fc">&nbsp;							if (idmin &gt; id)</b>
+<b class="fc">&nbsp;								idmin = id;</b>
+<b class="fc">&nbsp;							else if (idmax &lt; id)</b>
+<b class="fc">&nbsp;								idmax = id;</b>
+&nbsp;						}
+&nbsp;
+<b class="fc">&nbsp;						if (bPolygon &amp;&amp; endpartActual &gt; 0) {</b>
+<b class="fc">&nbsp;							offset += 4;</b>
+&nbsp;						}
+&nbsp;
+<b class="fc">&nbsp;						startpart = endpart;</b>
+&nbsp;					}
+&nbsp;
+<b class="fc">&nbsp;					if (!bCreate)</b>
+<b class="nc">&nbsp;						ids = null;</b>
+<b class="fc">&nbsp;				} else {</b>
+<b class="fc">&nbsp;					for (int i = 0; i &lt; pointCount; i++) {</b>
+<b class="fc">&nbsp;						int id = shapeBuffer.getInt(offset);</b>
+<b class="fc">&nbsp;						offset += 4;</b>
+&nbsp;
+<b class="fc">&nbsp;						if (idmin &gt; id)</b>
+<b class="fc">&nbsp;							idmin = id;</b>
+<b class="fc">&nbsp;						else if (idmax &lt; id)</b>
+<b class="fc">&nbsp;							idmax = id;</b>
+&nbsp;					}
+&nbsp;				}
+&nbsp;
+<b class="fc">&nbsp;				Envelope1D env = new Envelope1D();</b>
+<b class="fc">&nbsp;				env.setCoords(idmin, idmax);</b>
+<b class="fc">&nbsp;				bbox.setInterval(Semantics.ID, 0, env);</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			if (m_type == Geometry.GeometryType.Polygon</b>
+&nbsp;					|| m_type == Geometry.GeometryType.Polyline
+&nbsp;					|| m_type == Geometry.GeometryType.Unknown)
+<b class="fc">&nbsp;				multipathImpl.setAttributeStreamRef(Semantics.ID, ids);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (bHasBadRings &amp;&amp; bHasAttributes) {// revert our hack for bad polygons</b>
+<b class="nc">&nbsp;			for (int ipart = 1; ipart &lt; partCount + 1; ipart++) {</b>
+<b class="nc">&nbsp;				int v = parts.read(ipart);</b>
+<b class="nc">&nbsp;				if (v &lt; 0)</b>
+<b class="nc">&nbsp;					parts.write(ipart, -v);</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (m_type == Geometry.GeometryType.Envelope)</b>
+<b class="fc">&nbsp;			return (Geometry) bbox;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (pointCount &gt; 0) {</b>
+<b class="fc">&nbsp;			multipathImpl.setPathStreamRef(parts);</b>
+<b class="fc">&nbsp;			multipathImpl.setPathFlagsStreamRef(pathFlags);</b>
+<b class="fc">&nbsp;			multipathImpl.setAttributeStreamRef(Semantics.POSITION, position);</b>
+<b class="fc">&nbsp;			multipathImpl.setEnvelope(bbox);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if ((m_importFlags &amp; ShapeImportFlags.ShapeImportNonTrusted) == 0)</b>
+<b class="fc">&nbsp;			multipathImpl.setIsSimple(GeometryXSimple.Weak, 0.0, false);// We</b>
+&nbsp;																		// use
+&nbsp;																		// tolerance
+&nbsp;																		// of 0.
+&nbsp;																		// What
+&nbsp;																		// should
+&nbsp;																		// we
+&nbsp;																		// instead?
+&nbsp;
+<b class="fc">&nbsp;		return (Geometry) multipath;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private Geometry importFromESRIShapeMultiPoint(int modifiers,
+&nbsp;			ByteBuffer shapeBuffer) {
+<b class="fc">&nbsp;		int offset = 4;</b>
+&nbsp;
+<b class="fc">&nbsp;		boolean bZs = (modifiers &amp; (int) ShapeModifiers.ShapeHasZs) != 0;</b>
+<b class="fc">&nbsp;		boolean bMs = (modifiers &amp; (int) ShapeModifiers.ShapeHasMs) != 0;</b>
+<b class="fc">&nbsp;		boolean bIDs = (modifiers &amp; modifiers &amp; (int) ShapeModifiers.ShapeHasIDs) != 0;</b>
+&nbsp;
+<b class="fc">&nbsp;		double xmin = shapeBuffer.getDouble(offset);</b>
+<b class="fc">&nbsp;		offset += 8;</b>
+<b class="fc">&nbsp;		double ymin = shapeBuffer.getDouble(offset);</b>
+<b class="fc">&nbsp;		offset += 8;</b>
+<b class="fc">&nbsp;		double xmax = shapeBuffer.getDouble(offset);</b>
+<b class="fc">&nbsp;		offset += 8;</b>
+<b class="fc">&nbsp;		double ymax = shapeBuffer.getDouble(offset);</b>
+<b class="fc">&nbsp;		offset += 8;</b>
+&nbsp;
+<b class="fc">&nbsp;		int cPoints = shapeBuffer.getInt(offset);</b>
+<b class="fc">&nbsp;		offset += 4;</b>
+&nbsp;
+<b class="fc">&nbsp;		AttributeStreamOfDbl position = null;</b>
+<b class="fc">&nbsp;		AttributeStreamOfDbl zs = null;</b>
+<b class="fc">&nbsp;		AttributeStreamOfDbl ms = null;</b>
+<b class="fc">&nbsp;		AttributeStreamOfInt32 ids = null;</b>
+&nbsp;
+<b class="fc">&nbsp;		Envelope bbox = null;</b>
+<b class="fc">&nbsp;		MultiPoint multipoint = null;</b>
+<b class="fc">&nbsp;		MultiPointImpl multipointImpl = null;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (m_type == Geometry.GeometryType.MultiPoint</b>
+&nbsp;				|| m_type == Geometry.GeometryType.Unknown) {
+<b class="fc">&nbsp;			multipoint = new MultiPoint();</b>
+<b class="fc">&nbsp;			multipointImpl = (MultiPointImpl) multipoint._getImpl();</b>
+&nbsp;
+<b class="fc">&nbsp;			if (cPoints &gt; 0) {</b>
+<b class="fc">&nbsp;				bbox = new Envelope();</b>
+<b class="fc">&nbsp;				multipointImpl.resize(cPoints);</b>
+<b class="fc">&nbsp;				position = (AttributeStreamOfDbl) AttributeStreamBase</b>
+<b class="fc">&nbsp;						.createAttributeStreamWithSemantics(Semantics.POSITION,</b>
+&nbsp;								cPoints);
+&nbsp;
+<b class="fc">&nbsp;				for (int i = 0; i &lt; cPoints; i++) {</b>
+<b class="fc">&nbsp;					double x = shapeBuffer.getDouble(offset);</b>
+<b class="fc">&nbsp;					offset += 8;</b>
+<b class="fc">&nbsp;					double y = shapeBuffer.getDouble(offset);</b>
+<b class="fc">&nbsp;					offset += 8;</b>
+<b class="fc">&nbsp;					position.write(2 * i, x);</b>
+<b class="fc">&nbsp;					position.write(2 * i + 1, y);</b>
+&nbsp;				}
+&nbsp;
+<b class="fc">&nbsp;				multipointImpl.resize(cPoints);</b>
+<b class="fc">&nbsp;				bbox.setCoords(xmin, ymin, xmax, ymax);</b>
+&nbsp;
+<b class="fc">&nbsp;				if (bZs)</b>
+<b class="fc">&nbsp;					bbox.addAttribute(Semantics.Z);</b>
+&nbsp;
+<b class="fc">&nbsp;				if (bMs)</b>
+<b class="nc">&nbsp;					bbox.addAttribute(Semantics.M);</b>
+&nbsp;
+<b class="fc">&nbsp;				if (bIDs)</b>
+<b class="fc">&nbsp;					bbox.addAttribute(Semantics.ID);</b>
+&nbsp;			}
+&nbsp;		} else {
+<b class="fc">&nbsp;			bbox = new Envelope();</b>
+&nbsp;
+<b class="fc">&nbsp;			if (bZs)</b>
+<b class="fc">&nbsp;				bbox.addAttribute(Semantics.Z);</b>
+&nbsp;
+<b class="fc">&nbsp;			if (bMs)</b>
+<b class="nc">&nbsp;				bbox.addAttribute(Semantics.M);</b>
+&nbsp;
+<b class="fc">&nbsp;			if (bIDs)</b>
+<b class="fc">&nbsp;				bbox.addAttribute(Semantics.ID);</b>
+&nbsp;
+<b class="fc">&nbsp;			if (cPoints &gt; 0) {</b>
+<b class="fc">&nbsp;				bbox.setCoords(xmin, ymin, xmax, ymax);</b>
+<b class="fc">&nbsp;				offset += cPoints * 16;</b>
+&nbsp;			} else
+<b class="nc">&nbsp;				return (Geometry) bbox;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (bZs) {</b>
+<b class="fc">&nbsp;			if (cPoints &gt; 0) {</b>
+<b class="fc">&nbsp;				double zmin = Interop.translateFromAVNaN(shapeBuffer</b>
+<b class="fc">&nbsp;						.getDouble(offset));</b>
+<b class="fc">&nbsp;				offset += 8;</b>
+<b class="fc">&nbsp;				double zmax = Interop.translateFromAVNaN(shapeBuffer</b>
+<b class="fc">&nbsp;						.getDouble(offset));</b>
+<b class="fc">&nbsp;				offset += 8;</b>
+&nbsp;
+<b class="fc">&nbsp;				Envelope1D env = new Envelope1D();</b>
+<b class="fc">&nbsp;				env.setCoords(zmin, zmax);</b>
+<b class="fc">&nbsp;				bbox.setInterval(Semantics.Z, 0, env);</b>
+&nbsp;
+<b class="fc">&nbsp;				if (m_type == Geometry.GeometryType.MultiPoint</b>
+&nbsp;						|| m_type == Geometry.GeometryType.Unknown) {
+<b class="fc">&nbsp;					zs = (AttributeStreamOfDbl) AttributeStreamBase</b>
+<b class="fc">&nbsp;							.createAttributeStreamWithSemantics(Semantics.Z,</b>
+&nbsp;									cPoints);
+&nbsp;
+<b class="fc">&nbsp;					boolean bCreate = false;</b>
+<b class="fc">&nbsp;					for (int i = 0; i &lt; cPoints; i++) {</b>
+<b class="fc">&nbsp;						double value = Interop.translateFromAVNaN(shapeBuffer</b>
+<b class="fc">&nbsp;								.getDouble(offset));</b>
+<b class="fc">&nbsp;						offset += 8;</b>
+<b class="fc">&nbsp;						zs.write(i, value);</b>
+<b class="fc">&nbsp;						if (!VertexDescription.isDefaultValue(Semantics.Z,</b>
+&nbsp;								value))
+<b class="fc">&nbsp;							bCreate = true;</b>
+&nbsp;					}
+&nbsp;
+<b class="fc">&nbsp;					if (!bCreate)</b>
+<b class="nc">&nbsp;						zs = null;</b>
+<b class="fc">&nbsp;				} else</b>
+<b class="fc">&nbsp;					offset += cPoints * 8;</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			if (m_type == Geometry.GeometryType.MultiPoint</b>
+&nbsp;					|| m_type == Geometry.GeometryType.Unknown)
+<b class="fc">&nbsp;				multipointImpl.setAttributeStreamRef(Semantics.Z, zs);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (bMs) {</b>
+<b class="nc">&nbsp;			if (cPoints &gt; 0) {</b>
+<b class="nc">&nbsp;				double mmin = Interop.translateFromAVNaN(shapeBuffer</b>
+<b class="nc">&nbsp;						.getDouble(offset));</b>
+<b class="nc">&nbsp;				offset += 8;</b>
+<b class="nc">&nbsp;				double mmax = Interop.translateFromAVNaN(shapeBuffer</b>
+<b class="nc">&nbsp;						.getDouble(offset));</b>
+<b class="nc">&nbsp;				offset += 8;</b>
+&nbsp;
+<b class="nc">&nbsp;				Envelope1D env = new Envelope1D();</b>
+<b class="nc">&nbsp;				env.setCoords(mmin, mmax);</b>
+<b class="nc">&nbsp;				bbox.setInterval(Semantics.M, 0, env);</b>
+<b class="nc">&nbsp;				if (m_type == Geometry.GeometryType.MultiPoint</b>
+&nbsp;						|| m_type == Geometry.GeometryType.Unknown) {
+<b class="nc">&nbsp;					ms = (AttributeStreamOfDbl) AttributeStreamBase</b>
+<b class="nc">&nbsp;							.createAttributeStreamWithSemantics(Semantics.M,</b>
+&nbsp;									cPoints);
+&nbsp;
+<b class="nc">&nbsp;					boolean bCreate = false;</b>
+<b class="nc">&nbsp;					for (int i = 0; i &lt; cPoints; i++) {</b>
+<b class="nc">&nbsp;						double value = Interop.translateFromAVNaN(shapeBuffer</b>
+<b class="nc">&nbsp;								.getDouble(offset));</b>
+<b class="nc">&nbsp;						offset += 8;</b>
+<b class="nc">&nbsp;						ms.write(i, value);</b>
+<b class="nc">&nbsp;						if (!VertexDescription.isDefaultValue(Semantics.M,</b>
+&nbsp;								value))
+<b class="nc">&nbsp;							bCreate = true;</b>
+&nbsp;					}
+&nbsp;
+<b class="nc">&nbsp;					if (!bCreate)</b>
+<b class="nc">&nbsp;						ms = null;</b>
+<b class="nc">&nbsp;				} else</b>
+<b class="nc">&nbsp;					offset += cPoints * 8;</b>
+&nbsp;			}
+&nbsp;
+<b class="nc">&nbsp;			if (m_type == Geometry.GeometryType.MultiPoint</b>
+&nbsp;					|| m_type == Geometry.GeometryType.Unknown)
+<b class="nc">&nbsp;				multipointImpl.setAttributeStreamRef(Semantics.M, ms);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (bIDs) {</b>
+<b class="fc">&nbsp;			if (cPoints &gt; 0) {</b>
+<b class="fc">&nbsp;				double idmin = NumberUtils.doubleMax();</b>
+<b class="fc">&nbsp;				double idmax = -NumberUtils.doubleMax();</b>
+&nbsp;
+<b class="fc">&nbsp;				if (m_type == Geometry.GeometryType.MultiPoint</b>
+&nbsp;						|| m_type == Geometry.GeometryType.Unknown) {
+<b class="fc">&nbsp;					ids = (AttributeStreamOfInt32) AttributeStreamBase</b>
+<b class="fc">&nbsp;							.createAttributeStreamWithSemantics(Semantics.ID,</b>
+&nbsp;									cPoints);
+&nbsp;
+<b class="fc">&nbsp;					boolean bCreate = false;</b>
+<b class="fc">&nbsp;					for (int i = 0; i &lt; cPoints; i++) {</b>
+<b class="fc">&nbsp;						int value = shapeBuffer.getInt(offset);</b>
+<b class="fc">&nbsp;						offset += 4;</b>
+<b class="fc">&nbsp;						ids.write(i, value);</b>
+<b class="fc">&nbsp;						if (!VertexDescription.isDefaultValue(Semantics.ID,</b>
+&nbsp;								value))
+<b class="fc">&nbsp;							bCreate = true;</b>
+&nbsp;
+<b class="fc">&nbsp;						if (idmin &gt; value)</b>
+<b class="fc">&nbsp;							idmin = value;</b>
+<b class="fc">&nbsp;						else if (idmax &lt; value)</b>
+<b class="fc">&nbsp;							idmax = value;</b>
+&nbsp;					}
+&nbsp;
+<b class="fc">&nbsp;					if (!bCreate)</b>
+<b class="nc">&nbsp;						ids = null;</b>
+<b class="fc">&nbsp;				} else {</b>
+<b class="fc">&nbsp;					for (int i = 0; i &lt; cPoints; i++) {</b>
+<b class="fc">&nbsp;						int id = shapeBuffer.getInt(offset);</b>
+<b class="fc">&nbsp;						offset += 4;</b>
+&nbsp;
+<b class="fc">&nbsp;						if (idmin &gt; id)</b>
+<b class="fc">&nbsp;							idmin = id;</b>
+<b class="fc">&nbsp;						else if (idmax &lt; id)</b>
+<b class="fc">&nbsp;							idmax = id;</b>
+&nbsp;					}
+&nbsp;				}
+&nbsp;
+<b class="fc">&nbsp;				Envelope1D env = new Envelope1D();</b>
+<b class="fc">&nbsp;				env.setCoords(idmin, idmax);</b>
+<b class="fc">&nbsp;				bbox.setInterval(Semantics.ID, 0, env);</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			if (m_type == Geometry.GeometryType.MultiPoint</b>
+&nbsp;					|| m_type == Geometry.GeometryType.Unknown)
+<b class="fc">&nbsp;				multipointImpl.setAttributeStreamRef(Semantics.ID, ids);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (m_type == Geometry.GeometryType.Envelope)</b>
+<b class="fc">&nbsp;			return (Geometry) bbox;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (cPoints &gt; 0) {</b>
+<b class="fc">&nbsp;			multipointImpl.setAttributeStreamRef(Semantics.POSITION, position);</b>
+<b class="fc">&nbsp;			multipointImpl.setEnvelope(bbox);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return (Geometry) multipoint;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private Geometry importFromESRIShapePoint(int modifiers,
+&nbsp;			ByteBuffer shapeBuffer) {
+<b class="fc">&nbsp;		int offset = 4;</b>
+&nbsp;
+<b class="fc">&nbsp;		boolean bZs = (modifiers &amp; (int) ShapeModifiers.ShapeHasZs) != 0;</b>
+<b class="fc">&nbsp;		boolean bMs = (modifiers &amp; (int) ShapeModifiers.ShapeHasMs) != 0;</b>
+<b class="fc">&nbsp;		boolean bIDs = (modifiers &amp; modifiers &amp; (int) ShapeModifiers.ShapeHasIDs) != 0;</b>
+&nbsp;
+&nbsp;		// read XY
+<b class="fc">&nbsp;		double x = shapeBuffer.getDouble(offset);</b>
+<b class="fc">&nbsp;		offset += 8;</b>
+<b class="fc">&nbsp;		double y = shapeBuffer.getDouble(offset);</b>
+<b class="fc">&nbsp;		offset += 8;</b>
+&nbsp;
+<b class="fc">&nbsp;		boolean bEmpty = NumberUtils.isNaN(x);</b>
+&nbsp;
+<b class="fc">&nbsp;		double z = NumberUtils.NaN();</b>
+<b class="fc">&nbsp;		if (bZs) {</b>
+<b class="fc">&nbsp;			z = Interop.translateFromAVNaN(shapeBuffer.getDouble(offset));</b>
+<b class="fc">&nbsp;			offset += 8;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		double m = NumberUtils.NaN();</b>
+<b class="fc">&nbsp;		if (bMs) {</b>
+<b class="fc">&nbsp;			m = Interop.translateFromAVNaN(shapeBuffer.getDouble(offset));</b>
+<b class="fc">&nbsp;			offset += 8;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		int id = -1;</b>
+<b class="fc">&nbsp;		if (bIDs) {</b>
+<b class="fc">&nbsp;			id = shapeBuffer.getInt(offset);</b>
+<b class="fc">&nbsp;			offset += 4;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (m_type == Geometry.GeometryType.MultiPoint) {</b>
+<b class="fc">&nbsp;			MultiPoint newmultipoint = new MultiPoint();</b>
+<b class="fc">&nbsp;			MultiPointImpl multipointImpl = (MultiPointImpl) newmultipoint</b>
+<b class="fc">&nbsp;					._getImpl();</b>
+&nbsp;
+<b class="fc">&nbsp;			if (!bEmpty) {</b>
+<b class="fc">&nbsp;				AttributeStreamBase newPositionStream = AttributeStreamBase</b>
+<b class="fc">&nbsp;						.createAttributeStreamWithSemantics(Semantics.POSITION,</b>
+&nbsp;								1);
+<b class="fc">&nbsp;				AttributeStreamOfDbl position = (AttributeStreamOfDbl) newPositionStream;</b>
+<b class="fc">&nbsp;				position.write(0, x);</b>
+<b class="fc">&nbsp;				position.write(1, y);</b>
+&nbsp;
+<b class="fc">&nbsp;				multipointImpl.setAttributeStreamRef(Semantics.POSITION,</b>
+&nbsp;						newPositionStream);
+<b class="fc">&nbsp;				multipointImpl.resize(1);</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			if (bZs) {</b>
+<b class="fc">&nbsp;				multipointImpl.addAttribute(Semantics.Z);</b>
+<b class="fc">&nbsp;				if (!bEmpty</b>
+<b class="fc">&nbsp;						&amp;&amp; !VertexDescription.isDefaultValue(Semantics.Z, z)) {</b>
+<b class="fc">&nbsp;					AttributeStreamBase newZStream = AttributeStreamBase</b>
+<b class="fc">&nbsp;							.createAttributeStreamWithSemantics(Semantics.Z, 1);</b>
+<b class="fc">&nbsp;					newZStream.writeAsDbl(0, z);</b>
+<b class="fc">&nbsp;					multipointImpl.setAttributeStreamRef(Semantics.Z,</b>
+&nbsp;							newZStream);
+&nbsp;				}
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			if (bMs) {</b>
+<b class="fc">&nbsp;				multipointImpl.addAttribute(Semantics.M);</b>
+<b class="fc">&nbsp;				if (!bEmpty</b>
+<b class="fc">&nbsp;						&amp;&amp; !VertexDescription.isDefaultValue(Semantics.M, m)) {</b>
+<b class="fc">&nbsp;					AttributeStreamBase newMStream = AttributeStreamBase</b>
+<b class="fc">&nbsp;							.createAttributeStreamWithSemantics(Semantics.M, 1);</b>
+<b class="fc">&nbsp;					newMStream.writeAsDbl(0, m);</b>
+<b class="fc">&nbsp;					multipointImpl.setAttributeStreamRef(Semantics.M,</b>
+&nbsp;							newMStream);
+&nbsp;				}
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			if (bIDs) {</b>
+<b class="fc">&nbsp;				multipointImpl.addAttribute(Semantics.ID);</b>
+<b class="fc">&nbsp;				if (!bEmpty</b>
+<b class="fc">&nbsp;						&amp;&amp; !VertexDescription.isDefaultValue(Semantics.ID, id)) {</b>
+<b class="fc">&nbsp;					AttributeStreamBase newIDStream = AttributeStreamBase</b>
+<b class="fc">&nbsp;							.createAttributeStreamWithSemantics(Semantics.ID, 1);</b>
+<b class="fc">&nbsp;					newIDStream.writeAsInt(0, id);</b>
+<b class="fc">&nbsp;					multipointImpl.setAttributeStreamRef(Semantics.ID,</b>
+&nbsp;							newIDStream);
+&nbsp;				}
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			return (Geometry) newmultipoint;</b>
+<b class="fc">&nbsp;		} else if (m_type == Geometry.GeometryType.Envelope) {</b>
+<b class="fc">&nbsp;			Envelope envelope = new Envelope();</b>
+<b class="fc">&nbsp;			envelope.setCoords(x, y, x, y);</b>
+&nbsp;
+<b class="fc">&nbsp;			if (bZs) {</b>
+<b class="fc">&nbsp;				Envelope1D interval = new Envelope1D();</b>
+<b class="fc">&nbsp;				interval.vmin = z;</b>
+<b class="fc">&nbsp;				interval.vmax = z;</b>
+<b class="fc">&nbsp;				envelope.addAttribute(Semantics.Z);</b>
+<b class="fc">&nbsp;				envelope.setInterval(Semantics.Z, 0, interval);</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			if (bMs) {</b>
+<b class="fc">&nbsp;				Envelope1D interval = new Envelope1D();</b>
+<b class="fc">&nbsp;				interval.vmin = m;</b>
+<b class="fc">&nbsp;				interval.vmax = m;</b>
+<b class="fc">&nbsp;				envelope.addAttribute(Semantics.M);</b>
+<b class="fc">&nbsp;				envelope.setInterval(Semantics.M, 0, interval);</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			if (bIDs) {</b>
+<b class="fc">&nbsp;				Envelope1D interval = new Envelope1D();</b>
+<b class="fc">&nbsp;				interval.vmin = id;</b>
+<b class="fc">&nbsp;				interval.vmax = id;</b>
+<b class="fc">&nbsp;				envelope.addAttribute(Semantics.ID);</b>
+<b class="fc">&nbsp;				envelope.setInterval(Semantics.ID, 0, interval);</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			return (Geometry) envelope;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		Point point = new Point();</b>
+&nbsp;
+<b class="fc">&nbsp;		if (!bEmpty) {</b>
+<b class="fc">&nbsp;			point.setX(Interop.translateFromAVNaN(x));</b>
+<b class="fc">&nbsp;			point.setY(Interop.translateFromAVNaN(y));</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		// read Z
+<b class="fc">&nbsp;		if (bZs) {</b>
+<b class="fc">&nbsp;			point.addAttribute(Semantics.Z);</b>
+<b class="fc">&nbsp;			if (!bEmpty)</b>
+<b class="fc">&nbsp;				point.setZ(Interop.translateFromAVNaN(z));</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		// read M
+<b class="fc">&nbsp;		if (bMs) {</b>
+<b class="fc">&nbsp;			point.addAttribute(Semantics.M);</b>
+<b class="fc">&nbsp;			if (!bEmpty)</b>
+<b class="fc">&nbsp;				point.setM(Interop.translateFromAVNaN(m));</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		// read ID
+<b class="fc">&nbsp;		if (bIDs) {</b>
+<b class="fc">&nbsp;			point.addAttribute(Semantics.ID);</b>
+<b class="fc">&nbsp;			if (!bEmpty)</b>
+<b class="fc">&nbsp;				point.setID(id);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return (Geometry) point;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-02-21 16:04</div>
+</div>
+</body>
+</html>

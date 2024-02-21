@@ -1,0 +1,617 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > AttributeStreamBase</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.esri.core.geometry</a>
+</div>
+
+<h1>Coverage Summary for Class: AttributeStreamBase (com.esri.core.geometry)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">AttributeStreamBase</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    66,7%
+  </span>
+  <span class="absValue">
+    (10/15)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    47,8%
+  </span>
+  <span class="absValue">
+    (33/69)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; Copyright 1995-2015 Esri
+&nbsp;
+&nbsp;   Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp;   you may not use this file except in compliance with the License.
+&nbsp;   You may obtain a copy of the License at
+&nbsp;
+&nbsp;       http://www.apache.org/licenses/LICENSE-2.0
+&nbsp;
+&nbsp;   Unless required by applicable law or agreed to in writing, software
+&nbsp;   distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp;   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp;   See the License for the specific language governing permissions and
+&nbsp;   limitations under the License.
+&nbsp;
+&nbsp; For additional information, contact:
+&nbsp; Environmental Systems Research Institute, Inc.
+&nbsp; Attn: Contracts Dept
+&nbsp; 380 New York Street
+&nbsp; Redlands, California, USA 92373
+&nbsp;
+&nbsp; email: contracts@esri.com
+&nbsp; */
+&nbsp;
+&nbsp;
+&nbsp;package com.esri.core.geometry;
+&nbsp;
+&nbsp;import com.esri.core.geometry.VertexDescription.Persistence;
+&nbsp;import java.nio.ByteBuffer;
+&nbsp;
+&nbsp;/**
+&nbsp; * Base class for AttributeStream instances.
+&nbsp; */
+&nbsp;abstract class AttributeStreamBase {
+&nbsp;
+&nbsp;	protected boolean m_bLockedInSize;
+&nbsp;	protected boolean m_bReadonly;
+&nbsp;
+<b class="fc">&nbsp;	public AttributeStreamBase() {</b>
+<b class="fc">&nbsp;		m_bReadonly = false;</b>
+<b class="fc">&nbsp;		m_bLockedInSize = false;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns the number of elements in the stream.
+&nbsp;	 */
+&nbsp;	public abstract int virtualSize();
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns an estimate of this object size in bytes.
+&nbsp;	 *
+&nbsp;	 * @return Returns an estimate of this object size in bytes.
+&nbsp;	 */
+&nbsp;	public abstract long estimateMemorySize();
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns the Persistence type of the stream.
+&nbsp;	 */
+&nbsp;	public abstract int getPersistence();
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Reads given element and returns it as double.
+&nbsp;	 */
+&nbsp;	public abstract double readAsDbl(int offset);
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Writes given element as double. The double is cast to the internal
+&nbsp;	 * representation (truncated when int).
+&nbsp;	 */
+&nbsp;	public abstract void writeAsDbl(int offset, double d);
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Reads given element and returns it as int (truncated if double).
+&nbsp;	 */
+&nbsp;	public abstract int readAsInt(int offset);
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Writes given element as int. The int is cast to the internal
+&nbsp;	 * representation.
+&nbsp;	 */
+&nbsp;	public abstract void writeAsInt(int offset, int d);
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Reads given element and returns it as int (truncated if double).
+&nbsp;	 */
+&nbsp;	public abstract long readAsInt64(int offset);
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Writes given element as int. The int is cast to the internal
+&nbsp;	 * representation.
+&nbsp;	 */
+&nbsp;	public abstract void writeAsInt64(int offset, long d);
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Resizes the AttributeStream to the new size.
+&nbsp;	 */
+&nbsp;	public abstract void resize(int newSize, double defaultValue);
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Resizes the AttributeStream to the new size.
+&nbsp;	 */
+&nbsp;	public abstract void resize(int newSize);
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Resizes the AttributeStream to the new size. Does not change the capacity
+&nbsp;	 * of the stream.
+&nbsp;	 */
+&nbsp;	public abstract void resizePreserveCapacity(int newSize);// java only method
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Same as resize(0)
+&nbsp;	 */
+&nbsp;	void clear(boolean bFreeMemory) {
+<b class="fc">&nbsp;		if (bFreeMemory)</b>
+<b class="nc">&nbsp;			resize(0);</b>
+&nbsp;		else
+<b class="fc">&nbsp;			resizePreserveCapacity(0);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Adds a range of elements from the source stream. The streams must be of
+&nbsp;	 * the same type.
+&nbsp;	 * 
+&nbsp;	 * @param src
+&nbsp;	 *            The source stream to read elements from.
+&nbsp;	 * @param srcStart
+&nbsp;	 *            The index of the element in the source stream to start reading
+&nbsp;	 *            from.
+&nbsp;	 * @param count
+&nbsp;	 *            The number of elements to add.
+&nbsp;	 * @param bForward
+&nbsp;	 *            True if adding the elements in order of the incoming source
+&nbsp;	 *            stream. False if adding the elements in reverse.
+&nbsp;	 * @param stride
+&nbsp;	 *            The number of elements to be grouped together if adding the
+&nbsp;	 *            elements in reverse.
+&nbsp;	 */
+&nbsp;	public abstract void addRange(AttributeStreamBase src, int srcStart,
+&nbsp;			int count, boolean bForward, int stride);
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Inserts a range of elements from the source stream. The streams must be
+&nbsp;	 * of the same type.
+&nbsp;	 * 
+&nbsp;	 * @param start
+&nbsp;	 *            The index where to start the insert.
+&nbsp;	 * @param src
+&nbsp;	 *            The source stream to read elements from.
+&nbsp;	 * @param srcStart
+&nbsp;	 *            The index of the element in the source stream to start reading
+&nbsp;	 *            from.
+&nbsp;	 * @param count
+&nbsp;	 *            The number of elements to read from the source stream.
+&nbsp;	 * @param validSize
+&nbsp;	 *            The number of valid elements in this stream.
+&nbsp;	 */
+&nbsp;	public abstract void insertRange(int start, AttributeStreamBase src,
+&nbsp;			int srcStart, int count, boolean bForward, int stride, int validSize);
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Inserts a range of elements of the given value.
+&nbsp;	 * 
+&nbsp;	 * @param start
+&nbsp;	 *            The index where to start the insert.
+&nbsp;	 * @param value
+&nbsp;	 *            The value to be inserted.
+&nbsp;	 * @param count
+&nbsp;	 *            The number of elements to be inserted.
+&nbsp;	 * @param validSize
+&nbsp;	 *            The number of valid elements in this stream.
+&nbsp;	 */
+&nbsp;	public abstract void insertRange(int start, double value, int count,
+&nbsp;			int validSize);
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Inserts the attributes of a given semantics from a Point geometry.
+&nbsp;	 * 
+&nbsp;	 * @param start
+&nbsp;	 *            The index where to start the insert.
+&nbsp;	 * @param pt
+&nbsp;	 *            The Point geometry holding the attributes to be inserted.
+&nbsp;	 * @param semantics
+&nbsp;	 *            The attribute semantics that are being inserted.
+&nbsp;	 * @param validSize
+&nbsp;	 *            The number of valid elements in this stream.
+&nbsp;	 */
+&nbsp;	public abstract void insertAttributes(int start, Point pt, int semantics,
+&nbsp;			int validSize);
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Sets a range of values to given value.
+&nbsp;	 * 
+&nbsp;	 * @param value
+&nbsp;	 *            The value to set stream elements to.
+&nbsp;	 * @param start
+&nbsp;	 *            The index of the element to start writing to.
+&nbsp;	 * @param count
+&nbsp;	 *            The number of elements to set.
+&nbsp;	 */
+&nbsp;	public abstract void setRange(double value, int start, int count);
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Adds a range of elements from the source byte buffer. This stream is
+&nbsp;	 * resized automatically to accomodate required number of elements.
+&nbsp;	 * 
+&nbsp;	 * @param startElement
+&nbsp;	 *            the index of the element in this stream to start setting
+&nbsp;	 *            elements from.
+&nbsp;	 * @param count
+&nbsp;	 *            The number of AttributeStream elements to read.
+&nbsp;	 * @param src
+&nbsp;	 *            The source ByteBuffer to read elements from.
+&nbsp;	 * @param sourceStart
+&nbsp;	 *            The offset from the start of the ByteBuffer in bytes.
+&nbsp;	 * @param bForward
+&nbsp;	 *            When False, the source is written in reversed order.
+&nbsp;	 * @param stride
+&nbsp;	 *            Used for reversed writing only to indicate the unit of
+&nbsp;	 *            writing. elements inside a stride are not reversed. Only the
+&nbsp;	 *            strides are reversed.
+&nbsp;	 */
+&nbsp;	public abstract void writeRange(int startElement, int count,
+&nbsp;			AttributeStreamBase src, int sourceStart, boolean bForward,
+&nbsp;			int stride);
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Adds a range of elements from the source byte buffer. The stream is
+&nbsp;	 * resized automatically to accomodate required number of elements.
+&nbsp;	 * 
+&nbsp;	 * @param startElement
+&nbsp;	 *            the index of the element in this stream to start setting
+&nbsp;	 *            elements from.
+&nbsp;	 * @param count
+&nbsp;	 *            The number of AttributeStream elements to read.
+&nbsp;	 * @param src
+&nbsp;	 *            The source ByteBuffer to read elements from.
+&nbsp;	 * @param offsetBytes
+&nbsp;	 *            The offset from the start of the ByteBuffer in bytes.
+&nbsp;	 */
+&nbsp;	public abstract void writeRange(int startElement, int count,
+&nbsp;			ByteBuffer src, int offsetBytes, boolean bForward);
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Write a range of elements to the source byte buffer.
+&nbsp;	 * 
+&nbsp;	 * @param srcStart
+&nbsp;	 *            The element index to start writing from.
+&nbsp;	 * @param count
+&nbsp;	 *            The number of AttributeStream elements to write.
+&nbsp;	 * @param dst
+&nbsp;	 *            The destination ByteBuffer. The buffer must be large enough or
+&nbsp;	 *            it will throw.
+&nbsp;	 * @param dstOffsetBytes
+&nbsp;	 *            The offset in the destination ByteBuffer to start write
+&nbsp;	 *            elements from.
+&nbsp;	 */
+&nbsp;	public abstract void readRange(int srcStart, int count, ByteBuffer dst,
+&nbsp;			int dstOffsetBytes, boolean bForward);
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Erases a range from the buffer and defragments the result.
+&nbsp;	 * 
+&nbsp;	 * @param index
+&nbsp;	 *            The index in this stream where the erasing starts.
+&nbsp;	 * @param count
+&nbsp;	 *            The number of elements to be erased.
+&nbsp;	 * @param validSize
+&nbsp;	 *            The number of valid elements in this stream.
+&nbsp;	 */
+&nbsp;	public abstract void eraseRange(int index, int count, int validSize);
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Reverses a range from the buffer.
+&nbsp;	 * 
+&nbsp;	 * @param index
+&nbsp;	 *            The index in this stream where the reversing starts.
+&nbsp;	 * @param count
+&nbsp;	 *            The number of elements to be reversed.
+&nbsp;	 * @param stride
+&nbsp;	 *            The number of elements to be grouped together when doing the
+&nbsp;	 *            reverse.
+&nbsp;	 */
+&nbsp;	public abstract void reverseRange(int index, int count, int stride);
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Creates a new attribute stream for storing bytes.
+&nbsp;	 * 
+&nbsp;	 * @param size
+&nbsp;	 *            The number of elements in the stream.
+&nbsp;	 */
+&nbsp;	public static AttributeStreamBase createByteStream(int size) {
+<b class="fc">&nbsp;		AttributeStreamBase newStream = new AttributeStreamOfInt8(size);</b>
+<b class="fc">&nbsp;		return newStream;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Creates a new attribute stream for storing bytes.
+&nbsp;	 * 
+&nbsp;	 * @param size
+&nbsp;	 *            The number of elements in the stream.
+&nbsp;	 * @param defaultValue
+&nbsp;	 *            The default value to fill the stream with.
+&nbsp;	 */
+&nbsp;	public static AttributeStreamBase createByteStream(int size,
+&nbsp;			byte defaultValue) {
+<b class="fc">&nbsp;		AttributeStreamBase newStream = new AttributeStreamOfInt8(size,</b>
+&nbsp;				defaultValue);
+<b class="fc">&nbsp;		return newStream;</b>
+&nbsp;
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Creates a new attribute stream for storing doubles.
+&nbsp;	 * 
+&nbsp;	 * @param size
+&nbsp;	 *            The number of elements in the stream.
+&nbsp;	 */
+&nbsp;	public static AttributeStreamBase createDoubleStream(int size) {
+<b class="fc">&nbsp;		AttributeStreamBase newStream = new AttributeStreamOfDbl(size);</b>
+<b class="fc">&nbsp;		return newStream;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Creates a new attribute stream for storing doubles.
+&nbsp;	 * 
+&nbsp;	 * @param size
+&nbsp;	 *            The number of elements in the stream.
+&nbsp;	 * @param defaultValue
+&nbsp;	 *            The default value to fill the stream with.
+&nbsp;	 */
+&nbsp;	public static AttributeStreamBase createDoubleStream(int size,
+&nbsp;			double defaultValue) {
+<b class="fc">&nbsp;		AttributeStreamBase newStream = new AttributeStreamOfDbl(size,</b>
+&nbsp;				defaultValue);
+<b class="fc">&nbsp;		return newStream;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Creats a copy of the stream that contains upto maxsize elements.
+&nbsp;	 */
+&nbsp;	public abstract AttributeStreamBase restrictedClone(int maxsize);
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Makes the stream to be readonly. Any operation that changes the content
+&nbsp;	 * or size of the stream will throw.
+&nbsp;	 */
+&nbsp;	public void setReadonly() {
+<b class="nc">&nbsp;		m_bReadonly = true;</b>
+<b class="nc">&nbsp;		m_bLockedInSize = true;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public boolean isReadonly() {
+<b class="nc">&nbsp;		return m_bReadonly;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Lock the size of the stream. Any operation that changes the size of the
+&nbsp;	 * stream will throw.
+&nbsp;	 */
+&nbsp;	public void lockSize() {
+<b class="nc">&nbsp;		m_bLockedInSize = true;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public boolean isLockedSize() {
+<b class="nc">&nbsp;		return m_bLockedInSize;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Creates a new attribute stream of given persistence type and size.
+&nbsp;	 * 
+&nbsp;	 * @param persistence
+&nbsp;	 *            The persistence type of the stream (see VertexDescription).
+&nbsp;	 * @param size
+&nbsp;	 *            The number of elements (floats, doubles, or 32 bit integers)
+&nbsp;	 *            of the given type in the stream.
+&nbsp;	 */
+&nbsp;	public static AttributeStreamBase createAttributeStreamWithPersistence(
+&nbsp;			int persistence, int size) {
+&nbsp;		AttributeStreamBase newStream;
+<b class="nc">&nbsp;		switch (persistence) {</b>
+&nbsp;		case (Persistence.enumFloat):
+<b class="nc">&nbsp;			newStream = new AttributeStreamOfFloat(size);</b>
+<b class="nc">&nbsp;			break;</b>
+&nbsp;		case (Persistence.enumDouble):
+<b class="nc">&nbsp;			newStream = new AttributeStreamOfDbl(size);</b>
+<b class="nc">&nbsp;			break;</b>
+&nbsp;		case (Persistence.enumInt32):
+<b class="nc">&nbsp;			newStream = new AttributeStreamOfInt32(size);</b>
+<b class="nc">&nbsp;			break;</b>
+&nbsp;		case (Persistence.enumInt64):
+<b class="nc">&nbsp;			newStream = new AttributeStreamOfInt64(size);</b>
+<b class="nc">&nbsp;			break;</b>
+&nbsp;		case (Persistence.enumInt8):
+<b class="nc">&nbsp;			newStream = new AttributeStreamOfInt8(size);</b>
+<b class="nc">&nbsp;			break;</b>
+&nbsp;		case (Persistence.enumInt16):
+<b class="nc">&nbsp;			newStream = new AttributeStreamOfInt16(size);</b>
+<b class="nc">&nbsp;			break;</b>
+&nbsp;		default:
+<b class="nc">&nbsp;			throw new GeometryException(&quot;Internal Error&quot;);</b>
+&nbsp;		}
+<b class="nc">&nbsp;		return newStream;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Creates a new attribute stream of given persistence type and size.
+&nbsp;	 * 
+&nbsp;	 * @param persistence
+&nbsp;	 *            The persistence type of the stream (see VertexDescription).
+&nbsp;	 * @param size
+&nbsp;	 *            The number of elements (floats, doubles, or 32 bit integers)
+&nbsp;	 *            of the given type in the stream.
+&nbsp;	 * @param defaultValue
+&nbsp;	 *            The default value to fill the stream with.
+&nbsp;	 */
+&nbsp;	public static AttributeStreamBase createAttributeStreamWithPersistence(
+&nbsp;			int persistence, int size, double defaultValue) {
+&nbsp;		AttributeStreamBase newStream;
+<b class="fc">&nbsp;		switch (persistence) {</b>
+&nbsp;		case (Persistence.enumFloat):
+<b class="nc">&nbsp;			newStream = new AttributeStreamOfFloat(size, (float) defaultValue);</b>
+<b class="nc">&nbsp;			break;</b>
+&nbsp;		case (Persistence.enumDouble):
+<b class="fc">&nbsp;			newStream = new AttributeStreamOfDbl(size, (double) defaultValue);</b>
+<b class="fc">&nbsp;			break;</b>
+&nbsp;		case (Persistence.enumInt32):
+<b class="fc">&nbsp;			newStream = new AttributeStreamOfInt32(size, (int) defaultValue);</b>
+<b class="fc">&nbsp;			break;</b>
+&nbsp;		case (Persistence.enumInt64):
+<b class="nc">&nbsp;			newStream = new AttributeStreamOfInt64(size, (long) defaultValue);</b>
+<b class="nc">&nbsp;			break;</b>
+&nbsp;		case (Persistence.enumInt8):
+<b class="nc">&nbsp;			newStream = new AttributeStreamOfInt8(size, (byte) defaultValue);</b>
+<b class="nc">&nbsp;			break;</b>
+&nbsp;		case (Persistence.enumInt16):
+<b class="nc">&nbsp;			newStream = new AttributeStreamOfInt16(size, (short) defaultValue);</b>
+<b class="nc">&nbsp;			break;</b>
+&nbsp;		default:
+<b class="nc">&nbsp;			throw new GeometryException(&quot;Internal Error&quot;);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return newStream;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Creates a new attribute stream for the given semantics and vertex count.
+&nbsp;	 * 
+&nbsp;	 * @param semantics
+&nbsp;	 *            The semantics of the attribute (see VertexDescription).
+&nbsp;	 * @param vertexCount
+&nbsp;	 *            The number of vertices in the geometry. The actual number of
+&nbsp;	 *            elements in the stream is vertexCount * ncomponents.
+&nbsp;	 */
+&nbsp;	public static AttributeStreamBase createAttributeStreamWithSemantics(
+&nbsp;			int semantics, int vertexCount) {
+<b class="fc">&nbsp;		int ncomps = VertexDescription.getComponentCount(semantics);</b>
+<b class="fc">&nbsp;		int persistence = VertexDescription.getPersistence(semantics);</b>
+<b class="fc">&nbsp;		return createAttributeStreamWithPersistence(persistence, vertexCount</b>
+<b class="fc">&nbsp;				* ncomps, VertexDescription.getDefaultValue(semantics));</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Creates a new attribute stream for storing vertex indices.
+&nbsp;	 * 
+&nbsp;	 * @param size
+&nbsp;	 *            The number of elements in the stream.
+&nbsp;	 */
+&nbsp;	public static AttributeStreamBase createIndexStream(int size) {
+<b class="fc">&nbsp;		int persistence = Persistence.enumInt32;// VertexDescription.getPersistenceFromInt(NumberUtils::SizeOf((int)0));</b>
+&nbsp;		AttributeStreamBase newStream;
+<b class="fc">&nbsp;		switch (persistence) {</b>
+&nbsp;		case (Persistence.enumInt32):
+<b class="fc">&nbsp;			newStream = new AttributeStreamOfInt32(size);</b>
+<b class="fc">&nbsp;			break;</b>
+&nbsp;		case (Persistence.enumInt64):
+<b class="nc">&nbsp;			newStream = new AttributeStreamOfInt64(size);</b>
+<b class="nc">&nbsp;			break;</b>
+&nbsp;		default:
+<b class="nc">&nbsp;			throw new GeometryException(&quot;Internal Error&quot;);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return newStream;</b>
+&nbsp;
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Creates a new attribute stream for storing vertex indices.
+&nbsp;	 * 
+&nbsp;	 * @param size
+&nbsp;	 *            The number of elements in the stream.
+&nbsp;	 * @param defaultValue
+&nbsp;	 *            The default value to fill the stream with.
+&nbsp;	 */
+&nbsp;	public static AttributeStreamBase createIndexStream(int size,
+&nbsp;			int defaultValue) {
+<b class="fc">&nbsp;		int persistence = Persistence.enumInt32;// VertexDescription.getPersistenceFromInt(NumberUtils::SizeOf((int)0));</b>
+&nbsp;		AttributeStreamBase newStream;
+<b class="fc">&nbsp;		switch (persistence) {</b>
+&nbsp;		case (Persistence.enumInt32):
+<b class="fc">&nbsp;			newStream = new AttributeStreamOfInt32(size, (int) defaultValue);</b>
+<b class="fc">&nbsp;			break;</b>
+&nbsp;		case (Persistence.enumInt64):
+<b class="nc">&nbsp;			newStream = new AttributeStreamOfInt64(size, (long) defaultValue);</b>
+<b class="nc">&nbsp;			break;</b>
+&nbsp;		default:
+<b class="nc">&nbsp;			throw new GeometryException(&quot;Internal Error&quot;);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return newStream;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public abstract int calculateHashImpl(int hashCode, int start, int end);
+&nbsp;
+&nbsp;	public abstract boolean equals(AttributeStreamBase other, int start, int end);
+&nbsp;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-02-21 16:04</div>
+</div>
+</body>
+</html>

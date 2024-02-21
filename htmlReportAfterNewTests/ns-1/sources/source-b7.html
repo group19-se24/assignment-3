@@ -1,0 +1,894 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > Point2D</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.esri.core.geometry</a>
+</div>
+
+<h1>Coverage Summary for Class: Point2D (com.esri.core.geometry)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">Point2D</td>
+<td class="coverageStat">
+  <span class="percent">
+    63,3%
+  </span>
+  <span class="absValue">
+    (38/60)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    32,4%
+  </span>
+  <span class="absValue">
+    (116/358)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">Point2D$CompareVectors</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    64,5%
+  </span>
+  <span class="absValue">
+    (40/62)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    32,8%
+  </span>
+  <span class="absValue">
+    (118/360)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; Copyright 1995-2018 Esri
+&nbsp;
+&nbsp;   Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp;   you may not use this file except in compliance with the License.
+&nbsp;   You may obtain a copy of the License at
+&nbsp;
+&nbsp;       http://www.apache.org/licenses/LICENSE-2.0
+&nbsp;
+&nbsp;   Unless required by applicable law or agreed to in writing, software
+&nbsp;   distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp;   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp;   See the License for the specific language governing permissions and
+&nbsp;   limitations under the License.
+&nbsp;
+&nbsp; For additional information, contact:
+&nbsp; Environmental Systems Research Institute, Inc.
+&nbsp; Attn: Contracts Dept
+&nbsp; 380 New York Street
+&nbsp; Redlands, California, USA 92373
+&nbsp;
+&nbsp; email: contracts@esri.com
+&nbsp; */
+&nbsp;
+&nbsp;
+&nbsp;package com.esri.core.geometry;
+&nbsp;
+&nbsp;import java.io.Serializable;
+&nbsp;import java.math.BigDecimal;
+&nbsp;import java.util.Comparator;
+&nbsp;
+&nbsp;/**
+&nbsp; * 
+&nbsp; * Basic 2D point class. Contains only two double fields.
+&nbsp; * 
+&nbsp; */
+<b class="fc">&nbsp;public final class Point2D implements Serializable{</b>
+&nbsp;	private static final long serialVersionUID = 1L;
+&nbsp;	
+&nbsp;	public double x;
+&nbsp;	public double y;
+&nbsp;
+<b class="fc">&nbsp;	public Point2D() {</b>
+&nbsp;	}
+&nbsp;
+<b class="fc">&nbsp;	public Point2D(double x, double y) {</b>
+<b class="fc">&nbsp;		this.x = x;</b>
+<b class="fc">&nbsp;		this.y = y;</b>
+&nbsp;	}
+&nbsp;
+<b class="fc">&nbsp;	public Point2D(Point2D other) {</b>
+<b class="fc">&nbsp;		setCoords(other);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public static Point2D construct(double x, double y) {
+<b class="fc">&nbsp;		return new Point2D(x, y);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public void setCoords(double x, double y) {
+<b class="fc">&nbsp;		this.x = x;</b>
+<b class="fc">&nbsp;		this.y = y;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public void setCoords(Point2D other) {
+<b class="fc">&nbsp;		x = other.x;</b>
+<b class="fc">&nbsp;		y = other.y;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public boolean isEqual(Point2D other) {
+<b class="fc">&nbsp;		return x == other.x &amp;&amp; y == other.y;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public boolean isEqual(double x_, double y_) { 
+<b class="nc">&nbsp;		return x == x_ &amp;&amp; y == y_;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public boolean isEqual(Point2D other, double tol) {
+<b class="fc">&nbsp;		return (Math.abs(x - other.x) &lt;= tol) &amp;&amp; (Math.abs(y - other.y) &lt;= tol);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public boolean equals(Point2D other) {
+<b class="fc">&nbsp;		return x == other.x &amp;&amp; y == other.y;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public boolean equals(Object other) {
+<b class="fc">&nbsp;		if (other == this)</b>
+<b class="nc">&nbsp;			return true;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (!(other instanceof Point2D))</b>
+<b class="nc">&nbsp;			return false;</b>
+&nbsp;		
+<b class="fc">&nbsp;		Point2D v = (Point2D)other;</b>
+&nbsp;		
+<b class="fc">&nbsp;		return x == v.x &amp;&amp; y == v.y;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public int hashCode() {
+<b class="nc">&nbsp;		return NumberUtils.hash(NumberUtils.hash(x), y);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	
+&nbsp;	public void sub(Point2D other) {
+<b class="fc">&nbsp;		x -= other.x;</b>
+<b class="fc">&nbsp;		y -= other.y;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public void sub(Point2D p1, Point2D p2) {
+<b class="fc">&nbsp;		x = p1.x - p2.x;</b>
+<b class="fc">&nbsp;		y = p1.y - p2.y;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public void add(Point2D other) {
+<b class="fc">&nbsp;		x += other.x;</b>
+<b class="fc">&nbsp;		y += other.y;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public void add(Point2D p1, Point2D p2) {
+<b class="fc">&nbsp;		x = p1.x + p2.x;</b>
+<b class="fc">&nbsp;		y = p1.y + p2.y;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public void negate() {
+<b class="fc">&nbsp;		x = -x;</b>
+<b class="fc">&nbsp;		y = -y;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public void negate(Point2D other) {
+<b class="fc">&nbsp;		x = -other.x;</b>
+<b class="fc">&nbsp;		y = -other.y;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public void interpolate(Point2D other, double alpha) {
+<b class="nc">&nbsp;		MathUtils.lerp(this, other, alpha, this);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public void interpolate(Point2D p1, Point2D p2, double alpha) {
+<b class="nc">&nbsp;		MathUtils.lerp(p1,  p2, alpha, this);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Calculates this = this * f + shift
+&nbsp;	 * @param f
+&nbsp;	 * @param shift
+&nbsp;	 */
+&nbsp;	public void scaleAdd(double f, Point2D shift) {
+<b class="fc">&nbsp;		x = x * f + shift.x;</b>
+<b class="fc">&nbsp;		y = y * f + shift.y;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Calculates this = other * f + shift
+&nbsp;	 * @param f
+&nbsp;	 * @param other
+&nbsp;	 * @param shift
+&nbsp;	 */
+&nbsp;	public void scaleAdd(double f, Point2D other, Point2D shift) {
+<b class="fc">&nbsp;		x = other.x * f + shift.x;</b>
+<b class="fc">&nbsp;		y = other.y * f + shift.y;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public void scale(double f, Point2D other) {
+<b class="nc">&nbsp;		x = f * other.x;</b>
+<b class="nc">&nbsp;		y = f * other.y;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public void scale(double f) {
+<b class="fc">&nbsp;		x *= f;</b>
+<b class="fc">&nbsp;		y *= f;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Compares two vertices lexicographically by y.
+&nbsp;	 */
+&nbsp;	public int compare(Point2D other) {
+<b class="fc">&nbsp;		return y &lt; other.y ? -1 : (y &gt; other.y ? 1 : (x &lt; other.x ? -1</b>
+<b class="fc">&nbsp;				: (x &gt; other.x ? 1 : 0)));</b>
+&nbsp;	}
+&nbsp;	/**
+&nbsp;	 * Compares two vertices lexicographically by x.
+&nbsp;	 */
+&nbsp;	int compareX(Point2D other) {
+<b class="nc">&nbsp;		return x &lt; other.x ? -1 : (x &gt; other.x ? 1 : (y &lt; other.y ? -1</b>
+<b class="nc">&nbsp;				: (y &gt; other.y ? 1 : 0)));</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public void normalize(Point2D other) {
+<b class="nc">&nbsp;		double len = other.length();</b>
+<b class="nc">&nbsp;		if (len == 0) {</b>
+<b class="nc">&nbsp;			x = 1.0;</b>
+<b class="nc">&nbsp;			y = 0.0;</b>
+&nbsp;		} else {
+<b class="nc">&nbsp;			x = other.x / len;</b>
+<b class="nc">&nbsp;			y = other.y / len;</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	public void normalize() {
+<b class="fc">&nbsp;		double len = length();</b>
+<b class="fc">&nbsp;		if (len == 0)// (!len)</b>
+&nbsp;		{
+<b class="nc">&nbsp;			x = 1.0;</b>
+<b class="nc">&nbsp;			y = 0.0;</b>
+&nbsp;		}
+<b class="fc">&nbsp;		x /= len;</b>
+<b class="fc">&nbsp;		y /= len;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public double length() {
+<b class="fc">&nbsp;		return Math.sqrt(x * x + y * y);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public double sqrLength() {
+<b class="fc">&nbsp;		return x * x + y * y;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public static double distance(Point2D pt1, Point2D pt2) {
+<b class="fc">&nbsp;		return Math.sqrt(sqrDistance(pt1, pt2));</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public double dotProduct(Point2D other) {
+<b class="fc">&nbsp;		return x * other.x + y * other.y;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	double _dotProductAbs(Point2D other) {
+<b class="fc">&nbsp;		return Math.abs(x * other.x) + Math.abs(y * other.y);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public double crossProduct(Point2D other) {
+<b class="fc">&nbsp;		return x * other.y - y * other.x;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public void rotateDirect(double Cos, double Sin) // corresponds to the
+&nbsp;												// Transformation2D.SetRotate(cos,
+&nbsp;												// sin).Transform(pt)
+&nbsp;	{
+<b class="nc">&nbsp;		double xx = x * Cos - y * Sin;</b>
+<b class="nc">&nbsp;		double yy = x * Sin + y * Cos;</b>
+<b class="nc">&nbsp;		x = xx;</b>
+<b class="nc">&nbsp;		y = yy;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public void rotateReverse(double Cos, double Sin) {
+<b class="fc">&nbsp;		double xx = x * Cos + y * Sin;</b>
+<b class="fc">&nbsp;		double yy = -x * Sin + y * Cos;</b>
+<b class="fc">&nbsp;		x = xx;</b>
+<b class="fc">&nbsp;		y = yy;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * 90 degree rotation, anticlockwise. Equivalent to RotateDirect(cos(pi/2),
+&nbsp;	 * sin(pi/2)).
+&nbsp;	 */
+&nbsp;	public void leftPerpendicular() {
+<b class="fc">&nbsp;		double xx = x;</b>
+<b class="fc">&nbsp;		x = -y;</b>
+<b class="fc">&nbsp;		y = xx;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * 90 degree rotation, anticlockwise. Equivalent to RotateDirect(cos(pi/2),
+&nbsp;	 * sin(pi/2)).
+&nbsp;	 */
+&nbsp;	public void leftPerpendicular(Point2D pt) {
+<b class="fc">&nbsp;		x = -pt.y;</b>
+<b class="fc">&nbsp;		y = pt.x;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * 270 degree rotation, anticlockwise. Equivalent to
+&nbsp;	 * RotateDirect(-cos(pi/2), sin(-pi/2)).
+&nbsp;	 */
+&nbsp;	public void rightPerpendicular() {
+<b class="fc">&nbsp;		double xx = x;</b>
+<b class="fc">&nbsp;		x = y;</b>
+<b class="fc">&nbsp;		y = -xx;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * 270 degree rotation, anticlockwise. Equivalent to
+&nbsp;	 * RotateDirect(-cos(pi/2), sin(-pi/2)).
+&nbsp;	 */
+&nbsp;	public void rightPerpendicular(Point2D pt) {
+<b class="nc">&nbsp;		x = pt.y;</b>
+<b class="nc">&nbsp;		y = -pt.x;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void _setNan() {
+<b class="nc">&nbsp;		x = NumberUtils.NaN();</b>
+<b class="nc">&nbsp;		y = NumberUtils.NaN();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	boolean _isNan() {
+<b class="fc">&nbsp;		return NumberUtils.isNaN(x) || NumberUtils.isNaN(y);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// calculates which quarter of xy plane the vector lies in. First quater is
+&nbsp;	// between vectors (1,0) and (0, 1), second between (0, 1) and (-1, 0), etc.
+&nbsp;	// Angle intervals corresponding to quarters: 1 : [0 : 90); 2 : [90 : 180);
+&nbsp;	// 3 : [180 : 270); 4 : [270 : 360)
+&nbsp;	final int _getQuarter() {
+<b class="fc">&nbsp;		if (x &gt; 0) {</b>
+<b class="fc">&nbsp;			if (y &gt;= 0)</b>
+<b class="fc">&nbsp;				return 1; // x &gt; 0 &amp;&amp; y &lt;= 0</b>
+&nbsp;			else
+<b class="fc">&nbsp;				return 4; // y &lt; 0 &amp;&amp; x &gt; 0. Should be x &gt;= 0 &amp;&amp; y &lt; 0. The x ==</b>
+&nbsp;							// 0 case is processed later.
+&nbsp;		} else {
+<b class="fc">&nbsp;			if (y &gt; 0)</b>
+<b class="fc">&nbsp;				return 2; // x &lt;= 0 &amp;&amp; y &gt; 0</b>
+&nbsp;			else
+<b class="fc">&nbsp;				return x == 0 ? 4 : 3; // 3: x &lt; 0 &amp;&amp; y &lt;= 0. The case x == 0 &amp;&amp;</b>
+&nbsp;										// y &lt;= 0 is attribute to the case 4.
+&nbsp;										// The point x==0 and y==0 is a bug, but
+&nbsp;										// will be assigned to 4.
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	* Calculates which quarter of XY plane the vector lies in. First quarter is
+&nbsp;	* between vectors (1,0) and (0, 1), second between (0, 1) and (-1, 0), etc.
+&nbsp;	* The quarters are numbered counterclockwise.
+&nbsp;	* Angle intervals corresponding to quarters: 1 : [0 : 90); 2 : [90 : 180);
+&nbsp;	* 3 : [180 : 270); 4 : [270 : 360)
+&nbsp;	*/
+<b class="nc">&nbsp;	public int getQuarter() { return _getQuarter(); }</b>
+&nbsp;	
+&nbsp;	// Assume vector v1 and v2 have same origin. The function compares the
+&nbsp;	// vectors by angle from the x axis to the vector in the counter clockwise
+&nbsp;	// direction.
+&nbsp;	//   &gt;    &gt;
+&nbsp;	//   \   /
+&nbsp;	// V3 \ / V1
+&nbsp;	//     \
+&nbsp;	//      \
+&nbsp;	//       &gt;V2
+&nbsp;	// _compareVectors(V1, V2) == -1.
+&nbsp;	// _compareVectors(V1, V3) == -1
+&nbsp;	// _compareVectors(V2, V3) == 1
+&nbsp;	//
+&nbsp;	final static int _compareVectors(Point2D v1, Point2D v2) {
+<b class="fc">&nbsp;		int q1 = v1._getQuarter();</b>
+<b class="fc">&nbsp;		int q2 = v2._getQuarter();</b>
+&nbsp;
+<b class="fc">&nbsp;		if (q2 == q1) {</b>
+<b class="fc">&nbsp;			double cross = v1.crossProduct(v2);</b>
+<b class="fc">&nbsp;			return cross &lt; 0 ? 1 : (cross &gt; 0 ? -1 : 0);</b>
+&nbsp;		} else
+<b class="fc">&nbsp;			return q1 &lt; q2 ? -1 : 1;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Assume vector v1 and v2 have same origin. The function compares the
+&nbsp;	 * vectors by angle in the counter clockwise direction from the axis X.
+&nbsp;	 * 
+&nbsp;	 * For example, V1 makes 30 degree angle counterclockwise from horizontal x axis
+&nbsp;	 * V2, makes 270, V3 makes 90, then 
+&nbsp;	 * compareVectors(V1, V2) == -1.
+&nbsp;	 * compareVectors(V1, V3) == -1.
+&nbsp;	 * compareVectors(V2, V3) == 1.
+&nbsp;	 * @return Returns 1 if v1 is less than v2, 0 if equal, and 1 if greater.
+&nbsp;	 */
+&nbsp;	public static int compareVectors(Point2D v1, Point2D v2) {
+<b class="nc">&nbsp;		return _compareVectors(v1, v2);</b>
+&nbsp;	}
+&nbsp;	
+<b class="fc">&nbsp;	static class CompareVectors implements Comparator&lt;Point2D&gt; {</b>
+&nbsp;		@Override
+&nbsp;		public int compare(Point2D v1, Point2D v2) {
+<b class="fc">&nbsp;			return _compareVectors((Point2D) v1, (Point2D) v2);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	public static double sqrDistance(Point2D pt1, Point2D pt2) {
+<b class="fc">&nbsp;		double dx = pt1.x - pt2.x;</b>
+<b class="fc">&nbsp;		double dy = pt1.y - pt2.y;</b>
+<b class="fc">&nbsp;		return dx * dx + dy * dy;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public String toString() {
+<b class="nc">&nbsp;		return &quot;(&quot; + x + &quot; , &quot; + y + &quot;)&quot;;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public void setNaN() {
+<b class="fc">&nbsp;		x = NumberUtils.NaN();</b>
+<b class="fc">&nbsp;		y = NumberUtils.NaN();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public boolean isNaN() {
+<b class="nc">&nbsp;		return NumberUtils.isNaN(x) || NumberUtils.isNaN(y);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// metric = 1: Manhattan metric
+&nbsp;	// 2: Euclidian metric (default)
+&nbsp;	// 0: used for L-infinite (max(fabs(x), fabs(y))
+&nbsp;	// for predefined metrics, use the DistanceMetricEnum defined in WKSPoint.h
+&nbsp;	double _norm(int metric) {
+<b class="nc">&nbsp;		if (metric &lt; 0 || _isNan())</b>
+<b class="nc">&nbsp;			return NumberUtils.NaN();</b>
+&nbsp;
+<b class="nc">&nbsp;		switch (metric) {</b>
+&nbsp;		case 0: // L-infinite
+<b class="nc">&nbsp;			return Math.abs(x) &gt;= Math.abs(y) ? Math.abs(x) : Math.abs(y);</b>
+&nbsp;
+&nbsp;		case 1: // L1 or Manhattan metric
+<b class="nc">&nbsp;			return Math.abs(x) + Math.abs(y);</b>
+&nbsp;
+&nbsp;		case 2: // L2 or Euclidean metric
+<b class="nc">&nbsp;			return Math.sqrt(x * x + y * y);</b>
+&nbsp;
+&nbsp;		default:
+<b class="nc">&nbsp;			return Math</b>
+<b class="nc">&nbsp;					.pow(Math.pow(x, (double) metric)</b>
+<b class="nc">&nbsp;							+ Math.pow(y, (double) metric),</b>
+&nbsp;							1.0 / (double) metric);
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * returns signed distance of point from infinite line represented by
+&nbsp;	 * pt_1...pt_2. The returned distance is positive if this point lies on the
+&nbsp;	 * right-hand side of the line, negative otherwise. If the two input points
+&nbsp;	 * are equal, the (positive) distance of this point to p_1 is returned.
+&nbsp;	 */
+&nbsp;	double offset(/* const */Point2D pt1, /* const */Point2D pt2) {
+<b class="nc">&nbsp;		double newDistance = distance(pt1, pt2);</b>
+<b class="nc">&nbsp;		Point2D p = construct(x, y);</b>
+<b class="nc">&nbsp;		if (newDistance == 0.0)</b>
+<b class="nc">&nbsp;			return distance(p, pt1);</b>
+&nbsp;
+&nbsp;		// get vectors relative to pt_1
+<b class="nc">&nbsp;		Point2D p2 = new Point2D();</b>
+<b class="nc">&nbsp;		p2.setCoords(pt2);</b>
+<b class="nc">&nbsp;		p2.sub(pt1);</b>
+<b class="nc">&nbsp;		p.sub(pt1);</b>
+&nbsp;
+<b class="nc">&nbsp;		double cross = p.crossProduct(p2);</b>
+<b class="nc">&nbsp;		return cross / newDistance;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Calculates the orientation of the triangle formed by p, q, r. Returns 1
+&nbsp;	 * for counter-clockwise, -1 for clockwise, and 0 for collinear. May use
+&nbsp;	 * high precision arithmetics for some special degenerate cases.
+&nbsp;	 */
+&nbsp;	public static int orientationRobust(Point2D p, Point2D q, Point2D r) {
+<b class="fc">&nbsp;		ECoordinate det_ec = new ECoordinate();</b>
+<b class="fc">&nbsp;		det_ec.set(q.x);</b>
+<b class="fc">&nbsp;		det_ec.sub(p.x);</b>
+&nbsp;
+<b class="fc">&nbsp;		ECoordinate rp_y_ec = new ECoordinate();</b>
+<b class="fc">&nbsp;		rp_y_ec.set(r.y);</b>
+<b class="fc">&nbsp;		rp_y_ec.sub(p.y);</b>
+&nbsp;
+<b class="fc">&nbsp;		ECoordinate qp_y_ec = new ECoordinate();</b>
+<b class="fc">&nbsp;		qp_y_ec.set(q.y);</b>
+<b class="fc">&nbsp;		qp_y_ec.sub(p.y);</b>
+&nbsp;
+<b class="fc">&nbsp;		ECoordinate rp_x_ec = new ECoordinate();</b>
+<b class="fc">&nbsp;		rp_x_ec.set(r.x);</b>
+<b class="fc">&nbsp;		rp_x_ec.sub(p.x);</b>
+&nbsp;
+<b class="fc">&nbsp;		det_ec.mul(rp_y_ec);</b>
+<b class="fc">&nbsp;		qp_y_ec.mul(rp_x_ec);</b>
+<b class="fc">&nbsp;		det_ec.sub(qp_y_ec);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (!det_ec.isFuzzyZero()) {</b>
+<b class="fc">&nbsp;			double det_ec_value = det_ec.value();</b>
+&nbsp;
+<b class="fc">&nbsp;			if (det_ec_value &lt; 0.0)</b>
+<b class="fc">&nbsp;				return -1;</b>
+&nbsp;
+<b class="fc">&nbsp;			if (det_ec_value &gt; 0.0)</b>
+<b class="fc">&nbsp;				return 1;</b>
+&nbsp;
+<b class="fc">&nbsp;			return 0;</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		// Need extended precision
+&nbsp;
+<b class="fc">&nbsp;		BigDecimal det_mp = new BigDecimal(q.x);</b>
+<b class="fc">&nbsp;		BigDecimal px_mp = new BigDecimal(p.x);</b>
+<b class="fc">&nbsp;		BigDecimal py_mp = new BigDecimal(p.y);</b>
+<b class="fc">&nbsp;		det_mp = det_mp.subtract(px_mp);</b>
+&nbsp;
+<b class="fc">&nbsp;		BigDecimal rp_y_mp = new BigDecimal(r.y);</b>
+<b class="fc">&nbsp;		rp_y_mp = rp_y_mp.subtract(py_mp);</b>
+&nbsp;
+<b class="fc">&nbsp;		BigDecimal qp_y_mp = new BigDecimal(q.y);</b>
+<b class="fc">&nbsp;		qp_y_mp = qp_y_mp.subtract(py_mp);</b>
+&nbsp;
+<b class="fc">&nbsp;		BigDecimal rp_x_mp = new BigDecimal(r.x);</b>
+<b class="fc">&nbsp;		rp_x_mp = rp_x_mp.subtract(px_mp);</b>
+&nbsp;
+<b class="fc">&nbsp;		det_mp = det_mp.multiply(rp_y_mp);</b>
+<b class="fc">&nbsp;		qp_y_mp = qp_y_mp.multiply(rp_x_mp);</b>
+<b class="fc">&nbsp;		det_mp = det_mp.subtract(qp_y_mp);</b>
+&nbsp;
+<b class="fc">&nbsp;		return det_mp.signum();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	private static int inCircleRobustMP_(Point2D p, Point2D q, Point2D r, Point2D s) {
+<b class="nc">&nbsp;		BigDecimal sx_mp = new BigDecimal(s.x), sy_mp = new BigDecimal(s.y);</b>
+&nbsp;
+<b class="nc">&nbsp;		BigDecimal psx_mp = new BigDecimal(p.x), psy_mp = new BigDecimal(p.y);</b>
+<b class="nc">&nbsp;		psx_mp = psx_mp.subtract(sx_mp);</b>
+<b class="nc">&nbsp;		psy_mp = psy_mp.subtract(sy_mp);</b>
+&nbsp;
+<b class="nc">&nbsp;		BigDecimal qsx_mp = new BigDecimal(q.x), qsy_mp = new BigDecimal(q.y);</b>
+<b class="nc">&nbsp;		qsx_mp = qsx_mp.subtract(sx_mp);</b>
+<b class="nc">&nbsp;		qsy_mp = qsy_mp.subtract(sy_mp);</b>
+&nbsp;
+<b class="nc">&nbsp;		BigDecimal rsx_mp = new BigDecimal(r.x), rsy_mp = new BigDecimal(r.y);</b>
+<b class="nc">&nbsp;		rsx_mp = rsx_mp.subtract(sx_mp);</b>
+<b class="nc">&nbsp;		rsy_mp = rsy_mp.subtract(sy_mp);</b>
+&nbsp;
+<b class="nc">&nbsp;		BigDecimal pq_det_mp = psx_mp.multiply(qsy_mp).subtract(psy_mp.multiply(qsx_mp));</b>
+<b class="nc">&nbsp;		BigDecimal qr_det_mp = qsx_mp.multiply(rsy_mp).subtract(qsy_mp.multiply(rsx_mp));</b>
+<b class="nc">&nbsp;		BigDecimal pr_det_mp = psx_mp.multiply(rsy_mp).subtract(psy_mp.multiply(rsx_mp));</b>
+&nbsp;
+<b class="nc">&nbsp;		BigDecimal p_parab_mp = psx_mp.multiply(psx_mp).add(psy_mp.multiply(psy_mp));</b>
+<b class="nc">&nbsp;		BigDecimal q_parab_mp = qsx_mp.multiply(qsx_mp).add(qsy_mp.multiply(qsy_mp));</b>
+<b class="nc">&nbsp;		BigDecimal r_parab_mp = rsx_mp.multiply(rsx_mp).add(rsy_mp.multiply(rsy_mp));</b>
+&nbsp;
+<b class="nc">&nbsp;		BigDecimal det_mp = (p_parab_mp.multiply(qr_det_mp).subtract(q_parab_mp.multiply(pr_det_mp)))</b>
+<b class="nc">&nbsp;				.add(r_parab_mp.multiply(pq_det_mp));</b>
+&nbsp;
+<b class="nc">&nbsp;		return det_mp.signum();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Calculates if the point s is inside of the circumcircle inscribed by the clockwise oriented triangle p-q-r.
+&nbsp;	 * Returns 1 for outside, -1 for inside, and 0 for cocircular.
+&nbsp;	 * Note that the convention used here differs from what is commonly found in literature, which can define the relation
+&nbsp;	 * in terms of a counter-clockwise oriented circle, and this flips the sign (think of the signed volume of the tetrahedron).
+&nbsp;	 * May use high precision arithmetics for some special cases.
+&nbsp;	 */
+&nbsp;	static int inCircleRobust(Point2D p, Point2D q, Point2D r, Point2D s) {
+<b class="nc">&nbsp;		ECoordinate psx_ec = new ECoordinate(), psy_ec = new ECoordinate();</b>
+<b class="nc">&nbsp;		psx_ec.set(p.x);</b>
+<b class="nc">&nbsp;		psx_ec.sub(s.x);</b>
+<b class="nc">&nbsp;		psy_ec.set(p.y);</b>
+<b class="nc">&nbsp;		psy_ec.sub(s.y);</b>
+&nbsp;
+<b class="nc">&nbsp;		ECoordinate qsx_ec = new ECoordinate(), qsy_ec = new ECoordinate();</b>
+<b class="nc">&nbsp;		qsx_ec.set(q.x);</b>
+<b class="nc">&nbsp;		qsx_ec.sub(s.x);</b>
+<b class="nc">&nbsp;		qsy_ec.set(q.y);</b>
+<b class="nc">&nbsp;		qsy_ec.sub(s.y);</b>
+&nbsp;
+<b class="nc">&nbsp;		ECoordinate rsx_ec = new ECoordinate(), rsy_ec = new ECoordinate();</b>
+<b class="nc">&nbsp;		rsx_ec.set(r.x);</b>
+<b class="nc">&nbsp;		rsx_ec.sub(s.x);</b>
+<b class="nc">&nbsp;		rsy_ec.set(r.y);</b>
+<b class="nc">&nbsp;		rsy_ec.sub(s.y);</b>
+&nbsp;
+<b class="nc">&nbsp;		ECoordinate psx_ec_qsy_ec = new ECoordinate();</b>
+<b class="nc">&nbsp;		psx_ec_qsy_ec.set(psx_ec);</b>
+<b class="nc">&nbsp;		psx_ec_qsy_ec.mul(qsy_ec);</b>
+<b class="nc">&nbsp;		ECoordinate psy_ec_qsx_ec = new ECoordinate();</b>
+<b class="nc">&nbsp;		psy_ec_qsx_ec.set(psy_ec);</b>
+<b class="nc">&nbsp;		psy_ec_qsx_ec.mul(qsx_ec);</b>
+<b class="nc">&nbsp;		ECoordinate qsx_ec_rsy_ec = new ECoordinate();</b>
+<b class="nc">&nbsp;		qsx_ec_rsy_ec.set(qsx_ec);</b>
+<b class="nc">&nbsp;		qsx_ec_rsy_ec.mul(rsy_ec);</b>
+<b class="nc">&nbsp;		ECoordinate qsy_ec_rsx_ec = new ECoordinate();</b>
+<b class="nc">&nbsp;		qsy_ec_rsx_ec.set(qsy_ec);</b>
+<b class="nc">&nbsp;		qsy_ec_rsx_ec.mul(rsx_ec);</b>
+<b class="nc">&nbsp;		ECoordinate psx_ec_rsy_ec = new ECoordinate();</b>
+<b class="nc">&nbsp;		psx_ec_rsy_ec.set(psx_ec);</b>
+<b class="nc">&nbsp;		psx_ec_rsy_ec.mul(rsy_ec);</b>
+<b class="nc">&nbsp;		ECoordinate psy_ec_rsx_ec = new ECoordinate();</b>
+<b class="nc">&nbsp;		psy_ec_rsx_ec.set(psy_ec);</b>
+<b class="nc">&nbsp;		psy_ec_rsx_ec.mul(rsx_ec);</b>
+&nbsp;
+<b class="nc">&nbsp;		ECoordinate pq_det_ec = new ECoordinate();</b>
+<b class="nc">&nbsp;		pq_det_ec.set(psx_ec_qsy_ec);</b>
+<b class="nc">&nbsp;		pq_det_ec.sub(psy_ec_qsx_ec);</b>
+<b class="nc">&nbsp;		ECoordinate qr_det_ec = new ECoordinate();</b>
+<b class="nc">&nbsp;		qr_det_ec.set(qsx_ec_rsy_ec);</b>
+<b class="nc">&nbsp;		qr_det_ec.sub(qsy_ec_rsx_ec);</b>
+<b class="nc">&nbsp;		ECoordinate pr_det_ec = new ECoordinate();</b>
+<b class="nc">&nbsp;		pr_det_ec.set(psx_ec_rsy_ec);</b>
+<b class="nc">&nbsp;		pr_det_ec.sub(psy_ec_rsx_ec);</b>
+&nbsp;
+<b class="nc">&nbsp;		ECoordinate psx_ec_psx_ec = new ECoordinate();</b>
+<b class="nc">&nbsp;		psx_ec_psx_ec.set(psx_ec);</b>
+<b class="nc">&nbsp;		psx_ec_psx_ec.mul(psx_ec);</b>
+<b class="nc">&nbsp;		ECoordinate psy_ec_psy_ec = new ECoordinate();</b>
+<b class="nc">&nbsp;		psy_ec_psy_ec.set(psy_ec);</b>
+<b class="nc">&nbsp;		psy_ec_psy_ec.mul(psy_ec);</b>
+<b class="nc">&nbsp;		ECoordinate qsx_ec_qsx_ec = new ECoordinate();</b>
+<b class="nc">&nbsp;		qsx_ec_qsx_ec.set(qsx_ec);</b>
+<b class="nc">&nbsp;		qsx_ec_qsx_ec.mul(qsx_ec);</b>
+<b class="nc">&nbsp;		ECoordinate qsy_ec_qsy_ec = new ECoordinate();</b>
+<b class="nc">&nbsp;		qsy_ec_qsy_ec.set(qsy_ec);</b>
+<b class="nc">&nbsp;		qsy_ec_qsy_ec.mul(qsy_ec);</b>
+<b class="nc">&nbsp;		ECoordinate rsx_ec_rsx_ec = new ECoordinate();</b>
+<b class="nc">&nbsp;		rsx_ec_rsx_ec.set(rsx_ec);</b>
+<b class="nc">&nbsp;		rsx_ec_rsx_ec.mul(rsx_ec);</b>
+<b class="nc">&nbsp;		ECoordinate rsy_ec_rsy_ec = new ECoordinate();</b>
+<b class="nc">&nbsp;		rsy_ec_rsy_ec.set(rsy_ec);</b>
+<b class="nc">&nbsp;		rsy_ec_rsy_ec.mul(rsy_ec);</b>
+&nbsp;
+<b class="nc">&nbsp;		ECoordinate p_parab_ec = new ECoordinate();</b>
+<b class="nc">&nbsp;		p_parab_ec.set(psx_ec_psx_ec);</b>
+<b class="nc">&nbsp;		p_parab_ec.add(psy_ec_psy_ec);</b>
+<b class="nc">&nbsp;		ECoordinate q_parab_ec = new ECoordinate();</b>
+<b class="nc">&nbsp;		q_parab_ec.set(qsx_ec_qsx_ec);</b>
+<b class="nc">&nbsp;		q_parab_ec.add(qsy_ec_qsy_ec);</b>
+<b class="nc">&nbsp;		ECoordinate r_parab_ec = new ECoordinate();</b>
+<b class="nc">&nbsp;		r_parab_ec.set(rsx_ec_rsx_ec);</b>
+<b class="nc">&nbsp;		r_parab_ec.add(rsy_ec_rsy_ec);</b>
+&nbsp;
+<b class="nc">&nbsp;		p_parab_ec.mul(qr_det_ec);</b>
+<b class="nc">&nbsp;		q_parab_ec.mul(pr_det_ec);</b>
+<b class="nc">&nbsp;		r_parab_ec.mul(pq_det_ec);</b>
+&nbsp;
+<b class="nc">&nbsp;		ECoordinate det_ec = new ECoordinate();</b>
+<b class="nc">&nbsp;		det_ec.set(p_parab_ec);</b>
+<b class="nc">&nbsp;		det_ec.sub(q_parab_ec);</b>
+<b class="nc">&nbsp;		det_ec.add(r_parab_ec);</b>
+&nbsp;
+<b class="nc">&nbsp;		if (!det_ec.isFuzzyZero()) {</b>
+<b class="nc">&nbsp;			double det_ec_value = det_ec.value();</b>
+&nbsp;
+<b class="nc">&nbsp;			if (det_ec_value &lt; 0.0)</b>
+<b class="nc">&nbsp;				return -1;</b>
+&nbsp;
+<b class="nc">&nbsp;			if (det_ec_value &gt; 0.0)</b>
+<b class="nc">&nbsp;				return 1;</b>
+&nbsp;
+<b class="nc">&nbsp;			return 0;</b>
+&nbsp;		}
+&nbsp;
+<b class="nc">&nbsp;		return inCircleRobustMP_(p, q, r, s);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private static Point2D calculateCenterFromThreePointsHelperMP_(Point2D from, Point2D mid_point, Point2D to) {
+<b class="nc">&nbsp;		assert(!mid_point.isEqual(to) &amp;&amp; !mid_point.isEqual(from) &amp;&amp; !from.isEqual(to));</b>
+<b class="nc">&nbsp;		BigDecimal mx = new BigDecimal(mid_point.x);</b>
+<b class="nc">&nbsp;		mx = mx.subtract(new BigDecimal(from.x));</b>
+<b class="nc">&nbsp;		BigDecimal my = new BigDecimal(mid_point.y);</b>
+<b class="nc">&nbsp;		my = my.subtract(new BigDecimal(from.y));</b>
+<b class="nc">&nbsp;		BigDecimal tx = new BigDecimal(to.x);</b>
+<b class="nc">&nbsp;		tx = tx.subtract(new BigDecimal(from.x));</b>
+<b class="nc">&nbsp;		BigDecimal ty = new BigDecimal(to.y);</b>
+<b class="nc">&nbsp;		ty = ty.subtract(new BigDecimal(from.y));</b>
+&nbsp;
+<b class="nc">&nbsp;		BigDecimal d = mx.multiply(ty);</b>
+<b class="nc">&nbsp;		BigDecimal tmp = my.multiply(tx);</b>
+<b class="nc">&nbsp;		d = d.subtract(tmp);</b>
+&nbsp;
+<b class="nc">&nbsp;		if (d.signum() == 0) {</b>
+<b class="nc">&nbsp;			return Point2D.construct(NumberUtils.NaN(), NumberUtils.NaN());</b>
+&nbsp;		}
+&nbsp;
+<b class="nc">&nbsp;		d = d.multiply(new BigDecimal(2.0));</b>
+&nbsp;
+<b class="nc">&nbsp;		BigDecimal mx2 = mx.multiply(mx);</b>
+<b class="nc">&nbsp;		BigDecimal my2 = my.multiply(my);</b>
+<b class="nc">&nbsp;		BigDecimal m_norm2 = mx2.add(my2);</b>
+<b class="nc">&nbsp;		BigDecimal tx2 = tx.multiply(tx);</b>
+<b class="nc">&nbsp;		BigDecimal ty2 = ty.multiply(ty);</b>
+<b class="nc">&nbsp;		BigDecimal t_norm2 = tx2.add(ty2);</b>
+&nbsp;
+<b class="nc">&nbsp;		BigDecimal xo = my.multiply(t_norm2);</b>
+<b class="nc">&nbsp;		tmp = ty.multiply(m_norm2);</b>
+<b class="nc">&nbsp;		xo = xo.subtract(tmp);</b>
+<b class="nc">&nbsp;		xo = xo.divide(d, BigDecimal.ROUND_HALF_EVEN);</b>
+&nbsp;
+<b class="nc">&nbsp;		BigDecimal yo = mx.multiply(t_norm2);</b>
+<b class="nc">&nbsp;		tmp = tx.multiply(m_norm2);</b>
+<b class="nc">&nbsp;		yo = yo.subtract(tmp);</b>
+<b class="nc">&nbsp;		yo = yo.divide(d, BigDecimal.ROUND_HALF_EVEN);</b>
+&nbsp;
+<b class="nc">&nbsp;		Point2D center = Point2D.construct(from.x - xo.doubleValue(), from.y + yo.doubleValue());</b>
+<b class="nc">&nbsp;		return center;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private static Point2D calculateCenterFromThreePointsHelper_(Point2D from, Point2D mid_point, Point2D to) {
+<b class="nc">&nbsp;		assert(!mid_point.isEqual(to) &amp;&amp; !mid_point.isEqual(from) &amp;&amp; !from.isEqual(to));</b>
+<b class="nc">&nbsp;		ECoordinate mx = new ECoordinate(mid_point.x);</b>
+<b class="nc">&nbsp;		mx.sub(from.x);</b>
+<b class="nc">&nbsp;		ECoordinate my = new ECoordinate(mid_point.y);</b>
+<b class="nc">&nbsp;		my.sub(from.y);</b>
+<b class="nc">&nbsp;		ECoordinate tx = new ECoordinate(to.x);</b>
+<b class="nc">&nbsp;		tx.sub(from.x);</b>
+<b class="nc">&nbsp;		ECoordinate ty = new ECoordinate(to.y);</b>
+<b class="nc">&nbsp;		ty.sub(from.y);</b>
+&nbsp;
+<b class="nc">&nbsp;		ECoordinate d = new ECoordinate(mx);</b>
+<b class="nc">&nbsp;		d.mul(ty);</b>
+<b class="nc">&nbsp;		ECoordinate tmp = new ECoordinate(my);</b>
+<b class="nc">&nbsp;		tmp.mul(tx);</b>
+<b class="nc">&nbsp;		d.sub(tmp);</b>
+&nbsp;
+<b class="nc">&nbsp;		if (d.value() == 0.0) {</b>
+<b class="nc">&nbsp;			return Point2D.construct(NumberUtils.NaN(), NumberUtils.NaN());</b>
+&nbsp;		}
+&nbsp;
+<b class="nc">&nbsp;		d.mul(2.0);</b>
+&nbsp;
+<b class="nc">&nbsp;		ECoordinate mx2 = new ECoordinate(mx);</b>
+<b class="nc">&nbsp;		mx2.mul(mx);</b>
+<b class="nc">&nbsp;		ECoordinate my2 = new ECoordinate(my);</b>
+<b class="nc">&nbsp;		my2.mul(my);</b>
+<b class="nc">&nbsp;		ECoordinate m_norm2 = new ECoordinate(mx2);</b>
+<b class="nc">&nbsp;		m_norm2.add(my2);</b>
+<b class="nc">&nbsp;		ECoordinate tx2 = new ECoordinate(tx);</b>
+<b class="nc">&nbsp;		tx2.mul(tx);</b>
+<b class="nc">&nbsp;		ECoordinate ty2 = new ECoordinate(ty);</b>
+<b class="nc">&nbsp;		ty2.mul(ty);</b>
+<b class="nc">&nbsp;		ECoordinate t_norm2 = new ECoordinate(tx2);</b>
+<b class="nc">&nbsp;		t_norm2.add(ty2);</b>
+&nbsp;
+<b class="nc">&nbsp;		ECoordinate xo = new ECoordinate(my);</b>
+<b class="nc">&nbsp;		xo.mul(t_norm2);</b>
+<b class="nc">&nbsp;		tmp = new ECoordinate(ty);</b>
+<b class="nc">&nbsp;		tmp.mul(m_norm2);</b>
+<b class="nc">&nbsp;		xo.sub(tmp);</b>
+<b class="nc">&nbsp;		xo.div(d);</b>
+&nbsp;
+<b class="nc">&nbsp;		ECoordinate yo = new ECoordinate(mx);</b>
+<b class="nc">&nbsp;		yo.mul(t_norm2);</b>
+<b class="nc">&nbsp;		tmp = new ECoordinate(tx);</b>
+<b class="nc">&nbsp;		tmp.mul(m_norm2);</b>
+<b class="nc">&nbsp;		yo.sub(tmp);</b>
+<b class="nc">&nbsp;		yo.div(d);</b>
+&nbsp;
+<b class="nc">&nbsp;		Point2D center = Point2D.construct(from.x - xo.value(), from.y + yo.value());</b>
+<b class="nc">&nbsp;		double r1 = Point2D.construct(from.x - center.x, from.y - center.y).length();</b>
+<b class="nc">&nbsp;		double r2 = Point2D.construct(mid_point.x - center.x, mid_point.y - center.y).length();</b>
+<b class="nc">&nbsp;		double r3 = Point2D.construct(to.x - center.x, to.y - center.y).length();</b>
+<b class="nc">&nbsp;		double base = r1 + Math.abs(from.x) + Math.abs(mid_point.x) + Math.abs(to.x) + Math.abs(from.y)</b>
+<b class="nc">&nbsp;				+ Math.abs(mid_point.y) + Math.abs(to.y);</b>
+&nbsp;
+<b class="nc">&nbsp;		double tol = 1e-15;</b>
+<b class="nc">&nbsp;		if ((Math.abs(r1 - r2) &lt;= base * tol &amp;&amp; Math.abs(r1 - r3) &lt;= base * tol))</b>
+<b class="nc">&nbsp;			return center;//returns center value for MP_value type or when calculated radius value for from - center, mid - center, and to - center are very close.</b>
+&nbsp;
+<b class="nc">&nbsp;		return Point2D.construct(NumberUtils.NaN(), NumberUtils.NaN());</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	static Point2D calculateCircleCenterFromThreePoints(Point2D from, Point2D mid_point, Point2D to) {
+<b class="nc">&nbsp;		if (from.isEqual(to) || from.isEqual(mid_point) || to.isEqual(mid_point)) {</b>
+<b class="nc">&nbsp;			return new Point2D(NumberUtils.NaN(), NumberUtils.NaN());</b>
+&nbsp;		}
+&nbsp;
+<b class="nc">&nbsp;		Point2D pt = calculateCenterFromThreePointsHelper_(from, mid_point, to); //use error tracking calculations</b>
+<b class="nc">&nbsp;		if (pt.isNaN())</b>
+<b class="nc">&nbsp;			return calculateCenterFromThreePointsHelperMP_(from, mid_point, to); //use precise calculations</b>
+&nbsp;		else {
+<b class="nc">&nbsp;			return pt;</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;	
+&nbsp;	double getAxis(int ordinate) {
+<b class="nc">&nbsp;		assert(ordinate == 0 || ordinate == 1);</b>
+<b class="nc">&nbsp;		return (ordinate == 0 ? x : y);</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-02-21 16:04</div>
+</div>
+</body>
+</html>

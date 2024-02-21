@@ -1,0 +1,1090 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > Segment</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.esri.core.geometry</a>
+</div>
+
+<h1>Coverage Summary for Class: Segment (com.esri.core.geometry)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">Segment</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    63,2%
+  </span>
+  <span class="absValue">
+    (43/68)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    65,2%
+  </span>
+  <span class="absValue">
+    (189/290)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; Copyright 1995-2015 Esri
+&nbsp;
+&nbsp;   Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp;   you may not use this file except in compliance with the License.
+&nbsp;   You may obtain a copy of the License at
+&nbsp;
+&nbsp;       http://www.apache.org/licenses/LICENSE-2.0
+&nbsp;
+&nbsp;   Unless required by applicable law or agreed to in writing, software
+&nbsp;   distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp;   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp;   See the License for the specific language governing permissions and
+&nbsp;   limitations under the License.
+&nbsp;
+&nbsp; For additional information, contact:
+&nbsp; Environmental Systems Research Institute, Inc.
+&nbsp; Attn: Contracts Dept
+&nbsp; 380 New York Street
+&nbsp; Redlands, California, USA 92373
+&nbsp;
+&nbsp; email: contracts@esri.com
+&nbsp; */
+&nbsp;
+&nbsp;package com.esri.core.geometry;
+&nbsp;
+&nbsp;import com.esri.core.geometry.VertexDescription.Semantics;
+&nbsp;
+&nbsp;import java.io.Serializable;
+&nbsp;
+&nbsp;/**
+&nbsp; * A base class for segments. Presently only Line segments are supported.
+&nbsp; */
+&nbsp;public abstract class Segment extends Geometry implements Serializable {
+&nbsp;	double m_xStart;
+&nbsp;
+&nbsp;	double m_yStart;
+&nbsp;
+&nbsp;	double m_xEnd;
+&nbsp;
+&nbsp;	double m_yEnd;
+&nbsp;
+&nbsp;	double[] m_attributes;
+&nbsp;
+&nbsp;	// Header Definitions
+&nbsp;	/**
+&nbsp;	 * Returns XY coordinates of the start point.
+&nbsp;	 */
+&nbsp;	public Point2D getStartXY() {
+<b class="fc">&nbsp;		return Point2D.construct(m_xStart, m_yStart);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public void getStartXY(Point2D pt) {
+<b class="fc">&nbsp;		pt.x = m_xStart;</b>
+<b class="fc">&nbsp;		pt.y = m_yStart;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Sets the XY coordinates of the start point.
+&nbsp;	 */
+&nbsp;	public void setStartXY(Point2D pt) {
+<b class="fc">&nbsp;		_setXY(0, pt);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public void setStartXY(double x, double y) {
+<b class="fc">&nbsp;		_setXY(0, Point2D.construct(x, y));</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns XYZ coordinates of the start point. Z if 0 if Z is missing.
+&nbsp;	 */
+&nbsp;	public Point3D getStartXYZ() {
+<b class="nc">&nbsp;		return _getXYZ(0);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Sets the XYZ coordinates of the start point.
+&nbsp;	 */
+&nbsp;	public void setStartXYZ(Point3D pt) {
+<b class="nc">&nbsp;		_setXYZ(0, pt);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public void setStartXYZ(double x, double y, double z) {
+<b class="nc">&nbsp;		_setXYZ(0, Point3D.construct(x, y, z));</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns coordinates of the start point in a Point class.
+&nbsp;	 */
+&nbsp;	public void queryStart(Point dstPoint) {
+<b class="fc">&nbsp;		_get(0, dstPoint);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Sets the coordinates of the start point in this segment.
+&nbsp;	 * 
+&nbsp;	 * @param srcPoint
+&nbsp;	 *            The new start point of this segment.
+&nbsp;	 */
+&nbsp;	public void setStart(Point srcPoint) {
+<b class="fc">&nbsp;		_set(0, srcPoint);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns value of the start vertex attribute&#39;s ordinate. Throws if the
+&nbsp;	 * Point is empty.
+&nbsp;	 * 
+&nbsp;	 * @param semantics
+&nbsp;	 *            The attribute semantics.
+&nbsp;	 * @param ordinate
+&nbsp;	 *            The attribute&#39;s ordinate. For example, the y coordinate of the
+&nbsp;	 *            NORMAL has ordinate of 1.
+&nbsp;	 * @return Ordinate value as double.
+&nbsp;	 */
+&nbsp;	public double getStartAttributeAsDbl(int semantics, int ordinate) {
+<b class="fc">&nbsp;		return _getAttributeAsDbl(0, semantics, ordinate);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns the value of the start vertex attribute&#39;s ordinate. The ordinate
+&nbsp;	 * is always 0 because integer attributes always have one component.
+&nbsp;	 * 
+&nbsp;	 * @param semantics
+&nbsp;	 *            The attribute semantics.
+&nbsp;	 * @param ordinate
+&nbsp;	 *            The attribute&#39;s ordinate. For example, the y coordinate of the
+&nbsp;	 *            NORMAL has ordinate of 1.
+&nbsp;	 * @return Ordinate value truncated to 32 bit integer.
+&nbsp;	 */
+&nbsp;	public int getStartAttributeAsInt(int semantics, int ordinate) {
+<b class="nc">&nbsp;		return _getAttributeAsInt(0, semantics, ordinate);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Sets the value of the start vertex attribute.
+&nbsp;	 * 
+&nbsp;	 * @param semantics
+&nbsp;	 *            The attribute semantics.
+&nbsp;	 * @param value
+&nbsp;	 *            is the array to write values to. The attribute type and the
+&nbsp;	 *            number of elements must match the persistence type, as well as
+&nbsp;	 *            the number of components of the attribute.
+&nbsp;	 */
+&nbsp;	public void setStartAttribute(int semantics, int ordinate, double value) {
+<b class="fc">&nbsp;		_setAttribute(0, semantics, ordinate, value);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public void setStartAttribute(int semantics, int ordinate, int value) {
+<b class="fc">&nbsp;		_setAttribute(0, semantics, ordinate, value);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns the X coordinate of starting point.
+&nbsp;	 * 
+&nbsp;	 * @return The X coordinate of starting point.
+&nbsp;	 */
+&nbsp;	public double getStartX() {
+<b class="fc">&nbsp;		return m_xStart;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns the Y coordinate of starting point.
+&nbsp;	 * 
+&nbsp;	 * @return The Y coordinate of starting point.
+&nbsp;	 */
+&nbsp;	public double getStartY() {
+<b class="fc">&nbsp;		return m_yStart;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns the X coordinate of ending point.
+&nbsp;	 * 
+&nbsp;	 * @return The X coordinate of ending point.
+&nbsp;	 */
+&nbsp;	public double getEndX() {
+<b class="fc">&nbsp;		return m_xEnd;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns the Y coordinate of ending point.
+&nbsp;	 * 
+&nbsp;	 * @return The Y coordinate of ending point.
+&nbsp;	 */
+&nbsp;	public double getEndY() {
+<b class="fc">&nbsp;		return m_yEnd;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns XY coordinates of the end point.
+&nbsp;	 * 
+&nbsp;	 * @return The XY coordinates of the end point.
+&nbsp;	 */
+&nbsp;	public Point2D getEndXY() {
+<b class="fc">&nbsp;		return Point2D.construct(m_xEnd, m_yEnd);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public void getEndXY(Point2D pt) {
+<b class="nc">&nbsp;		pt.x = m_xEnd;</b>
+<b class="nc">&nbsp;		pt.y = m_yEnd;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Sets the XY coordinates of the end point.
+&nbsp;	 * 
+&nbsp;	 * @param pt
+&nbsp;	 *            The end point of the segment.
+&nbsp;	 */
+&nbsp;	public void setEndXY(Point2D pt) {
+<b class="fc">&nbsp;		_setXY(1, pt);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public void setEndXY(double x, double y) {
+<b class="fc">&nbsp;		_setXY(1, Point2D.construct(x, y));</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns XYZ coordinates of the end point. Z if 0 if Z is missing.
+&nbsp;	 * 
+&nbsp;	 * @return The XYZ coordinates of the end point.
+&nbsp;	 */
+&nbsp;	public Point3D getEndXYZ() {
+<b class="nc">&nbsp;		return _getXYZ(1);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Sets the XYZ coordinates of the end point.
+&nbsp;	 */
+&nbsp;	public void setEndXYZ(Point3D pt) {
+<b class="nc">&nbsp;		_setXYZ(1, pt);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public void setEndXYZ(double x, double y, double z) {
+<b class="nc">&nbsp;		_setXYZ(1, Point3D.construct(x, y, z));</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns coordinates of the end point in this segment.
+&nbsp;	 * 
+&nbsp;	 * @param dstPoint
+&nbsp;	 *            The end point of this segment.
+&nbsp;	 */
+&nbsp;	public void queryEnd(Point dstPoint) {
+<b class="fc">&nbsp;		_get(1, dstPoint);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Sets the coordinates of the end point in a Point class.
+&nbsp;	 * 
+&nbsp;	 * @param srcPoint
+&nbsp;	 *            The new end point of this segment.
+&nbsp;	 */
+&nbsp;	public void setEnd(Point srcPoint) {
+<b class="fc">&nbsp;		_set(1, srcPoint);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns value of the end vertex attribute&#39;s ordinate. Throws if the Point
+&nbsp;	 * is empty.
+&nbsp;	 * 
+&nbsp;	 * @param semantics
+&nbsp;	 *            The attribute semantics.
+&nbsp;	 * @param ordinate
+&nbsp;	 *            The attribute&#39;s ordinate. For example, the y coordinate of the
+&nbsp;	 *            NORMAL has ordinate of 1.
+&nbsp;	 * @return Ordinate value as double.
+&nbsp;	 */
+&nbsp;	public double getEndAttributeAsDbl(int semantics, int ordinate) {
+<b class="fc">&nbsp;		return _getAttributeAsDbl(1, semantics, ordinate);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns the value of the end vertex attribute&#39;s ordinate. The ordinate is
+&nbsp;	 * always 0 because integer attributes always have one component.
+&nbsp;	 * 
+&nbsp;	 * @param semantics
+&nbsp;	 *            The attribute semantics.
+&nbsp;	 * @param ordinate
+&nbsp;	 *            The attribute&#39;s ordinate. For example, the y coordinate of the
+&nbsp;	 *            NORMAL has ordinate of 1.
+&nbsp;	 * @return The ordinate value truncated to 32 bit integer.
+&nbsp;	 */
+&nbsp;	public int getEndAttributeAsInt(int semantics, int ordinate) {
+<b class="nc">&nbsp;		return _getAttributeAsInt(1, semantics, ordinate);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Sets the value of end vertex attribute.
+&nbsp;	 * 
+&nbsp;	 * @param semantics
+&nbsp;	 *            The attribute semantics.
+&nbsp;	 * @param ordinate
+&nbsp;	 *            The attribute&#39;s ordinate.
+&nbsp;	 * @param value
+&nbsp;	 *            Is the array to write values to. The attribute type and the
+&nbsp;	 *            number of elements must match the persistence type, as well as
+&nbsp;	 *            the number of components of the attribute.
+&nbsp;	 */
+&nbsp;	public void setEndAttribute(int semantics, int ordinate, double value) {
+<b class="fc">&nbsp;		_setAttribute(1, semantics, ordinate, value);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public void setEndAttribute(int semantics, int ordinate, int value) {
+<b class="fc">&nbsp;		_setAttribute(1, semantics, ordinate, value);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public final int getDimension() {
+<b class="nc">&nbsp;		return 1;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public final boolean isEmpty() {
+<b class="fc">&nbsp;		return isEmptyImpl();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public final void setEmpty() {
+&nbsp;
+<b class="nc">&nbsp;	}</b>
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public double calculateArea2D() {
+<b class="nc">&nbsp;		return 0;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Calculates intersections of this segment with another segment.
+&nbsp;	 * &lt;p&gt;
+&nbsp;	 * Note: This is not a topological operation. It needs to be paired with the
+&nbsp;	 * Segment.Overlap call.
+&nbsp;	 * 
+&nbsp;	 * @param other
+&nbsp;	 *            The segment to calculate intersection with.
+&nbsp;	 * @param intersectionPoints
+&nbsp;	 *            The intersection points. Can be NULL.
+&nbsp;	 * @param paramThis
+&nbsp;	 *            The value of the parameter in the intersection points for this
+&nbsp;	 *            Segment (between 0 and 1). Can be NULL.
+&nbsp;	 * @param paramOther
+&nbsp;	 *            The value of the parameter in the intersection points for the
+&nbsp;	 *            other Segment (between 0 and 1). Can be NULL.
+&nbsp;	 * @param tolerance
+&nbsp;	 *            The tolerance value for the intersection calculation. Can be
+&nbsp;	 *            0.
+&nbsp;	 * @return The number of intersection points, 0 when no intersection points
+&nbsp;	 *         exist.
+&nbsp;	 */
+&nbsp;	int intersect(Segment other, Point2D[] intersectionPoints,
+&nbsp;			double[] paramThis, double[] paramOther, double tolerance) {
+<b class="fc">&nbsp;		return _intersect(other, intersectionPoints, paramThis, paramOther,</b>
+&nbsp;				tolerance);
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns TRUE if this segment intersects with the other segment with the
+&nbsp;	 * given tolerance.
+&nbsp;	 */
+&nbsp;	public boolean isIntersecting(Segment other, double tolerance) {
+<b class="nc">&nbsp;		return _isIntersecting(other, tolerance, false) != 0;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns TRUE if the point and segment intersect (not disjoint) for the
+&nbsp;	 * given tolerance.
+&nbsp;	 */
+&nbsp;	public boolean isIntersecting(Point2D pt, double tolerance) {
+<b class="nc">&nbsp;		return _isIntersectingPoint(pt, tolerance, false);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Non public abstract version of the function.
+&nbsp;	 */
+&nbsp;	public boolean isEmptyImpl() {
+<b class="fc">&nbsp;		return false;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Header Definitions
+&nbsp;
+&nbsp;	// Cpp definitions
+&nbsp;	/**
+&nbsp;	 * Creates a segment with start and end points (0,0).
+&nbsp;	 */
+<b class="fc">&nbsp;	public Segment() {</b>
+<b class="fc">&nbsp;		m_xStart = 0;</b>
+<b class="fc">&nbsp;		m_yStart = 0;</b>
+<b class="fc">&nbsp;		m_xEnd = 0;</b>
+<b class="fc">&nbsp;		m_yEnd = 0;</b>
+<b class="fc">&nbsp;		m_attributes = null;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void _resizeAttributes(int newSize) {
+<b class="fc">&nbsp;		_touch();</b>
+<b class="fc">&nbsp;		if (m_attributes == null &amp;&amp; newSize &gt; 0) {</b>
+<b class="fc">&nbsp;			m_attributes = new double[newSize * 2];</b>
+<b class="fc">&nbsp;		} else if (m_attributes != null &amp;&amp; m_attributes.length &lt; newSize * 2) {</b>
+<b class="nc">&nbsp;			double[] newbuffer = new double[newSize * 2];</b>
+<b class="nc">&nbsp;			System.arraycopy(m_attributes, 0, newbuffer, 0, m_attributes.length);</b>
+<b class="nc">&nbsp;			m_attributes = newbuffer;</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	static void _attributeCopy(double[] src, int srcStart, double[] dst,
+&nbsp;			int dstStart, int count) {
+<b class="fc">&nbsp;		if (count &gt; 0)</b>
+<b class="fc">&nbsp;			System.arraycopy(src, srcStart, dst, dstStart, count);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private Point2D _getXY(int endPoint) {
+<b class="nc">&nbsp;		Point2D pt = new Point2D();</b>
+<b class="nc">&nbsp;		if (endPoint != 0) {</b>
+<b class="nc">&nbsp;			pt.setCoords(m_xEnd, m_yEnd);</b>
+&nbsp;		} else {
+<b class="nc">&nbsp;			pt.setCoords(m_xStart, m_yStart);</b>
+&nbsp;		}
+<b class="nc">&nbsp;		return pt;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private void _setXY(int endPoint, Point2D pt) {
+<b class="fc">&nbsp;		if (endPoint != 0) {</b>
+<b class="fc">&nbsp;			m_xEnd = pt.x;</b>
+<b class="fc">&nbsp;			m_yEnd = pt.y;</b>
+&nbsp;		} else {
+<b class="fc">&nbsp;			m_xStart = pt.x;</b>
+<b class="fc">&nbsp;			m_yStart = pt.y;</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	private Point3D _getXYZ(int endPoint) {
+<b class="nc">&nbsp;		Point3D pt = new Point3D();</b>
+<b class="nc">&nbsp;		if (endPoint != 0) {</b>
+<b class="nc">&nbsp;			pt.x = m_xEnd;</b>
+<b class="nc">&nbsp;			pt.y = m_yEnd;</b>
+&nbsp;		} else {
+<b class="nc">&nbsp;			pt.x = m_xStart;</b>
+<b class="nc">&nbsp;			pt.y = m_yStart;</b>
+&nbsp;		}
+&nbsp;
+<b class="nc">&nbsp;		if (m_description.hasZ())</b>
+<b class="nc">&nbsp;			pt.z = m_attributes[_getEndPointOffset(m_description, endPoint)];</b>
+&nbsp;		else
+<b class="nc">&nbsp;			pt.z = VertexDescription.getDefaultValue(Semantics.Z);</b>
+&nbsp;
+<b class="nc">&nbsp;		return pt;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private void _setXYZ(int endPoint, Point3D pt) {
+<b class="nc">&nbsp;		_touch();</b>
+<b class="nc">&nbsp;		boolean bHasZ = hasAttribute(Semantics.Z);</b>
+<b class="nc">&nbsp;		if (!bHasZ &amp;&amp; !VertexDescription.isDefaultValue(Semantics.Z, pt.z)) {// add</b>
+&nbsp;																				// Z
+&nbsp;																				// only
+&nbsp;																				// if
+&nbsp;																				// pt.z
+&nbsp;																				// is
+&nbsp;																				// not
+&nbsp;																				// a
+&nbsp;																				// default
+&nbsp;																				// value.
+<b class="nc">&nbsp;			addAttribute(Semantics.Z);</b>
+<b class="nc">&nbsp;			bHasZ = true;</b>
+&nbsp;		}
+&nbsp;
+<b class="nc">&nbsp;		if (endPoint != 0) {</b>
+<b class="nc">&nbsp;			m_xEnd = pt.x;</b>
+<b class="nc">&nbsp;			m_yEnd = pt.y;</b>
+&nbsp;		} else {
+<b class="nc">&nbsp;			m_xStart = pt.x;</b>
+<b class="nc">&nbsp;			m_yStart = pt.y;</b>
+&nbsp;		}
+&nbsp;
+<b class="nc">&nbsp;		if (bHasZ)</b>
+<b class="nc">&nbsp;			m_attributes[_getEndPointOffset(m_description, endPoint)] = pt.z;</b>
+&nbsp;
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	protected void _assignVertexDescriptionImpl(VertexDescription newDescription) {
+<b class="fc">&nbsp;		if (m_attributes == null) {</b>
+<b class="fc">&nbsp;			m_description = newDescription;</b>
+&nbsp;			return;
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		int[] mapping = VertexDescriptionDesignerImpl.mapAttributes(newDescription, m_description);</b>
+&nbsp;		
+<b class="fc">&nbsp;		double[] newAttributes = new double[(newDescription.getTotalComponentCount() - 2) * 2];</b>
+&nbsp;		
+<b class="fc">&nbsp;		int old_offset0 = _getEndPointOffset(m_description, 0);</b>
+<b class="fc">&nbsp;		int old_offset1 = _getEndPointOffset(m_description, 1);</b>
+&nbsp;
+<b class="fc">&nbsp;		int new_offset0 = _getEndPointOffset(newDescription, 0);</b>
+<b class="fc">&nbsp;		int new_offset1 = _getEndPointOffset(newDescription, 1);</b>
+&nbsp;		
+<b class="fc">&nbsp;		int j = 0;</b>
+<b class="fc">&nbsp;		for (int i = 1, n = newDescription.getAttributeCount(); i &lt; n; i++) {</b>
+<b class="fc">&nbsp;			int semantics = newDescription.getSemantics(i);</b>
+<b class="fc">&nbsp;			int nords = VertexDescription.getComponentCount(semantics);</b>
+<b class="fc">&nbsp;			if (mapping[i] == -1)</b>
+&nbsp;			{
+<b class="fc">&nbsp;				double d = VertexDescription.getDefaultValue(semantics);</b>
+<b class="fc">&nbsp;				for (int ord = 0; ord &lt; nords; ord++)</b>
+&nbsp;				{
+<b class="fc">&nbsp;					newAttributes[new_offset0 + j] = d;</b>
+<b class="fc">&nbsp;					newAttributes[new_offset1 + j] = d;</b>
+<b class="fc">&nbsp;					j++;</b>
+&nbsp;				}
+<b class="fc">&nbsp;			}</b>
+&nbsp;			else {
+<b class="fc">&nbsp;				int m = mapping[i];</b>
+<b class="fc">&nbsp;				int offset = m_description._getPointAttributeOffset(m) - 2;</b>
+<b class="fc">&nbsp;				for (int ord = 0; ord &lt; nords; ord++)</b>
+&nbsp;				{
+<b class="fc">&nbsp;					newAttributes[new_offset0 + j] = m_attributes[old_offset0 + offset];</b>
+<b class="fc">&nbsp;					newAttributes[new_offset1 + j] = m_attributes[old_offset1 + offset];</b>
+<b class="fc">&nbsp;					j++;</b>
+<b class="fc">&nbsp;					offset++;</b>
+&nbsp;				}
+&nbsp;			}
+&nbsp;				 
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		m_attributes = newAttributes;</b>
+<b class="fc">&nbsp;		m_description = newDescription;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private void _get(int endPoint, Point outPoint) {
+<b class="fc">&nbsp;		if (isEmptyImpl())</b>
+<b class="nc">&nbsp;			throw new GeometryException(&quot;empty geometry&quot;);// ._setToDefault();</b>
+&nbsp;
+<b class="fc">&nbsp;		outPoint.assignVertexDescription(m_description);</b>
+&nbsp;
+<b class="fc">&nbsp;		for (int attributeIndex = 0; attributeIndex &lt; m_description</b>
+<b class="fc">&nbsp;				.getAttributeCount(); attributeIndex++) {</b>
+<b class="fc">&nbsp;			int semantics = m_description._getSemanticsImpl(attributeIndex);</b>
+<b class="fc">&nbsp;			for (int icomp = 0, ncomp = VertexDescription</b>
+<b class="fc">&nbsp;					.getComponentCount(semantics); icomp &lt; ncomp; icomp++) {</b>
+<b class="fc">&nbsp;				double v = _getAttributeAsDbl(endPoint, semantics, icomp);</b>
+<b class="fc">&nbsp;				outPoint.setAttribute(semantics, icomp, v);</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	private void _set(int endPoint, Point src) {
+<b class="fc">&nbsp;		_touch();</b>
+<b class="fc">&nbsp;		Point point = src;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (src.isEmptyImpl())// can not assign an empty point</b>
+<b class="nc">&nbsp;			throw new GeometryException(&quot;empty_Geometry&quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;		VertexDescription vdin = point.getDescription();</b>
+<b class="fc">&nbsp;		for (int attributeIndex = 0, nattrib = vdin.getAttributeCount(); attributeIndex &lt; nattrib; attributeIndex++) {</b>
+<b class="fc">&nbsp;			int semantics = vdin._getSemanticsImpl(attributeIndex);</b>
+<b class="fc">&nbsp;			int ncomp = VertexDescription.getComponentCount(semantics);</b>
+<b class="fc">&nbsp;			for (int icomp = 0; icomp &lt; ncomp; icomp++) {</b>
+<b class="fc">&nbsp;				double v = point.getAttributeAsDbl(semantics, icomp);</b>
+<b class="fc">&nbsp;				_setAttribute(endPoint, semantics, icomp, v);</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	double _getAttributeAsDbl(int endPoint, int semantics, int ordinate) {
+<b class="fc">&nbsp;		if (isEmptyImpl())</b>
+<b class="nc">&nbsp;			throw new GeometryException(</b>
+&nbsp;					&quot;This operation was performed on an Empty Geometry.&quot;);
+&nbsp;
+<b class="fc">&nbsp;		if (semantics == Semantics.POSITION) {</b>
+<b class="fc">&nbsp;			if (endPoint != 0) {</b>
+<b class="fc">&nbsp;				return (ordinate != 0) ? m_yEnd : m_xEnd;</b>
+&nbsp;			} else {
+<b class="fc">&nbsp;				return (ordinate != 0) ? m_yStart : m_xStart;</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		int ncomps = VertexDescription.getComponentCount(semantics);</b>
+<b class="fc">&nbsp;		if (ordinate &gt;= ncomps)</b>
+<b class="nc">&nbsp;			throw new IndexOutOfBoundsException();</b>
+&nbsp;
+<b class="fc">&nbsp;		int attributeIndex = m_description.getAttributeIndex(semantics);</b>
+<b class="fc">&nbsp;		if (attributeIndex &gt;= 0) {</b>
+<b class="fc">&nbsp;			if (m_attributes != null)</b>
+<b class="fc">&nbsp;				_resizeAttributes(m_description.getTotalComponentCount() - 2);</b>
+&nbsp;
+<b class="fc">&nbsp;			return m_attributes[_getEndPointOffset(m_description, endPoint)</b>
+<b class="fc">&nbsp;					+ m_description._getPointAttributeOffset(attributeIndex)</b>
+&nbsp;					- 2 + ordinate];
+&nbsp;		} else
+<b class="nc">&nbsp;			return VertexDescription.getDefaultValue(semantics);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private int _getAttributeAsInt(int endPoint, int semantics, int ordinate) {
+<b class="nc">&nbsp;		if (isEmptyImpl())</b>
+<b class="nc">&nbsp;			throw new GeometryException(&quot;Empty_Geometry.&quot;);</b>
+&nbsp;
+<b class="nc">&nbsp;		return (int) _getAttributeAsDbl(endPoint, semantics, ordinate);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void _setAttribute(int endPoint, int semantics, int ordinate, double value) {
+<b class="fc">&nbsp;		_touch();</b>
+<b class="fc">&nbsp;		int ncomps = VertexDescription.getComponentCount(semantics);</b>
+<b class="fc">&nbsp;		if (ordinate &gt;= ncomps)</b>
+<b class="nc">&nbsp;			throw new IndexOutOfBoundsException();</b>
+&nbsp;
+<b class="fc">&nbsp;		int attributeIndex = m_description.getAttributeIndex(semantics);</b>
+<b class="fc">&nbsp;		if (attributeIndex &lt; 0) {</b>
+<b class="fc">&nbsp;			addAttribute(semantics);</b>
+<b class="fc">&nbsp;			attributeIndex = m_description.getAttributeIndex(semantics);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (semantics == Semantics.POSITION) {</b>
+<b class="fc">&nbsp;			if (endPoint != 0) {</b>
+<b class="fc">&nbsp;				if (ordinate != 0)</b>
+<b class="fc">&nbsp;					m_yEnd = value;</b>
+&nbsp;				else
+<b class="fc">&nbsp;					m_xEnd = value;</b>
+&nbsp;			}
+<b class="fc">&nbsp;			else if (ordinate != 0)</b>
+<b class="fc">&nbsp;				m_yStart = value;</b>
+&nbsp;			else
+<b class="fc">&nbsp;				m_xStart = value;</b>
+&nbsp;			return;
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (m_attributes == null)</b>
+<b class="fc">&nbsp;			_resizeAttributes(m_description.getTotalComponentCount() - 2);</b>
+&nbsp;
+<b class="fc">&nbsp;		m_attributes[_getEndPointOffset(m_description, endPoint)</b>
+<b class="fc">&nbsp;				+ m_description._getPointAttributeOffset(attributeIndex) - 2</b>
+&nbsp;				+ ordinate] = value;
+&nbsp;
+&nbsp;	}
+&nbsp;
+&nbsp;	void _setAttribute(int endPoint, int semantics, int ordinate, int value) {
+<b class="fc">&nbsp;		_setAttribute(endPoint, semantics, ordinate, (double) value);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public void copyTo(Geometry dst) {
+<b class="fc">&nbsp;		if (dst.getType() != getType())</b>
+<b class="nc">&nbsp;			throw new IllegalArgumentException();</b>
+&nbsp;
+<b class="fc">&nbsp;		Segment segDst = (Segment) dst;</b>
+<b class="fc">&nbsp;		segDst.m_description = m_description;</b>
+<b class="fc">&nbsp;		segDst._resizeAttributes(m_description.getTotalComponentCount() - 2);</b>
+<b class="fc">&nbsp;		_attributeCopy(m_attributes, 0, segDst.m_attributes, 0,</b>
+<b class="fc">&nbsp;				(m_description.getTotalComponentCount() - 2) * 2);</b>
+<b class="fc">&nbsp;		segDst.m_xStart = m_xStart;</b>
+<b class="fc">&nbsp;		segDst.m_yStart = m_yStart;</b>
+<b class="fc">&nbsp;		segDst.m_xEnd = m_xEnd;</b>
+<b class="fc">&nbsp;		segDst.m_yEnd = m_yEnd;</b>
+<b class="fc">&nbsp;		dst._touch();</b>
+&nbsp;
+<b class="fc">&nbsp;		_copyToImpl(segDst);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public Envelope1D queryInterval(int semantics, int ordinate) {
+<b class="fc">&nbsp;		Envelope1D env = new Envelope1D();</b>
+<b class="fc">&nbsp;		if (isEmptyImpl()) {</b>
+<b class="nc">&nbsp;			env.setEmpty();</b>
+<b class="nc">&nbsp;			return env;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		env.vmin = _getAttributeAsDbl(0, semantics, ordinate);</b>
+<b class="fc">&nbsp;		env.vmax = env.vmin;</b>
+<b class="fc">&nbsp;		env.mergeNE(_getAttributeAsDbl(1, semantics, ordinate));</b>
+<b class="fc">&nbsp;		return env;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void queryCoord(double t, Point point) {
+<b class="fc">&nbsp;		point.assignVertexDescription(m_description);</b>
+<b class="fc">&nbsp;		point.setXY(getCoord2D(t));</b>
+<b class="fc">&nbsp;		for (int iattrib = 1, nattrib = m_description.getAttributeCount(); iattrib &lt; nattrib; iattrib++) {</b>
+<b class="nc">&nbsp;			int semantics = m_description._getSemanticsImpl(iattrib);</b>
+<b class="nc">&nbsp;			int ncomp = VertexDescription.getComponentCount(semantics);</b>
+<b class="nc">&nbsp;			for (int iord = 0; iord &lt; ncomp; iord++) {</b>
+<b class="nc">&nbsp;				double value = getAttributeAsDbl(t, semantics, iord);</b>
+<b class="nc">&nbsp;				point.setAttribute(semantics, iord, value);</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	boolean _equalsImpl(Segment other) {
+<b class="fc">&nbsp;		if (m_description != other.m_description)</b>
+<b class="nc">&nbsp;			return false;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (m_xStart != other.m_xStart || m_xEnd != other.m_xEnd</b>
+&nbsp;				|| m_yStart != other.m_yStart || m_yEnd != other.m_yEnd)
+<b class="nc">&nbsp;			return false;</b>
+<b class="fc">&nbsp;		for (int i = 0; i &lt; (m_description.getTotalComponentCount() - 2) * 2; i++)</b>
+<b class="nc">&nbsp;			if (!NumberUtils.isEqualNonIEEE(m_attributes[i], other.m_attributes[i]))</b>
+<b class="nc">&nbsp;				return false;</b>
+&nbsp;
+<b class="fc">&nbsp;		return true;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public int hashCode() {
+<b class="nc">&nbsp;		int hash = m_description.hashCode();</b>
+<b class="nc">&nbsp;		hash = NumberUtils.hash(hash, m_xStart);</b>
+<b class="nc">&nbsp;		hash = NumberUtils.hash(hash, m_yStart);</b>
+<b class="nc">&nbsp;		hash = NumberUtils.hash(hash, m_xEnd);</b>
+<b class="nc">&nbsp;		hash = NumberUtils.hash(hash, m_yEnd);</b>
+<b class="nc">&nbsp;		for (int i = 0; i &lt; (m_description.getTotalComponentCount() - 2) * 2; i++) {</b>
+<b class="nc">&nbsp;			hash = NumberUtils.hash(hash, m_attributes[i]);</b>
+&nbsp;		}
+&nbsp;
+<b class="nc">&nbsp;		return hash;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns true, when this segment is a closed curve (start point is equal
+&nbsp;	 * to end point exactly).
+&nbsp;	 * 
+&nbsp;	 * Note, this will return true for lines, that are degenerate to a point
+&nbsp;	 * too.
+&nbsp;	 */
+&nbsp;	boolean isClosed() {
+<b class="nc">&nbsp;		return m_xStart == m_xEnd &amp;&amp; m_yStart == m_yEnd;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void reverse() {
+<b class="nc">&nbsp;		_reverseImpl();</b>
+<b class="nc">&nbsp;		double origxStart = m_xStart;</b>
+<b class="nc">&nbsp;		double origxEnd = m_xEnd;</b>
+<b class="nc">&nbsp;		m_xStart = origxEnd;</b>
+<b class="nc">&nbsp;		m_xEnd = origxStart;</b>
+<b class="nc">&nbsp;		double origyStart = m_yStart;</b>
+<b class="nc">&nbsp;		double origyEnd = m_yEnd;</b>
+<b class="nc">&nbsp;		m_yStart = origyEnd;</b>
+<b class="nc">&nbsp;		m_yEnd = origyStart;</b>
+&nbsp;
+<b class="nc">&nbsp;		for (int i = 1, n = m_description.getAttributeCount(); i &lt; n; i++) {</b>
+<b class="nc">&nbsp;			int semantics = m_description.getSemantics(i);// VertexDescription.Semantics</b>
+&nbsp;															// semantics =
+&nbsp;															// m_description.getSemantics(i);
+<b class="nc">&nbsp;			for (int iord = 0, nord = VertexDescription</b>
+<b class="nc">&nbsp;					.getComponentCount(semantics); iord &lt; nord; iord++) {</b>
+<b class="nc">&nbsp;				double v1 = _getAttributeAsDbl(0, semantics, iord);</b>
+<b class="nc">&nbsp;				double v2 = _getAttributeAsDbl(1, semantics, iord);</b>
+<b class="nc">&nbsp;				_setAttribute(0, semantics, iord, v2);</b>
+<b class="nc">&nbsp;				_setAttribute(1, semantics, iord, v1);</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	int _isIntersecting(Segment other, double tolerance,
+&nbsp;			boolean bExcludeExactEndpoints) {
+<b class="fc">&nbsp;		int gtThis = getType().value();</b>
+<b class="fc">&nbsp;		int gtOther = other.getType().value();</b>
+<b class="fc">&nbsp;		switch (gtThis) {</b>
+&nbsp;		case Geometry.GeometryType.Line:
+<b class="fc">&nbsp;			if (gtOther == Geometry.GeometryType.Line)</b>
+<b class="fc">&nbsp;				return Line._isIntersectingLineLine((Line) this, (Line) other,</b>
+&nbsp;						tolerance, bExcludeExactEndpoints);
+&nbsp;			else
+<b class="nc">&nbsp;				throw GeometryException.GeometryInternalError();</b>
+&nbsp;		default:
+<b class="nc">&nbsp;			throw GeometryException.GeometryInternalError();</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	int _intersect(Segment other, Point2D[] intersectionPoints,
+&nbsp;			double[] paramThis, double[] paramOther, double tolerance) {
+<b class="fc">&nbsp;		int gtThis = getType().value();</b>
+<b class="fc">&nbsp;		int gtOther = other.getType().value();</b>
+<b class="fc">&nbsp;		switch (gtThis) {</b>
+&nbsp;		case Geometry.GeometryType.Line:
+<b class="fc">&nbsp;			if (gtOther == Geometry.GeometryType.Line)</b>
+<b class="fc">&nbsp;				return Line._intersectLineLine((Line) this, (Line) other,</b>
+&nbsp;						intersectionPoints, paramThis, paramOther, tolerance);
+&nbsp;			else
+<b class="nc">&nbsp;				throw GeometryException.GeometryInternalError();</b>
+&nbsp;		default:
+<b class="nc">&nbsp;			throw GeometryException.GeometryInternalError();</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * A helper function for area calculation. Calculates the Integral(y(t) *
+&nbsp;	 * x&#39;(t) * dt) for t = [0, 1]. The area of a ring is caluclated as a sum of
+&nbsp;	 * the results of CalculateArea2DHelper.
+&nbsp;	 */
+&nbsp;	abstract double _calculateArea2DHelper(double xorg, double yorg);
+&nbsp;
+&nbsp;	static int _getEndPointOffset(VertexDescription vd, int endPoint) {
+<b class="fc">&nbsp;		return endPoint * (vd.getTotalComponentCount() - 2);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns the coordinate of the point on this segment for the given
+&nbsp;	 * parameter value.
+&nbsp;	 */
+&nbsp;	public Point2D getCoord2D(double t) {
+<b class="fc">&nbsp;		Point2D pt = new Point2D();</b>
+<b class="fc">&nbsp;		getCoord2D(t, pt);</b>
+<b class="fc">&nbsp;		return pt;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns the coordinate of the point on this segment for the given
+&nbsp;	 * parameter value (segments are parametric curves).
+&nbsp;	 * 
+&nbsp;	 * @param t
+&nbsp;	 *            the parameter coordinate along the segment from 0.0 to 1.0.
+&nbsp;	 *            Value of 0 returns the start point, 1 returns end point.
+&nbsp;	 * @param dst
+&nbsp;	 *            the coordinate where result will be placed.
+&nbsp;	 */
+&nbsp;	public abstract void getCoord2D(double t, Point2D dst);
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Finds a closest coordinate on this segment.
+&nbsp;	 * 
+&nbsp;	 * @param inputPoint
+&nbsp;	 *            The 2D point to find the closest coordinate on this segment.
+&nbsp;	 * @param bExtrapolate
+&nbsp;	 *            TRUE if the segment is extrapolated at the end points along
+&nbsp;	 *            the end point tangents. Otherwise the result is limited to
+&nbsp;	 *            values between 0 and 1.
+&nbsp;	 * @return The parametric coordinate t on the segment (0 corresponds to the
+&nbsp;	 *         start point, 1 corresponds to the end point). Use getCoord2D to
+&nbsp;	 *         obtain the 2D coordinate on the segment from t. To find the
+&nbsp;	 *         distance, call (inputPoint.sub(seg.getCoord2D(t))).length();
+&nbsp;	 */
+&nbsp;	public abstract double getClosestCoordinate(Point2D inputPoint,
+&nbsp;			boolean bExtrapolate);
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Splits this segment into Y monotonic parts and places them into the input
+&nbsp;	 * array.
+&nbsp;	 * 
+&nbsp;	 * @param monotonicSegments
+&nbsp;	 *            The in/out array of SegmentBuffer structures that will be
+&nbsp;	 *            filled with the monotonic parts. The monotonicSegments array
+&nbsp;	 *            must contain at least 3 elements.
+&nbsp;	 * @return The number of monotonic parts if the split had happened. Returns
+&nbsp;	 *         0 if the segment is already monotonic.
+&nbsp;	 */
+&nbsp;	abstract int getYMonotonicParts(SegmentBuffer[] monotonicSegments);
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Calculates intersection points of this segment with an infinite line,
+&nbsp;	 * parallel to one of the axes.
+&nbsp;	 * 
+&nbsp;	 * @param bAxisX
+&nbsp;	 *            TRUE if the function works with the line parallel to the axis
+&nbsp;	 *            X.
+&nbsp;	 * @param ordinate
+&nbsp;	 *            The ordinate value of the line (x for axis Y, y for axis X).
+&nbsp;	 * @param resultOrdinates
+&nbsp;	 *            The value of ordinate in the intersection points One ordinate
+&nbsp;	 *            is equal to the ordinate parameter. This parameter can be
+&nbsp;	 *            NULL.
+&nbsp;	 * @param parameters
+&nbsp;	 *            The value of the parameter in the intersection points (between
+&nbsp;	 *            0 and 1). This parameter can be NULL.
+&nbsp;	 * @return The number of intersection points, 0 when no intersection points
+&nbsp;	 *         exist, -1 when the segment coincides with the line (infinite
+&nbsp;	 *         number of intersection points).
+&nbsp;	 */
+&nbsp;	public abstract int intersectionWithAxis2D(boolean bAxisX, double ordinate,
+&nbsp;			double[] resultOrdinates, double[] parameters);
+&nbsp;
+&nbsp;	void _reverseImpl() {
+<b class="nc">&nbsp;	}</b>
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns True if the segment is degenerate to a point with relation to the
+&nbsp;	 * given tolerance. For Lines this means the line length is not longer than
+&nbsp;	 * the tolerance. For the curves, the distance between the segment endpoints
+&nbsp;	 * should not be longer than the tolerance and the distance from the line,
+&nbsp;	 * connecting the endpoints to the furtherst point on the segment is not
+&nbsp;	 * larger than the tolerance.
+&nbsp;	 */
+&nbsp;	abstract boolean isDegenerate(double tolerance);
+&nbsp;
+&nbsp;	// Cpp definitions
+&nbsp;
+&nbsp;	abstract boolean isCurve();
+&nbsp;
+&nbsp;	abstract Point2D _getTangent(double t);
+&nbsp;
+&nbsp;	abstract boolean _isDegenerate(double tolerance);
+&nbsp;
+<b class="nc">&nbsp;	double _calculateSubLength(double t) { return tToLength(t); }</b>
+&nbsp;	
+<b class="nc">&nbsp;	double _calculateSubLength(double t1, double t2) { return tToLength(t2) - tToLength(t1); }</b>
+&nbsp;
+&nbsp;	abstract void _copyToImpl(Segment dst);
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns subsegment between parameters t1 and t2. The attributes are
+&nbsp;	 * interpolated along the length of the curve.
+&nbsp;	 */
+&nbsp;	public abstract Segment cut(double t1, double t2);
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Calculates the subsegment between parameters t1 and t2, and stores the
+&nbsp;	 * result in subSegmentBuffer. The attributes are interpolated along the
+&nbsp;	 * length of the curve.
+&nbsp;	 */
+&nbsp;	abstract void cut(double t1, double t2, SegmentBuffer subSegmentBuffer);
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns the attribute on the segment for the given parameter value. The
+&nbsp;	 * interpolation of attribute is given by the attribute interpolation type.
+&nbsp;	 */
+&nbsp;	public abstract double getAttributeAsDbl(double t, int semantics,
+&nbsp;			int ordinate);
+&nbsp;
+&nbsp;	abstract boolean _isIntersectingPoint(Point2D pt, double tolerance,
+&nbsp;			boolean bExcludeExactEndpoints);
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Calculates intersection point of this segment with an infinite line,
+&nbsp;	 * parallel to axis X. This segment must be to be y-monotonic (or
+&nbsp;	 * horizontal).
+&nbsp;	 * 
+&nbsp;	 * @param y
+&nbsp;	 *            The y coordinate of the line.
+&nbsp;	 * @param xParallel
+&nbsp;	 *            For segments, that are horizontal, and have y coordinate, this
+&nbsp;	 *            value is returned.
+&nbsp;	 * @return X coordinate of the intersection, or NaN, if no intersection.
+&nbsp;	 */
+&nbsp;	abstract double intersectionOfYMonotonicWithAxisX(double y, double xParallel);
+&nbsp;  
+&nbsp;	/**
+&nbsp;	 * Converts curves parameter t to the curve length. Can be expensive for curves.
+&nbsp;	 */
+&nbsp;	abstract double tToLength(double t);
+&nbsp;
+&nbsp;	abstract double lengthToT(double len);
+&nbsp;
+&nbsp;	public double distance(/* const */Segment otherSegment,
+&nbsp;			boolean bSegmentsKnownDisjoint)
+&nbsp;	{
+&nbsp;		// if the segments are not known to be disjoint, and
+&nbsp;		// the segments are found to touch in any way, then return 0.0
+<b class="fc">&nbsp;		if (!bSegmentsKnownDisjoint</b>
+<b class="fc">&nbsp;				&amp;&amp; _isIntersecting(otherSegment, 0, false) != 0) {</b>
+<b class="fc">&nbsp;			return 0.0;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		double minDistance = NumberUtils.doubleMax();</b>
+&nbsp;
+&nbsp;		Point2D input_point;
+&nbsp;		double t;
+&nbsp;		double distance;
+&nbsp;
+<b class="fc">&nbsp;		input_point = getStartXY();</b>
+<b class="fc">&nbsp;		t = otherSegment.getClosestCoordinate(input_point, false);</b>
+<b class="fc">&nbsp;		input_point.sub(otherSegment.getCoord2D(t));</b>
+<b class="fc">&nbsp;		distance = input_point.length();</b>
+<b class="fc">&nbsp;		if (distance &lt; minDistance)</b>
+<b class="fc">&nbsp;			minDistance = distance;</b>
+&nbsp;
+<b class="fc">&nbsp;		input_point = getEndXY();</b>
+<b class="fc">&nbsp;		t = otherSegment.getClosestCoordinate(input_point, false);</b>
+<b class="fc">&nbsp;		input_point.sub(otherSegment.getCoord2D(t));</b>
+<b class="fc">&nbsp;		distance = input_point.length();</b>
+<b class="fc">&nbsp;		if (distance &lt; minDistance)</b>
+<b class="fc">&nbsp;			minDistance = distance;</b>
+&nbsp;
+<b class="fc">&nbsp;		input_point = otherSegment.getStartXY();</b>
+<b class="fc">&nbsp;		t = getClosestCoordinate(input_point, false);</b>
+<b class="fc">&nbsp;		input_point.sub(getCoord2D(t));</b>
+<b class="fc">&nbsp;		distance = input_point.length();</b>
+<b class="fc">&nbsp;		if (distance &lt; minDistance)</b>
+<b class="fc">&nbsp;			minDistance = distance;</b>
+&nbsp;
+<b class="fc">&nbsp;		input_point = otherSegment.getEndXY();</b>
+<b class="fc">&nbsp;		t = getClosestCoordinate(input_point, false);</b>
+<b class="fc">&nbsp;		input_point.sub(getCoord2D(t));</b>
+<b class="fc">&nbsp;		distance = input_point.length();</b>
+<b class="fc">&nbsp;		if (distance &lt; minDistance)</b>
+<b class="nc">&nbsp;			minDistance = distance;</b>
+&nbsp;
+<b class="fc">&nbsp;		return minDistance;</b>
+&nbsp;	}    
+&nbsp;
+&nbsp;    public Geometry getBoundary() {
+<b class="nc">&nbsp;        return Boundary.calculate(this, null);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-02-21 16:04</div>
+</div>
+</body>
+</html>

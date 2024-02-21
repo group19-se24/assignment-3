@@ -1,0 +1,402 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > StridedIndexTypeCollection</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.esri.core.geometry</a>
+</div>
+
+<h1>Coverage Summary for Class: StridedIndexTypeCollection (com.esri.core.geometry)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">StridedIndexTypeCollection</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    85,7%
+  </span>
+  <span class="absValue">
+    (18/21)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    75,2%
+  </span>
+  <span class="absValue">
+    (91/121)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; Copyright 1995-2018 Esri
+&nbsp;
+&nbsp;   Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp;   you may not use this file except in compliance with the License.
+&nbsp;   You may obtain a copy of the License at
+&nbsp;
+&nbsp;       http://www.apache.org/licenses/LICENSE-2.0
+&nbsp;
+&nbsp;   Unless required by applicable law or agreed to in writing, software
+&nbsp;   distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp;   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp;   See the License for the specific language governing permissions and
+&nbsp;   limitations under the License.
+&nbsp;
+&nbsp; For additional information, contact:
+&nbsp; Environmental Systems Research Institute, Inc.
+&nbsp; Attn: Contracts Dept
+&nbsp; 380 New York Street
+&nbsp; Redlands, California, USA 92373
+&nbsp;
+&nbsp; email: contracts@esri.com
+&nbsp; */
+&nbsp;package com.esri.core.geometry;
+&nbsp;
+&nbsp;import java.io.Serializable;
+&nbsp;
+&nbsp;import static com.esri.core.geometry.SizeOf.SIZE_OF_STRIDED_INDEX_TYPE_COLLECTION;
+&nbsp;import static com.esri.core.geometry.SizeOf.sizeOfIntArray;
+&nbsp;import static com.esri.core.geometry.SizeOf.sizeOfObjectArray;
+&nbsp;
+&nbsp;/**
+&nbsp; * A collection of strides of Index_type elements. To be used when one needs a
+&nbsp; * collection of homogeneous elements that contain only integer fields (i.e.
+&nbsp; * structs with Index_type members) Recycles the strides. Allows for constant
+&nbsp; * time creation and deletion of an element.
+&nbsp; */
+<b class="fc">&nbsp;final class StridedIndexTypeCollection implements Serializable {</b>
+&nbsp;	private static final long serialVersionUID = 1L;
+&nbsp;	
+<b class="fc">&nbsp;	private int[][] m_buffer = null;</b>
+<b class="fc">&nbsp;	private int m_firstFree = -1;</b>
+<b class="fc">&nbsp;	private int m_last = 0;</b>
+<b class="fc">&nbsp;	private int m_size = 0;</b>
+<b class="fc">&nbsp;	private int m_capacity = 0;</b>
+<b class="fc">&nbsp;	private int m_bufferSize = 0;</b>
+&nbsp;	private int m_stride;
+&nbsp;	private int m_realStride;
+&nbsp;	private int m_blockSize;
+&nbsp;
+&nbsp;	/*
+&nbsp;	 private final static int m_realBlockSize = 2048;//if you change this, change m_blockSize, m_blockPower, m_blockMask, and st_sizes
+&nbsp;	 private final static int m_blockMask = 0x7FF;
+&nbsp;	 private final static int m_blockPower = 11;
+&nbsp;	 private final static int[] st_sizes = {16, 32, 64, 128, 256, 512, 1024, 2048};
+&nbsp;	 */
+&nbsp;
+&nbsp;	private final static int m_realBlockSize = 16384;// if you change this,
+&nbsp;														// change m_blockSize,
+&nbsp;														// m_blockPower,
+&nbsp;														// m_blockMask, and
+&nbsp;														// st_sizes
+&nbsp;	private final static int m_blockMask = 0x3FFF;
+&nbsp;	private final static int m_blockPower = 14;
+<b class="fc">&nbsp;	private final static int[] st_sizes = { 16, 32, 64, 128, 256, 512, 1024,</b>
+&nbsp;			2048, 4096, 8192, 16384 };
+&nbsp;
+<b class="fc">&nbsp;	StridedIndexTypeCollection(int stride) {</b>
+<b class="fc">&nbsp;		m_stride = stride;</b>
+<b class="fc">&nbsp;		m_realStride = stride;</b>
+<b class="fc">&nbsp;		m_blockSize = m_realBlockSize / m_realStride;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private boolean dbgdelete_(int element) {
+<b class="fc">&nbsp;		m_buffer[element &gt;&gt; m_blockPower][(element &amp; m_blockMask) + 1] = -0x7eadbeed;</b>
+<b class="fc">&nbsp;		return true;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	void deleteElement(int element) {
+<b class="fc">&nbsp;		assert(dbgdelete_(element));</b>
+<b class="fc">&nbsp;		int totalStrides = (element &gt;&gt; m_blockPower) * m_blockSize</b>
+&nbsp;				* m_realStride + (element &amp; m_blockMask);
+<b class="fc">&nbsp;		if (totalStrides &lt; m_last * m_realStride) {</b>
+<b class="fc">&nbsp;			m_buffer[element &gt;&gt; m_blockPower][element &amp; m_blockMask] = m_firstFree;</b>
+<b class="fc">&nbsp;			m_firstFree = element;</b>
+&nbsp;		} else {
+<b class="nc">&nbsp;			assert (totalStrides == m_last * m_realStride);</b>
+<b class="nc">&nbsp;			m_last--;</b>
+&nbsp;		}
+<b class="fc">&nbsp;		m_size--;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Returns the given field of the element.
+&nbsp;	int getField(int element, int field) {
+<b class="fc">&nbsp;		assert(m_buffer[element &gt;&gt; m_blockPower][(element &amp; m_blockMask) + 1] != -0x7eadbeed);</b>
+<b class="fc">&nbsp;		return m_buffer[element &gt;&gt; m_blockPower][(element &amp; m_blockMask)</b>
+&nbsp;				+ field];
+&nbsp;	}
+&nbsp;
+&nbsp;	// Sets the given field of the element.
+&nbsp;	void setField(int element, int field, int value) {
+<b class="fc">&nbsp;		assert(m_buffer[element &gt;&gt; m_blockPower][(element &amp; m_blockMask) + 1] != -0x7eadbeed);</b>
+<b class="fc">&nbsp;		m_buffer[element &gt;&gt; m_blockPower][(element &amp; m_blockMask) + field] = value;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Returns the stride size
+&nbsp;	int getStride() {
+<b class="nc">&nbsp;		return m_stride;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Creates the new element. This is a constant time operation.
+&nbsp;	// All fields are initialized to -1.
+&nbsp;	int newElement() {
+<b class="fc">&nbsp;		int element = m_firstFree;</b>
+<b class="fc">&nbsp;		if (element == -1) {</b>
+<b class="fc">&nbsp;			if (m_last == m_capacity) {</b>
+<b class="fc">&nbsp;				long newcap = m_capacity != 0 ? (((long) m_capacity + 1) * 3 / 2)</b>
+<b class="fc">&nbsp;						: (long) 1;</b>
+<b class="fc">&nbsp;				if (newcap &gt; Integer.MAX_VALUE)</b>
+<b class="nc">&nbsp;					newcap = Integer.MAX_VALUE;// cannot grow past 2gb elements</b>
+&nbsp;												// presently
+&nbsp;
+<b class="fc">&nbsp;				if (newcap == m_capacity)</b>
+<b class="nc">&nbsp;					throw new IndexOutOfBoundsException();</b>
+&nbsp;
+<b class="fc">&nbsp;				grow_(newcap);</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			element = ((m_last / m_blockSize) &lt;&lt; m_blockPower)</b>
+&nbsp;					+ (m_last % m_blockSize) * m_realStride;
+<b class="fc">&nbsp;			m_last++;</b>
+&nbsp;		} else {
+<b class="fc">&nbsp;			m_firstFree = m_buffer[element &gt;&gt; m_blockPower][element</b>
+&nbsp;					&amp; m_blockMask];
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		m_size++;</b>
+<b class="fc">&nbsp;		int ar[] = m_buffer[element &gt;&gt; m_blockPower];</b>
+<b class="fc">&nbsp;		int ind = element &amp; m_blockMask;</b>
+<b class="fc">&nbsp;		for (int i = 0; i &lt; m_stride; i++) {</b>
+<b class="fc">&nbsp;			ar[ind + i] = -1;</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return element;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	int elementToIndex(int element) {
+<b class="fc">&nbsp;		return (element &gt;&gt; m_blockPower) * m_blockSize</b>
+&nbsp;				+ (element &amp; m_blockMask) / m_realStride;
+&nbsp;	}
+&nbsp;
+&nbsp;	// Deletes all elements and frees all the memory if b_free_memory is True.
+&nbsp;	void deleteAll(boolean b_free_memory) {
+<b class="fc">&nbsp;		m_firstFree = -1;</b>
+<b class="fc">&nbsp;		m_last = 0;</b>
+<b class="fc">&nbsp;		m_size = 0;</b>
+<b class="fc">&nbsp;		if (b_free_memory) {</b>
+<b class="fc">&nbsp;			m_buffer = null;</b>
+<b class="fc">&nbsp;			m_capacity = 0;</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	// Returns the count of existing elements
+&nbsp;	int size() {
+<b class="fc">&nbsp;		return m_size;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Sets the capcity of the collection. Only applied if current capacity is
+&nbsp;	// smaller.
+&nbsp;	void setCapacity(int capacity) {
+<b class="fc">&nbsp;		if (capacity &gt; m_capacity)</b>
+<b class="fc">&nbsp;			grow_(capacity);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Returns the capacity of the collection
+&nbsp;	int capacity() {
+<b class="fc">&nbsp;		return m_capacity;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Swaps content of two elements (each field of the stride)
+&nbsp;	void swap(int element1, int element2) {
+<b class="nc">&nbsp;		int ar1[] = m_buffer[element1 &gt;&gt; m_blockPower];</b>
+<b class="nc">&nbsp;		int ar2[] = m_buffer[element2 &gt;&gt; m_blockPower];</b>
+<b class="nc">&nbsp;		int ind1 = element1 &amp; m_blockMask;</b>
+<b class="nc">&nbsp;		int ind2 = element2 &amp; m_blockMask;</b>
+<b class="nc">&nbsp;		for (int i = 0; i &lt; m_stride; i++) {</b>
+<b class="nc">&nbsp;			int tmp = ar1[ind1 + i];</b>
+<b class="nc">&nbsp;			ar1[ind1 + i] = ar2[ind2 + i];</b>
+<b class="nc">&nbsp;			ar2[ind2 + i] = tmp;</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	// Swaps content of two fields
+&nbsp;	void swapField(int element1, int element2, int field) {
+<b class="fc">&nbsp;		int ar1[] = m_buffer[element1 &gt;&gt; m_blockPower];</b>
+<b class="fc">&nbsp;		int ar2[] = m_buffer[element2 &gt;&gt; m_blockPower];</b>
+<b class="fc">&nbsp;		int ind1 = (element1 &amp; m_blockMask) + field;</b>
+<b class="fc">&nbsp;		int ind2 = (element2 &amp; m_blockMask) + field;</b>
+<b class="fc">&nbsp;		int tmp = ar1[ind1];</b>
+<b class="fc">&nbsp;		ar1[ind1] = ar2[ind2];</b>
+<b class="fc">&nbsp;		ar2[ind2] = tmp;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Returns a value of the index, that never will be returned by new_element
+&nbsp;	// and is neither -1 nor impossible_index_3.
+&nbsp;	static int impossibleIndex2() {
+<b class="fc">&nbsp;		return -2;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Returns a value of the index, that never will be returned by new_element
+&nbsp;	// and is neither -1 nor impossible_index_2.
+&nbsp;	static int impossibleIndex3() {
+<b class="fc">&nbsp;		return -3;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	static boolean isValidElement(int element) {
+<b class="fc">&nbsp;		return element &gt;= 0;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private void ensureBufferBlocksCapacity(int blocks) {
+<b class="fc">&nbsp;		if (m_buffer.length &lt; blocks) {</b>
+<b class="nc">&nbsp;			int[][] newBuffer = new int[blocks][];</b>
+<b class="nc">&nbsp;			for (int i = 0; i &lt; m_buffer.length; i++) {</b>
+<b class="nc">&nbsp;				newBuffer[i] = m_buffer[i];</b>
+&nbsp;			}
+&nbsp;
+<b class="nc">&nbsp;			m_buffer = newBuffer;</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	private void grow_(long newsize) {
+<b class="fc">&nbsp;		if (m_buffer == null) {</b>
+<b class="fc">&nbsp;			m_bufferSize = 0;</b>
+<b class="fc">&nbsp;			m_buffer = new int[8][];</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		assert (newsize &gt; m_capacity);</b>
+&nbsp;
+<b class="fc">&nbsp;		long nblocks = (newsize + m_blockSize - 1) / m_blockSize;</b>
+<b class="fc">&nbsp;		if (nblocks &gt; Integer.MAX_VALUE)</b>
+<b class="nc">&nbsp;			throw new IndexOutOfBoundsException();</b>
+&nbsp;
+<b class="fc">&nbsp;		ensureBufferBlocksCapacity((int) nblocks);</b>
+<b class="fc">&nbsp;		if (nblocks == 1) {</b>
+&nbsp;			// When less than one block is needed we allocate smaller arrays
+&nbsp;			// than m_realBlockSize to avoid initialization cost.
+<b class="fc">&nbsp;			int oldsz = m_capacity &gt; 0 ? m_capacity : 0;</b>
+<b class="fc">&nbsp;			assert (oldsz &lt; newsize);</b>
+<b class="fc">&nbsp;			int i = 0;</b>
+<b class="fc">&nbsp;			int realnewsize = (int) newsize * m_realStride;</b>
+<b class="fc">&nbsp;			while (realnewsize &gt; st_sizes[i])</b>
+&nbsp;				// get the size to allocate. Using fixed sizes to reduce
+&nbsp;				// fragmentation.
+<b class="fc">&nbsp;				i++;</b>
+<b class="fc">&nbsp;			int[] b = new int[st_sizes[i]];</b>
+<b class="fc">&nbsp;			if (m_bufferSize == 1) {</b>
+<b class="fc">&nbsp;				System.arraycopy(m_buffer[0], 0, b, 0, m_buffer[0].length);</b>
+<b class="fc">&nbsp;				m_buffer[0] = b;</b>
+&nbsp;			} else {
+<b class="fc">&nbsp;				m_buffer[m_bufferSize] = b;</b>
+<b class="fc">&nbsp;				m_bufferSize++;</b>
+&nbsp;			}
+<b class="fc">&nbsp;			m_capacity = b.length / m_realStride;</b>
+<b class="fc">&nbsp;		} else {</b>
+<b class="fc">&nbsp;			if (nblocks * m_blockSize &gt; Integer.MAX_VALUE)</b>
+<b class="nc">&nbsp;				throw new IndexOutOfBoundsException();</b>
+&nbsp;
+<b class="fc">&nbsp;			if (m_bufferSize == 1) {</b>
+<b class="fc">&nbsp;				if (m_buffer[0].length &lt; m_realBlockSize) {</b>
+&nbsp;					// resize the first buffer to ensure it is equal the
+&nbsp;					// m_realBlockSize.
+<b class="nc">&nbsp;					int[] b = new int[m_realBlockSize];</b>
+<b class="nc">&nbsp;					System.arraycopy(m_buffer[0], 0, b, 0, m_buffer[0].length);</b>
+<b class="nc">&nbsp;					m_buffer[0] = b;</b>
+<b class="nc">&nbsp;					m_capacity = m_blockSize;</b>
+&nbsp;				}
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			while (m_bufferSize &lt; nblocks) {</b>
+<b class="fc">&nbsp;				m_buffer[m_bufferSize++] = new int[m_realBlockSize];</b>
+<b class="fc">&nbsp;				m_capacity += m_blockSize;</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	public long estimateMemorySize()
+&nbsp;	{
+<b class="nc">&nbsp;		long size = SIZE_OF_STRIDED_INDEX_TYPE_COLLECTION;</b>
+<b class="nc">&nbsp;		if (m_buffer != null) {</b>
+<b class="nc">&nbsp;			size += sizeOfObjectArray(m_buffer.length);</b>
+<b class="nc">&nbsp;			for (int i = 0; i&lt; m_buffer.length; i++) {</b>
+<b class="nc">&nbsp;				if (m_buffer[i] != null) {</b>
+<b class="nc">&nbsp;					size += sizeOfIntArray(m_buffer[i].length);</b>
+&nbsp;				}
+&nbsp;			}
+&nbsp;		}
+<b class="nc">&nbsp;		return size;</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-02-21 16:04</div>
+</div>
+</body>
+</html>

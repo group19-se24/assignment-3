@@ -1,0 +1,656 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > Cracker</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.esri.core.geometry</a>
+</div>
+
+<h1>Coverage Summary for Class: Cracker (com.esri.core.geometry)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">Cracker</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (12/12)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    93%
+  </span>
+  <span class="absValue">
+    (265/285)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; Copyright 1995-2015 Esri
+&nbsp;
+&nbsp;   Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp;   you may not use this file except in compliance with the License.
+&nbsp;   You may obtain a copy of the License at
+&nbsp;
+&nbsp;       http://www.apache.org/licenses/LICENSE-2.0
+&nbsp;
+&nbsp;   Unless required by applicable law or agreed to in writing, software
+&nbsp;   distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp;   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp;   See the License for the specific language governing permissions and
+&nbsp;   limitations under the License.
+&nbsp;
+&nbsp; For additional information, contact:
+&nbsp; Environmental Systems Research Institute, Inc.
+&nbsp; Attn: Contracts Dept
+&nbsp; 380 New York Street
+&nbsp; Redlands, California, USA 92373
+&nbsp;
+&nbsp; email: contracts@esri.com
+&nbsp; */
+&nbsp;package com.esri.core.geometry;
+&nbsp;
+&nbsp;
+&nbsp;/**
+&nbsp; * Implementation for the segment cracking.
+&nbsp; * 
+&nbsp; * Finds and splits all intersecting segments. Used by the TopoGraph and
+&nbsp; * Simplify.
+&nbsp; */
+<b class="fc">&nbsp;final class Cracker {</b>
+&nbsp;	private EditShape m_shape;
+&nbsp;	private ProgressTracker m_progress_tracker;
+&nbsp;	private NonSimpleResult m_non_simple_result;
+&nbsp;	private double m_tolerance;
+&nbsp;	private Treap m_sweep_structure;
+&nbsp;	private SweepComparator m_sweep_comparator;
+&nbsp;	private boolean m_bAllowCoincident;
+&nbsp;
+&nbsp;	private Segment getSegment_(int vertex, Line lineHelper) {
+<b class="fc">&nbsp;		Segment seg = m_shape.getSegment(vertex);</b>
+<b class="fc">&nbsp;		if (seg == null) {</b>
+<b class="fc">&nbsp;			if (!m_shape.queryLineConnector(vertex, lineHelper))</b>
+<b class="fc">&nbsp;				return null;</b>
+&nbsp;			
+<b class="fc">&nbsp;			seg = (Segment)lineHelper;</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return seg;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	private boolean crackBruteForce_() {
+<b class="fc">&nbsp;		EditShape.VertexIterator iter_1 = m_shape.queryVertexIterator(false);</b>
+<b class="fc">&nbsp;		boolean b_cracked = false;</b>
+<b class="fc">&nbsp;		Line line_1 = new Line();</b>
+<b class="fc">&nbsp;		Line line_2 = new Line();</b>
+<b class="fc">&nbsp;		Envelope2D seg_1_env = new Envelope2D();</b>
+<b class="fc">&nbsp;		seg_1_env.setEmpty();</b>
+<b class="fc">&nbsp;		Envelope2D seg_2_env = new Envelope2D();</b>
+<b class="fc">&nbsp;		seg_2_env.setEmpty();</b>
+<b class="fc">&nbsp;		boolean assume_intersecting = false;</b>
+<b class="fc">&nbsp;		Point helper_point = new Point();</b>
+<b class="fc">&nbsp;		SegmentIntersector segment_intersector = new SegmentIntersector();</b>
+&nbsp;
+<b class="fc">&nbsp;		for (int vertex_1 = iter_1.next(); vertex_1 != -1; vertex_1 = iter_1</b>
+<b class="fc">&nbsp;				.next()) {</b>
+<b class="fc">&nbsp;			ProgressTracker.checkAndThrow(m_progress_tracker);</b>
+&nbsp;
+<b class="fc">&nbsp;			int GT_1 = m_shape.getGeometryType(iter_1.currentGeometry());</b>
+&nbsp;
+<b class="fc">&nbsp;			Segment seg_1 = null;</b>
+<b class="fc">&nbsp;			boolean seg_1_zero = false;</b>
+<b class="fc">&nbsp;			if (!Geometry.isPoint(GT_1)) {</b>
+<b class="fc">&nbsp;				seg_1 = getSegment_(vertex_1, line_1);</b>
+<b class="fc">&nbsp;				if (seg_1 == null)</b>
+<b class="fc">&nbsp;					continue;</b>
+&nbsp;				
+<b class="fc">&nbsp;				seg_1.queryEnvelope2D(seg_1_env);</b>
+<b class="fc">&nbsp;				seg_1_env.inflate(m_tolerance, m_tolerance);</b>
+&nbsp;
+<b class="fc">&nbsp;				if (seg_1.isDegenerate(m_tolerance))// do not crack with</b>
+&nbsp;													// degenerate segments
+&nbsp;				{
+<b class="fc">&nbsp;					if (seg_1.isDegenerate(0)) {</b>
+<b class="fc">&nbsp;						seg_1_zero = true;</b>
+<b class="fc">&nbsp;						seg_1 = null;</b>
+&nbsp;					}
+&nbsp;					else {
+&nbsp;						continue;
+&nbsp;					}
+&nbsp;				}
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			EditShape.VertexIterator iter_2 = m_shape</b>
+<b class="fc">&nbsp;					.queryVertexIterator(iter_1);</b>
+<b class="fc">&nbsp;			int vertex_2 = iter_2.next();</b>
+<b class="fc">&nbsp;			if (vertex_2 != -1)</b>
+<b class="fc">&nbsp;				vertex_2 = iter_2.next();</b>
+&nbsp;
+<b class="fc">&nbsp;			for (; vertex_2 != -1; vertex_2 = iter_2.next()) {</b>
+<b class="fc">&nbsp;				int GT_2 = m_shape.getGeometryType(iter_2.currentGeometry());</b>
+&nbsp;
+<b class="fc">&nbsp;				Segment seg_2 = null;</b>
+<b class="fc">&nbsp;				boolean seg_2_zero = false;</b>
+<b class="fc">&nbsp;				if (!Geometry.isPoint(GT_2)) {</b>
+<b class="fc">&nbsp;					seg_2 = getSegment_(vertex_2, line_2);</b>
+<b class="fc">&nbsp;					if (seg_2 == null) {</b>
+<b class="fc">&nbsp;						continue;</b>
+&nbsp;					}
+&nbsp;					
+<b class="fc">&nbsp;					seg_2.queryEnvelope2D(seg_2_env);</b>
+<b class="fc">&nbsp;					if (seg_2.isDegenerate(m_tolerance))// do not crack with</b>
+&nbsp;														// degenerate segments
+&nbsp;					{
+<b class="fc">&nbsp;						if (seg_2.isDegenerate(0)) {</b>
+<b class="fc">&nbsp;							seg_2_zero = true;</b>
+<b class="fc">&nbsp;							seg_2 = null;</b>
+&nbsp;						}
+&nbsp;						else {
+&nbsp;							continue;
+&nbsp;						}
+&nbsp;					}
+&nbsp;				}
+&nbsp;
+<b class="fc">&nbsp;				int split_count_1 = 0;</b>
+<b class="fc">&nbsp;				int split_count_2 = 0;</b>
+<b class="fc">&nbsp;				if (seg_1 != null &amp;&amp; seg_2 != null) {</b>
+<b class="fc">&nbsp;					if (seg_1_env.isIntersectingNE(seg_2_env)) {</b>
+<b class="fc">&nbsp;						segment_intersector.pushSegment(seg_1);</b>
+<b class="fc">&nbsp;						segment_intersector.pushSegment(seg_2);</b>
+<b class="fc">&nbsp;						segment_intersector.intersect(m_tolerance,</b>
+&nbsp;								assume_intersecting);
+<b class="fc">&nbsp;						split_count_1 = segment_intersector</b>
+<b class="fc">&nbsp;								.getResultSegmentCount(0);</b>
+<b class="fc">&nbsp;						split_count_2 = segment_intersector</b>
+<b class="fc">&nbsp;								.getResultSegmentCount(1);</b>
+<b class="fc">&nbsp;						if (split_count_1 + split_count_2 &gt; 0) {</b>
+<b class="fc">&nbsp;							m_shape.splitSegment_(vertex_1,</b>
+&nbsp;									segment_intersector, 0, true);
+<b class="fc">&nbsp;							m_shape.splitSegment_(vertex_2,</b>
+&nbsp;									segment_intersector, 1, true);
+&nbsp;						}
+<b class="fc">&nbsp;						segment_intersector.clear();</b>
+&nbsp;					}
+&nbsp;				} else {
+<b class="fc">&nbsp;					if (seg_1 != null) {</b>
+<b class="fc">&nbsp;						Point2D pt = new Point2D();</b>
+<b class="fc">&nbsp;						m_shape.getXY(vertex_2, pt);</b>
+<b class="fc">&nbsp;						if (seg_1_env.contains(pt)) {</b>
+<b class="fc">&nbsp;							segment_intersector.pushSegment(seg_1);</b>
+<b class="fc">&nbsp;							m_shape.queryPoint(vertex_2, helper_point);</b>
+<b class="fc">&nbsp;							segment_intersector.intersect(m_tolerance,</b>
+&nbsp;									helper_point, 0, 1.0, assume_intersecting);
+<b class="fc">&nbsp;							split_count_1 = segment_intersector</b>
+<b class="fc">&nbsp;									.getResultSegmentCount(0);</b>
+<b class="fc">&nbsp;							if (split_count_1 &gt; 0) {</b>
+<b class="fc">&nbsp;								m_shape.splitSegment_(vertex_1,</b>
+&nbsp;										segment_intersector, 0, true);
+<b class="fc">&nbsp;								if (seg_2_zero) {</b>
+&nbsp;				                    //seg_2 was zero length. Need to change all coincident points
+&nbsp;				                    //segment at vertex_2 is dzero length, change all attached zero length segments
+<b class="fc">&nbsp;				                    int v_to = -1;</b>
+<b class="fc">&nbsp;				                    for (int v = m_shape.getNextVertex(vertex_2); v != -1 &amp;&amp; v != vertex_2; v = m_shape.getNextVertex(v))</b>
+&nbsp;				                    {
+<b class="fc">&nbsp;				                      seg_2 = getSegment_(v, line_2);</b>
+<b class="fc">&nbsp;				                      v_to = v;</b>
+<b class="fc">&nbsp;				                      if (seg_2 == null || !seg_2.isDegenerate(0))</b>
+<b class="nc">&nbsp;				                        break;</b>
+&nbsp;				                    }
+&nbsp;				                    //change from vertex_2 to v_to (inclusive).
+<b class="fc">&nbsp;				                    for (int v = vertex_2; v != -1; v = m_shape.getNextVertex(v))</b>
+&nbsp;				                    {
+<b class="fc">&nbsp;				                      m_shape.setPoint(v, segment_intersector.getResultPoint());</b>
+<b class="fc">&nbsp;				                      if (v == v_to)</b>
+<b class="fc">&nbsp;				                        break;</b>
+&nbsp;				                    }									
+<b class="fc">&nbsp;								}</b>
+&nbsp;								else {
+<b class="fc">&nbsp;									m_shape.setPoint(vertex_2,</b>
+<b class="fc">&nbsp;											segment_intersector.getResultPoint());</b>
+&nbsp;								}
+&nbsp;							}
+<b class="fc">&nbsp;							segment_intersector.clear();</b>
+&nbsp;						}
+<b class="fc">&nbsp;					} else if (seg_2 != null) {</b>
+<b class="fc">&nbsp;						Point2D pt = new Point2D();</b>
+<b class="fc">&nbsp;						m_shape.getXY(vertex_1, pt);</b>
+<b class="fc">&nbsp;						seg_2_env.inflate(m_tolerance, m_tolerance);</b>
+<b class="fc">&nbsp;						if (seg_2_env.contains(pt)) {</b>
+<b class="fc">&nbsp;							segment_intersector.pushSegment(seg_2);</b>
+<b class="fc">&nbsp;							m_shape.queryPoint(vertex_1, helper_point);</b>
+<b class="fc">&nbsp;							segment_intersector.intersect(m_tolerance,</b>
+&nbsp;									helper_point, 0, 1.0, assume_intersecting);
+<b class="fc">&nbsp;							split_count_2 = segment_intersector</b>
+<b class="fc">&nbsp;									.getResultSegmentCount(0);</b>
+<b class="fc">&nbsp;							if (split_count_2 &gt; 0) {</b>
+<b class="fc">&nbsp;								m_shape.splitSegment_(vertex_2,</b>
+&nbsp;										segment_intersector, 0, true);
+<b class="fc">&nbsp;								if (seg_1_zero) {</b>
+&nbsp;				                    //seg_1 was zero length. Need to change all coincident points
+&nbsp;				                    //segment at vertex_2 is dzero length, change all attached zero length segments
+<b class="nc">&nbsp;				                    int v_to = -1;</b>
+<b class="nc">&nbsp;				                    for (int v = m_shape.getNextVertex(vertex_1); v != -1 &amp;&amp; v != vertex_1; v = m_shape.getNextVertex(v)) {</b>
+<b class="nc">&nbsp;				                      seg_2 = getSegment_(v, line_2);//using here seg_2 for seg_1</b>
+<b class="nc">&nbsp;				                      v_to = v;</b>
+<b class="nc">&nbsp;				                      if (seg_2 == null || !seg_2.isDegenerate(0))</b>
+<b class="nc">&nbsp;				                        break;</b>
+&nbsp;				                    }
+&nbsp;				                    //change from vertex_2 to v_to (inclusive).
+<b class="nc">&nbsp;				                    for (int v = vertex_1; v != -1; v = m_shape.getNextVertex(v)) {</b>
+<b class="nc">&nbsp;				                      m_shape.setPoint(v, segment_intersector.getResultPoint());</b>
+<b class="nc">&nbsp;				                      if (v == v_to)</b>
+<b class="nc">&nbsp;				                        break;</b>
+&nbsp;				                    }
+<b class="nc">&nbsp;								}</b>
+&nbsp;								else {
+<b class="fc">&nbsp;									m_shape.setPoint(vertex_1,</b>
+<b class="fc">&nbsp;											segment_intersector.getResultPoint());</b>
+&nbsp;								}
+&nbsp;							}
+<b class="fc">&nbsp;							segment_intersector.clear();</b>
+&nbsp;						}
+&nbsp;					} else {
+&nbsp;						continue;// points on points
+&nbsp;					}
+&nbsp;				}
+&nbsp;
+<b class="fc">&nbsp;				if (split_count_1 + split_count_2 != 0) {</b>
+<b class="fc">&nbsp;					if (split_count_1 != 0) {</b>
+<b class="fc">&nbsp;						seg_1 = m_shape.getSegment(vertex_1);// reload segment</b>
+&nbsp;																// after split
+<b class="fc">&nbsp;						if (seg_1 == null) {</b>
+<b class="fc">&nbsp;							if (!m_shape.queryLineConnector(vertex_1, line_1))</b>
+<b class="nc">&nbsp;								continue;</b>
+<b class="fc">&nbsp;							seg_1 = line_1;</b>
+<b class="fc">&nbsp;							line_1.queryEnvelope2D(seg_1_env);</b>
+&nbsp;						} else
+<b class="nc">&nbsp;							seg_1.queryEnvelope2D(seg_1_env);</b>
+&nbsp;
+<b class="fc">&nbsp;						if (seg_1.isDegenerate(m_tolerance))// do not crack with</b>
+&nbsp;															// degenerate
+&nbsp;															// segments
+&nbsp;						{
+<b class="nc">&nbsp;							break;</b>
+&nbsp;						}
+&nbsp;					}
+&nbsp;
+<b class="fc">&nbsp;					b_cracked = true;</b>
+&nbsp;				}
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return b_cracked;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	boolean crackerPlaneSweep_() {
+<b class="fc">&nbsp;		boolean b_cracked = planeSweep_();</b>
+<b class="fc">&nbsp;		return b_cracked;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	boolean planeSweep_() {
+<b class="fc">&nbsp;		PlaneSweepCrackerHelper plane_sweep = new PlaneSweepCrackerHelper();</b>
+<b class="fc">&nbsp;		boolean b_cracked = plane_sweep.sweep(m_shape, m_tolerance);</b>
+<b class="fc">&nbsp;		return b_cracked;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	boolean needsCrackingImpl_() {
+<b class="fc">&nbsp;		boolean b_needs_cracking = false;</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (m_sweep_structure == null)</b>
+<b class="fc">&nbsp;			m_sweep_structure = new Treap();</b>
+&nbsp;
+<b class="fc">&nbsp;		AttributeStreamOfInt32 event_q = new AttributeStreamOfInt32(0);</b>
+<b class="fc">&nbsp;		event_q.reserve(m_shape.getTotalPointCount() + 1);</b>
+&nbsp;
+<b class="fc">&nbsp;		EditShape.VertexIterator iter = m_shape.queryVertexIterator();</b>
+<b class="fc">&nbsp;		for (int vert = iter.next(); vert != -1; vert = iter.next()) {</b>
+<b class="fc">&nbsp;			event_q.add(vert);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		assert (m_shape.getTotalPointCount() == event_q.size());</b>
+&nbsp;
+<b class="fc">&nbsp;		m_shape.sortVerticesSimpleByY_(event_q, 0, event_q.size());</b>
+<b class="fc">&nbsp;		event_q.add(-1);// for termination;</b>
+&nbsp;		// create user indices to store edges that end at vertices.
+<b class="fc">&nbsp;		int edge_index_1 = m_shape.createUserIndex();</b>
+<b class="fc">&nbsp;		int edge_index_2 = m_shape.createUserIndex();</b>
+<b class="fc">&nbsp;		m_sweep_comparator = new SweepComparator(m_shape, m_tolerance, !m_bAllowCoincident);</b>
+<b class="fc">&nbsp;		m_sweep_structure.setComparator(m_sweep_comparator);</b>
+&nbsp;
+<b class="fc">&nbsp;		AttributeStreamOfInt32 swept_edges_to_delete = new AttributeStreamOfInt32(</b>
+&nbsp;				0);
+<b class="fc">&nbsp;		AttributeStreamOfInt32 edges_to_insert = new AttributeStreamOfInt32(0);</b>
+&nbsp;
+&nbsp;		// Go throught the sorted vertices
+<b class="fc">&nbsp;		int event_q_index = 0;</b>
+<b class="fc">&nbsp;		Point2D cluster_pt = new Point2D();</b>
+&nbsp;
+&nbsp;		// sweep-line algorithm:
+<b class="fc">&nbsp;		for (int vertex = event_q.get(event_q_index++); vertex != -1;) {</b>
+<b class="fc">&nbsp;			m_shape.getXY(vertex, cluster_pt);</b>
+&nbsp;			
+&nbsp;			do {
+<b class="fc">&nbsp;				int next_vertex = m_shape.getNextVertex(vertex);</b>
+<b class="fc">&nbsp;				int prev_vertex = m_shape.getPrevVertex(vertex);</b>
+&nbsp;
+<b class="fc">&nbsp;				if (next_vertex != -1</b>
+<b class="fc">&nbsp;						&amp;&amp; m_shape.compareVerticesSimpleY_(vertex, next_vertex) &lt; 0) {</b>
+<b class="fc">&nbsp;					edges_to_insert.add(vertex);</b>
+<b class="fc">&nbsp;					edges_to_insert.add(next_vertex);</b>
+&nbsp;				}
+&nbsp;
+<b class="fc">&nbsp;				if (prev_vertex != -1</b>
+<b class="fc">&nbsp;						&amp;&amp; m_shape.compareVerticesSimpleY_(vertex, prev_vertex) &lt; 0) {</b>
+<b class="fc">&nbsp;					edges_to_insert.add(prev_vertex);</b>
+<b class="fc">&nbsp;					edges_to_insert.add(prev_vertex);</b>
+&nbsp;				}
+&nbsp;
+&nbsp;				// Continue accumulating current cluster
+<b class="fc">&nbsp;				int attached_edge_1 = m_shape</b>
+<b class="fc">&nbsp;						.getUserIndex(vertex, edge_index_1);</b>
+<b class="fc">&nbsp;				if (attached_edge_1 != -1) {</b>
+<b class="fc">&nbsp;					swept_edges_to_delete.add(attached_edge_1);</b>
+<b class="fc">&nbsp;					m_shape.setUserIndex(vertex, edge_index_1, -1);</b>
+&nbsp;				}
+<b class="fc">&nbsp;				int attached_edge_2 = m_shape</b>
+<b class="fc">&nbsp;						.getUserIndex(vertex, edge_index_2);</b>
+<b class="fc">&nbsp;				if (attached_edge_2 != -1) {</b>
+<b class="fc">&nbsp;					swept_edges_to_delete.add(attached_edge_2);</b>
+<b class="fc">&nbsp;					m_shape.setUserIndex(vertex, edge_index_2, -1);</b>
+&nbsp;				}
+<b class="fc">&nbsp;				vertex = event_q.get(event_q_index++);</b>
+<b class="fc">&nbsp;			} while (vertex != -1 &amp;&amp; m_shape.isEqualXY(vertex, cluster_pt));</b>
+&nbsp;
+<b class="fc">&nbsp;			boolean b_continuing_segment_chain_optimization = swept_edges_to_delete</b>
+<b class="fc">&nbsp;					.size() == 1 &amp;&amp; edges_to_insert.size() == 2;</b>
+&nbsp;
+<b class="fc">&nbsp;			int new_left = -1;</b>
+<b class="fc">&nbsp;			int new_right = -1;</b>
+&nbsp;			// Process the cluster
+<b class="fc">&nbsp;			for (int i = 0, n = swept_edges_to_delete.size(); i &lt; n; i++) {</b>
+&nbsp;				// Find left and right neighbour of the edges that terminate at
+&nbsp;				// the cluster (there will be atmost only one left and one
+&nbsp;				// right).
+<b class="fc">&nbsp;				int edge = swept_edges_to_delete.get(i);</b>
+<b class="fc">&nbsp;				int left = m_sweep_structure.getPrev(edge);</b>
+<b class="fc">&nbsp;				if (left != -1 &amp;&amp; !swept_edges_to_delete.hasElement(left))// Note:</b>
+&nbsp;																			// for
+&nbsp;																			// some
+&nbsp;																			// heavy
+&nbsp;																			// cases,
+&nbsp;																			// it
+&nbsp;																			// could
+&nbsp;																			// be
+&nbsp;																			// better
+&nbsp;																			// to
+&nbsp;																			// use
+&nbsp;																			// binary
+&nbsp;																			// search.
+&nbsp;				{
+<b class="fc">&nbsp;					assert (new_left == -1);</b>
+<b class="fc">&nbsp;					new_left = left;</b>
+&nbsp;				}
+&nbsp;
+<b class="fc">&nbsp;				int right = m_sweep_structure.getNext(edge);</b>
+<b class="fc">&nbsp;				if (right != -1 &amp;&amp; !swept_edges_to_delete.hasElement(right)) {</b>
+<b class="fc">&nbsp;					assert (new_right == -1);</b>
+<b class="fc">&nbsp;					new_right = right;</b>
+&nbsp;				}
+&nbsp;//#ifdef NDEBUG				
+<b class="fc">&nbsp;				if (new_left != -1 &amp;&amp; new_right != -1)</b>
+<b class="fc">&nbsp;					break;</b>
+&nbsp;//#endif
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			assert (new_left == -1 || new_left != new_right);</b>
+&nbsp;
+<b class="fc">&nbsp;			m_sweep_comparator.setSweepY(cluster_pt.y, cluster_pt.x);</b>
+&nbsp;
+&nbsp;			// Delete the edges that terminate at the cluster.
+<b class="fc">&nbsp;			for (int i = 0, n = swept_edges_to_delete.size(); i &lt; n; i++) {</b>
+<b class="fc">&nbsp;				int edge = swept_edges_to_delete.get(i);</b>
+<b class="fc">&nbsp;				m_sweep_structure.deleteNode(edge, -1);</b>
+&nbsp;			}
+<b class="fc">&nbsp;			swept_edges_to_delete.clear(false);</b>
+&nbsp;
+<b class="fc">&nbsp;			if (!b_continuing_segment_chain_optimization &amp;&amp; new_left != -1 &amp;&amp; new_right != -1) {</b>
+<b class="fc">&nbsp;				if (checkForIntersections_(new_left, new_right)) {</b>
+<b class="nc">&nbsp;					b_needs_cracking = true;</b>
+<b class="nc">&nbsp;					m_non_simple_result = m_sweep_comparator.getResult();</b>
+<b class="nc">&nbsp;					break;</b>
+&nbsp;				}
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			for (int i = 0, n = edges_to_insert.size(); i &lt; n; i += 2) {</b>
+<b class="fc">&nbsp;				int v = edges_to_insert.get(i);</b>
+<b class="fc">&nbsp;				int otherv = edges_to_insert.get(i + 1);</b>
+&nbsp;
+<b class="fc">&nbsp;				int new_edge_1 = -1;</b>
+<b class="fc">&nbsp;				if (b_continuing_segment_chain_optimization) {</b>
+<b class="fc">&nbsp;					new_edge_1 = m_sweep_structure.addElementAtPosition(</b>
+&nbsp;							new_left, new_right, v, true, true, -1);
+<b class="fc">&nbsp;					b_continuing_segment_chain_optimization = false;</b>
+&nbsp;				} else {
+<b class="fc">&nbsp;					new_edge_1 = m_sweep_structure.addElement(v, -1); // the</b>
+&nbsp;																		// sweep
+&nbsp;																		// structure
+&nbsp;																		// consist
+&nbsp;																		// of
+&nbsp;																		// the
+&nbsp;																		// origin
+&nbsp;																		// vertices
+&nbsp;																		// for
+&nbsp;																		// edges.
+&nbsp;																		// One
+&nbsp;																		// can
+&nbsp;																		// always
+&nbsp;																		// get
+&nbsp;																		// the
+&nbsp;																		// other
+&nbsp;																		// endpoint
+&nbsp;																		// as
+&nbsp;																		// the
+&nbsp;																		// next
+&nbsp;																		// vertex.
+&nbsp;				}
+&nbsp;
+<b class="fc">&nbsp;				if (m_sweep_comparator.intersectionDetected()) {</b>
+<b class="fc">&nbsp;					m_non_simple_result = m_sweep_comparator.getResult();</b>
+<b class="fc">&nbsp;					b_needs_cracking = true;</b>
+<b class="fc">&nbsp;					break;</b>
+&nbsp;				}
+&nbsp;
+<b class="fc">&nbsp;				int e_1 = m_shape.getUserIndex(otherv, edge_index_1);</b>
+<b class="fc">&nbsp;				if (e_1 == -1)</b>
+<b class="fc">&nbsp;					m_shape.setUserIndex(otherv, edge_index_1, new_edge_1);</b>
+&nbsp;				else {
+<b class="fc">&nbsp;					assert (m_shape.getUserIndex(otherv, edge_index_2) == -1);</b>
+<b class="fc">&nbsp;					m_shape.setUserIndex(otherv, edge_index_2, new_edge_1);</b>
+&nbsp;				}
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			if (b_needs_cracking)</b>
+<b class="fc">&nbsp;				break;</b>
+&nbsp;
+&nbsp;			// Start accumulating new cluster
+<b class="fc">&nbsp;			edges_to_insert.resizePreserveCapacity(0);</b>
+<b class="fc">&nbsp;		}</b>
+&nbsp;
+<b class="fc">&nbsp;		m_shape.removeUserIndex(edge_index_1);</b>
+<b class="fc">&nbsp;		m_shape.removeUserIndex(edge_index_2);</b>
+<b class="fc">&nbsp;		return b_needs_cracking;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	boolean checkForIntersections_(int sweep_edge_1, int sweep_edge_2) {
+<b class="fc">&nbsp;		assert (sweep_edge_1 != sweep_edge_2);</b>
+<b class="fc">&nbsp;		int left = m_sweep_structure.getElement(sweep_edge_1);</b>
+<b class="fc">&nbsp;		assert (left != m_sweep_structure.getElement(sweep_edge_2));</b>
+<b class="fc">&nbsp;		m_sweep_comparator.compare(m_sweep_structure, left, sweep_edge_2);// compare</b>
+&nbsp;																			// detects
+&nbsp;																			// intersections
+<b class="fc">&nbsp;		boolean b_intersects = m_sweep_comparator.intersectionDetected();</b>
+<b class="fc">&nbsp;		m_sweep_comparator.clearIntersectionDetectedFlag();</b>
+<b class="fc">&nbsp;		return b_intersects;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// void dbg_print_sweep_edge_(int edge);
+&nbsp;	// void dbg_print_sweep_structure_();
+&nbsp;	// void dbg_check_sweep_structure_();
+<b class="fc">&nbsp;	Cracker(ProgressTracker progress_tracker) {</b>
+<b class="fc">&nbsp;		m_progress_tracker = progress_tracker;</b>
+<b class="fc">&nbsp;		m_bAllowCoincident = true;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	static boolean canBeCracked(EditShape shape) {
+<b class="fc">&nbsp;		for (int geometry = shape.getFirstGeometry(); geometry != -1; geometry = shape</b>
+<b class="fc">&nbsp;				.getNextGeometry(geometry)) {</b>
+<b class="fc">&nbsp;			if (!Geometry.isMultiPath(shape.getGeometryType(geometry)))</b>
+<b class="fc">&nbsp;				continue;</b>
+<b class="fc">&nbsp;			return true;</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return false;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	static boolean execute(EditShape shape, Envelope2D extent,
+&nbsp;			double tolerance, ProgressTracker progress_tracker) {
+<b class="fc">&nbsp;		if (!canBeCracked(shape)) // make sure it contains some segments,</b>
+&nbsp;									// otherwise no need to crack.
+<b class="fc">&nbsp;			return false;</b>
+&nbsp;
+<b class="fc">&nbsp;		Cracker cracker = new Cracker(progress_tracker);</b>
+<b class="fc">&nbsp;		cracker.m_shape = shape;</b>
+<b class="fc">&nbsp;		cracker.m_tolerance = tolerance;</b>
+&nbsp;		// Use brute force for smaller shapes, and a planesweep for bigger
+&nbsp;		// shapes.
+<b class="fc">&nbsp;		boolean b_cracked = false;</b>
+<b class="fc">&nbsp;		if (shape.getTotalPointCount() &lt; 15) // what is a good number?</b>
+&nbsp;		{
+<b class="fc">&nbsp;			b_cracked = cracker.crackBruteForce_();</b>
+&nbsp;		} else {
+<b class="fc">&nbsp;			boolean b_cracked_1 = cracker.crackerPlaneSweep_();</b>
+<b class="fc">&nbsp;			return b_cracked_1;</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return b_cracked;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	static boolean execute(EditShape shape, double tolerance,
+&nbsp;			ProgressTracker progress_tracker) {
+<b class="fc">&nbsp;		return Cracker.execute(shape, shape.getEnvelope2D(), tolerance,</b>
+&nbsp;				progress_tracker);
+&nbsp;	}
+&nbsp;
+&nbsp;	// Used for IsSimple.
+&nbsp;	static boolean needsCracking(boolean allowCoincident, EditShape shape, double tolerance,
+&nbsp;			NonSimpleResult result, ProgressTracker progress_tracker) {
+<b class="fc">&nbsp;		if (!canBeCracked(shape))</b>
+<b class="nc">&nbsp;			return false;</b>
+&nbsp;
+<b class="fc">&nbsp;		Cracker cracker = new Cracker(progress_tracker);</b>
+<b class="fc">&nbsp;		cracker.m_shape = shape;</b>
+<b class="fc">&nbsp;		cracker.m_tolerance = tolerance;</b>
+<b class="fc">&nbsp;		cracker.m_bAllowCoincident = allowCoincident;</b>
+<b class="fc">&nbsp;		if (cracker.needsCrackingImpl_()) {</b>
+<b class="fc">&nbsp;			if (result != null)</b>
+<b class="fc">&nbsp;				result.Assign(cracker.m_non_simple_result);</b>
+<b class="fc">&nbsp;			return true;</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		// Now swap the coordinates to catch horizontal cases.
+<b class="fc">&nbsp;		Transformation2D transform = new Transformation2D();</b>
+<b class="fc">&nbsp;		transform.setSwapCoordinates();</b>
+<b class="fc">&nbsp;		shape.applyTransformation(transform);</b>
+&nbsp;
+<b class="fc">&nbsp;		cracker = new Cracker(progress_tracker);</b>
+<b class="fc">&nbsp;		cracker.m_shape = shape;</b>
+<b class="fc">&nbsp;		cracker.m_tolerance = tolerance;</b>
+<b class="fc">&nbsp;		cracker.m_bAllowCoincident = allowCoincident;</b>
+<b class="fc">&nbsp;		boolean b_res = cracker.needsCrackingImpl_();</b>
+&nbsp;
+<b class="fc">&nbsp;		transform.setSwapCoordinates();</b>
+<b class="fc">&nbsp;		shape.applyTransformation(transform);// restore shape</b>
+&nbsp;
+<b class="fc">&nbsp;		if (b_res) {</b>
+<b class="fc">&nbsp;			if (result != null)</b>
+<b class="nc">&nbsp;				result.Assign(cracker.m_non_simple_result);</b>
+<b class="fc">&nbsp;			return true;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return false;</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-02-21 16:04</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,582 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > SegmentIteratorImpl</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.esri.core.geometry</a>
+</div>
+
+<h1>Coverage Summary for Class: SegmentIteratorImpl (com.esri.core.geometry)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">SegmentIteratorImpl</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    70%
+  </span>
+  <span class="absValue">
+    (21/30)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    60,9%
+  </span>
+  <span class="absValue">
+    (117/192)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; Copyright 1995-2015 Esri
+&nbsp;
+&nbsp;   Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp;   you may not use this file except in compliance with the License.
+&nbsp;   You may obtain a copy of the License at
+&nbsp;
+&nbsp;       http://www.apache.org/licenses/LICENSE-2.0
+&nbsp;
+&nbsp;   Unless required by applicable law or agreed to in writing, software
+&nbsp;   distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp;   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp;   See the License for the specific language governing permissions and
+&nbsp;   limitations under the License.
+&nbsp;
+&nbsp; For additional information, contact:
+&nbsp; Environmental Systems Research Institute, Inc.
+&nbsp; Attn: Contracts Dept
+&nbsp; 380 New York Street
+&nbsp; Redlands, California, USA 92373
+&nbsp;
+&nbsp; email: contracts@esri.com
+&nbsp; */
+&nbsp;
+&nbsp;
+&nbsp;package com.esri.core.geometry;
+&nbsp;
+&nbsp;/**
+&nbsp; * Provides functionality to iterate over MultiPath segments.
+&nbsp; */
+&nbsp;final class SegmentIteratorImpl {
+&nbsp;
+&nbsp;	protected Line m_line;
+&nbsp;
+&nbsp;	// Bezier m_bezier:
+&nbsp;	// Arc m_arc;
+&nbsp;	protected Segment m_currentSegment;
+&nbsp;	protected Point2D m_dummyPoint;
+&nbsp;
+&nbsp;	protected int m_currentPathIndex;
+&nbsp;
+&nbsp;	protected int m_nextPathIndex;
+&nbsp;
+&nbsp;	protected int m_prevPathIndex;
+&nbsp;
+&nbsp;	protected int m_currentSegmentIndex;
+&nbsp;
+&nbsp;	protected int m_nextSegmentIndex;
+&nbsp;
+&nbsp;	protected int m_prevSegmentIndex;
+&nbsp;
+&nbsp;	protected int m_segmentCount;
+&nbsp;
+&nbsp;	protected int m_pathBegin;
+&nbsp;
+&nbsp;	protected MultiPathImpl m_parent; // parent of the iterator.
+&nbsp;
+&nbsp;	protected boolean m_bCirculator; // If true, the iterator circulates around
+&nbsp;										// the current Path.
+&nbsp;
+&nbsp;	protected boolean m_bNeedsUpdate;
+&nbsp;
+<b class="fc">&nbsp;	public SegmentIteratorImpl(MultiPathImpl parent) {</b>
+<b class="fc">&nbsp;		m_currentSegmentIndex = -1;</b>
+<b class="fc">&nbsp;		m_nextSegmentIndex = 0;</b>
+<b class="fc">&nbsp;		m_nextPathIndex = 0;</b>
+<b class="fc">&nbsp;		m_currentPathIndex = -1;</b>
+<b class="fc">&nbsp;		m_parent = parent;</b>
+<b class="fc">&nbsp;		m_segmentCount = _getSegmentCount(m_nextPathIndex);</b>
+<b class="fc">&nbsp;		m_bCirculator = false;</b>
+<b class="fc">&nbsp;		m_currentSegment = null;</b>
+<b class="fc">&nbsp;		m_pathBegin = -1;</b>
+<b class="fc">&nbsp;		m_dummyPoint = new Point2D();</b>
+&nbsp;	}
+&nbsp;
+<b class="nc">&nbsp;	public SegmentIteratorImpl(MultiPathImpl parent, int pointIndex) {</b>
+<b class="nc">&nbsp;		if (pointIndex &lt; 0 || pointIndex &gt;= parent.getPointCount())</b>
+<b class="nc">&nbsp;			throw new IndexOutOfBoundsException();</b>
+&nbsp;
+<b class="nc">&nbsp;		m_currentSegmentIndex = -1;</b>
+<b class="nc">&nbsp;		int path = parent.getPathIndexFromPointIndex(pointIndex);</b>
+<b class="nc">&nbsp;		m_nextSegmentIndex = pointIndex - parent.getPathStart(path);</b>
+&nbsp;
+<b class="nc">&nbsp;		m_nextPathIndex = path + 1;</b>
+<b class="nc">&nbsp;		m_currentPathIndex = path;</b>
+<b class="nc">&nbsp;		m_parent = parent;</b>
+<b class="nc">&nbsp;		m_segmentCount = _getSegmentCount(m_currentPathIndex);</b>
+<b class="nc">&nbsp;		m_bCirculator = false;</b>
+<b class="nc">&nbsp;		m_currentSegment = null;</b>
+<b class="nc">&nbsp;		m_pathBegin = m_parent.getPathStart(m_currentPathIndex);</b>
+<b class="nc">&nbsp;		m_dummyPoint = new Point2D();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public SegmentIteratorImpl(MultiPathImpl parent, int pathIndex,
+<b class="nc">&nbsp;			int segmentIndex) {</b>
+<b class="nc">&nbsp;		if (pathIndex &lt; 0 || pathIndex &gt;= parent.getPathCount()</b>
+&nbsp;				|| segmentIndex &lt; 0)
+<b class="nc">&nbsp;			throw new IndexOutOfBoundsException();</b>
+&nbsp;
+<b class="nc">&nbsp;		int d = parent.isClosedPath(pathIndex) ? 0 : 1;</b>
+<b class="nc">&nbsp;		if (segmentIndex &gt;= parent.getPathSize(pathIndex) - d)</b>
+<b class="nc">&nbsp;			throw new IndexOutOfBoundsException();</b>
+&nbsp;
+<b class="nc">&nbsp;		m_currentSegmentIndex = -1;</b>
+<b class="nc">&nbsp;		m_nextSegmentIndex = segmentIndex;</b>
+<b class="nc">&nbsp;		m_currentPathIndex = pathIndex;</b>
+<b class="nc">&nbsp;		m_nextPathIndex = m_nextSegmentIndex + 1;</b>
+<b class="nc">&nbsp;		m_parent = parent;</b>
+<b class="nc">&nbsp;		m_segmentCount = _getSegmentCount(m_nextPathIndex);</b>
+<b class="nc">&nbsp;		m_bCirculator = false;</b>
+<b class="nc">&nbsp;		m_currentSegment = null;</b>
+<b class="nc">&nbsp;		m_pathBegin = m_parent.getPathStart(m_currentPathIndex);</b>
+<b class="nc">&nbsp;		m_dummyPoint = new Point2D();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void resetTo(SegmentIteratorImpl src) {
+<b class="fc">&nbsp;		if (m_parent != src.m_parent)</b>
+<b class="nc">&nbsp;			throw new GeometryException(&quot;invalid_call&quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;		m_currentSegmentIndex = src.m_currentSegmentIndex;</b>
+<b class="fc">&nbsp;		m_nextSegmentIndex = src.m_nextSegmentIndex;</b>
+<b class="fc">&nbsp;		m_currentPathIndex = src.m_currentPathIndex;</b>
+<b class="fc">&nbsp;		m_nextPathIndex = src.m_nextPathIndex;</b>
+<b class="fc">&nbsp;		m_segmentCount = src.m_segmentCount;</b>
+<b class="fc">&nbsp;		m_bCirculator = src.m_bCirculator;</b>
+<b class="fc">&nbsp;		m_pathBegin = src.m_pathBegin;</b>
+<b class="fc">&nbsp;		m_currentSegment = null;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Moves the iterator to the next curve segment and returns the segment.
+&nbsp;	 * 
+&nbsp;	 * The Segment is returned by value and is owned by the iterator. Note: The
+&nbsp;	 * method can return null if there are no curves in the part.
+&nbsp;	 */
+&nbsp;	public Segment nextCurve() {
+<b class="nc">&nbsp;		return null;</b>
+&nbsp;		// TODO: Fix me. This method is supposed to go only through the curves
+&nbsp;		// and skip the Line classes!!
+&nbsp;		// It must be very efficient.
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Moves the iterator to next segment and returns the segment.
+&nbsp;	 * 
+&nbsp;	 * The Segment is returned by value and is owned by the iterator.
+&nbsp;	 */
+&nbsp;	public Segment nextSegment() {
+<b class="fc">&nbsp;		if (m_currentSegmentIndex != m_nextSegmentIndex)</b>
+<b class="fc">&nbsp;			_updateSegment();</b>
+&nbsp;
+<b class="fc">&nbsp;		if (m_bCirculator) {</b>
+<b class="fc">&nbsp;			m_nextSegmentIndex = (m_nextSegmentIndex + 1) % m_segmentCount;</b>
+&nbsp;		} else {
+<b class="fc">&nbsp;			if (m_nextSegmentIndex == m_segmentCount)</b>
+<b class="nc">&nbsp;				throw new IndexOutOfBoundsException();</b>
+&nbsp;
+<b class="fc">&nbsp;			m_nextSegmentIndex++;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return m_currentSegment;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Moves the iterator to previous segment and returns the segment.
+&nbsp;	 * 
+&nbsp;	 * The Segment is returned by value and is owned by the iterator.
+&nbsp;	 */
+&nbsp;	public Segment previousSegment() {
+<b class="fc">&nbsp;		if (m_bCirculator) {</b>
+<b class="fc">&nbsp;			m_nextSegmentIndex = (m_segmentCount + m_nextSegmentIndex - 1)</b>
+&nbsp;					% m_segmentCount;
+&nbsp;		} else {
+<b class="fc">&nbsp;			if (m_nextSegmentIndex == 0)</b>
+<b class="nc">&nbsp;				throw new IndexOutOfBoundsException();</b>
+<b class="fc">&nbsp;			m_nextSegmentIndex--;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (m_nextSegmentIndex != m_currentSegmentIndex)</b>
+<b class="fc">&nbsp;			_updateSegment();</b>
+&nbsp;
+<b class="fc">&nbsp;		return m_currentSegment;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Resets the iterator so that the call to NextSegment will return the first
+&nbsp;	 * segment of the current path.
+&nbsp;	 */
+&nbsp;	public void resetToFirstSegment() {
+<b class="nc">&nbsp;		m_currentSegmentIndex = -1;</b>
+<b class="nc">&nbsp;		m_nextSegmentIndex = 0;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Resets the iterator so that the call to PreviousSegment will return the
+&nbsp;	 * last segment of the current path.
+&nbsp;	 */
+&nbsp;	public void resetToLastSegment() {
+<b class="fc">&nbsp;		m_nextSegmentIndex = m_segmentCount;</b>
+<b class="fc">&nbsp;		m_currentSegmentIndex = -1;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public void resetToVertex(int vertexIndex) {
+<b class="fc">&nbsp;		resetToVertex(vertexIndex, -1);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public void resetToVertex(int vertexIndex, int _pathIndex) {
+<b class="fc">&nbsp;		if (m_currentPathIndex &gt;= 0</b>
+<b class="fc">&nbsp;				&amp;&amp; m_currentPathIndex &lt; m_parent.getPathCount()) {// check if we</b>
+&nbsp;																	// are in
+&nbsp;																	// the
+&nbsp;																	// current
+&nbsp;																	// path
+<b class="fc">&nbsp;			int start = _getPathBegin();</b>
+<b class="fc">&nbsp;			if (vertexIndex &gt;= start</b>
+<b class="fc">&nbsp;					&amp;&amp; vertexIndex &lt; m_parent.getPathEnd(m_currentPathIndex)) {</b>
+<b class="fc">&nbsp;				m_currentSegmentIndex = -1;</b>
+<b class="fc">&nbsp;				m_nextSegmentIndex = vertexIndex - start;</b>
+&nbsp;				return;
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+&nbsp;		int path_index;
+<b class="fc">&nbsp;		if (_pathIndex &gt;= 0 &amp;&amp; _pathIndex &lt; m_parent.getPathCount()</b>
+<b class="fc">&nbsp;				&amp;&amp; vertexIndex &gt;= m_parent.getPathStart(_pathIndex)</b>
+<b class="fc">&nbsp;				&amp;&amp; vertexIndex &lt; m_parent.getPathEnd(_pathIndex)) {</b>
+<b class="fc">&nbsp;			path_index = _pathIndex;</b>
+&nbsp;		} else {
+<b class="fc">&nbsp;			path_index = m_parent.getPathIndexFromPointIndex(vertexIndex);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		m_nextPathIndex = path_index + 1;</b>
+<b class="fc">&nbsp;		m_currentPathIndex = path_index;</b>
+<b class="fc">&nbsp;		m_currentSegmentIndex = -1;</b>
+<b class="fc">&nbsp;		m_nextSegmentIndex = vertexIndex - m_parent.getPathStart(path_index);</b>
+<b class="fc">&nbsp;		m_segmentCount = _getSegmentCount(path_index);</b>
+<b class="fc">&nbsp;		m_pathBegin = m_parent.getPathStart(m_currentPathIndex);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Moves the iterator to next path and returns true if successful.
+&nbsp;	 * 
+&nbsp;	 */
+&nbsp;	public boolean nextPath() {
+&nbsp;		// post-increment
+<b class="fc">&nbsp;		m_currentPathIndex = m_nextPathIndex;</b>
+<b class="fc">&nbsp;		if (m_currentPathIndex &gt;= m_parent.getPathCount())</b>
+<b class="fc">&nbsp;			return false;</b>
+&nbsp;
+<b class="fc">&nbsp;		m_currentSegmentIndex = -1;</b>
+<b class="fc">&nbsp;		m_nextSegmentIndex = 0;</b>
+<b class="fc">&nbsp;		m_segmentCount = _getSegmentCount(m_currentPathIndex);</b>
+<b class="fc">&nbsp;		m_pathBegin = m_parent.getPathStart(m_currentPathIndex);</b>
+<b class="fc">&nbsp;		m_nextPathIndex++;</b>
+<b class="fc">&nbsp;		return true;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Moves the iterator to next path and returns true if successful.
+&nbsp;	 * 
+&nbsp;	 */
+&nbsp;	public boolean previousPath() {
+&nbsp;		// pre-decrement
+<b class="nc">&nbsp;		if (m_nextPathIndex == 0)</b>
+<b class="nc">&nbsp;			return false;</b>
+&nbsp;
+<b class="nc">&nbsp;		m_nextPathIndex--;</b>
+<b class="nc">&nbsp;		m_currentSegmentIndex = -1;</b>
+<b class="nc">&nbsp;		m_nextSegmentIndex = 0;</b>
+<b class="nc">&nbsp;		m_segmentCount = _getSegmentCount(m_nextPathIndex);</b>
+<b class="nc">&nbsp;		m_currentPathIndex = m_nextPathIndex;</b>
+<b class="nc">&nbsp;		m_pathBegin = m_parent.getPathStart(m_currentPathIndex);</b>
+<b class="nc">&nbsp;		resetToLastSegment();</b>
+<b class="nc">&nbsp;		return true;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Resets the iterator such that the subsequent call to the NextPath will
+&nbsp;	 * set the iterator to the first segment of the first path.
+&nbsp;	 */
+&nbsp;	public void resetToFirstPath() {
+&nbsp;
+<b class="fc">&nbsp;		m_currentSegmentIndex = -1;</b>
+<b class="fc">&nbsp;		m_nextSegmentIndex = -1;</b>
+<b class="fc">&nbsp;		m_segmentCount = -1;</b>
+<b class="fc">&nbsp;		m_nextPathIndex = 0;</b>
+<b class="fc">&nbsp;		m_currentPathIndex = -1;</b>
+<b class="fc">&nbsp;		m_pathBegin = -1;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Resets the iterator such that the subsequent call to the PreviousPath
+&nbsp;	 * will set the iterator to the last segment of the last path.
+&nbsp;	 */
+&nbsp;	public void resetToLastPath() {
+<b class="nc">&nbsp;		m_nextPathIndex = m_parent.getPathCount();</b>
+<b class="nc">&nbsp;		m_currentPathIndex = -1;</b>
+<b class="nc">&nbsp;		m_currentSegmentIndex = -1;</b>
+<b class="nc">&nbsp;		m_nextSegmentIndex = -1;</b>
+<b class="nc">&nbsp;		m_segmentCount = -1;</b>
+<b class="nc">&nbsp;		m_pathBegin = -1;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Resets the iterator such that the subsequent call to the NextPath will
+&nbsp;	 * set the iterator to the first segment of the given path. The call to
+&nbsp;	 * PreviousPath will reset the iterator to the last segment of path
+&nbsp;	 * pathIndex - 1.
+&nbsp;	 */
+&nbsp;	public void resetToPath(int pathIndex) {
+<b class="nc">&nbsp;		if (pathIndex &lt; 0)</b>
+<b class="nc">&nbsp;			throw new IndexOutOfBoundsException();</b>
+&nbsp;
+<b class="nc">&nbsp;		m_nextPathIndex = pathIndex;</b>
+<b class="nc">&nbsp;		m_currentPathIndex = -1;</b>
+<b class="nc">&nbsp;		m_currentSegmentIndex = -1;</b>
+<b class="nc">&nbsp;		m_nextSegmentIndex = -1;</b>
+<b class="nc">&nbsp;		m_segmentCount = -1;</b>
+<b class="nc">&nbsp;		m_pathBegin = -1;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public int _getSegmentCount(int pathIndex) {
+<b class="fc">&nbsp;		if (m_parent.isEmptyImpl())</b>
+<b class="fc">&nbsp;			return 0;</b>
+&nbsp;
+<b class="fc">&nbsp;		int d = 1;</b>
+<b class="fc">&nbsp;		if (m_parent.isClosedPath(pathIndex))</b>
+<b class="fc">&nbsp;			d = 0;</b>
+&nbsp;
+<b class="fc">&nbsp;		return m_parent.getPathSize(pathIndex) - d;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns True, if the segment is the closing segment of the closed path
+&nbsp;	 */
+&nbsp;	public boolean isClosingSegment() {
+<b class="fc">&nbsp;		return m_currentSegmentIndex == m_segmentCount - 1</b>
+<b class="fc">&nbsp;				&amp;&amp; m_parent.isClosedPath(m_currentPathIndex);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Switches the iterator navigation mode.
+&nbsp;	 * 
+&nbsp;	 * @param bYesNo
+&nbsp;	 *            If True, the iterator loops over the current path infinitely
+&nbsp;	 *            (unless the MultiPath is empty).
+&nbsp;	 */
+&nbsp;	public void setCirculator(boolean bYesNo) {
+<b class="fc">&nbsp;		m_bCirculator = bYesNo;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns the index of the current path.
+&nbsp;	 */
+&nbsp;	public int getPathIndex() {
+<b class="fc">&nbsp;		return m_currentPathIndex;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns the index of the start Point of the current Segment.
+&nbsp;	 */
+&nbsp;	public int getStartPointIndex() {
+<b class="fc">&nbsp;		return _getPathBegin() + m_currentSegmentIndex;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public int _getPathBegin() {
+<b class="fc">&nbsp;		return m_parent.getPathStart(m_currentPathIndex);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns the index of the end Point of the current Segment.
+&nbsp;	 */
+&nbsp;	public int getEndPointIndex() {
+<b class="fc">&nbsp;		if (isClosingSegment()) {</b>
+<b class="fc">&nbsp;			return m_parent.getPathStart(m_currentPathIndex);</b>
+&nbsp;		} else {
+<b class="fc">&nbsp;			return getStartPointIndex() + 1;</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns True if the segment is first one in the current Path.
+&nbsp;	 */
+&nbsp;	public boolean isFirstSegmentInPath() {
+<b class="nc">&nbsp;		return m_currentSegmentIndex == 0;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns True if the segment is last one in the current Path.
+&nbsp;	 */
+&nbsp;	public boolean isLastSegmentInPath() {
+<b class="fc">&nbsp;		return m_currentSegmentIndex == m_segmentCount - 1;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns True if the call to the NextSegment will succeed.
+&nbsp;	 */
+&nbsp;	public boolean hasNextSegment() {
+<b class="fc">&nbsp;		return m_nextSegmentIndex &lt; m_segmentCount;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns True if the call to the NextSegment will succeed.
+&nbsp;	 */
+&nbsp;	public boolean hasPreviousSegment() {
+<b class="fc">&nbsp;		return m_nextSegmentIndex &gt; 0;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public SegmentIteratorImpl copy() {
+<b class="nc">&nbsp;		SegmentIteratorImpl clone = new SegmentIteratorImpl(m_parent);</b>
+<b class="nc">&nbsp;		clone.m_currentSegmentIndex = m_currentSegmentIndex;</b>
+<b class="nc">&nbsp;		clone.m_nextSegmentIndex = m_nextSegmentIndex;</b>
+<b class="nc">&nbsp;		clone.m_segmentCount = m_segmentCount;</b>
+<b class="nc">&nbsp;		clone.m_currentPathIndex = m_currentPathIndex;</b>
+<b class="nc">&nbsp;		clone.m_nextPathIndex = m_nextPathIndex;</b>
+<b class="nc">&nbsp;		clone.m_parent = m_parent;</b>
+<b class="nc">&nbsp;		clone.m_bCirculator = m_bCirculator;</b>
+<b class="nc">&nbsp;		return clone;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public void _updateSegment() {
+<b class="fc">&nbsp;		if (m_nextSegmentIndex &lt; 0 || m_nextSegmentIndex &gt;= m_segmentCount)</b>
+<b class="nc">&nbsp;			throw new IndexOutOfBoundsException();</b>
+<b class="fc">&nbsp;		m_currentSegmentIndex = m_nextSegmentIndex;</b>
+&nbsp;
+<b class="fc">&nbsp;		int startVertexIndex = getStartPointIndex();</b>
+<b class="fc">&nbsp;		m_parent._verifyAllStreams();</b>
+<b class="fc">&nbsp;		AttributeStreamOfInt8 segFlagStream = m_parent</b>
+<b class="fc">&nbsp;				.getSegmentFlagsStreamRef();</b>
+&nbsp;
+<b class="fc">&nbsp;		int segFlag = SegmentFlags.enumLineSeg;</b>
+<b class="fc">&nbsp;		if (segFlagStream != null)</b>
+<b class="nc">&nbsp;			segFlag = (segFlagStream.read(startVertexIndex) &amp; SegmentFlags.enumSegmentMask);</b>
+&nbsp;
+<b class="fc">&nbsp;		VertexDescription vertexDescr = m_parent.getDescription();</b>
+<b class="fc">&nbsp;		switch (segFlag) {</b>
+&nbsp;		case SegmentFlags.enumLineSeg:
+<b class="fc">&nbsp;			if (m_line == null)</b>
+<b class="fc">&nbsp;				m_line = new Line();</b>
+<b class="fc">&nbsp;			m_currentSegment = (Line) m_line;</b>
+<b class="fc">&nbsp;			break;</b>
+&nbsp;		case SegmentFlags.enumBezierSeg:
+<b class="nc">&nbsp;			throw GeometryException.GeometryInternalError();</b>
+&nbsp;			// break;
+&nbsp;		case SegmentFlags.enumArcSeg:
+<b class="nc">&nbsp;			throw GeometryException.GeometryInternalError();</b>
+&nbsp;			// break;
+&nbsp;		default:
+<b class="nc">&nbsp;			throw GeometryException.GeometryInternalError();</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		m_currentSegment.assignVertexDescription(vertexDescr);</b>
+&nbsp;
+<b class="fc">&nbsp;		int endVertexIndex = getEndPointIndex();</b>
+<b class="fc">&nbsp;		m_parent.getXY(startVertexIndex, m_dummyPoint);</b>
+<b class="fc">&nbsp;		m_currentSegment.setStartXY(m_dummyPoint);</b>
+<b class="fc">&nbsp;		m_parent.getXY(endVertexIndex, m_dummyPoint);</b>
+<b class="fc">&nbsp;		m_currentSegment.setEndXY(m_dummyPoint);</b>
+&nbsp;
+<b class="fc">&nbsp;		for (int i = 1, nattr = vertexDescr.getAttributeCount(); i &lt; nattr; i++) {</b>
+<b class="fc">&nbsp;			int semantics = vertexDescr.getSemantics(i);</b>
+<b class="fc">&nbsp;			int ncomp = VertexDescription.getComponentCount(semantics);</b>
+<b class="fc">&nbsp;			for (int ord = 0; ord &lt; ncomp; ord++) {</b>
+<b class="fc">&nbsp;				double vs = m_parent.getAttributeAsDbl(semantics,</b>
+&nbsp;						startVertexIndex, ord);
+<b class="fc">&nbsp;				m_currentSegment.setStartAttribute(semantics, ord, vs);</b>
+<b class="fc">&nbsp;				double ve = m_parent.getAttributeAsDbl(semantics,</b>
+&nbsp;						endVertexIndex, ord);
+<b class="fc">&nbsp;				m_currentSegment.setEndAttribute(semantics, ord, ve);</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	boolean isLastPath() {
+<b class="fc">&nbsp;		return m_currentPathIndex == m_parent.getPathCount() - 1;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-02-21 16:04</div>
+</div>
+</body>
+</html>

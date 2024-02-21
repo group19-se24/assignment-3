@@ -1,0 +1,287 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > GeoJsonCrsTables</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.esri.core.geometry</a>
+</div>
+
+<h1>Coverage Summary for Class: GeoJsonCrsTables (com.esri.core.geometry)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">GeoJsonCrsTables</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (8/8)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    86,9%
+  </span>
+  <span class="absValue">
+    (73/84)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; Copyright 1995-2015 Esri
+&nbsp;
+&nbsp;   Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp;   you may not use this file except in compliance with the License.
+&nbsp;   You may obtain a copy of the License at
+&nbsp;
+&nbsp;       http://www.apache.org/licenses/LICENSE-2.0
+&nbsp;
+&nbsp;   Unless required by applicable law or agreed to in writing, software
+&nbsp;   distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp;   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp;   See the License for the specific language governing permissions and
+&nbsp;   limitations under the License.
+&nbsp;
+&nbsp; For additional information, contact:
+&nbsp; Environmental Systems Research Institute, Inc.
+&nbsp; Attn: Contracts Dept
+&nbsp; 380 New York Street
+&nbsp; Redlands, California, USA 92373
+&nbsp;
+&nbsp; email: contracts@esri.com
+&nbsp; */
+&nbsp;package com.esri.core.geometry;
+&nbsp;
+&nbsp;import java.util.Arrays;
+&nbsp;
+<b class="fc">&nbsp;class GeoJsonCrsTables {</b>
+&nbsp;	static int getWkidFromCrsShortForm(String crs_identifier) {
+<b class="fc">&nbsp;		int last_colon = crs_identifier.lastIndexOf((int) &#39;:&#39;); // skip version</b>
+&nbsp;
+<b class="fc">&nbsp;		if (last_colon == -1)</b>
+<b class="nc">&nbsp;			return -1;</b>
+&nbsp;
+<b class="fc">&nbsp;		int code_start = last_colon + 1;</b>
+<b class="fc">&nbsp;		int wkid = getWkidFromCrsCode_(crs_identifier, code_start);</b>
+<b class="fc">&nbsp;		return wkid;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	static int getWkidFromCrsName(String crs_identifier) {
+<b class="fc">&nbsp;		int wkid = -1;</b>
+&nbsp;
+<b class="fc">&nbsp;		int last_colon = crs_identifier.lastIndexOf((int) &#39;:&#39;); // skip</b>
+&nbsp;																// authority,
+&nbsp;																// version, and
+&nbsp;																// other things.
+&nbsp;																// Just try to
+&nbsp;																// get a wkid.
+&nbsp;																// This works
+&nbsp;																// for
+&nbsp;																// short/long
+&nbsp;																// form.
+&nbsp;
+<b class="fc">&nbsp;		if (last_colon == -1)</b>
+<b class="fc">&nbsp;			return -1;</b>
+&nbsp;
+<b class="fc">&nbsp;		int code_start = last_colon + 1;</b>
+<b class="fc">&nbsp;		wkid = getWkidFromCrsCode_(crs_identifier, code_start);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (wkid != -1)</b>
+<b class="fc">&nbsp;			return wkid;</b>
+&nbsp;
+<b class="fc">&nbsp;		wkid = getWkidFromCrsOgcUrn(crs_identifier); // could be an OGC</b>
+&nbsp;														// &quot;preferred&quot; urn
+<b class="fc">&nbsp;		return wkid;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	static int getWkidFromCrsOgcUrn(String crs_identifier) {
+<b class="fc">&nbsp;		int wkid = -1;</b>
+<b class="fc">&nbsp;		if (crs_identifier.regionMatches(0, &quot;urn:ogc:def:crs:OGC&quot;, 0, 19))</b>
+<b class="fc">&nbsp;			wkid = getWkidFromCrsOgcUrn_(crs_identifier);</b>
+&nbsp;
+<b class="fc">&nbsp;		return wkid;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private static int getWkidFromCrsCode_(String crs_identifier, int code_start) {
+<b class="fc">&nbsp;		assert(code_start &gt; 0);</b>
+&nbsp;
+<b class="fc">&nbsp;		int wkid = -1;</b>
+<b class="fc">&nbsp;		int code_count = crs_identifier.length() - code_start;</b>
+&nbsp;
+&nbsp;		try {
+<b class="fc">&nbsp;			wkid = Integer.parseInt(crs_identifier.substring(code_start, code_start + code_count));</b>
+<b class="fc">&nbsp;		} catch (Exception e) {</b>
+<b class="fc">&nbsp;		}</b>
+&nbsp;
+<b class="fc">&nbsp;		return (int) wkid;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private static int getWkidFromCrsOgcUrn_(String crs_identifier) {
+<b class="fc">&nbsp;		assert(crs_identifier.regionMatches(0, &quot;urn:ogc:def:crs:OGC&quot;, 0, 19));</b>
+&nbsp;
+<b class="fc">&nbsp;		int last_colon = crs_identifier.lastIndexOf((int) &#39;:&#39;); // skip version</b>
+&nbsp;
+<b class="fc">&nbsp;		if (last_colon == -1)</b>
+<b class="nc">&nbsp;			return -1;</b>
+&nbsp;
+<b class="fc">&nbsp;		int ogc_code_start = last_colon + 1;</b>
+<b class="fc">&nbsp;		int ogc_code_count = crs_identifier.length() - ogc_code_start;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (crs_identifier.regionMatches(ogc_code_start, &quot;CRS84&quot;, 0, ogc_code_count))</b>
+<b class="fc">&nbsp;			return 4326;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (crs_identifier.regionMatches(ogc_code_start, &quot;CRS83&quot;, 0, ogc_code_count))</b>
+<b class="fc">&nbsp;			return 4269;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (crs_identifier.regionMatches(ogc_code_start, &quot;CRS27&quot;, 0, ogc_code_count))</b>
+<b class="fc">&nbsp;			return 4267;</b>
+&nbsp;
+<b class="nc">&nbsp;		return -1;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	static int getWkidFromCrsHref(String crs_identifier) {
+<b class="fc">&nbsp;		int sr_org_code_start = -1;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (crs_identifier.regionMatches(0, &quot;http://spatialreference.org/ref/epsg/&quot;, 0, 37))</b>
+<b class="nc">&nbsp;			sr_org_code_start = 37;</b>
+<b class="fc">&nbsp;		else if (crs_identifier.regionMatches(0, &quot;www.spatialreference.org/ref/epsg/&quot;, 0, 34))</b>
+<b class="fc">&nbsp;			sr_org_code_start = 34;</b>
+<b class="fc">&nbsp;		else if (crs_identifier.regionMatches(0, &quot;http://www.spatialreference.org/ref/epsg/&quot;, 0, 41))</b>
+<b class="nc">&nbsp;			sr_org_code_start = 41;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (sr_org_code_start != -1) {</b>
+<b class="fc">&nbsp;			int sr_org_code_end = crs_identifier.indexOf(&#39;/&#39;, sr_org_code_start);</b>
+&nbsp;
+<b class="fc">&nbsp;			if (sr_org_code_end == -1)</b>
+<b class="nc">&nbsp;				return -1;</b>
+&nbsp;
+<b class="fc">&nbsp;			int count = sr_org_code_end - sr_org_code_start;</b>
+<b class="fc">&nbsp;			int wkid = -1;</b>
+&nbsp;
+&nbsp;			try {
+<b class="fc">&nbsp;				wkid = Integer.parseInt(crs_identifier.substring(sr_org_code_start, sr_org_code_start + count));</b>
+<b class="nc">&nbsp;			} catch (Exception e) {</b>
+<b class="fc">&nbsp;			}</b>
+&nbsp;
+<b class="fc">&nbsp;			return wkid;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		int open_gis_epsg_slash_end = -1;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (crs_identifier.regionMatches(0, &quot;http://opengis.net/def/crs/EPSG/&quot;, 0, 32))</b>
+<b class="nc">&nbsp;			open_gis_epsg_slash_end = 32;</b>
+<b class="fc">&nbsp;		else if (crs_identifier.regionMatches(0, &quot;www.opengis.net/def/crs/EPSG/&quot;, 0, 29))</b>
+<b class="fc">&nbsp;			open_gis_epsg_slash_end = 29;</b>
+<b class="fc">&nbsp;		else if (crs_identifier.regionMatches(0, &quot;http://www.opengis.net/def/crs/EPSG/&quot;, 0, 36))</b>
+<b class="fc">&nbsp;			open_gis_epsg_slash_end = 36;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (open_gis_epsg_slash_end != -1) {</b>
+<b class="fc">&nbsp;			int last_slash = crs_identifier.lastIndexOf(&#39;/&#39;); // skip over the</b>
+&nbsp;																// &quot;0/&quot;
+&nbsp;
+<b class="fc">&nbsp;			if (last_slash == -1)</b>
+<b class="nc">&nbsp;				return -1;</b>
+&nbsp;
+<b class="fc">&nbsp;			int open_gis_code_start = last_slash + 1;</b>
+&nbsp;
+<b class="fc">&nbsp;			int count = crs_identifier.length() - open_gis_code_start;</b>
+<b class="fc">&nbsp;			int wkid = -1;</b>
+&nbsp;
+&nbsp;			try {
+<b class="fc">&nbsp;				wkid = Integer.parseInt(crs_identifier.substring(open_gis_code_start, open_gis_code_start + count));</b>
+<b class="nc">&nbsp;			} catch (Exception e) {</b>
+<b class="fc">&nbsp;			}</b>
+&nbsp;
+<b class="fc">&nbsp;			return wkid;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (crs_identifier.compareToIgnoreCase(&quot;http://spatialreference.org/ref/sr-org/6928/ogcwkt/&quot;) == 0)</b>
+<b class="fc">&nbsp;			return 3857;</b>
+&nbsp;
+<b class="nc">&nbsp;		return -1;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	static String getWktFromCrsName(String crs_identifier) {
+<b class="fc">&nbsp;		int last_colon = crs_identifier.lastIndexOf((int) &#39;:&#39;); // skip</b>
+&nbsp;																// authority
+<b class="fc">&nbsp;		int wkt_start = last_colon + 1;</b>
+<b class="fc">&nbsp;		int wkt_count = crs_identifier.length() - wkt_start;</b>
+<b class="fc">&nbsp;		String wkt = crs_identifier.substring(wkt_start, wkt_start + wkt_count);</b>
+<b class="fc">&nbsp;		return wkt;</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-02-21 16:04</div>
+</div>
+</body>
+</html>

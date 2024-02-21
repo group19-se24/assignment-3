@@ -1,0 +1,671 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > InternalUtils</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.esri.core.geometry</a>
+</div>
+
+<h1>Coverage Summary for Class: InternalUtils (com.esri.core.geometry)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">InternalUtils</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    63,6%
+  </span>
+  <span class="absValue">
+    (14/22)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    57,4%
+  </span>
+  <span class="absValue">
+    (182/317)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; Copyright 1995-2015 Esri
+&nbsp;
+&nbsp;   Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp;   you may not use this file except in compliance with the License.
+&nbsp;   You may obtain a copy of the License at
+&nbsp;
+&nbsp;       http://www.apache.org/licenses/LICENSE-2.0
+&nbsp;
+&nbsp;   Unless required by applicable law or agreed to in writing, software
+&nbsp;   distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp;   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp;   See the License for the specific language governing permissions and
+&nbsp;   limitations under the License.
+&nbsp;
+&nbsp; For additional information, contact:
+&nbsp; Environmental Systems Research Institute, Inc.
+&nbsp; Attn: Contracts Dept
+&nbsp; 380 New York Street
+&nbsp; Redlands, California, USA 92373
+&nbsp;
+&nbsp; email: contracts@esri.com
+&nbsp; */
+&nbsp;
+&nbsp;package com.esri.core.geometry;
+&nbsp;
+&nbsp;import java.util.ArrayList;
+&nbsp;
+<b class="nc">&nbsp;final class InternalUtils {</b>
+&nbsp;
+&nbsp;	// p0 and p1 have to be on left/right boundary of fullRange2D (since this
+&nbsp;	// fuction can be called recursively, p0 or p1 can also be fullRange2D
+&nbsp;	// corners)
+&nbsp;	static int addPointsToArray(Point2D p0In, Point2D p1In,
+&nbsp;			Point2D[] pointsArray, int idx, Envelope2D fullRange2D,
+&nbsp;			boolean clockwise, double densifyDist)// PointerOfArrayOf(Point2D)
+&nbsp;													// pointsArray, int idx,
+&nbsp;													// Envelope2D fullRange2D,
+&nbsp;													// boolean clockwise, double
+&nbsp;													// densifyDist)
+&nbsp;	{
+<b class="nc">&nbsp;		Point2D p0 = new Point2D();</b>
+<b class="nc">&nbsp;		p0.setCoords(p0In);</b>
+<b class="nc">&nbsp;		Point2D p1 = new Point2D();</b>
+<b class="nc">&nbsp;		p1.setCoords(p1In);</b>
+<b class="nc">&nbsp;		fullRange2D._snapToBoundary(p0);</b>
+<b class="nc">&nbsp;		fullRange2D._snapToBoundary(p1);</b>
+&nbsp;		// //_ASSERT((p0.x == fullRange2D.xmin || p0.x == fullRange2D.xmax) &amp;&amp;
+&nbsp;		// (p1.x == fullRange2D.xmin || p1.x == fullRange2D.xmax));
+<b class="nc">&nbsp;		double boundDist0 = fullRange2D._boundaryDistance(p0);</b>
+<b class="nc">&nbsp;		double boundDist1 = fullRange2D._boundaryDistance(p1);</b>
+<b class="nc">&nbsp;		if (boundDist1 == 0.0)</b>
+<b class="nc">&nbsp;			boundDist1 = fullRange2D.getLength();</b>
+&nbsp;
+<b class="nc">&nbsp;		if ((p0.x == p1.x || p0.y == p1.y</b>
+&nbsp;				&amp;&amp; (p0.y == fullRange2D.ymin || p0.y == fullRange2D.ymax))
+&nbsp;				&amp;&amp; (boundDist1 &gt; boundDist0) == clockwise) {
+<b class="nc">&nbsp;			Point2D delta = new Point2D();</b>
+<b class="nc">&nbsp;			delta.setCoords(p1.x - p0.x, p1.y - p0.y);</b>
+<b class="nc">&nbsp;			if (densifyDist != 0)// if (densifyDist)</b>
+&nbsp;			{
+<b class="nc">&nbsp;				long cPoints = (long) (delta._norm(0) / densifyDist);</b>
+<b class="nc">&nbsp;				if (cPoints &gt; 0) // if (cPoints)</b>
+&nbsp;				{
+<b class="nc">&nbsp;					delta.scale(1.0 / (cPoints + 1));</b>
+<b class="nc">&nbsp;					for (long i = 0; i &lt; cPoints; i++) {</b>
+<b class="nc">&nbsp;						p0.add(delta);</b>
+<b class="nc">&nbsp;						pointsArray[idx++].setCoords(p0.x, p0.y);// ARRAYELEMENT(pointsArray,</b>
+&nbsp;																	// idx++).setCoords(p0.x,
+&nbsp;																	// p0.y);
+&nbsp;					}
+&nbsp;				}
+&nbsp;			}
+<b class="nc">&nbsp;		} else {</b>
+<b class="nc">&nbsp;			int side0 = fullRange2D._envelopeSide(p0);</b>
+<b class="nc">&nbsp;			int side1 = fullRange2D._envelopeSide(p1);</b>
+&nbsp;			// create up to four corner points; the order depends on boolean
+&nbsp;			// clockwise
+&nbsp;			Point2D corner;
+<b class="nc">&nbsp;			int deltaSide = clockwise ? 1 : 3; // 3 is equivalent to -1</b>
+&nbsp;			do {
+<b class="nc">&nbsp;				side0 = (side0 + deltaSide) &amp; 3;</b>
+<b class="nc">&nbsp;				corner = fullRange2D.queryCorner(side0);</b>
+<b class="nc">&nbsp;				if (densifyDist != 0)// if (densifyDist)</b>
+&nbsp;				{
+<b class="nc">&nbsp;					idx = addPointsToArray(p0, corner, pointsArray, idx,</b>
+&nbsp;							fullRange2D, clockwise, densifyDist);
+&nbsp;				}
+<b class="nc">&nbsp;				pointsArray[idx++].setCoords(corner.x, corner.y);// ARRAYELEMENT(pointsArray,</b>
+&nbsp;																	// idx++).setCoords(corner.x,
+&nbsp;																	// corner.y);
+<b class="nc">&nbsp;				p0 = corner;</b>
+<b class="nc">&nbsp;			} while ((side0 &amp; 3) != side1);</b>
+&nbsp;
+<b class="nc">&nbsp;			if (densifyDist != 0)// if (densifyDist)</b>
+<b class="nc">&nbsp;				idx = addPointsToArray(p0, p1, pointsArray, idx, fullRange2D,</b>
+&nbsp;						clockwise, densifyDist);
+&nbsp;		}
+&nbsp;
+<b class="nc">&nbsp;		return idx;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void shiftPath(MultiPath inputGeom, int iPath, double shift) {
+<b class="nc">&nbsp;		MultiVertexGeometryImpl vertexGeometryImpl = (MultiVertexGeometryImpl) inputGeom</b>
+<b class="nc">&nbsp;				._getImpl();</b>
+<b class="nc">&nbsp;		AttributeStreamOfDbl xyStream = (AttributeStreamOfDbl) vertexGeometryImpl</b>
+<b class="nc">&nbsp;				.getAttributeStreamRef(VertexDescription.Semantics.POSITION);</b>
+&nbsp;
+<b class="nc">&nbsp;		int i1 = inputGeom.getPathStart(iPath);</b>
+<b class="nc">&nbsp;		int i2 = inputGeom.getPathEnd(iPath);</b>
+<b class="nc">&nbsp;		Point2D pt = new Point2D();</b>
+&nbsp;
+<b class="nc">&nbsp;		while (i1 &lt; i2) {</b>
+<b class="nc">&nbsp;			xyStream.read(i1, pt);</b>
+<b class="nc">&nbsp;			pt.x += shift;</b>
+<b class="nc">&nbsp;			xyStream.write(i1, pt);</b>
+<b class="nc">&nbsp;			i1++;</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	static double calculateToleranceFromGeometry(SpatialReference sr,
+&nbsp;			Envelope2D env2D, boolean bConservative) {
+<b class="fc">&nbsp;		double gtolerance = env2D._calculateToleranceFromEnvelope();</b>
+<b class="fc">&nbsp;		double stolerance = sr != null ? sr</b>
+<b class="fc">&nbsp;				.getTolerance(VertexDescription.Semantics.POSITION) : 0;</b>
+<b class="fc">&nbsp;		if (bConservative) {</b>
+<b class="fc">&nbsp;			gtolerance *= 4;</b>
+<b class="fc">&nbsp;			stolerance *= 1.1;</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return Math.max(stolerance, gtolerance);</b>
+&nbsp;	}
+&nbsp;
+<b class="fc">&nbsp;    static double adjust_tolerance_for_TE_clustering(double tol) { return 2.0 * Math.sqrt(2.0) * tol; }</b>
+&nbsp;
+<b class="fc">&nbsp;    static double adjust_tolerance_for_TE_cracking(double tol) { return Math.sqrt(2.0) * tol; }</b>
+&nbsp;	
+&nbsp;	static double calculateToleranceFromGeometry(SpatialReference sr,
+&nbsp;			Geometry geometry, boolean bConservative) {
+<b class="fc">&nbsp;		Envelope2D env2D = new Envelope2D();</b>
+<b class="fc">&nbsp;		geometry.queryEnvelope2D(env2D);</b>
+<b class="fc">&nbsp;		return calculateToleranceFromGeometry(sr, env2D, bConservative);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	static double calculateZToleranceFromGeometry(SpatialReference sr,
+&nbsp;			Geometry geometry, boolean bConservative) {
+<b class="nc">&nbsp;		Envelope1D env1D = geometry.queryInterval(</b>
+&nbsp;				VertexDescription.Semantics.Z, 0);
+<b class="nc">&nbsp;		double gtolerance = env1D._calculateToleranceFromEnvelope();</b>
+<b class="nc">&nbsp;		double stolerance = sr != null ? sr</b>
+<b class="nc">&nbsp;				.getTolerance(VertexDescription.Semantics.Z) : 0;</b>
+<b class="nc">&nbsp;		if (bConservative) {</b>
+<b class="nc">&nbsp;			gtolerance *= 4;</b>
+<b class="nc">&nbsp;			stolerance *= 1.1;</b>
+&nbsp;		}
+<b class="nc">&nbsp;		return Math.max(stolerance, gtolerance);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	double calculateZToleranceFromGeometry(SpatialReference sr,
+&nbsp;			Geometry geometry) {
+<b class="nc">&nbsp;		Envelope1D env1D = geometry.queryInterval(</b>
+&nbsp;				VertexDescription.Semantics.Z, 0);
+<b class="nc">&nbsp;		double tolerance = env1D._calculateToleranceFromEnvelope();</b>
+&nbsp;		return Math
+<b class="nc">&nbsp;				.max(sr != null ? sr</b>
+<b class="nc">&nbsp;						.getTolerance(VertexDescription.Semantics.Z) : 0,</b>
+&nbsp;						tolerance);
+&nbsp;	}
+&nbsp;
+&nbsp;	public static Envelope2D getMergedExtent(Geometry geom1, Envelope2D env2) {
+<b class="nc">&nbsp;		Envelope2D env1 = new Envelope2D();</b>
+<b class="nc">&nbsp;		geom1.queryLooseEnvelope2D(env1);</b>
+<b class="nc">&nbsp;		env1.merge(env2);</b>
+<b class="nc">&nbsp;		return env1;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public static Envelope2D getMergedExtent(Geometry geom1, Geometry geom2) {
+<b class="fc">&nbsp;		Envelope2D env1 = new Envelope2D();</b>
+<b class="fc">&nbsp;		geom1.queryLooseEnvelope2D(env1);</b>
+<b class="fc">&nbsp;		Envelope2D env2 = new Envelope2D();</b>
+<b class="fc">&nbsp;		geom2.queryLooseEnvelope2D(env2);</b>
+<b class="fc">&nbsp;		env1.merge(env2);</b>
+<b class="fc">&nbsp;		return env1;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public static Geometry createGeometry(int gt, VertexDescription vdIn) {
+<b class="fc">&nbsp;		VertexDescription vd = vdIn;</b>
+<b class="fc">&nbsp;		if (vd == null)</b>
+<b class="nc">&nbsp;			vd = VertexDescriptionDesignerImpl.getDefaultDescriptor2D();</b>
+<b class="fc">&nbsp;		switch (gt) {</b>
+&nbsp;		case Geometry.GeometryType.Point:
+<b class="nc">&nbsp;			return new Point(vd);</b>
+&nbsp;		case Geometry.GeometryType.Line:
+<b class="nc">&nbsp;			return new Line(vd);</b>
+&nbsp;			// case enum_value2(Geometry, GeometryType, enumBezier):
+&nbsp;			// break;
+&nbsp;			// case enum_value2(Geometry, GeometryType, enumEllipticArc):
+&nbsp;			// break;
+&nbsp;		case Geometry.GeometryType.Envelope:
+<b class="nc">&nbsp;			return new Envelope(vd);</b>
+&nbsp;		case Geometry.GeometryType.MultiPoint:
+<b class="fc">&nbsp;			return new MultiPoint(vd);</b>
+&nbsp;		case Geometry.GeometryType.Polyline:
+<b class="fc">&nbsp;			return new Polyline(vd);</b>
+&nbsp;		case Geometry.GeometryType.Polygon:
+<b class="fc">&nbsp;			return new Polygon(vd);</b>
+&nbsp;		default:
+<b class="nc">&nbsp;			throw new GeometryException(&quot;invalid argument.&quot;);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	static boolean isClockwiseRing(MultiPathImpl polygon, int iring) {
+<b class="fc">&nbsp;		int high_point_index = polygon.getHighestPointIndex(iring);</b>
+<b class="fc">&nbsp;		int path_start = polygon.getPathStart(iring);</b>
+<b class="fc">&nbsp;		int path_end = polygon.getPathEnd(iring);</b>
+&nbsp;
+<b class="fc">&nbsp;		Point2D q = polygon.getXY(high_point_index);</b>
+&nbsp;		Point2D p, r;
+&nbsp;
+<b class="fc">&nbsp;		if (high_point_index == path_start) {</b>
+<b class="fc">&nbsp;			p = polygon.getXY(path_end - 1);</b>
+<b class="fc">&nbsp;			r = polygon.getXY(path_start + 1);</b>
+<b class="fc">&nbsp;		} else if (high_point_index == path_end - 1) {</b>
+<b class="fc">&nbsp;			p = polygon.getXY(high_point_index - 1);</b>
+<b class="fc">&nbsp;			r = polygon.getXY(path_start);</b>
+&nbsp;		} else {
+<b class="fc">&nbsp;			p = polygon.getXY(high_point_index - 1);</b>
+<b class="fc">&nbsp;			r = polygon.getXY(high_point_index + 1);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		int orientation = Point2D.orientationRobust(p, q, r);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (orientation == 0)</b>
+<b class="fc">&nbsp;			return polygon.calculateRingArea2D(iring) &gt; 0.0;</b>
+&nbsp;
+<b class="fc">&nbsp;		return orientation == -1;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	static QuadTreeImpl buildQuadTree(MultiPathImpl multipathImpl) {
+<b class="fc">&nbsp;		Envelope2D extent = new Envelope2D();</b>
+<b class="fc">&nbsp;		multipathImpl.queryLooseEnvelope2D(extent);</b>
+<b class="fc">&nbsp;		QuadTreeImpl quad_tree_impl = new QuadTreeImpl(extent, 8);</b>
+<b class="fc">&nbsp;		int hint_index = -1;</b>
+<b class="fc">&nbsp;		SegmentIteratorImpl seg_iter = multipathImpl.querySegmentIterator();</b>
+<b class="fc">&nbsp;		Envelope2D boundingbox = new Envelope2D();</b>
+<b class="fc">&nbsp;		boolean resized_extent = false;</b>
+&nbsp;		
+<b class="fc">&nbsp;		while (seg_iter.nextPath()) {</b>
+<b class="fc">&nbsp;			while (seg_iter.hasNextSegment()) {</b>
+<b class="fc">&nbsp;				Segment segment = seg_iter.nextSegment();</b>
+<b class="fc">&nbsp;				int index = seg_iter.getStartPointIndex();</b>
+<b class="fc">&nbsp;				segment.queryEnvelope2D(boundingbox);</b>
+<b class="fc">&nbsp;				hint_index = quad_tree_impl.insert(index, boundingbox,</b>
+&nbsp;						hint_index);
+&nbsp;
+<b class="fc">&nbsp;				if (hint_index == -1) {</b>
+<b class="nc">&nbsp;					if (resized_extent)</b>
+<b class="nc">&nbsp;						throw GeometryException.GeometryInternalError();</b>
+&nbsp;
+&nbsp;					// resize extent
+<b class="nc">&nbsp;					multipathImpl.calculateEnvelope2D(extent, false);</b>
+<b class="nc">&nbsp;					resized_extent = true;</b>
+<b class="nc">&nbsp;					quad_tree_impl.reset(extent, 8);</b>
+<b class="nc">&nbsp;					seg_iter.resetToFirstPath();</b>
+<b class="nc">&nbsp;					break;</b>
+&nbsp;				}
+<b class="fc">&nbsp;			}</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return quad_tree_impl;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	static QuadTreeImpl buildQuadTree(MultiPathImpl multipathImpl,
+&nbsp;			Envelope2D extentOfInterest) {
+<b class="fc">&nbsp;		Envelope2D extent = new Envelope2D();</b>
+<b class="fc">&nbsp;		multipathImpl.queryLooseEnvelope2D(extent);</b>
+<b class="fc">&nbsp;		QuadTreeImpl quad_tree_impl = new QuadTreeImpl(extent, 8);</b>
+<b class="fc">&nbsp;		int hint_index = -1;</b>
+<b class="fc">&nbsp;		Envelope2D boundingbox = new Envelope2D();</b>
+<b class="fc">&nbsp;		SegmentIteratorImpl seg_iter = multipathImpl.querySegmentIterator();</b>
+&nbsp;
+<b class="fc">&nbsp;		boolean resized_extent = false;</b>
+<b class="fc">&nbsp;		while (seg_iter.nextPath()) {</b>
+<b class="fc">&nbsp;			while (seg_iter.hasNextSegment()) {</b>
+<b class="fc">&nbsp;				Segment segment = seg_iter.nextSegment();</b>
+<b class="fc">&nbsp;				int index = seg_iter.getStartPointIndex();</b>
+<b class="fc">&nbsp;				segment.queryEnvelope2D(boundingbox);</b>
+&nbsp;
+<b class="fc">&nbsp;				if (boundingbox.isIntersecting(extentOfInterest)) {</b>
+<b class="fc">&nbsp;					hint_index = quad_tree_impl.insert(index, boundingbox,</b>
+&nbsp;							hint_index);
+&nbsp;
+<b class="fc">&nbsp;					if (hint_index == -1) {</b>
+<b class="nc">&nbsp;						if (resized_extent)</b>
+<b class="nc">&nbsp;							throw GeometryException.GeometryInternalError();</b>
+&nbsp;
+&nbsp;						// resize extent
+<b class="nc">&nbsp;						multipathImpl.calculateEnvelope2D(extent, false);</b>
+<b class="nc">&nbsp;						resized_extent = true;</b>
+<b class="nc">&nbsp;						quad_tree_impl.reset(extent, 8);</b>
+<b class="nc">&nbsp;						seg_iter.resetToFirstPath();</b>
+<b class="nc">&nbsp;						break;</b>
+&nbsp;					}
+&nbsp;				}
+<b class="fc">&nbsp;			}</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return quad_tree_impl;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;    static QuadTreeImpl buildQuadTreeForPaths(MultiPathImpl multipathImpl)
+&nbsp;    {
+<b class="fc">&nbsp;        Envelope2D extent = new Envelope2D();</b>
+<b class="fc">&nbsp;        multipathImpl.queryLooseEnvelope2D(extent);</b>
+<b class="fc">&nbsp;        if (extent.isEmpty())</b>
+<b class="nc">&nbsp;            return null;</b>
+&nbsp;
+<b class="fc">&nbsp;        QuadTreeImpl quad_tree_impl = new QuadTreeImpl(extent, 8);</b>
+<b class="fc">&nbsp;        int hint_index = -1;</b>
+<b class="fc">&nbsp;        Envelope2D boundingbox = new Envelope2D();</b>
+&nbsp;
+<b class="fc">&nbsp;        boolean resized_extent = false;</b>
+&nbsp;        do
+&nbsp;        {
+<b class="fc">&nbsp;            for (int ipath = 0, npaths = multipathImpl.getPathCount(); ipath &lt; npaths; ipath++)</b>
+&nbsp;            {
+<b class="fc">&nbsp;                multipathImpl.queryPathEnvelope2D(ipath, boundingbox);</b>
+<b class="fc">&nbsp;                hint_index = quad_tree_impl.insert(ipath, boundingbox, hint_index);</b>
+&nbsp;
+<b class="fc">&nbsp;                if (hint_index == -1)</b>
+&nbsp;                {
+<b class="nc">&nbsp;                    if (resized_extent)</b>
+<b class="nc">&nbsp;                        throw GeometryException.GeometryInternalError();</b>
+&nbsp;
+&nbsp;                    //This is usually happens because esri shape buffer contains geometry extent which is slightly different from the true extent.
+&nbsp;                    //Recalculate extent
+<b class="nc">&nbsp;                    multipathImpl.calculateEnvelope2D(extent, false);</b>
+<b class="nc">&nbsp;                    resized_extent = true;</b>
+<b class="nc">&nbsp;                    quad_tree_impl.reset(extent, 8);</b>
+<b class="nc">&nbsp;                    break; //break the for loop</b>
+&nbsp;                }
+&nbsp;                else
+&nbsp;                {
+<b class="fc">&nbsp;                    resized_extent = false;</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;
+<b class="fc">&nbsp;        } while(resized_extent);</b>
+&nbsp;
+<b class="fc">&nbsp;        return quad_tree_impl;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;	static QuadTreeImpl buildQuadTree(MultiPointImpl multipointImpl) {
+<b class="nc">&nbsp;		Envelope2D extent = new Envelope2D();</b>
+<b class="nc">&nbsp;		multipointImpl.queryLooseEnvelope2D(extent);</b>
+<b class="nc">&nbsp;		QuadTreeImpl quad_tree_impl = new QuadTreeImpl(extent, 8);</b>
+&nbsp;
+<b class="nc">&nbsp;		Point2D pt = new Point2D();</b>
+<b class="nc">&nbsp;		Envelope2D boundingbox = new Envelope2D();</b>
+<b class="nc">&nbsp;		boolean resized_extent = false;</b>
+<b class="nc">&nbsp;		for (int i = 0; i &lt; multipointImpl.getPointCount(); i++) {</b>
+<b class="nc">&nbsp;			multipointImpl.getXY(i, pt);</b>
+<b class="nc">&nbsp;			boundingbox.setCoords(pt);</b>
+<b class="nc">&nbsp;			int element_handle = quad_tree_impl.insert(i, boundingbox);</b>
+&nbsp;
+<b class="nc">&nbsp;			if (element_handle == -1) {</b>
+<b class="nc">&nbsp;				if (resized_extent)</b>
+<b class="nc">&nbsp;					throw GeometryException.GeometryInternalError();</b>
+&nbsp;
+&nbsp;				// resize extent
+<b class="nc">&nbsp;				multipointImpl.calculateEnvelope2D(extent, false);</b>
+<b class="nc">&nbsp;				resized_extent = true;</b>
+<b class="nc">&nbsp;				quad_tree_impl.reset(extent, 8);</b>
+<b class="nc">&nbsp;				i = -1; // resets the for-loop</b>
+<b class="nc">&nbsp;				continue;</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="nc">&nbsp;		return quad_tree_impl;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	static QuadTreeImpl buildQuadTree(MultiPointImpl multipointImpl,
+&nbsp;			Envelope2D extentOfInterest) {
+<b class="fc">&nbsp;		QuadTreeImpl quad_tree_impl = new QuadTreeImpl(extentOfInterest, 8);</b>
+<b class="fc">&nbsp;		Point2D pt = new Point2D();</b>
+<b class="fc">&nbsp;		boolean resized_extent = false;</b>
+<b class="fc">&nbsp;		Envelope2D boundingbox = new Envelope2D();</b>
+<b class="fc">&nbsp;		for (int i = 0; i &lt; multipointImpl.getPointCount(); i++) {</b>
+<b class="fc">&nbsp;			multipointImpl.getXY(i, pt);</b>
+&nbsp;
+<b class="fc">&nbsp;			if (!extentOfInterest.contains(pt))</b>
+<b class="fc">&nbsp;				continue;</b>
+&nbsp;
+<b class="fc">&nbsp;			boundingbox.setCoords(pt);</b>
+<b class="fc">&nbsp;			int element_handle = quad_tree_impl.insert(i, boundingbox);</b>
+&nbsp;
+<b class="fc">&nbsp;			if (element_handle == -1) {</b>
+<b class="nc">&nbsp;				if (resized_extent)</b>
+<b class="nc">&nbsp;					throw GeometryException.GeometryInternalError();</b>
+&nbsp;
+&nbsp;				// resize extent
+<b class="nc">&nbsp;				resized_extent = true;</b>
+<b class="nc">&nbsp;				Envelope2D extent = new Envelope2D();</b>
+<b class="nc">&nbsp;				multipointImpl.calculateEnvelope2D(extent, false);</b>
+<b class="nc">&nbsp;				quad_tree_impl.reset(extent, 8);</b>
+<b class="nc">&nbsp;				i = -1; // resets the for-loop</b>
+<b class="nc">&nbsp;				continue;</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return quad_tree_impl;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	static Envelope2DIntersectorImpl getEnvelope2DIntersector(
+&nbsp;			MultiPathImpl multipathImplA, MultiPathImpl multipathImplB,
+&nbsp;			double tolerance) {
+<b class="fc">&nbsp;		Envelope2D env_a = new Envelope2D(), env_b = new Envelope2D();</b>
+<b class="fc">&nbsp;		multipathImplA.queryLooseEnvelope2D(env_a);</b>
+<b class="fc">&nbsp;		multipathImplB.queryLooseEnvelope2D(env_b);</b>
+<b class="fc">&nbsp;		env_a.inflate(tolerance, tolerance);</b>
+<b class="fc">&nbsp;		env_b.inflate(tolerance, tolerance);</b>
+&nbsp;
+<b class="fc">&nbsp;		Envelope2D envInter = new Envelope2D();</b>
+<b class="fc">&nbsp;		envInter.setCoords(env_a);</b>
+<b class="fc">&nbsp;		envInter.intersect(env_b);</b>
+&nbsp;
+<b class="fc">&nbsp;		SegmentIteratorImpl segIterA = multipathImplA.querySegmentIterator();</b>
+<b class="fc">&nbsp;		SegmentIteratorImpl segIterB = multipathImplB.querySegmentIterator();</b>
+&nbsp;
+<b class="fc">&nbsp;		Envelope2DIntersectorImpl intersector = new Envelope2DIntersectorImpl();</b>
+<b class="fc">&nbsp;		intersector.setTolerance(tolerance);</b>
+&nbsp;
+<b class="fc">&nbsp;		boolean b_found_red = false;</b>
+<b class="fc">&nbsp;		intersector.startRedConstruction();</b>
+<b class="fc">&nbsp;		while (segIterA.nextPath()) {</b>
+<b class="fc">&nbsp;			while (segIterA.hasNextSegment()) {</b>
+<b class="fc">&nbsp;				Segment segmentA = segIterA.nextSegment();</b>
+<b class="fc">&nbsp;				segmentA.queryEnvelope2D(env_a);</b>
+&nbsp;
+<b class="fc">&nbsp;				if (!env_a.isIntersecting(envInter))</b>
+<b class="fc">&nbsp;					continue;</b>
+&nbsp;
+<b class="fc">&nbsp;				b_found_red = true;</b>
+<b class="fc">&nbsp;				Envelope2D env = new Envelope2D();</b>
+<b class="fc">&nbsp;				env.setCoords(env_a);</b>
+<b class="fc">&nbsp;				intersector.addRedEnvelope(segIterA.getStartPointIndex(), env);</b>
+<b class="fc">&nbsp;			}</b>
+&nbsp;		}
+<b class="fc">&nbsp;		intersector.endRedConstruction();</b>
+&nbsp;
+<b class="fc">&nbsp;		if (!b_found_red)</b>
+<b class="fc">&nbsp;			return null;</b>
+&nbsp;
+<b class="fc">&nbsp;		boolean b_found_blue = false;</b>
+<b class="fc">&nbsp;		intersector.startBlueConstruction();</b>
+<b class="fc">&nbsp;		while (segIterB.nextPath()) {</b>
+<b class="fc">&nbsp;			while (segIterB.hasNextSegment()) {</b>
+<b class="fc">&nbsp;				Segment segmentB = segIterB.nextSegment();</b>
+<b class="fc">&nbsp;				segmentB.queryEnvelope2D(env_b);</b>
+&nbsp;
+<b class="fc">&nbsp;				if (!env_b.isIntersecting(envInter))</b>
+<b class="fc">&nbsp;					continue;</b>
+&nbsp;
+<b class="fc">&nbsp;				b_found_blue = true;</b>
+<b class="fc">&nbsp;				Envelope2D env = new Envelope2D();</b>
+<b class="fc">&nbsp;				env.setCoords(env_b);</b>
+<b class="fc">&nbsp;				intersector.addBlueEnvelope(segIterB.getStartPointIndex(), env);</b>
+<b class="fc">&nbsp;			}</b>
+&nbsp;		}
+<b class="fc">&nbsp;		intersector.endBlueConstruction();</b>
+&nbsp;
+<b class="fc">&nbsp;		if (!b_found_blue)</b>
+<b class="fc">&nbsp;			return null;</b>
+&nbsp;
+<b class="fc">&nbsp;		return intersector;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;    static Envelope2DIntersectorImpl getEnvelope2DIntersectorForParts(
+&nbsp;            MultiPathImpl multipathImplA, MultiPathImpl multipathImplB,
+&nbsp;            double tolerance, boolean bExteriorOnlyA, boolean bExteriorOnlyB) {
+<b class="fc">&nbsp;        int type_a = multipathImplA.getType().value();</b>
+<b class="fc">&nbsp;        int type_b = multipathImplB.getType().value();</b>
+&nbsp;
+<b class="fc">&nbsp;        Envelope2D env_a = new Envelope2D(), env_b = new Envelope2D();</b>
+<b class="fc">&nbsp;        multipathImplA.queryLooseEnvelope2D(env_a);</b>
+<b class="fc">&nbsp;        multipathImplB.queryLooseEnvelope2D(env_b);</b>
+<b class="fc">&nbsp;        env_a.inflate(tolerance, tolerance);</b>
+<b class="fc">&nbsp;        env_b.inflate(tolerance, tolerance);</b>
+&nbsp;
+<b class="fc">&nbsp;        Envelope2D envInter = new Envelope2D();</b>
+<b class="fc">&nbsp;        envInter.setCoords(env_a);</b>
+<b class="fc">&nbsp;        envInter.intersect(env_b);</b>
+&nbsp;
+<b class="fc">&nbsp;        Envelope2DIntersectorImpl intersector = new Envelope2DIntersectorImpl();</b>
+<b class="fc">&nbsp;        intersector.setTolerance(tolerance);</b>
+&nbsp;
+<b class="fc">&nbsp;        boolean b_found_red = false;</b>
+<b class="fc">&nbsp;        intersector.startRedConstruction();</b>
+<b class="fc">&nbsp;        for (int ipath_a = 0, npaths = multipathImplA.getPathCount(); ipath_a &lt; npaths; ipath_a++) {</b>
+<b class="fc">&nbsp;            if (bExteriorOnlyA &amp;&amp; type_a == Geometry.GeometryType.Polygon &amp;&amp; !multipathImplA.isExteriorRing(ipath_a))</b>
+<b class="nc">&nbsp;                continue;</b>
+&nbsp;
+<b class="fc">&nbsp;            multipathImplA.queryPathEnvelope2D(ipath_a, env_a);</b>
+&nbsp;
+<b class="fc">&nbsp;            if (!env_a.isIntersecting(envInter))</b>
+<b class="fc">&nbsp;                continue;</b>
+&nbsp;
+<b class="fc">&nbsp;            b_found_red = true;</b>
+<b class="fc">&nbsp;            intersector.addRedEnvelope(ipath_a, env_a);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        intersector.endRedConstruction();</b>
+&nbsp;
+<b class="fc">&nbsp;        if (!b_found_red)</b>
+<b class="fc">&nbsp;            return null;</b>
+&nbsp;
+<b class="fc">&nbsp;        boolean b_found_blue = false;</b>
+<b class="fc">&nbsp;        intersector.startBlueConstruction();</b>
+<b class="fc">&nbsp;        for (int ipath_b = 0, npaths = multipathImplB.getPathCount(); ipath_b &lt; npaths; ipath_b++) {</b>
+<b class="fc">&nbsp;            if (bExteriorOnlyB &amp;&amp; type_b == Geometry.GeometryType.Polygon &amp;&amp; !multipathImplB.isExteriorRing(ipath_b))</b>
+<b class="nc">&nbsp;                continue;</b>
+&nbsp;
+<b class="fc">&nbsp;            multipathImplB.queryPathEnvelope2D(ipath_b, env_b);</b>
+&nbsp;
+<b class="fc">&nbsp;            if (!env_b.isIntersecting(envInter))</b>
+<b class="fc">&nbsp;                continue;</b>
+&nbsp;
+<b class="fc">&nbsp;            b_found_blue = true;</b>
+<b class="fc">&nbsp;            intersector.addBlueEnvelope(ipath_b, env_b);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        intersector.endBlueConstruction();</b>
+&nbsp;
+<b class="fc">&nbsp;        if (!b_found_blue)</b>
+<b class="fc">&nbsp;            return null;</b>
+&nbsp;
+<b class="fc">&nbsp;        return intersector;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;	static boolean isWeakSimple(MultiVertexGeometry geom, double tol) {
+<b class="fc">&nbsp;		return ((MultiVertexGeometryImpl) geom._getImpl()).getIsSimple(tol) &gt; 0;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	static QuadTree buildQuadTreeForOnePath(MultiPathImpl multipathImpl, int path) {
+<b class="nc">&nbsp;		Envelope2D extent = new Envelope2D();</b>
+<b class="nc">&nbsp;		multipathImpl.queryLoosePathEnvelope2D(path, extent);</b>
+<b class="nc">&nbsp;		QuadTree quad_tree = new QuadTree(extent, 8);</b>
+<b class="nc">&nbsp;		int hint_index = -1;</b>
+<b class="nc">&nbsp;		Envelope2D boundingbox = new Envelope2D();</b>
+<b class="nc">&nbsp;		SegmentIteratorImpl seg_iter = multipathImpl.querySegmentIterator();</b>
+&nbsp;
+<b class="nc">&nbsp;		seg_iter.resetToPath(path);</b>
+<b class="nc">&nbsp;		if (seg_iter.nextPath()) {</b>
+<b class="nc">&nbsp;			while (seg_iter.hasNextSegment()) {</b>
+<b class="nc">&nbsp;				Segment segment = seg_iter.nextSegment();</b>
+<b class="nc">&nbsp;				int index = seg_iter.getStartPointIndex();</b>
+<b class="nc">&nbsp;				segment.queryLooseEnvelope2D(boundingbox);</b>
+<b class="nc">&nbsp;				hint_index = quad_tree.insert(index, boundingbox, hint_index);</b>
+&nbsp;
+<b class="nc">&nbsp;				if (hint_index == -1) {</b>
+<b class="nc">&nbsp;					throw new GeometryException(&quot;internal error&quot;);</b>
+&nbsp;				}
+<b class="nc">&nbsp;			}</b>
+&nbsp;		}
+&nbsp;
+<b class="nc">&nbsp;		return quad_tree;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;}
+&nbsp;
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-02-21 16:04</div>
+</div>
+</body>
+</html>

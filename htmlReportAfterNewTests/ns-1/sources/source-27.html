@@ -1,0 +1,414 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > IndexMultiDCList</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.esri.core.geometry</a>
+</div>
+
+<h1>Coverage Summary for Class: IndexMultiDCList (com.esri.core.geometry)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">IndexMultiDCList</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    72,5%
+  </span>
+  <span class="absValue">
+    (29/40)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    75,7%
+  </span>
+  <span class="absValue">
+    (81/107)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; Copyright 1995-2015 Esri
+&nbsp;
+&nbsp;   Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp;   you may not use this file except in compliance with the License.
+&nbsp;   You may obtain a copy of the License at
+&nbsp;
+&nbsp;       http://www.apache.org/licenses/LICENSE-2.0
+&nbsp;
+&nbsp;   Unless required by applicable law or agreed to in writing, software
+&nbsp;   distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp;   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp;   See the License for the specific language governing permissions and
+&nbsp;   limitations under the License.
+&nbsp;
+&nbsp; For additional information, contact:
+&nbsp; Environmental Systems Research Institute, Inc.
+&nbsp; Attn: Contracts Dept
+&nbsp; 380 New York Street
+&nbsp; Redlands, California, USA 92373
+&nbsp;
+&nbsp; email: contracts@esri.com
+&nbsp; */
+&nbsp;package com.esri.core.geometry;
+&nbsp;
+<b class="fc">&nbsp;class IndexMultiDCList {</b>
+&nbsp;
+&nbsp;	StridedIndexTypeCollection m_list_nodes; // stores lists and list elements.
+&nbsp;												// Each list element is Index,
+&nbsp;												// Prev, next.
+&nbsp;	StridedIndexTypeCollection m_lists; // stores lists. Each list is Head,
+&nbsp;										// Tail, PrevList, NextList, NodeCount,
+&nbsp;										// ListData.
+&nbsp;	int m_list_of_lists;
+&nbsp;	boolean m_b_store_list_index_with_node;
+&nbsp;
+&nbsp;	void freeNode_(int node) {
+<b class="fc">&nbsp;		m_list_nodes.deleteElement(node);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	int newNode_() {
+<b class="fc">&nbsp;		int node = m_list_nodes.newElement();</b>
+<b class="fc">&nbsp;		return node;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void freeList_(int list) {
+<b class="nc">&nbsp;		m_lists.deleteElement(list);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	int newList_() {
+<b class="fc">&nbsp;		int list = m_lists.newElement();</b>
+<b class="fc">&nbsp;		return list;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void setPrev_(int node, int prev) {
+<b class="fc">&nbsp;		m_list_nodes.setField(node, 1, prev);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void setNext_(int node, int next) {
+<b class="fc">&nbsp;		m_list_nodes.setField(node, 2, next);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void setData_(int node, int data) {
+<b class="nc">&nbsp;		m_list_nodes.setField(node, 0, data);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void setList_(int node, int list) {
+<b class="nc">&nbsp;		m_list_nodes.setField(node, 3, list);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void setListSize_(int list, int newsize) {
+<b class="fc">&nbsp;		m_lists.setField(list, 4, newsize);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void setNextList_(int list, int next) {
+<b class="nc">&nbsp;		m_lists.setField(list, 3, next);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void setPrevList_(int list, int prev) {
+<b class="fc">&nbsp;		m_lists.setField(list, 2, prev);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Same as Index_multi_dc_list(true).
+<b class="fc">&nbsp;	IndexMultiDCList() {</b>
+<b class="fc">&nbsp;		m_list_nodes = new StridedIndexTypeCollection(3);</b>
+<b class="fc">&nbsp;		m_lists = new StridedIndexTypeCollection(6);</b>
+<b class="fc">&nbsp;		m_b_store_list_index_with_node = false;</b>
+<b class="fc">&nbsp;		m_list_of_lists = nullNode();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// When bStoreListIndexWithNode is true, the each node stores a pointer to
+&nbsp;	// the list. Otherwise it does not.
+&nbsp;	// The get_list() method cannot be used if bStoreListIndexWithNode is false.
+<b class="fc">&nbsp;	IndexMultiDCList(boolean b_store_list_index_with_node) {</b>
+<b class="fc">&nbsp;		m_list_nodes = new StridedIndexTypeCollection(3);</b>
+<b class="fc">&nbsp;		m_lists = new StridedIndexTypeCollection(6);</b>
+<b class="fc">&nbsp;		m_b_store_list_index_with_node = false;</b>
+<b class="fc">&nbsp;		m_list_of_lists = nullNode();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Creates new list and returns it&#39;s handle.
+&nbsp;	// listData is user&#39;s info associated with the list
+&nbsp;	int createList(int listData) {
+<b class="fc">&nbsp;		int list = newList_();</b>
+&nbsp;		// m_lists.set_field(list, 0, null_node());//head
+&nbsp;		// m_lists.set_field(list, 1, null_node());//tail
+&nbsp;		// m_lists.set_field(list, 2, null_node());//prev list
+<b class="fc">&nbsp;		m_lists.setField(list, 3, m_list_of_lists); // next list</b>
+<b class="fc">&nbsp;		m_lists.setField(list, 4, 0);// node count in the list</b>
+<b class="fc">&nbsp;		m_lists.setField(list, 5, listData);</b>
+<b class="fc">&nbsp;		if (m_list_of_lists != nullNode())</b>
+<b class="fc">&nbsp;			setPrevList_(m_list_of_lists, list);</b>
+&nbsp;
+<b class="fc">&nbsp;		m_list_of_lists = list;</b>
+<b class="fc">&nbsp;		return list;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Deletes a list and returns the index of the next list.
+&nbsp;	int deleteList(int list) {
+<b class="nc">&nbsp;		clear(list);</b>
+<b class="nc">&nbsp;		int prevList = m_lists.getField(list, 2);</b>
+<b class="nc">&nbsp;		int nextList = m_lists.getField(list, 3);</b>
+<b class="nc">&nbsp;		if (prevList != nullNode())</b>
+<b class="nc">&nbsp;			setNextList_(prevList, nextList);</b>
+&nbsp;		else
+<b class="nc">&nbsp;			m_list_of_lists = nextList;</b>
+&nbsp;
+<b class="nc">&nbsp;		if (nextList != nullNode())</b>
+<b class="nc">&nbsp;			setPrevList_(nextList, prevList);</b>
+&nbsp;
+<b class="nc">&nbsp;		freeList_(list);</b>
+<b class="nc">&nbsp;		return nextList;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Reserves memory for the given number of lists.
+&nbsp;	void reserveLists(int listCount) {
+<b class="nc">&nbsp;		m_lists.setCapacity(listCount);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// returns user&#39;s data associated with the list
+&nbsp;	int getListData(int list) {
+<b class="fc">&nbsp;		return m_lists.getField(list, 5);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// returns the list associated with the node_index. Do not use if list is
+&nbsp;	// created with bStoreListIndexWithNode == false.
+&nbsp;	int getList(int node_index) {
+<b class="nc">&nbsp;		assert (m_b_store_list_index_with_node);</b>
+<b class="nc">&nbsp;		return m_list_nodes.getField(node_index, 3);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// sets the user data to the list
+&nbsp;	void setListData(int list, int data) {
+<b class="fc">&nbsp;		m_lists.setField(list, 5, data);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Adds element to a given list. The element is added to the end. Returns
+&nbsp;	// the new
+&nbsp;	int addElement(int list, int data) {
+<b class="fc">&nbsp;		return insertElement(list, -1, data);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Inserts a new node before the given one .
+&nbsp;	int insertElement(int list, int beforeNode, int data) {
+<b class="fc">&nbsp;		int node = newNode_();</b>
+<b class="fc">&nbsp;		int prev = -1;</b>
+<b class="fc">&nbsp;		if (beforeNode != nullNode()) {</b>
+<b class="nc">&nbsp;			prev = getPrev(beforeNode);</b>
+<b class="nc">&nbsp;			setPrev_(beforeNode, node);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		setNext_(node, beforeNode);</b>
+<b class="fc">&nbsp;		if (prev != nullNode())</b>
+<b class="nc">&nbsp;			setNext_(prev, node);</b>
+&nbsp;
+<b class="fc">&nbsp;		int head = m_lists.getField(list, 0);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (beforeNode == head)</b>
+<b class="fc">&nbsp;			m_lists.setField(list, 0, node);</b>
+<b class="fc">&nbsp;		if (beforeNode == nullNode()) {</b>
+<b class="fc">&nbsp;			int tail = m_lists.getField(list, 1);</b>
+<b class="fc">&nbsp;			setPrev_(node, tail);</b>
+<b class="fc">&nbsp;			if (tail != -1)</b>
+<b class="fc">&nbsp;				setNext_(tail, node);</b>
+&nbsp;
+<b class="fc">&nbsp;			m_lists.setField(list, 1, node);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		setData(node, data);</b>
+<b class="fc">&nbsp;		setListSize_(list, getListSize(list) + 1);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (m_b_store_list_index_with_node)</b>
+<b class="nc">&nbsp;			setList_(node, list);</b>
+&nbsp;
+<b class="fc">&nbsp;		return node;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Deletes a node from a list. Returns the next node after the deleted one.
+&nbsp;	int deleteElement(int list, int node) {
+<b class="fc">&nbsp;		int prev = getPrev(node);</b>
+<b class="fc">&nbsp;		int next = getNext(node);</b>
+<b class="fc">&nbsp;		if (prev != nullNode())</b>
+<b class="fc">&nbsp;			setNext_(prev, next);</b>
+&nbsp;		else
+<b class="fc">&nbsp;			m_lists.setField(list, 0, next);// change head</b>
+<b class="fc">&nbsp;		if (next != nullNode())</b>
+<b class="fc">&nbsp;			setPrev_(next, prev);</b>
+&nbsp;		else
+<b class="fc">&nbsp;			m_lists.setField(list, 1, prev);// change tail</b>
+&nbsp;
+<b class="fc">&nbsp;		freeNode_(node);</b>
+<b class="fc">&nbsp;		setListSize_(list, getListSize(list) - 1);</b>
+<b class="fc">&nbsp;		return next;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Reserves memory for the given number of nodes.
+&nbsp;	void reserveNodes(int nodeCount) {
+<b class="fc">&nbsp;		m_list_nodes.setCapacity(nodeCount);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Returns the data from the given list node.
+&nbsp;	int getData(int node_index) {
+<b class="fc">&nbsp;		return m_list_nodes.getField(node_index, 0);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Sets the data to the given list node.
+&nbsp;	void setData(int node_index, int element) {
+<b class="fc">&nbsp;		m_list_nodes.setField(node_index, 0, element);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Returns index of next node for the give node.
+&nbsp;	int getNext(int node_index) {
+<b class="fc">&nbsp;		return m_list_nodes.getField(node_index, 2);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Returns index of previous node for the give node.
+&nbsp;	int getPrev(int node_index) {
+<b class="fc">&nbsp;		return m_list_nodes.getField(node_index, 1);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Returns the first node in the list
+&nbsp;	int getFirst(int list) {
+<b class="fc">&nbsp;		return m_lists.getField(list, 0);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Returns the last node in the list
+&nbsp;	int getLast(int list) {
+<b class="fc">&nbsp;		return m_lists.getField(list, 1);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Check if the node is Null (does not exist)
+&nbsp;	static int nullNode() {
+<b class="fc">&nbsp;		return -1;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Clears all nodes and removes all lists.
+&nbsp;	void clear() {
+<b class="nc">&nbsp;		for (int list = getFirstList(); list != -1;) {</b>
+<b class="nc">&nbsp;			list = deleteList(list);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	// Clears all nodes from the list.
+&nbsp;	void clear(int list) {
+<b class="fc">&nbsp;		int last = getLast(list);</b>
+<b class="fc">&nbsp;		while (last != nullNode()) {</b>
+<b class="fc">&nbsp;			int n = last;</b>
+<b class="fc">&nbsp;			last = getPrev(n);</b>
+<b class="fc">&nbsp;			freeNode_(n);</b>
+<b class="fc">&nbsp;		}</b>
+<b class="fc">&nbsp;		m_lists.setField(list, 0, -1);</b>
+<b class="fc">&nbsp;		m_lists.setField(list, 1, -1);</b>
+<b class="fc">&nbsp;		setListSize_(list, 0);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Returns True if the given list is empty.
+&nbsp;	boolean isEmpty(int list) {
+<b class="nc">&nbsp;		return m_lists.getField(list, 0) == -1;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Returns True if the multilist is empty
+&nbsp;	boolean isEmpty() {
+<b class="nc">&nbsp;		return m_list_nodes.size() == 0;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Returns node count in all lists
+&nbsp;	int getNodeCount() {
+<b class="fc">&nbsp;		return m_list_nodes.size();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// returns the number of lists
+&nbsp;	int getListCount() {
+<b class="nc">&nbsp;		return m_lists.size();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Returns the node count in the given list
+&nbsp;	int getListSize(int list) {
+<b class="fc">&nbsp;		return m_lists.getField(list, 4);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// returns the first list
+&nbsp;	int getFirstList() {
+<b class="fc">&nbsp;		return m_list_of_lists;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// returns the next list
+&nbsp;	int getNextList(int list) {
+<b class="fc">&nbsp;		return m_lists.getField(list, 3);</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-02-21 16:04</div>
+</div>
+</body>
+</html>

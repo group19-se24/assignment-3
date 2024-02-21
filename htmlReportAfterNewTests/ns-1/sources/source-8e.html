@@ -1,0 +1,847 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > OperatorInternalRelationUtils</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.esri.core.geometry</a>
+</div>
+
+<h1>Coverage Summary for Class: OperatorInternalRelationUtils (com.esri.core.geometry)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">OperatorInternalRelationUtils</td>
+<td class="coverageStat">
+  <span class="percent">
+    3,1%
+  </span>
+  <span class="absValue">
+    (1/32)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    5%
+  </span>
+  <span class="absValue">
+    (17/339)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">OperatorInternalRelationUtils$Relation</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    3,1%
+  </span>
+  <span class="absValue">
+    (1/32)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    5%
+  </span>
+  <span class="absValue">
+    (17/339)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; Copyright 1995-2015 Esri
+&nbsp;
+&nbsp;   Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp;   you may not use this file except in compliance with the License.
+&nbsp;   You may obtain a copy of the License at
+&nbsp;
+&nbsp;       http://www.apache.org/licenses/LICENSE-2.0
+&nbsp;
+&nbsp;   Unless required by applicable law or agreed to in writing, software
+&nbsp;   distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp;   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp;   See the License for the specific language governing permissions and
+&nbsp;   limitations under the License.
+&nbsp;
+&nbsp; For additional information, contact:
+&nbsp; Environmental Systems Research Institute, Inc.
+&nbsp; Attn: Contracts Dept
+&nbsp; 380 New York Street
+&nbsp; Redlands, California, USA 92373
+&nbsp;
+&nbsp; email: contracts@esri.com
+&nbsp; */
+&nbsp;package com.esri.core.geometry;
+&nbsp;
+&nbsp;import com.esri.core.geometry.RasterizedGeometry2D.HitType;
+&nbsp;
+<b class="nc">&nbsp;class OperatorInternalRelationUtils {</b>
+&nbsp;
+&nbsp;	interface Relation {
+&nbsp;		public final int Unknown = 0;
+&nbsp;		public final int Contains = 1;
+&nbsp;		public final int Within = 2;
+&nbsp;		public final int Equals = 3; // == Within | Contains tests both within
+&nbsp;										// and contains
+&nbsp;		public final int Disjoint = 4;
+&nbsp;		public final int Touches = 8;
+&nbsp;		public final int Crosses = 16;
+&nbsp;		public final int Overlaps = 32;
+&nbsp;
+&nbsp;		public final int NoThisRelation = 64; // returned when the relation is
+&nbsp;												// not satisified
+&nbsp;		public final int Intersects = 0x40000000;// this means not_disjoint.
+&nbsp;													// Used for early bailout
+&nbsp;		public final int IntersectsOrDisjoint = Intersects | Disjoint;
+&nbsp;	}
+&nbsp;
+&nbsp;	public static int quickTest2D(Geometry geomA, Geometry geomB,
+&nbsp;			double tolerance, int testType) {
+<b class="nc">&nbsp;		if (geomB.isEmpty() || geomA.isEmpty())</b>
+<b class="nc">&nbsp;			return (int) Relation.Disjoint;</b>
+&nbsp;
+<b class="nc">&nbsp;		int geomAtype = geomA.getType().value();</b>
+<b class="nc">&nbsp;		int geomBtype = geomB.getType().value();</b>
+&nbsp;
+&nbsp;		// We do not support segments directly for now. Convert to Polyline
+&nbsp;		Polyline autoPolyA;
+<b class="nc">&nbsp;		if (Geometry.isSegment(geomAtype)) {</b>
+<b class="nc">&nbsp;			autoPolyA = new Polyline(geomA.getDescription());</b>
+<b class="nc">&nbsp;			geomA = (Geometry) autoPolyA;</b>
+<b class="nc">&nbsp;			autoPolyA.addSegment((Segment) geomA, true);</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		Polyline autoPolyB;
+<b class="nc">&nbsp;		if (Geometry.isSegment(geomBtype)) {</b>
+<b class="nc">&nbsp;			autoPolyB = new Polyline(geomB.getDescription());</b>
+<b class="nc">&nbsp;			geomB = (Geometry) autoPolyB;</b>
+<b class="nc">&nbsp;			autoPolyB.addSegment((Segment) geomB, true);</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		// Now process GeometryxGeometry case by case
+<b class="nc">&nbsp;		switch (geomAtype) {</b>
+&nbsp;		case Geometry.GeometryType.Point: {
+<b class="nc">&nbsp;			switch (geomBtype) {</b>
+&nbsp;			case Geometry.GeometryType.Point:
+<b class="nc">&nbsp;				return quickTest2DPointPoint((Point) geomA, (Point) geomB,</b>
+&nbsp;						tolerance);
+&nbsp;			case Geometry.GeometryType.Envelope:
+<b class="nc">&nbsp;				return reverseResult(quickTest2DEnvelopePoint((Envelope) geomB,</b>
+&nbsp;						(Point) geomA, tolerance));
+&nbsp;			case Geometry.GeometryType.MultiPoint:
+<b class="nc">&nbsp;				return reverseResult(quickTest2DMultiPointPoint(</b>
+&nbsp;						(MultiPoint) geomB, (Point) geomA, tolerance));
+&nbsp;			case Geometry.GeometryType.Polyline:
+<b class="nc">&nbsp;				return reverseResult(quickTest2DPolylinePoint((Polyline) geomB,</b>
+&nbsp;						(Point) geomA, tolerance, testType));
+&nbsp;			case Geometry.GeometryType.Polygon:
+<b class="nc">&nbsp;				return reverseResult(quickTest2DPolygonPoint((Polygon) geomB,</b>
+&nbsp;						(Point) geomA, tolerance));
+&nbsp;			}
+<b class="nc">&nbsp;			throw GeometryException.GeometryInternalError();// GEOMTHROW(internal_error);//what</b>
+&nbsp;															// else?
+&nbsp;		}
+&nbsp;		case Geometry.GeometryType.Envelope: {
+<b class="nc">&nbsp;			switch (geomBtype) {</b>
+&nbsp;			case Geometry.GeometryType.Point:
+<b class="nc">&nbsp;				return quickTest2DEnvelopePoint((Envelope) geomA,</b>
+&nbsp;						(Point) geomB, tolerance);
+&nbsp;			case Geometry.GeometryType.Envelope:
+<b class="nc">&nbsp;				return quickTest2DEnvelopeEnvelope((Envelope) geomA,</b>
+&nbsp;						(Envelope) geomB, tolerance);
+&nbsp;			case Geometry.GeometryType.MultiPoint:
+<b class="nc">&nbsp;				return reverseResult(quickTest2DMultiPointEnvelope(</b>
+&nbsp;						(MultiPoint) geomB, (Envelope) geomA, tolerance,
+&nbsp;						testType));
+&nbsp;			case Geometry.GeometryType.Polyline:
+<b class="nc">&nbsp;				return reverseResult(quickTest2DPolylineEnvelope(</b>
+&nbsp;						(Polyline) geomB, (Envelope) geomA, tolerance));
+&nbsp;			case Geometry.GeometryType.Polygon:
+<b class="nc">&nbsp;				return reverseResult(quickTest2DPolygonEnvelope(</b>
+&nbsp;						(Polygon) geomB, (Envelope) geomA, tolerance));
+&nbsp;			}
+<b class="nc">&nbsp;			throw GeometryException.GeometryInternalError();// GEOMTHROW(internal_error);//what</b>
+&nbsp;															// else?
+&nbsp;		}
+&nbsp;		case Geometry.GeometryType.MultiPoint: {
+<b class="nc">&nbsp;			switch (geomBtype) {</b>
+&nbsp;			case Geometry.GeometryType.Point:
+<b class="nc">&nbsp;				return quickTest2DMultiPointPoint((MultiPoint) geomA,</b>
+&nbsp;						(Point) geomB, tolerance);
+&nbsp;			case Geometry.GeometryType.Envelope:
+<b class="nc">&nbsp;				return quickTest2DMultiPointEnvelope((MultiPoint) geomA,</b>
+&nbsp;						(Envelope) geomB, tolerance, testType);
+&nbsp;			case Geometry.GeometryType.MultiPoint:
+<b class="nc">&nbsp;				return quickTest2DMultiPointMultiPoint((MultiPoint) geomA,</b>
+&nbsp;						(MultiPoint) geomB, tolerance, testType);
+&nbsp;			case Geometry.GeometryType.Polyline:
+<b class="nc">&nbsp;				return reverseResult(quickTest2DPolylineMultiPoint(</b>
+&nbsp;						(Polyline) geomB, (MultiPoint) geomA, tolerance));
+&nbsp;			case Geometry.GeometryType.Polygon:
+<b class="nc">&nbsp;				return reverseResult(quickTest2DPolygonMultiPoint(</b>
+&nbsp;						(Polygon) geomB, (MultiPoint) geomA, tolerance));
+&nbsp;			}
+<b class="nc">&nbsp;			throw GeometryException.GeometryInternalError();// GEOMTHROW(internal_error);//what</b>
+&nbsp;															// else?
+&nbsp;		}
+&nbsp;		case Geometry.GeometryType.Polyline: {
+<b class="nc">&nbsp;			switch (geomBtype) {</b>
+&nbsp;			case Geometry.GeometryType.Point:
+<b class="nc">&nbsp;				return quickTest2DPolylinePoint((Polyline) geomA,</b>
+&nbsp;						(Point) geomB, tolerance, testType);
+&nbsp;			case Geometry.GeometryType.Envelope:
+<b class="nc">&nbsp;				return quickTest2DPolylineEnvelope((Polyline) geomA,</b>
+&nbsp;						(Envelope) geomB, tolerance);
+&nbsp;			case Geometry.GeometryType.MultiPoint:
+<b class="nc">&nbsp;				return quickTest2DPolylineMultiPoint((Polyline) geomA,</b>
+&nbsp;						(MultiPoint) geomB, tolerance);
+&nbsp;			case Geometry.GeometryType.Polyline:
+<b class="nc">&nbsp;				return quickTest2DPolylinePolyline((Polyline) geomA,</b>
+&nbsp;						(Polyline) geomB, tolerance);
+&nbsp;			case Geometry.GeometryType.Polygon:
+<b class="nc">&nbsp;				return reverseResult(quickTest2DPolygonPolyline(</b>
+&nbsp;						(Polygon) geomB, (Polyline) geomA, tolerance));
+&nbsp;			}
+<b class="nc">&nbsp;			throw GeometryException.GeometryInternalError();// GEOMTHROW(internal_error);//what</b>
+&nbsp;															// else?
+&nbsp;		}
+&nbsp;		case Geometry.GeometryType.Polygon: {
+<b class="nc">&nbsp;			switch (geomBtype) {</b>
+&nbsp;			case Geometry.GeometryType.Point:
+<b class="nc">&nbsp;				return quickTest2DPolygonPoint((Polygon) geomA, (Point) geomB,</b>
+&nbsp;						tolerance);
+&nbsp;			case Geometry.GeometryType.Envelope:
+<b class="nc">&nbsp;				return quickTest2DPolygonEnvelope((Polygon) geomA,</b>
+&nbsp;						(Envelope) geomB, tolerance);
+&nbsp;			case Geometry.GeometryType.MultiPoint:
+<b class="nc">&nbsp;				return quickTest2DPolygonMultiPoint((Polygon) geomA,</b>
+&nbsp;						(MultiPoint) geomB, tolerance);
+&nbsp;			case Geometry.GeometryType.Polyline:
+<b class="nc">&nbsp;				return quickTest2DPolygonPolyline((Polygon) geomA,</b>
+&nbsp;						(Polyline) geomB, tolerance);
+&nbsp;			case Geometry.GeometryType.Polygon:
+<b class="nc">&nbsp;				return quickTest2DPolygonPolygon((Polygon) geomA,</b>
+&nbsp;						(Polygon) geomB, tolerance);
+&nbsp;			}
+<b class="nc">&nbsp;			throw GeometryException.GeometryInternalError();// GEOMTHROW(internal_error);//what</b>
+&nbsp;															// else?
+&nbsp;		}
+&nbsp;
+&nbsp;		default:
+<b class="nc">&nbsp;			throw GeometryException.GeometryInternalError();// GEOMTHROW(internal_error);//what</b>
+&nbsp;															// else?
+&nbsp;			// return 0;
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	private static int quickTest2DPointPoint(Point geomA, Point geomB,
+&nbsp;			double tolerance) {
+<b class="nc">&nbsp;		Point2D ptA = geomA.getXY();</b>
+<b class="nc">&nbsp;		Point2D ptB = geomB.getXY();</b>
+<b class="nc">&nbsp;		return quickTest2DPointPoint(ptA, ptB, tolerance);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private static int quickTest2DPointPoint(Point2D ptA, Point2D ptB,
+&nbsp;			double tolerance) {
+<b class="nc">&nbsp;		ptA.sub(ptB);</b>
+<b class="nc">&nbsp;		double len = ptA.sqrLength();// Should we test against 2*tol or tol?</b>
+<b class="nc">&nbsp;		if (len &lt;= tolerance * tolerance)// Two points are equal if they are not</b>
+&nbsp;											// Disjoint. We consider a point to
+&nbsp;											// be a disk of radius tolerance.
+&nbsp;											// Any intersection of two disks
+&nbsp;											// produces same disk.
+<b class="nc">&nbsp;			return (int) Relation.Within | (int) Relation.Contains;// ==Equals</b>
+&nbsp;
+<b class="nc">&nbsp;		return (int) Relation.Disjoint;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private static int quickTest2DEnvelopePoint(Envelope geomA, Point geomB,
+&nbsp;			double tolerance) {
+<b class="nc">&nbsp;		Envelope2D geomAEnv = new Envelope2D();</b>
+<b class="nc">&nbsp;		geomA.queryEnvelope2D(geomAEnv);</b>
+&nbsp;		Point2D ptB;
+<b class="nc">&nbsp;		ptB = geomB.getXY();</b>
+<b class="nc">&nbsp;		return quickTest2DEnvelopePoint(geomAEnv, ptB, tolerance);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private static int quickTest2DEnvelopePoint(Envelope2D geomAEnv,
+&nbsp;			Point2D ptB, double tolerance) {
+<b class="nc">&nbsp;		Envelope2D envAMinus = geomAEnv;</b>
+<b class="nc">&nbsp;		envAMinus.inflate(-tolerance, -tolerance);</b>
+<b class="nc">&nbsp;		if (envAMinus.contains(ptB))</b>
+<b class="nc">&nbsp;			return (int) Relation.Contains;// clementini&#39;s contains</b>
+<b class="nc">&nbsp;		Envelope2D envAPlus = geomAEnv;</b>
+<b class="nc">&nbsp;		envAPlus.inflate(tolerance, tolerance);</b>
+<b class="nc">&nbsp;		if (envAPlus.contains(ptB))</b>
+<b class="nc">&nbsp;			return (int) Relation.Touches;// clementini&#39;s touches</b>
+&nbsp;
+<b class="nc">&nbsp;		return (int) Relation.Disjoint;// clementini&#39;s disjoint</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private static int quickTest2DEnvelopePoint(Envelope2D envAPlus,
+&nbsp;			Envelope2D envAMinus, Point2D ptB, double tolerance) {
+<b class="nc">&nbsp;		if (envAMinus.contains(ptB))</b>
+<b class="nc">&nbsp;			return (int) Relation.Contains;// clementini&#39;s contains</b>
+<b class="nc">&nbsp;		if (envAPlus.contains(ptB))</b>
+<b class="nc">&nbsp;			return (int) Relation.Touches;// clementini&#39;s touches</b>
+&nbsp;
+<b class="nc">&nbsp;		return (int) Relation.Disjoint;// clementini&#39;s disjoint</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private static int quickTest2DEnvelopeEnvelope(Envelope geomA,
+&nbsp;			Envelope geomB, double tolerance) {
+<b class="nc">&nbsp;		Envelope2D geomAEnv = new Envelope2D();</b>
+<b class="nc">&nbsp;		geomA.queryEnvelope2D(geomAEnv);</b>
+<b class="nc">&nbsp;		Envelope2D geomBEnv = new Envelope2D();</b>
+<b class="nc">&nbsp;		geomB.queryEnvelope2D(geomBEnv);</b>
+<b class="nc">&nbsp;		return quickTest2DEnvelopeEnvelope(geomAEnv, geomBEnv, tolerance);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private static int quickTest2DEnvelopeEnvelope(Envelope2D geomAEnv,
+&nbsp;			Envelope2D geomBEnv, double tolerance) {
+&nbsp;		// firstly check for contains and within to give a chance degenerate
+&nbsp;		// envelopes to work.
+&nbsp;		// otherwise, if there are two degenerate envelopes that are equal,
+&nbsp;		// Touch relation may occur.
+<b class="nc">&nbsp;		int res = 0;</b>
+<b class="nc">&nbsp;		if (geomAEnv.contains(geomBEnv))</b>
+<b class="nc">&nbsp;			res |= (int) Relation.Contains;</b>
+&nbsp;
+<b class="nc">&nbsp;		if (geomBEnv.contains(geomAEnv))</b>
+<b class="nc">&nbsp;			res |= (int) Relation.Within;</b>
+&nbsp;
+<b class="nc">&nbsp;		if (res != 0)</b>
+<b class="nc">&nbsp;			return res;</b>
+&nbsp;
+<b class="nc">&nbsp;		Envelope2D envAMinus = geomAEnv;</b>
+<b class="nc">&nbsp;		envAMinus.inflate(-tolerance, -tolerance);// Envelope A interior</b>
+<b class="nc">&nbsp;		Envelope2D envBMinus = geomBEnv;</b>
+<b class="nc">&nbsp;		envBMinus.inflate(-tolerance, -tolerance);// Envelope B interior</b>
+<b class="nc">&nbsp;		if (envAMinus.isIntersecting(envBMinus)) {</b>
+<b class="nc">&nbsp;			Envelope2D envAPlus = geomAEnv;</b>
+<b class="nc">&nbsp;			envAPlus.inflate(tolerance, tolerance);// Envelope A interior plus</b>
+&nbsp;													// boundary
+<b class="nc">&nbsp;			res = envAPlus.contains(geomBEnv) ? (int) Relation.Contains : 0;</b>
+<b class="nc">&nbsp;			Envelope2D envBPlus = geomBEnv;</b>
+<b class="nc">&nbsp;			envBPlus.inflate(tolerance, tolerance);// Envelope A interior plus</b>
+&nbsp;													// boundary
+<b class="nc">&nbsp;			res |= envBPlus.contains(geomAEnv) ? (int) Relation.Within : 0;</b>
+<b class="nc">&nbsp;			if (res != 0)</b>
+<b class="nc">&nbsp;				return res;</b>
+&nbsp;
+<b class="nc">&nbsp;			return (int) Relation.Overlaps; // Clementini&#39;s Overlap</b>
+&nbsp;		} else {
+<b class="nc">&nbsp;			Envelope2D envAPlus = geomAEnv;</b>
+<b class="nc">&nbsp;			envAPlus.inflate(tolerance, tolerance);// Envelope A interior plus</b>
+&nbsp;													// boundary
+<b class="nc">&nbsp;			Envelope2D envBPlus = geomBEnv;</b>
+<b class="nc">&nbsp;			envBPlus.inflate(tolerance, tolerance);// Envelope A interior plus</b>
+&nbsp;													// boundary
+<b class="nc">&nbsp;			if (envAPlus.isIntersecting(envBPlus)) {</b>
+<b class="nc">&nbsp;				return (int) Relation.Touches; // Clementini Touch</b>
+&nbsp;			} else {
+<b class="nc">&nbsp;				return (int) Relation.Disjoint; // Clementini Disjoint</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	private static int quickTest2DMultiPointPoint(MultiPoint geomA,
+&nbsp;			Point geomB, double tolerance) {
+&nbsp;		Point2D ptB;
+<b class="nc">&nbsp;		ptB = geomB.getXY();</b>
+<b class="nc">&nbsp;		return quickTest2DMultiPointPoint(geomA, ptB, tolerance);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private static int quickTest2DMultiPointPoint(MultiPoint geomA,
+&nbsp;			Point2D ptB, double tolerance) {
+&nbsp;		// TODO: Add Geometry accelerator. (RasterizedGeometry + kd-tree or
+&nbsp;		// alike)
+<b class="nc">&nbsp;		for (int i = 0, n = geomA.getPointCount(); i &lt; n; i++) {</b>
+&nbsp;			Point2D ptA;
+<b class="nc">&nbsp;			ptA = geomA.getXY(i);</b>
+<b class="nc">&nbsp;			int res = quickTest2DPointPoint(ptA, ptB, tolerance);</b>
+<b class="nc">&nbsp;			if (res != (int) Relation.Disjoint) {</b>
+<b class="nc">&nbsp;				if ((res &amp; (int) Relation.Within) != 0 &amp;&amp; n != 1) {</b>
+&nbsp;					// _ASSERT(res &amp; (int)Relation.Contains);
+<b class="nc">&nbsp;					return (int) Relation.Contains;</b>
+&nbsp;				}
+&nbsp;
+<b class="nc">&nbsp;				return res;</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="nc">&nbsp;		return (int) Relation.Disjoint;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private static int quickTest2DMultiPointEnvelope(MultiPoint geomA,
+&nbsp;			Envelope geomB, double tolerance, int testType) {
+<b class="nc">&nbsp;		Envelope2D geomBEnv = new Envelope2D();</b>
+<b class="nc">&nbsp;		geomB.queryEnvelope2D(geomBEnv);</b>
+<b class="nc">&nbsp;		return quickTest2DMultiPointEnvelope(geomA, geomBEnv, tolerance,</b>
+&nbsp;				testType);
+&nbsp;	}
+&nbsp;
+&nbsp;	private static int quickTest2DMultiPointEnvelope(MultiPoint geomA,
+&nbsp;			Envelope2D geomBEnv, double tolerance, int testType) {
+&nbsp;		// Add early bailout for disjoint test.
+<b class="nc">&nbsp;		Envelope2D envBMinus = geomBEnv;</b>
+<b class="nc">&nbsp;		envBMinus.inflate(-tolerance, -tolerance);</b>
+<b class="nc">&nbsp;		Envelope2D envBPlus = geomBEnv;</b>
+<b class="nc">&nbsp;		envBPlus.inflate(tolerance, tolerance);</b>
+<b class="nc">&nbsp;		int dres = 0;</b>
+<b class="nc">&nbsp;		for (int i = 0, n = geomA.getPointCount(); i &lt; n; i++) {</b>
+&nbsp;			Point2D ptA;
+<b class="nc">&nbsp;			ptA = geomA.getXY(i);</b>
+<b class="nc">&nbsp;			int res = reverseResult(quickTest2DEnvelopePoint(envBPlus,</b>
+&nbsp;					envBMinus, ptA, tolerance));
+<b class="nc">&nbsp;			if (res != (int) Relation.Disjoint) {</b>
+<b class="nc">&nbsp;				dres |= res;</b>
+<b class="nc">&nbsp;				if (testType == (int) Relation.Disjoint)</b>
+<b class="nc">&nbsp;					return (int) Relation.Intersects;</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="nc">&nbsp;		if (dres == 0)</b>
+<b class="nc">&nbsp;			return (int) Relation.Disjoint;</b>
+&nbsp;
+<b class="nc">&nbsp;		if (dres == (int) Relation.Within)</b>
+<b class="nc">&nbsp;			return dres;</b>
+&nbsp;
+<b class="nc">&nbsp;		return (int) Relation.Overlaps;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private static int quickTest2DMultiPointMultiPoint(MultiPoint geomA,
+&nbsp;			MultiPoint geomB, double tolerance, int testType) {
+<b class="nc">&nbsp;		int counter = 0;</b>
+<b class="nc">&nbsp;		for (int ib = 0, nb = geomB.getPointCount(); ib &lt; nb; ib++) {</b>
+&nbsp;			Point2D ptB;
+<b class="nc">&nbsp;			ptB = geomB.getXY(ib);</b>
+<b class="nc">&nbsp;			int res = quickTest2DMultiPointPoint(geomA, ptB, tolerance);</b>
+<b class="nc">&nbsp;			if (res != (int) Relation.Disjoint) {</b>
+<b class="nc">&nbsp;				counter++;</b>
+<b class="nc">&nbsp;				if (testType == (int) Relation.Disjoint)</b>
+<b class="nc">&nbsp;					return (int) Relation.Intersects;</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="nc">&nbsp;		if (counter &gt; 0) {</b>
+<b class="nc">&nbsp;			if (counter == geomB.getPointCount())// every point from B is within</b>
+&nbsp;													// A. Means the A contains B
+&nbsp;			{
+<b class="nc">&nbsp;				if (testType == (int) Relation.Equals) {// This is slow.</b>
+&nbsp;														// Refactor.
+<b class="nc">&nbsp;					int res = quickTest2DMultiPointMultiPoint(geomB, geomA,</b>
+&nbsp;							tolerance, (int) Relation.Contains);
+<b class="nc">&nbsp;					return res == (int) Relation.Contains ? (int) Relation.Equals</b>
+<b class="nc">&nbsp;							: (int) Relation.Unknown;</b>
+&nbsp;				}
+<b class="nc">&nbsp;				return (int) Relation.Contains;</b>
+&nbsp;			} else {
+<b class="nc">&nbsp;				return (int) Relation.Overlaps;</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="nc">&nbsp;		return 0;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private static int quickTest2DPolylinePoint(Polyline geomA, Point geomB,
+&nbsp;			double tolerance, int testType) {
+&nbsp;		Point2D ptB;
+<b class="nc">&nbsp;		ptB = geomB.getXY();</b>
+<b class="nc">&nbsp;		return quickTest2DPolylinePoint(geomA, ptB, tolerance, testType);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private static int quickTest2DMVPointRasterOnly(MultiVertexGeometry geomA,
+&nbsp;			Point2D ptB, double tolerance) {
+&nbsp;		// Use rasterized Geometry:
+<b class="nc">&nbsp;		RasterizedGeometry2D rgeomA = null;</b>
+<b class="nc">&nbsp;		MultiVertexGeometryImpl mpImpl = (MultiVertexGeometryImpl) geomA</b>
+<b class="nc">&nbsp;				._getImpl();</b>
+<b class="nc">&nbsp;		GeometryAccelerators gaccel = mpImpl._getAccelerators();</b>
+<b class="nc">&nbsp;		if (gaccel != null) {</b>
+<b class="nc">&nbsp;			rgeomA = gaccel.getRasterizedGeometry();</b>
+&nbsp;		}
+&nbsp;
+<b class="nc">&nbsp;		if (rgeomA != null) {</b>
+<b class="nc">&nbsp;			RasterizedGeometry2D.HitType hitres = rgeomA.queryPointInGeometry(</b>
+&nbsp;					ptB.x, ptB.y);
+<b class="nc">&nbsp;			if (hitres == RasterizedGeometry2D.HitType.Outside)</b>
+<b class="nc">&nbsp;				return (int) Relation.Disjoint;</b>
+&nbsp;
+<b class="nc">&nbsp;			if (hitres == RasterizedGeometry2D.HitType.Inside)</b>
+<b class="nc">&nbsp;				return (int) Relation.Contains;</b>
+<b class="nc">&nbsp;		} else</b>
+<b class="nc">&nbsp;			return -1;</b>
+&nbsp;
+<b class="nc">&nbsp;		return 0;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private static int quickTest2DPolylinePoint(Polyline geomA, Point2D ptB,
+&nbsp;			double tolerance, int testType) {
+<b class="nc">&nbsp;		int mask = Relation.Touches | Relation.Contains | Relation.Within</b>
+&nbsp;				| Relation.Disjoint | Relation.Intersects;
+&nbsp;
+<b class="nc">&nbsp;		if ((testType &amp; mask) == 0)</b>
+<b class="nc">&nbsp;			return Relation.NoThisRelation;</b>
+&nbsp;
+<b class="nc">&nbsp;		int res = quickTest2DMVPointRasterOnly(geomA, ptB, tolerance);</b>
+<b class="nc">&nbsp;		if (res &gt; 0)</b>
+<b class="nc">&nbsp;			return res;</b>
+&nbsp;
+&nbsp;		// Go through the segments:
+<b class="nc">&nbsp;		double toleranceSqr = tolerance * tolerance;</b>
+<b class="nc">&nbsp;		MultiPathImpl mpImpl = (MultiPathImpl) geomA._getImpl();</b>
+<b class="nc">&nbsp;		SegmentIteratorImpl iter = mpImpl.querySegmentIterator();</b>
+<b class="nc">&nbsp;		while (iter.nextPath()) {</b>
+<b class="nc">&nbsp;			int pathIndex = iter.getPathIndex();</b>
+<b class="nc">&nbsp;			if (!geomA.isClosedPath(pathIndex)) {</b>
+<b class="nc">&nbsp;				int pathSize = geomA.getPathSize(pathIndex);</b>
+<b class="nc">&nbsp;				int pathStart = geomA.getPathStart(pathIndex);</b>
+<b class="nc">&nbsp;				if (pathSize == 0)</b>
+<b class="nc">&nbsp;					continue;</b>
+&nbsp;
+<b class="nc">&nbsp;				if (Point2D.sqrDistance(geomA.getXY(pathStart), ptB) &lt;= toleranceSqr</b>
+<b class="nc">&nbsp;						|| (pathSize &gt; 1 &amp;&amp; Point2D.sqrDistance(</b>
+<b class="nc">&nbsp;								geomA.getXY(pathStart + pathSize - 1), ptB) &lt;= toleranceSqr)) {</b>
+<b class="nc">&nbsp;					return (int) Relation.Touches;</b>
+&nbsp;				}
+&nbsp;			}
+&nbsp;
+<b class="nc">&nbsp;			if (testType != Relation.Touches) {</b>
+<b class="nc">&nbsp;				while (iter.hasNextSegment()) {</b>
+<b class="nc">&nbsp;					Segment segment = iter.nextSegment();</b>
+<b class="nc">&nbsp;					double t = segment.getClosestCoordinate(ptB, false);</b>
+<b class="nc">&nbsp;					Point2D pt = segment.getCoord2D(t);</b>
+<b class="nc">&nbsp;					if (Point2D.sqrDistance(pt, ptB) &lt;= toleranceSqr) {</b>
+<b class="nc">&nbsp;						if ((testType &amp; Relation.IntersectsOrDisjoint) != 0) {</b>
+<b class="nc">&nbsp;							return Relation.Intersects;</b>
+&nbsp;						}
+&nbsp;
+<b class="nc">&nbsp;						return (int) Relation.Contains;</b>
+&nbsp;					}
+<b class="nc">&nbsp;				}</b>
+&nbsp;			}
+<b class="nc">&nbsp;		}</b>
+&nbsp;
+<b class="nc">&nbsp;		return (testType &amp; Relation.IntersectsOrDisjoint) != 0 ? Relation.Disjoint</b>
+<b class="nc">&nbsp;				: Relation.NoThisRelation;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private static int quickTest2DPolylineEnvelope(Polyline geomA,
+&nbsp;			Envelope geomB, double tolerance) {
+<b class="nc">&nbsp;		Envelope2D geomBEnv = new Envelope2D();</b>
+<b class="nc">&nbsp;		geomB.queryEnvelope2D(geomBEnv);</b>
+<b class="nc">&nbsp;		return quickTest2DPolylineEnvelope(geomA, geomBEnv, tolerance);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private static int quickTest2DPolylineEnvelope(Polyline geomA,
+&nbsp;			Envelope2D geomBEnv, double tolerance) {
+<b class="nc">&nbsp;		int res = quickTest2DMVEnvelopeRasterOnly(geomA, geomBEnv, tolerance);</b>
+<b class="nc">&nbsp;		if (res &gt; 0)</b>
+<b class="nc">&nbsp;			return res;</b>
+&nbsp;
+&nbsp;		// TODO: implement me
+<b class="nc">&nbsp;		return 0;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private static int quickTest2DMVEnvelopeRasterOnly(
+&nbsp;			MultiVertexGeometry geomA, Envelope2D geomBEnv, double tolerance) {
+&nbsp;		// Use rasterized Geometry only:
+&nbsp;		RasterizedGeometry2D rgeomA;
+<b class="nc">&nbsp;		MultiVertexGeometryImpl mpImpl = (MultiVertexGeometryImpl) geomA</b>
+<b class="nc">&nbsp;				._getImpl();</b>
+<b class="nc">&nbsp;		GeometryAccelerators gaccel = mpImpl._getAccelerators();</b>
+<b class="nc">&nbsp;		if (gaccel != null) {</b>
+<b class="nc">&nbsp;			rgeomA = gaccel.getRasterizedGeometry();</b>
+&nbsp;		} else
+<b class="nc">&nbsp;			return -1;</b>
+&nbsp;
+<b class="nc">&nbsp;		if (rgeomA != null) {</b>
+<b class="nc">&nbsp;			HitType hitres = rgeomA.queryEnvelopeInGeometry(geomBEnv);</b>
+<b class="nc">&nbsp;			if (hitres == RasterizedGeometry2D.HitType.Outside)</b>
+<b class="nc">&nbsp;				return (int) Relation.Disjoint;</b>
+&nbsp;
+<b class="nc">&nbsp;			if (hitres == RasterizedGeometry2D.HitType.Inside)</b>
+<b class="nc">&nbsp;				return (int) Relation.Contains;</b>
+<b class="nc">&nbsp;		} else</b>
+<b class="nc">&nbsp;			return -1;</b>
+&nbsp;
+<b class="nc">&nbsp;		return 0;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private static int quickTest2DPolylineMultiPoint(Polyline geomA,
+&nbsp;			MultiPoint geomB, double tolerance) {
+<b class="nc">&nbsp;		Envelope2D geomBEnv = new Envelope2D();</b>
+<b class="nc">&nbsp;		geomB.queryEnvelope2D(geomBEnv);</b>
+<b class="nc">&nbsp;		int res = quickTest2DMVEnvelopeRasterOnly(geomA, geomBEnv, tolerance);</b>
+<b class="nc">&nbsp;		if (res &gt; 0)</b>
+<b class="nc">&nbsp;			return res;</b>
+&nbsp;
+&nbsp;		// TODO: implement me
+<b class="nc">&nbsp;		return 0;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private static int quickTest2DMVMVRasterOnly(MultiVertexGeometry geomA,
+&nbsp;			MultiVertexGeometry geomB, double tolerance) {
+<b class="nc">&nbsp;		Envelope2D geomBEnv = new Envelope2D();</b>
+<b class="nc">&nbsp;		geomB.queryEnvelope2D(geomBEnv);</b>
+<b class="nc">&nbsp;		int res = quickTest2DMVEnvelopeRasterOnly(geomA, geomBEnv, tolerance);</b>
+<b class="nc">&nbsp;		if (res &gt; 0)</b>
+<b class="nc">&nbsp;			return res;</b>
+&nbsp;
+<b class="nc">&nbsp;		if (res == -1) {</b>
+<b class="nc">&nbsp;			Envelope2D geomAEnv = new Envelope2D();</b>
+<b class="nc">&nbsp;			geomA.queryEnvelope2D(geomAEnv);</b>
+<b class="nc">&nbsp;			res = quickTest2DMVEnvelopeRasterOnly(geomB, geomAEnv, tolerance);</b>
+<b class="nc">&nbsp;			if (res &gt; 0)</b>
+<b class="nc">&nbsp;				return reverseResult(res);</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		// TODO: implement me
+<b class="nc">&nbsp;		return 0;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private static int quickTest2DPolylinePolyline(Polyline geomA,
+&nbsp;			Polyline geomB, double tolerance) {
+<b class="nc">&nbsp;		int res = quickTest2DMVMVRasterOnly(geomA, geomB, tolerance);</b>
+<b class="nc">&nbsp;		if (res &gt; 0)</b>
+<b class="nc">&nbsp;			return res;</b>
+&nbsp;
+&nbsp;		// TODO: implement me
+<b class="nc">&nbsp;		return 0;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private static int quickTest2DPolygonPoint(Polygon geomA, Point geomB,
+&nbsp;			double tolerance) {
+&nbsp;		Point2D ptB;
+<b class="nc">&nbsp;		ptB = geomB.getXY();</b>
+<b class="nc">&nbsp;		return quickTest2DPolygonPoint(geomA, ptB, tolerance);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private static int quickTest2DPolygonPoint(Polygon geomA, Point2D ptB,
+&nbsp;			double tolerance) {
+<b class="nc">&nbsp;		PolygonUtils.PiPResult pipres = PolygonUtils.isPointInPolygon2D(geomA,</b>
+&nbsp;				ptB, tolerance);// this method uses the accelerator if available
+<b class="nc">&nbsp;		if (pipres == PolygonUtils.PiPResult.PiPOutside)</b>
+<b class="nc">&nbsp;			return (int) Relation.Disjoint;// clementini&#39;s disjoint</b>
+&nbsp;
+<b class="nc">&nbsp;		if (pipres == PolygonUtils.PiPResult.PiPInside)</b>
+<b class="nc">&nbsp;			return (int) Relation.Contains;// clementini&#39;s contains</b>
+&nbsp;
+<b class="nc">&nbsp;		if (pipres == PolygonUtils.PiPResult.PiPBoundary)</b>
+<b class="nc">&nbsp;			return (int) Relation.Touches;// clementini&#39;s touches</b>
+&nbsp;
+<b class="nc">&nbsp;		throw GeometryException.GeometryInternalError();// GEOMTHROW(internal_error);</b>
+&nbsp;														// //what else
+&nbsp;		// return 0;
+&nbsp;	}
+&nbsp;
+&nbsp;	private static int quickTest2DPolygonEnvelope(Polygon geomA,
+&nbsp;			Envelope geomB, double tolerance) {
+<b class="nc">&nbsp;		Envelope2D geomBEnv = new Envelope2D();</b>
+<b class="nc">&nbsp;		geomB.queryEnvelope2D(geomBEnv);</b>
+<b class="nc">&nbsp;		return quickTest2DPolygonEnvelope(geomA, geomBEnv, tolerance);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private static int quickTest2DPolygonEnvelope(Polygon geomA,
+&nbsp;			Envelope2D geomBEnv, double tolerance) {
+<b class="nc">&nbsp;		int res = quickTest2DMVEnvelopeRasterOnly(geomA, geomBEnv, tolerance);</b>
+<b class="nc">&nbsp;		if (res &gt; 0)</b>
+<b class="nc">&nbsp;			return res;</b>
+&nbsp;
+&nbsp;		// TODO: implement me
+<b class="nc">&nbsp;		return 0;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private static int quickTest2DPolygonMultiPoint(Polygon geomA,
+&nbsp;			MultiPoint geomB, double tolerance) {
+<b class="nc">&nbsp;		int res = quickTest2DMVMVRasterOnly(geomA, geomB, tolerance);</b>
+<b class="nc">&nbsp;		if (res &gt; 0)</b>
+<b class="nc">&nbsp;			return res;</b>
+&nbsp;
+&nbsp;		// TODO: implement me
+<b class="nc">&nbsp;		return 0;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private static int quickTest2DPolygonPolyline(Polygon geomA,
+&nbsp;			Polyline geomB, double tolerance) {
+<b class="nc">&nbsp;		int res = quickTest2DMVMVRasterOnly(geomA, geomB, tolerance);</b>
+<b class="nc">&nbsp;		if (res &gt; 0)</b>
+<b class="nc">&nbsp;			return res;</b>
+&nbsp;
+&nbsp;		// TODO: implement me
+<b class="nc">&nbsp;		return 0;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private static int quickTest2DPolygonPolygon(Polygon geomA, Polygon geomB,
+&nbsp;			double tolerance) {
+<b class="nc">&nbsp;		int res = quickTest2DMVMVRasterOnly(geomA, geomB, tolerance);</b>
+<b class="nc">&nbsp;		if (res &gt; 0)</b>
+<b class="nc">&nbsp;			return res;</b>
+&nbsp;
+&nbsp;		// TODO: implement me
+<b class="nc">&nbsp;		return 0;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public static int quickTest2D_Accelerated_DisjointOrContains(
+&nbsp;			Geometry geomA, Geometry geomB, double tolerance) {
+<b class="fc">&nbsp;		int gtA = geomA.getType().value();</b>
+<b class="fc">&nbsp;		int gtB = geomB.getType().value();</b>
+&nbsp;		GeometryAccelerators accel;
+<b class="fc">&nbsp;		boolean endWhileStatement = false;</b>
+&nbsp;		do {
+<b class="fc">&nbsp;			if (Geometry.isMultiVertex(gtA)) {</b>
+<b class="fc">&nbsp;				MultiVertexGeometryImpl impl = (MultiVertexGeometryImpl) geomA</b>
+<b class="fc">&nbsp;						._getImpl();</b>
+<b class="fc">&nbsp;				accel = impl._getAccelerators();</b>
+<b class="fc">&nbsp;				if (accel != null) {</b>
+<b class="nc">&nbsp;					RasterizedGeometry2D rgeom = accel.getRasterizedGeometry();</b>
+<b class="nc">&nbsp;					if (rgeom != null) {</b>
+<b class="nc">&nbsp;						if (gtB == Geometry.GeometryType.Point) {</b>
+<b class="nc">&nbsp;							Point2D ptB = ((Point) geomB).getXY();</b>
+<b class="nc">&nbsp;							HitType hit = rgeom.queryPointInGeometry(ptB.x,</b>
+&nbsp;									ptB.y);
+<b class="nc">&nbsp;							if (hit == RasterizedGeometry2D.HitType.Inside) {</b>
+<b class="nc">&nbsp;								return (int) Relation.Contains;</b>
+<b class="nc">&nbsp;							} else if (hit == RasterizedGeometry2D.HitType.Outside) {</b>
+<b class="nc">&nbsp;								return (int) Relation.Disjoint;</b>
+&nbsp;							}
+&nbsp;
+&nbsp;							break;
+&nbsp;						}
+<b class="nc">&nbsp;						Envelope2D envB = new Envelope2D();</b>
+<b class="nc">&nbsp;						geomB.queryEnvelope2D(envB);</b>
+<b class="nc">&nbsp;						RasterizedGeometry2D.HitType hit = rgeom</b>
+<b class="nc">&nbsp;								.queryEnvelopeInGeometry(envB);</b>
+<b class="nc">&nbsp;						if (hit == RasterizedGeometry2D.HitType.Inside) {</b>
+<b class="nc">&nbsp;							return (int) Relation.Contains;</b>
+<b class="nc">&nbsp;						} else if (hit == RasterizedGeometry2D.HitType.Outside) {</b>
+<b class="nc">&nbsp;							return (int) Relation.Disjoint;</b>
+&nbsp;						}
+&nbsp;
+&nbsp;						break;
+&nbsp;					}
+&nbsp;				}
+&nbsp;			}
+<b class="fc">&nbsp;		} while (endWhileStatement);</b>
+&nbsp;
+<b class="fc">&nbsp;		accel = null;</b>
+&nbsp;		do {
+<b class="fc">&nbsp;			if (Geometry.isMultiVertex(gtB)) {</b>
+<b class="fc">&nbsp;				MultiVertexGeometryImpl impl = (MultiVertexGeometryImpl) geomB</b>
+<b class="fc">&nbsp;						._getImpl();</b>
+<b class="fc">&nbsp;				accel = impl._getAccelerators();</b>
+<b class="fc">&nbsp;				if (accel != null) {</b>
+<b class="nc">&nbsp;					RasterizedGeometry2D rgeom = accel.getRasterizedGeometry();</b>
+<b class="nc">&nbsp;					if (rgeom != null) {</b>
+<b class="nc">&nbsp;						if (gtA == Geometry.GeometryType.Point) {</b>
+<b class="nc">&nbsp;							Point2D ptA = ((Point) geomA).getXY();</b>
+<b class="nc">&nbsp;							RasterizedGeometry2D.HitType hit = rgeom</b>
+<b class="nc">&nbsp;									.queryPointInGeometry(ptA.x, ptA.y);</b>
+<b class="nc">&nbsp;							if (hit == RasterizedGeometry2D.HitType.Inside) {</b>
+<b class="nc">&nbsp;								return (int) Relation.Within;</b>
+<b class="nc">&nbsp;							} else if (hit == RasterizedGeometry2D.HitType.Outside) {</b>
+<b class="nc">&nbsp;								return (int) Relation.Disjoint;</b>
+&nbsp;							}
+&nbsp;
+&nbsp;							break;
+&nbsp;						}
+&nbsp;
+<b class="nc">&nbsp;						Envelope2D envA = new Envelope2D();</b>
+<b class="nc">&nbsp;						geomA.queryEnvelope2D(envA);</b>
+<b class="nc">&nbsp;						RasterizedGeometry2D.HitType hit = rgeom</b>
+<b class="nc">&nbsp;								.queryEnvelopeInGeometry(envA);</b>
+<b class="nc">&nbsp;						if (hit == RasterizedGeometry2D.HitType.Inside) {</b>
+<b class="nc">&nbsp;							return (int) Relation.Within;</b>
+<b class="nc">&nbsp;						} else if (hit == RasterizedGeometry2D.HitType.Outside) {</b>
+<b class="nc">&nbsp;							return (int) Relation.Disjoint;</b>
+&nbsp;						}
+&nbsp;
+&nbsp;						break;
+&nbsp;					}
+&nbsp;				}
+&nbsp;			}
+<b class="fc">&nbsp;		} while (endWhileStatement);</b>
+&nbsp;
+<b class="fc">&nbsp;		return 0;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private static int reverseResult(int resIn) {
+<b class="nc">&nbsp;		int res = resIn;</b>
+<b class="nc">&nbsp;		if ((res &amp; (int) Relation.Contains) != 0) {</b>
+<b class="nc">&nbsp;			res &amp;= ~(int) Relation.Contains;</b>
+<b class="nc">&nbsp;			res |= (int) Relation.Within;</b>
+&nbsp;		}
+<b class="nc">&nbsp;		if ((res &amp; (int) Relation.Within) != 0) {</b>
+<b class="nc">&nbsp;			res &amp;= ~(int) Relation.Within;</b>
+<b class="nc">&nbsp;			res |= (int) Relation.Contains;</b>
+&nbsp;		}
+&nbsp;
+<b class="nc">&nbsp;		return res;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-02-21 16:04</div>
+</div>
+</body>
+</html>

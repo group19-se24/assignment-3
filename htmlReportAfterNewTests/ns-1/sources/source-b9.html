@@ -1,0 +1,540 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > PointInPolygonHelper</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.esri.core.geometry</a>
+</div>
+
+<h1>Coverage Summary for Class: PointInPolygonHelper (com.esri.core.geometry)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">PointInPolygonHelper</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    78,6%
+  </span>
+  <span class="absValue">
+    (11/14)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    57,9%
+  </span>
+  <span class="absValue">
+    (128/221)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; Copyright 1995-2015 Esri
+&nbsp;
+&nbsp;   Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp;   you may not use this file except in compliance with the License.
+&nbsp;   You may obtain a copy of the License at
+&nbsp;
+&nbsp;       http://www.apache.org/licenses/LICENSE-2.0
+&nbsp;
+&nbsp;   Unless required by applicable law or agreed to in writing, software
+&nbsp;   distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp;   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp;   See the License for the specific language governing permissions and
+&nbsp;   limitations under the License.
+&nbsp;
+&nbsp; For additional information, contact:
+&nbsp; Environmental Systems Research Institute, Inc.
+&nbsp; Attn: Contracts Dept
+&nbsp; 380 New York Street
+&nbsp; Redlands, California, USA 92373
+&nbsp;
+&nbsp; email: contracts@esri.com
+&nbsp; */
+&nbsp;
+&nbsp;package com.esri.core.geometry;
+&nbsp;
+&nbsp;final class PointInPolygonHelper {
+&nbsp;
+&nbsp;	private Point2D m_inputPoint;
+&nbsp;	private int m_windnum;
+<b class="fc">&nbsp;	private SegmentBuffer[] m_monotoneParts = null;</b>
+<b class="fc">&nbsp;	private double[] m_xOrds = null;</b>
+&nbsp;	private double m_tolerance;
+&nbsp;	private double m_toleranceSqr;
+&nbsp;	private double m_miny;
+&nbsp;	private double m_maxy;
+&nbsp;	private boolean m_bAlternate;
+&nbsp;	private boolean m_bTestBorder;
+&nbsp;	private boolean m_bBreak;
+&nbsp;	private boolean m_bPointInAnyOuterRingTest;
+&nbsp;
+&nbsp;	private int result() {
+<b class="fc">&nbsp;		return m_windnum != 0 ? 1 : 0;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private boolean _testBorder(Segment seg) {
+<b class="fc">&nbsp;		double t = seg.getClosestCoordinate(m_inputPoint, false);</b>
+<b class="fc">&nbsp;		Point2D pt = seg.getCoord2D(t);</b>
+<b class="fc">&nbsp;		if (Point2D.sqrDistance(pt, m_inputPoint) &lt;= m_toleranceSqr) {</b>
+<b class="fc">&nbsp;			return true;</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return false;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private void doOne(Segment seg) {
+<b class="fc">&nbsp;		if (!m_bTestBorder) {</b>
+&nbsp;			// test if point is on the boundary
+<b class="fc">&nbsp;			if (m_bAlternate &amp;&amp; m_inputPoint.isEqual(seg.getStartXY())</b>
+<b class="fc">&nbsp;					|| m_inputPoint.isEqual(seg.getEndXY())) {// test if the</b>
+&nbsp;																// point
+&nbsp;																// coincides
+&nbsp;																// with a vertex
+<b class="fc">&nbsp;				m_bBreak = true;</b>
+&nbsp;				return;
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (seg.getStartY() == m_inputPoint.y</b>
+<b class="fc">&nbsp;				&amp;&amp; seg.getStartY() == seg.getEndY()) {// skip horizontal</b>
+&nbsp;														// segments. test if the
+&nbsp;														// point lies on a
+&nbsp;														// horizontal segment
+<b class="fc">&nbsp;			if (m_bAlternate &amp;&amp; !m_bTestBorder) {</b>
+<b class="fc">&nbsp;				double minx = Math.min(seg.getStartX(), seg.getEndX());</b>
+<b class="fc">&nbsp;				double maxx = Math.max(seg.getStartX(), seg.getEndX());</b>
+<b class="fc">&nbsp;				if (m_inputPoint.x &gt; minx &amp;&amp; m_inputPoint.x &lt; maxx)</b>
+<b class="fc">&nbsp;					m_bBreak = true;</b>
+&nbsp;			}
+&nbsp;
+&nbsp;			return;// skip horizontal segments
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		boolean bToTheRight = false;</b>
+<b class="fc">&nbsp;		double maxx = Math.max(seg.getStartX(), seg.getEndX());</b>
+<b class="fc">&nbsp;		if (m_inputPoint.x &gt; maxx) {</b>
+<b class="fc">&nbsp;			bToTheRight = true;</b>
+&nbsp;		} else {
+<b class="fc">&nbsp;			if (m_inputPoint.x &gt;= Math.min(seg.getStartX(), seg.getEndX())) {</b>
+<b class="fc">&nbsp;				int n = seg.intersectionWithAxis2D(true, m_inputPoint.y,</b>
+&nbsp;						m_xOrds, null);
+<b class="fc">&nbsp;				bToTheRight = n &gt; 0 &amp;&amp; m_xOrds[0] &lt;= m_inputPoint.x;</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (bToTheRight) {</b>
+&nbsp;			// to prevent double counting, when the ray crosses a vertex, count
+&nbsp;			// only the segments that are below the ray.
+<b class="fc">&nbsp;			if (m_inputPoint.y == seg.getStartXY().y) {</b>
+<b class="fc">&nbsp;				if (m_inputPoint.y &lt; seg.getEndXY().y)</b>
+&nbsp;					return;
+<b class="fc">&nbsp;			} else if (m_inputPoint.y == seg.getEndXY().y) {</b>
+<b class="fc">&nbsp;				if (m_inputPoint.y &lt; seg.getStartXY().y)</b>
+&nbsp;					return;
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			if (m_bAlternate)</b>
+<b class="fc">&nbsp;				m_windnum ^= 1;</b>
+&nbsp;			else
+<b class="fc">&nbsp;				m_windnum += (seg.getStartXY().y &gt; seg.getEndXY().y) ? 1 : -1;</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	public PointInPolygonHelper(boolean bFillRule_Alternate,
+<b class="fc">&nbsp;			Point2D inputPoint, double tolerance) {</b>
+&nbsp;		// //_ASSERT(tolerance &gt;= 0);
+<b class="fc">&nbsp;		m_inputPoint = inputPoint;</b>
+<b class="fc">&nbsp;		m_miny = inputPoint.y - tolerance;</b>
+<b class="fc">&nbsp;		m_maxy = inputPoint.y + tolerance;</b>
+<b class="fc">&nbsp;		m_windnum = 0;</b>
+<b class="fc">&nbsp;		m_bAlternate = bFillRule_Alternate;</b>
+<b class="fc">&nbsp;		m_tolerance = tolerance;</b>
+<b class="fc">&nbsp;		m_toleranceSqr = tolerance * tolerance;</b>
+<b class="fc">&nbsp;		m_bTestBorder = tolerance != 0;//</b>
+<b class="fc">&nbsp;		m_bBreak = false;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private boolean processSegment(Segment segment) {
+<b class="fc">&nbsp;		Envelope1D yrange = segment.queryInterval(</b>
+&nbsp;				(int) VertexDescription.Semantics.POSITION, 1);
+<b class="fc">&nbsp;		if (yrange.vmin &gt; m_maxy || yrange.vmax &lt; m_miny) {</b>
+<b class="fc">&nbsp;			return false;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (m_bTestBorder &amp;&amp; _testBorder(segment))</b>
+<b class="fc">&nbsp;			return true;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (yrange.vmin &gt; m_inputPoint.y || yrange.vmax &lt; m_inputPoint.y) {</b>
+<b class="fc">&nbsp;			return false;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (m_monotoneParts == null)</b>
+<b class="fc">&nbsp;			m_monotoneParts = new SegmentBuffer[5];</b>
+<b class="fc">&nbsp;		if (m_xOrds == null)</b>
+<b class="fc">&nbsp;			m_xOrds = new double[3];</b>
+&nbsp;
+<b class="fc">&nbsp;		int nparts = segment.getYMonotonicParts(m_monotoneParts);</b>
+<b class="fc">&nbsp;		if (nparts &gt; 0) {// the segment is a curve and has been broken in</b>
+&nbsp;							// ymonotone parts
+<b class="nc">&nbsp;			for (int i = 0; i &lt; nparts; i++) {</b>
+<b class="nc">&nbsp;				Segment part = m_monotoneParts[i].get();</b>
+<b class="nc">&nbsp;				doOne(part);</b>
+<b class="nc">&nbsp;				if (m_bBreak)</b>
+<b class="nc">&nbsp;					return true;</b>
+&nbsp;			}
+&nbsp;		} else {// the segment is a line or it is y monotone curve
+<b class="fc">&nbsp;			doOne(segment);</b>
+<b class="fc">&nbsp;			if (m_bBreak)</b>
+<b class="fc">&nbsp;				return true;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return false;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private static int _isPointInPolygonInternal(Polygon inputPolygon,
+&nbsp;			Point2D inputPoint, double tolerance) {
+&nbsp;
+<b class="fc">&nbsp;		boolean bAltenate = inputPolygon.getFillRule() == Polygon.FillRule.enumFillRuleOddEven;</b>
+<b class="fc">&nbsp;		PointInPolygonHelper helper = new PointInPolygonHelper(bAltenate,</b>
+&nbsp;				inputPoint, tolerance);
+<b class="fc">&nbsp;		MultiPathImpl mpImpl = (MultiPathImpl) inputPolygon._getImpl();</b>
+<b class="fc">&nbsp;		SegmentIteratorImpl iter = mpImpl.querySegmentIterator();</b>
+<b class="fc">&nbsp;		while (iter.nextPath()) {</b>
+<b class="fc">&nbsp;			while (iter.hasNextSegment()) {</b>
+<b class="fc">&nbsp;				Segment segment = iter.nextSegment();</b>
+<b class="fc">&nbsp;				if (helper.processSegment(segment))</b>
+<b class="fc">&nbsp;					return -1; // point on boundary</b>
+<b class="fc">&nbsp;			}</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return helper.result();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private static int _isPointInPolygonInternalWithQuadTree(
+&nbsp;			Polygon inputPolygon, QuadTreeImpl quadTree, Point2D inputPoint,
+&nbsp;			double tolerance) {
+<b class="nc">&nbsp;		Envelope2D envPoly = new Envelope2D();</b>
+<b class="nc">&nbsp;		inputPolygon.queryLooseEnvelope(envPoly);</b>
+<b class="nc">&nbsp;		envPoly.inflate(tolerance, tolerance);</b>
+&nbsp;
+<b class="nc">&nbsp;		boolean bAltenate = inputPolygon.getFillRule() == Polygon.FillRule.enumFillRuleOddEven;</b>
+<b class="nc">&nbsp;		PointInPolygonHelper helper = new PointInPolygonHelper(bAltenate,</b>
+&nbsp;				inputPoint, tolerance);
+&nbsp;
+<b class="nc">&nbsp;		MultiPathImpl mpImpl = (MultiPathImpl) inputPolygon._getImpl();</b>
+<b class="nc">&nbsp;		SegmentIteratorImpl iter = mpImpl.querySegmentIterator();</b>
+<b class="nc">&nbsp;		Envelope2D queryEnv = new Envelope2D();</b>
+<b class="nc">&nbsp;		queryEnv.setCoords(envPoly);</b>
+<b class="nc">&nbsp;		queryEnv.xmax = inputPoint.x + tolerance;// no need to query segments to</b>
+&nbsp;													// the right of the point.
+&nbsp;													// Only segments to the left
+&nbsp;													// matter.
+<b class="nc">&nbsp;		queryEnv.ymin = inputPoint.y - tolerance;</b>
+<b class="nc">&nbsp;		queryEnv.ymax = inputPoint.y + tolerance;</b>
+<b class="nc">&nbsp;		QuadTreeImpl.QuadTreeIteratorImpl qiter = quadTree.getIterator(</b>
+&nbsp;				queryEnv, tolerance);
+<b class="nc">&nbsp;		for (int qhandle = qiter.next(); qhandle != -1; qhandle = qiter.next()) {</b>
+<b class="nc">&nbsp;			iter.resetToVertex(quadTree.getElement(qhandle));</b>
+<b class="nc">&nbsp;			if (iter.hasNextSegment()) {</b>
+<b class="nc">&nbsp;				Segment segment = iter.nextSegment();</b>
+<b class="nc">&nbsp;				if (helper.processSegment(segment))</b>
+<b class="nc">&nbsp;					return -1; // point on boundary</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="nc">&nbsp;		return helper.result();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public static int isPointInPolygon(Polygon inputPolygon,
+&nbsp;			Point2D inputPoint, double tolerance) {
+<b class="fc">&nbsp;		if (inputPolygon.isEmpty())</b>
+<b class="nc">&nbsp;			return 0;</b>
+&nbsp;
+<b class="fc">&nbsp;		Envelope2D env = new Envelope2D();</b>
+<b class="fc">&nbsp;		inputPolygon.queryLooseEnvelope(env);</b>
+<b class="fc">&nbsp;		env.inflate(tolerance, tolerance);</b>
+<b class="fc">&nbsp;		if (!env.contains(inputPoint))</b>
+<b class="fc">&nbsp;			return 0;</b>
+&nbsp;
+<b class="fc">&nbsp;		MultiPathImpl mpImpl = (MultiPathImpl) inputPolygon._getImpl();</b>
+<b class="fc">&nbsp;		GeometryAccelerators accel = mpImpl._getAccelerators();</b>
+<b class="fc">&nbsp;		if (accel != null) {</b>
+&nbsp;			// geometry has spatial indices built. Try using them.
+<b class="fc">&nbsp;			RasterizedGeometry2D rgeom = accel.getRasterizedGeometry();</b>
+<b class="fc">&nbsp;			if (rgeom != null) {</b>
+<b class="fc">&nbsp;				RasterizedGeometry2D.HitType hit = rgeom.queryPointInGeometry(</b>
+&nbsp;						inputPoint.x, inputPoint.y);
+<b class="fc">&nbsp;				if (hit == RasterizedGeometry2D.HitType.Inside)</b>
+<b class="fc">&nbsp;					return 1;</b>
+<b class="fc">&nbsp;				else if (hit == RasterizedGeometry2D.HitType.Outside)</b>
+<b class="fc">&nbsp;					return 0;</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			QuadTreeImpl qtree = accel.getQuadTree();</b>
+<b class="fc">&nbsp;			if (qtree != null) {</b>
+<b class="nc">&nbsp;				return _isPointInPolygonInternalWithQuadTree(inputPolygon,</b>
+&nbsp;						qtree, inputPoint, tolerance);
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return _isPointInPolygonInternal(inputPolygon, inputPoint, tolerance);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	static int isPointInPolygon(Polygon inputPolygon, double inputPointXVal,
+&nbsp;			double inputPointYVal, double tolerance) {
+<b class="fc">&nbsp;		if (inputPolygon.isEmpty())</b>
+<b class="fc">&nbsp;			return 0;</b>
+&nbsp;
+<b class="fc">&nbsp;		Envelope2D env = new Envelope2D();</b>
+<b class="fc">&nbsp;		inputPolygon.queryLooseEnvelope(env);</b>
+<b class="fc">&nbsp;		env.inflate(tolerance, tolerance);</b>
+<b class="fc">&nbsp;		if (!env.contains(inputPointXVal, inputPointYVal))</b>
+<b class="fc">&nbsp;			return 0;</b>
+&nbsp;
+<b class="fc">&nbsp;		MultiPathImpl mpImpl = (MultiPathImpl) inputPolygon._getImpl();</b>
+<b class="fc">&nbsp;		GeometryAccelerators accel = mpImpl._getAccelerators();</b>
+<b class="fc">&nbsp;		if (accel != null) {</b>
+<b class="nc">&nbsp;			RasterizedGeometry2D rgeom = accel.getRasterizedGeometry();</b>
+<b class="nc">&nbsp;			if (rgeom != null) {</b>
+<b class="nc">&nbsp;				RasterizedGeometry2D.HitType hit = rgeom.queryPointInGeometry(</b>
+&nbsp;						inputPointXVal, inputPointYVal);
+<b class="nc">&nbsp;				if (hit == RasterizedGeometry2D.HitType.Inside)</b>
+<b class="nc">&nbsp;					return 1;</b>
+<b class="nc">&nbsp;				else if (hit == RasterizedGeometry2D.HitType.Outside)</b>
+<b class="nc">&nbsp;					return 0;</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return _isPointInPolygonInternal(inputPolygon, new Point2D(</b>
+&nbsp;				inputPointXVal, inputPointYVal), tolerance);
+&nbsp;	}
+&nbsp;
+&nbsp;	public static int isPointInRing(MultiPathImpl inputPolygonImpl, int iRing,
+&nbsp;			Point2D inputPoint, double tolerance, QuadTree quadTree) {
+<b class="nc">&nbsp;		Envelope2D env = new Envelope2D();</b>
+<b class="nc">&nbsp;		inputPolygonImpl.queryLooseEnvelope2D(env);</b>
+<b class="nc">&nbsp;		env.inflate(tolerance, tolerance);</b>
+<b class="nc">&nbsp;		if (!env.contains(inputPoint))</b>
+<b class="nc">&nbsp;			return 0;</b>
+&nbsp;
+<b class="nc">&nbsp;		boolean bAltenate = true;</b>
+<b class="nc">&nbsp;		PointInPolygonHelper helper = new PointInPolygonHelper(bAltenate,</b>
+&nbsp;				inputPoint, tolerance);
+&nbsp;
+<b class="nc">&nbsp;		if (quadTree != null) {</b>
+<b class="nc">&nbsp;			Envelope2D queryEnv = new Envelope2D();</b>
+<b class="nc">&nbsp;			queryEnv.setCoords(env);</b>
+<b class="nc">&nbsp;			queryEnv.xmax = inputPoint.x + tolerance;// no need to query</b>
+&nbsp;														// segments to
+&nbsp;														// the right of the
+&nbsp;														// point.
+&nbsp;														// Only segments to the
+&nbsp;														// left
+&nbsp;														// matter.
+<b class="nc">&nbsp;			queryEnv.ymin = inputPoint.y - tolerance;</b>
+<b class="nc">&nbsp;			queryEnv.ymax = inputPoint.y + tolerance;</b>
+<b class="nc">&nbsp;			SegmentIteratorImpl iter = inputPolygonImpl.querySegmentIterator();</b>
+<b class="nc">&nbsp;			QuadTree.QuadTreeIterator qiter = quadTree.getIterator(queryEnv,</b>
+&nbsp;					tolerance);
+&nbsp;
+<b class="nc">&nbsp;			for (int qhandle = qiter.next(); qhandle != -1; qhandle = qiter</b>
+<b class="nc">&nbsp;					.next()) {</b>
+<b class="nc">&nbsp;				iter.resetToVertex(quadTree.getElement(qhandle), iRing);</b>
+<b class="nc">&nbsp;				if (iter.hasNextSegment()) {</b>
+<b class="nc">&nbsp;					if (iter.getPathIndex() != iRing)</b>
+<b class="nc">&nbsp;						continue;</b>
+&nbsp;
+<b class="nc">&nbsp;					Segment segment = iter.nextSegment();</b>
+<b class="nc">&nbsp;					if (helper.processSegment(segment))</b>
+<b class="nc">&nbsp;						return -1; // point on boundary</b>
+&nbsp;				}
+&nbsp;			}
+&nbsp;
+<b class="nc">&nbsp;			return helper.result();</b>
+&nbsp;		} else {
+<b class="nc">&nbsp;			SegmentIteratorImpl iter = inputPolygonImpl.querySegmentIterator();</b>
+<b class="nc">&nbsp;			iter.resetToPath(iRing);</b>
+&nbsp;
+<b class="nc">&nbsp;			if (iter.nextPath()) {</b>
+<b class="nc">&nbsp;				while (iter.hasNextSegment()) {</b>
+<b class="nc">&nbsp;					Segment segment = iter.nextSegment();</b>
+<b class="nc">&nbsp;					if (helper.processSegment(segment))</b>
+<b class="nc">&nbsp;						return -1; // point on boundary</b>
+<b class="nc">&nbsp;				}</b>
+&nbsp;			}
+&nbsp;
+<b class="nc">&nbsp;			return helper.result();</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	public static int isPointInPolygon(Polygon inputPolygon, Point inputPoint,
+&nbsp;			double tolerance) {
+<b class="fc">&nbsp;		if (inputPoint.isEmpty())</b>
+<b class="nc">&nbsp;			return 0;</b>
+&nbsp;
+<b class="fc">&nbsp;		return isPointInPolygon(inputPolygon, inputPoint.getXY(), tolerance);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public static int isPointInAnyOuterRing(Polygon inputPolygon,
+&nbsp;			Point2D inputPoint, double tolerance) {
+<b class="fc">&nbsp;		Envelope2D env = new Envelope2D();</b>
+<b class="fc">&nbsp;		inputPolygon.queryLooseEnvelope(env);</b>
+<b class="fc">&nbsp;		env.inflate(tolerance, tolerance);</b>
+<b class="fc">&nbsp;		if (!env.contains(inputPoint))</b>
+<b class="nc">&nbsp;			return 0;</b>
+&nbsp;
+&nbsp;		// Note:
+&nbsp;		// Wolfgang had noted that this could be optimized if the exterior rings
+&nbsp;		// have positive area:
+&nbsp;		// Only test the positive rings and bail out immediately when in a
+&nbsp;		// positive ring.
+&nbsp;		// The worst case complexity is still O(n), but on average for polygons
+&nbsp;		// with holes, that would be faster.
+&nbsp;		// However, that method would not work if polygon is reversed, while the
+&nbsp;		// one here works fine same as PointInPolygon.
+&nbsp;
+<b class="fc">&nbsp;		boolean bAltenate = false;// use winding in this test</b>
+<b class="fc">&nbsp;		PointInPolygonHelper helper = new PointInPolygonHelper(bAltenate,</b>
+&nbsp;				inputPoint, tolerance);
+<b class="fc">&nbsp;		MultiPathImpl mpImpl = (MultiPathImpl) inputPolygon._getImpl();</b>
+<b class="fc">&nbsp;		SegmentIteratorImpl iter = mpImpl.querySegmentIterator();</b>
+<b class="fc">&nbsp;		while (iter.nextPath()) {</b>
+<b class="fc">&nbsp;			double ringArea = mpImpl.calculateRingArea2D(iter.getPathIndex());</b>
+<b class="fc">&nbsp;			boolean bIsHole = ringArea &lt; 0;</b>
+<b class="fc">&nbsp;			if (!bIsHole) {</b>
+<b class="fc">&nbsp;				helper.m_windnum = 0;</b>
+<b class="fc">&nbsp;				while (iter.hasNextSegment()) {</b>
+<b class="fc">&nbsp;					Segment segment = iter.nextSegment();</b>
+<b class="fc">&nbsp;					if (helper.processSegment(segment))</b>
+<b class="nc">&nbsp;						return -1; // point on boundary</b>
+<b class="fc">&nbsp;				}</b>
+&nbsp;
+<b class="fc">&nbsp;				if (helper.m_windnum != 0)</b>
+<b class="fc">&nbsp;					return 1;</b>
+&nbsp;			}
+<b class="fc">&nbsp;		}</b>
+&nbsp;
+<b class="fc">&nbsp;		return helper.result();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Tests if Ring1 is inside Ring2.
+&nbsp;	// We assume here that the Polygon is Weak Simple. That is if one point of
+&nbsp;	// Ring1 is found to be inside of Ring2, then
+&nbsp;	// we assume that all of Ring1 is inside Ring2.
+&nbsp;	static boolean _isRingInRing2D(MultiPath polygon, int iRing1, int iRing2,
+&nbsp;			double tolerance, QuadTree quadTree) {
+<b class="nc">&nbsp;		MultiPathImpl polygonImpl = (MultiPathImpl) polygon._getImpl();</b>
+<b class="nc">&nbsp;		SegmentIteratorImpl segIter = polygonImpl.querySegmentIterator();</b>
+<b class="nc">&nbsp;		segIter.resetToPath(iRing1);</b>
+<b class="nc">&nbsp;		if (!segIter.nextPath() || !segIter.hasNextSegment())</b>
+<b class="nc">&nbsp;			throw new GeometryException(&quot;corrupted geometry&quot;);</b>
+&nbsp;
+<b class="nc">&nbsp;		int res = 2;</b>
+&nbsp;
+<b class="nc">&nbsp;		while (res == 2 &amp;&amp; segIter.hasNextSegment()) {</b>
+<b class="nc">&nbsp;			Segment segment = segIter.nextSegment();</b>
+<b class="nc">&nbsp;			Point2D point = segment.getCoord2D(0.5);</b>
+<b class="nc">&nbsp;			res = PointInPolygonHelper.isPointInRing(polygonImpl, iRing2,</b>
+&nbsp;					point, tolerance, quadTree);
+<b class="nc">&nbsp;		}</b>
+&nbsp;
+<b class="nc">&nbsp;		if (res == 2)</b>
+<b class="nc">&nbsp;			throw GeometryException.GeometryInternalError();</b>
+<b class="nc">&nbsp;		if (res == 1)</b>
+<b class="nc">&nbsp;			return true;</b>
+&nbsp;
+<b class="nc">&nbsp;		return false;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;    static boolean quadTreeWillHelp(Polygon polygon, int c_queries)
+&nbsp;    {
+<b class="fc">&nbsp;        int n = polygon.getPointCount();</b>
+&nbsp;
+<b class="fc">&nbsp;        if (n &lt; 16)</b>
+<b class="fc">&nbsp;            return false;</b>
+&nbsp;
+<b class="nc">&nbsp;        double c_build_quad_tree = 2.0; // what&#39;s a good constant?</b>
+<b class="nc">&nbsp;        double c_query_quad_tree = 1.0; // what&#39;s a good constant?</b>
+<b class="nc">&nbsp;        double c_point_in_polygon_brute_force = 1.0; // what&#39;s a good constant?</b>
+&nbsp;
+<b class="nc">&nbsp;        double c_quad_tree = c_build_quad_tree * n + c_query_quad_tree * (Math.log((double)n) / Math.log(2.0)) * c_queries;</b>
+<b class="nc">&nbsp;        double c_brute_force = c_point_in_polygon_brute_force * n * c_queries;</b>
+&nbsp;
+<b class="nc">&nbsp;        return c_quad_tree &lt; c_brute_force;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-02-21 16:04</div>
+</div>
+</body>
+</html>

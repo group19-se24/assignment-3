@@ -1,0 +1,1595 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > Cutter</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.esri.core.geometry</a>
+</div>
+
+<h1>Coverage Summary for Class: Cutter (com.esri.core.geometry)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">Cutter</td>
+<td class="coverageStat">
+  <span class="percent">
+    92,3%
+  </span>
+  <span class="absValue">
+    (12/13)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    77,1%
+  </span>
+  <span class="absValue">
+    (570/739)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">Cutter$CompareVertices</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    94,1%
+  </span>
+  <span class="absValue">
+    (16/17)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">Cutter$CutEvent</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (10/10)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">Cutter$CutterVertexComparer</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/3)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    94,4%
+  </span>
+  <span class="absValue">
+    (17/18)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    77,9%
+  </span>
+  <span class="absValue">
+    (599/769)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; Copyright 1995-2015 Esri
+&nbsp;
+&nbsp;   Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp;   you may not use this file except in compliance with the License.
+&nbsp;   You may obtain a copy of the License at
+&nbsp;
+&nbsp;       http://www.apache.org/licenses/LICENSE-2.0
+&nbsp;
+&nbsp;   Unless required by applicable law or agreed to in writing, software
+&nbsp;   distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp;   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp;   See the License for the specific language governing permissions and
+&nbsp;   limitations under the License.
+&nbsp;
+&nbsp; For additional information, contact:
+&nbsp; Environmental Systems Research Institute, Inc.
+&nbsp; Attn: Contracts Dept
+&nbsp; 380 New York Street
+&nbsp; Redlands, California, USA 92373
+&nbsp;
+&nbsp; email: contracts@esri.com
+&nbsp; */
+&nbsp;
+&nbsp;
+&nbsp;package com.esri.core.geometry;
+&nbsp;
+&nbsp;import com.esri.core.geometry.OperatorCutLocal;
+&nbsp;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Arrays;
+&nbsp;
+<b class="nc">&nbsp;class Cutter {</b>
+&nbsp;	static class CompareVertices {
+&nbsp;		int m_orderIndex;
+&nbsp;		EditShape m_editShape;
+&nbsp;
+<b class="fc">&nbsp;		CompareVertices(int orderIndex, EditShape editShape) {</b>
+<b class="fc">&nbsp;			m_orderIndex = orderIndex;</b>
+<b class="fc">&nbsp;			m_editShape = editShape;</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		int _compareVertices(int v1, int v2) {
+<b class="fc">&nbsp;			Point2D pt1 = new Point2D();</b>
+<b class="fc">&nbsp;			m_editShape.getXY(v1, pt1);</b>
+<b class="fc">&nbsp;			Point2D pt2 = new Point2D();</b>
+<b class="fc">&nbsp;			m_editShape.getXY(v2, pt2);</b>
+<b class="fc">&nbsp;			int res = pt1.compare(pt2);</b>
+<b class="fc">&nbsp;			if (res != 0)</b>
+<b class="fc">&nbsp;				return res;</b>
+<b class="fc">&nbsp;			int z1 = m_editShape.getUserIndex(v1, m_orderIndex);</b>
+<b class="fc">&nbsp;			int z2 = m_editShape.getUserIndex(v2, m_orderIndex);</b>
+<b class="fc">&nbsp;			if (z1 &lt; z2)</b>
+<b class="fc">&nbsp;				return -1;</b>
+<b class="fc">&nbsp;			if (z1 == z2)</b>
+<b class="nc">&nbsp;				return 0;</b>
+<b class="fc">&nbsp;			return 1;</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	static class CutterVertexComparer extends
+&nbsp;			AttributeStreamOfInt32.IntComparator {
+&nbsp;		CompareVertices m_compareVertices;
+&nbsp;
+<b class="fc">&nbsp;		CutterVertexComparer(CompareVertices _compareVertices) {</b>
+<b class="fc">&nbsp;			m_compareVertices = _compareVertices;</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		@Override
+&nbsp;		public int compare(int v1, int v2) {
+<b class="fc">&nbsp;			return m_compareVertices._compareVertices(v1, v2);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	static class CutEvent {
+&nbsp;		int m_ivertexCuttee;
+&nbsp;		int m_ipartCuttee;
+&nbsp;		double m_scalarCuttee0;
+&nbsp;		double m_scalarCuttee1;
+&nbsp;		int m_count;
+&nbsp;		int m_ivertexCutter;
+&nbsp;		int m_ipartCutter;
+&nbsp;		double m_scalarCutter0;
+&nbsp;		double m_scalarCutter1;
+&nbsp;
+&nbsp;		CutEvent(int ivertexCuttee, int ipartCuttee, double scalarCuttee0,
+&nbsp;				double scalarCuttee1, int count, int ivertexCutter,
+<b class="fc">&nbsp;				int ipartCutter, double scalarCutter0, double scalarCutter1) {</b>
+<b class="fc">&nbsp;			m_ivertexCuttee = ivertexCuttee;</b>
+<b class="fc">&nbsp;			m_ipartCuttee = ipartCuttee;</b>
+<b class="fc">&nbsp;			m_scalarCuttee0 = scalarCuttee0;</b>
+<b class="fc">&nbsp;			m_scalarCuttee1 = scalarCuttee1;</b>
+<b class="fc">&nbsp;			m_count = count;</b>
+<b class="fc">&nbsp;			m_ivertexCutter = ivertexCutter;</b>
+<b class="fc">&nbsp;			m_ipartCutter = ipartCutter;</b>
+<b class="fc">&nbsp;			m_scalarCutter0 = scalarCutter0;</b>
+<b class="fc">&nbsp;			m_scalarCutter1 = scalarCutter1;</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	static EditShape CutPolyline(boolean bConsiderTouch, Polyline cuttee,
+&nbsp;			Polyline cutter, double tolerance,
+&nbsp;			ArrayList&lt;OperatorCutLocal.CutPair&gt; cutPairs,
+&nbsp;			AttributeStreamOfInt32 segmentCounts, ProgressTracker progressTracker) {
+<b class="fc">&nbsp;		if (cuttee.isEmpty()) {</b>
+&nbsp;			OperatorCutLocal.CutPair cutPair;
+<b class="nc">&nbsp;			cutPair = new OperatorCutLocal.CutPair(cuttee,</b>
+<b class="nc">&nbsp;					OperatorCutLocal.Side.Uncut, -1, -1, NumberUtils.NaN(),</b>
+<b class="nc">&nbsp;					OperatorCutLocal.Side.Uncut, -1, -1, NumberUtils.NaN(), -1,</b>
+<b class="nc">&nbsp;					-1, NumberUtils.NaN(), -1, -1, NumberUtils.NaN());</b>
+<b class="nc">&nbsp;			cutPairs.add(cutPair);</b>
+<b class="nc">&nbsp;			return null;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		EditShape editShape = new EditShape();</b>
+<b class="fc">&nbsp;		int cutteeHandle = editShape.addGeometry(cuttee);</b>
+<b class="fc">&nbsp;		int cutterHandle = editShape.addGeometry(cutter);</b>
+<b class="fc">&nbsp;		CrackAndCluster.execute(editShape, tolerance, progressTracker, true);</b>
+&nbsp;
+<b class="fc">&nbsp;		int order = 0;</b>
+<b class="fc">&nbsp;		int orderIndex = editShape.createUserIndex();</b>
+<b class="fc">&nbsp;		for (int igeometry = editShape.getFirstGeometry(); igeometry != -1; igeometry = editShape</b>
+<b class="fc">&nbsp;				.getNextGeometry(igeometry))</b>
+<b class="fc">&nbsp;			for (int ipath = editShape.getFirstPath(igeometry); ipath != -1; ipath = editShape</b>
+<b class="fc">&nbsp;					.getNextPath(ipath))</b>
+<b class="fc">&nbsp;				for (int ivertex = editShape.getFirstVertex(ipath), i = 0, n = editShape</b>
+<b class="fc">&nbsp;						.getPathSize(ipath); i &lt; n; ivertex = editShape</b>
+<b class="fc">&nbsp;						.getNextVertex(ivertex), i++)</b>
+<b class="fc">&nbsp;					editShape.setUserIndex(ivertex, orderIndex, order++);</b>
+&nbsp;
+<b class="fc">&nbsp;		ArrayList&lt;CutEvent&gt; cutEvents = _getCutEvents(orderIndex, editShape);</b>
+<b class="fc">&nbsp;		_Cut(bConsiderTouch, false, cutEvents, editShape, cutPairs,</b>
+&nbsp;				segmentCounts);
+<b class="fc">&nbsp;		return editShape;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private static ArrayList&lt;CutEvent&gt; _getCutEvents(int orderIndex,
+&nbsp;			EditShape editShape) {
+<b class="fc">&nbsp;		int pointCount = editShape.getTotalPointCount();</b>
+<b class="fc">&nbsp;		if (pointCount == 0)</b>
+<b class="fc">&nbsp;			return null;</b>
+&nbsp;
+&nbsp;		// Sort vertices lexicographically
+&nbsp;		// Firstly copy allvertices to an array.
+<b class="fc">&nbsp;		AttributeStreamOfInt32 vertices = new AttributeStreamOfInt32(0);</b>
+&nbsp;
+<b class="fc">&nbsp;		for (int igeometry = editShape.getFirstGeometry(); igeometry != -1; igeometry = editShape</b>
+<b class="fc">&nbsp;				.getNextGeometry(igeometry))</b>
+<b class="fc">&nbsp;			for (int ipath = editShape.getFirstPath(igeometry); ipath != -1; ipath = editShape</b>
+<b class="fc">&nbsp;					.getNextPath(ipath))</b>
+<b class="fc">&nbsp;				for (int ivertex = editShape.getFirstVertex(ipath), i = 0, n = editShape</b>
+<b class="fc">&nbsp;						.getPathSize(ipath); i &lt; n; ivertex = editShape</b>
+<b class="fc">&nbsp;						.getNextVertex(ivertex), i++)</b>
+<b class="fc">&nbsp;					vertices.add(ivertex);</b>
+&nbsp;
+&nbsp;		// Sort
+<b class="fc">&nbsp;		CompareVertices compareVertices = new CompareVertices(orderIndex,</b>
+&nbsp;				editShape);
+<b class="fc">&nbsp;		vertices.Sort(0, pointCount, new CutterVertexComparer(compareVertices));</b>
+&nbsp;
+&nbsp;		// Find Cut Events
+<b class="fc">&nbsp;		ArrayList&lt;CutEvent&gt; cutEvents = new ArrayList&lt;CutEvent&gt;(0);</b>
+<b class="fc">&nbsp;		ArrayList&lt;CutEvent&gt; cutEventsTemp = new ArrayList&lt;CutEvent&gt;(0);</b>
+&nbsp;
+<b class="fc">&nbsp;		int eventIndex = editShape.createUserIndex();</b>
+<b class="fc">&nbsp;		int eventIndexTemp = editShape.createUserIndex();</b>
+&nbsp;
+<b class="fc">&nbsp;		int cutteeHandle = editShape.getFirstGeometry();</b>
+<b class="fc">&nbsp;		int cutterHandle = editShape.getNextGeometry(cutteeHandle);</b>
+&nbsp;
+<b class="fc">&nbsp;		Point2D pointCuttee = new Point2D();</b>
+<b class="fc">&nbsp;		Point2D pointCutter = new Point2D();</b>
+&nbsp;
+<b class="fc">&nbsp;		int ivertexCuttee = vertices.get(0);</b>
+&nbsp;		;
+<b class="fc">&nbsp;		int ipartCuttee = editShape.getPathFromVertex(ivertexCuttee);</b>
+<b class="fc">&nbsp;		int igeometryCuttee = editShape.getGeometryFromPath(ipartCuttee);</b>
+<b class="fc">&nbsp;		editShape.getXY(ivertexCuttee, pointCuttee);</b>
+&nbsp;
+<b class="fc">&nbsp;		int istart = 1;</b>
+<b class="fc">&nbsp;		int ivertex = 0;</b>
+<b class="fc">&nbsp;		while (istart &lt; pointCount - 1) {</b>
+<b class="fc">&nbsp;			boolean bCutEvent = false;</b>
+<b class="fc">&nbsp;			for (int i = istart; i &lt; pointCount; i++) {</b>
+<b class="fc">&nbsp;				if (i == ivertex)</b>
+<b class="fc">&nbsp;					continue;</b>
+&nbsp;
+<b class="fc">&nbsp;				int ivertexCutter = vertices.get(i);</b>
+<b class="fc">&nbsp;				int ipartCutter = editShape.getPathFromVertex(ivertexCutter);</b>
+<b class="fc">&nbsp;				int igeometryCutter = editShape</b>
+<b class="fc">&nbsp;						.getGeometryFromPath(ipartCutter);</b>
+<b class="fc">&nbsp;				editShape.getXY(ivertexCutter, pointCutter);</b>
+&nbsp;
+<b class="fc">&nbsp;				if (pointCuttee.isEqual(pointCutter)) {</b>
+<b class="fc">&nbsp;					boolean bCondition = igeometryCuttee == cutteeHandle</b>
+&nbsp;							&amp;&amp; igeometryCutter == cutterHandle;
+&nbsp;
+<b class="fc">&nbsp;					if (bCondition)</b>
+<b class="fc">&nbsp;						bCutEvent = _cutteeCutterEvents(eventIndex,</b>
+&nbsp;								eventIndexTemp, editShape, cutEvents,
+&nbsp;								cutEventsTemp, ipartCuttee, ivertexCuttee,
+&nbsp;								ipartCutter, ivertexCutter);
+&nbsp;				} else
+&nbsp;					break;
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			if (bCutEvent || ivertex == istart - 1) {</b>
+<b class="fc">&nbsp;				if (bCutEvent &amp;&amp; (ivertex == istart - 1))</b>
+<b class="fc">&nbsp;					istart--;</b>
+&nbsp;
+<b class="fc">&nbsp;				if (++ivertex == pointCount)</b>
+<b class="nc">&nbsp;					break;</b>
+&nbsp;
+<b class="fc">&nbsp;				ivertexCuttee = vertices.get(ivertex);</b>
+<b class="fc">&nbsp;				ipartCuttee = editShape.getPathFromVertex(ivertexCuttee);</b>
+<b class="fc">&nbsp;				igeometryCuttee = editShape.getGeometryFromPath(ipartCuttee);</b>
+<b class="fc">&nbsp;				editShape.getXY(ivertexCuttee, pointCuttee);</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			if (!bCutEvent)</b>
+<b class="fc">&nbsp;				istart = ivertex + 1;</b>
+<b class="fc">&nbsp;		}</b>
+&nbsp;
+<b class="fc">&nbsp;		ArrayList&lt;CutEvent&gt; cutEventsSorted = new ArrayList&lt;CutEvent&gt;(0);</b>
+&nbsp;
+&nbsp;		// Sort CutEvents
+&nbsp;		int icutEvent;
+&nbsp;		int icutEventTemp;
+<b class="fc">&nbsp;		for (int igeometry = editShape.getFirstGeometry(); igeometry != -1; igeometry = editShape</b>
+<b class="fc">&nbsp;				.getNextGeometry(igeometry)) {</b>
+<b class="fc">&nbsp;			for (int ipath = editShape.getFirstPath(igeometry); ipath != -1; ipath = editShape</b>
+<b class="fc">&nbsp;					.getNextPath(ipath)) {</b>
+<b class="fc">&nbsp;				for (int iv = editShape.getFirstVertex(ipath), i = 0, n = editShape</b>
+<b class="fc">&nbsp;						.getPathSize(ipath); i &lt; n; iv = editShape</b>
+<b class="fc">&nbsp;						.getNextVertex(iv), i++) {</b>
+<b class="fc">&nbsp;					icutEventTemp = editShape.getUserIndex(iv, eventIndexTemp);</b>
+<b class="fc">&nbsp;					if (icutEventTemp &gt;= 0) {</b>
+&nbsp;						// _ASSERT(cutEventsTemp.get(icutEventTemp).m_ivertexCuttee
+&nbsp;						// == iv);
+<b class="fc">&nbsp;						while (icutEventTemp &lt; cutEventsTemp.size()</b>
+<b class="fc">&nbsp;								&amp;&amp; cutEventsTemp.get(icutEventTemp).m_ivertexCuttee == iv)</b>
+<b class="fc">&nbsp;							cutEventsSorted.add(cutEventsTemp</b>
+<b class="fc">&nbsp;									.get(icutEventTemp++));</b>
+&nbsp;					}
+&nbsp;
+<b class="fc">&nbsp;					icutEvent = editShape.getUserIndex(iv, eventIndex);</b>
+<b class="fc">&nbsp;					if (icutEvent &gt;= 0) {</b>
+&nbsp;						// _ASSERT(cutEvents-&gt;Get(icutEvent)-&gt;m_ivertexCuttee ==
+&nbsp;						// iv);
+<b class="fc">&nbsp;						while (icutEvent &lt; cutEvents.size()</b>
+<b class="fc">&nbsp;								&amp;&amp; cutEvents.get(icutEvent).m_ivertexCuttee == iv)</b>
+<b class="fc">&nbsp;							cutEventsSorted.add(cutEvents.get(icutEvent++));</b>
+&nbsp;					}
+&nbsp;				}
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+&nbsp;		// _ASSERT(cutEvents-&gt;Size() + cutEventsTemp-&gt;Size() ==
+&nbsp;		// cutEventsSorted-&gt;Size());
+<b class="fc">&nbsp;		editShape.removeUserIndex(eventIndex);</b>
+<b class="fc">&nbsp;		editShape.removeUserIndex(eventIndexTemp);</b>
+<b class="fc">&nbsp;		return cutEventsSorted;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	static boolean _cutteeCutterEvents(int eventIndex, int eventIndexTemp,
+&nbsp;			EditShape editShape, ArrayList&lt;CutEvent&gt; cutEvents,
+&nbsp;			ArrayList&lt;CutEvent&gt; cutEventsTemp, int ipartCuttee,
+&nbsp;			int ivertexCuttee, int ipartCutter, int ivertexCutter) {
+<b class="fc">&nbsp;		int ilastVertexCuttee = editShape.getLastVertex(ipartCuttee);</b>
+<b class="fc">&nbsp;		int ilastVertexCutter = editShape.getLastVertex(ipartCutter);</b>
+<b class="fc">&nbsp;		int ifirstVertexCuttee = editShape.getFirstVertex(ipartCuttee);</b>
+<b class="fc">&nbsp;		int ifirstVertexCutter = editShape.getFirstVertex(ipartCutter);</b>
+<b class="fc">&nbsp;		int ivertexCutteePrev = editShape.getPrevVertex(ivertexCuttee);</b>
+<b class="fc">&nbsp;		int ivertexCutterPrev = editShape.getPrevVertex(ivertexCutter);</b>
+&nbsp;
+<b class="fc">&nbsp;		boolean bEndEnd = false;</b>
+<b class="fc">&nbsp;		boolean bEndStart = false;</b>
+<b class="fc">&nbsp;		boolean bStartEnd = false;</b>
+<b class="fc">&nbsp;		boolean bStartStart = false;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (ivertexCuttee != ifirstVertexCuttee) {</b>
+<b class="fc">&nbsp;			if (ivertexCutter != ifirstVertexCutter)</b>
+<b class="fc">&nbsp;				bEndEnd = _cutteeEndCutterEndEvent(eventIndex, editShape,</b>
+&nbsp;						cutEvents, ipartCuttee, ivertexCutteePrev, ipartCutter,
+&nbsp;						ivertexCutterPrev);
+&nbsp;
+<b class="fc">&nbsp;			if (ivertexCutter != ilastVertexCutter)</b>
+<b class="fc">&nbsp;				bEndStart = _cutteeEndCutterStartEvent(eventIndex, editShape,</b>
+&nbsp;						cutEvents, ipartCuttee, ivertexCutteePrev, ipartCutter,
+&nbsp;						ivertexCutter);
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (ivertexCuttee != ilastVertexCuttee) {</b>
+<b class="fc">&nbsp;			if (ivertexCutter != ifirstVertexCutter)</b>
+<b class="fc">&nbsp;				bStartEnd = _cutteeStartCutterEndEvent(eventIndexTemp,</b>
+&nbsp;						editShape, cutEventsTemp, ipartCuttee, ivertexCuttee,
+&nbsp;						ipartCutter, ivertexCutterPrev, ifirstVertexCuttee);
+&nbsp;
+<b class="fc">&nbsp;			if (ivertexCutter != ilastVertexCutter)</b>
+<b class="fc">&nbsp;				bStartStart = _cutteeStartCutterStartEvent(eventIndexTemp,</b>
+&nbsp;						editShape, cutEventsTemp, ipartCuttee, ivertexCuttee,
+&nbsp;						ipartCutter, ivertexCutter, ifirstVertexCuttee);
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (bEndEnd &amp;&amp; bEndStart &amp;&amp; bStartEnd) {</b>
+<b class="nc">&nbsp;			int iendstart = cutEvents.size() - 1;</b>
+<b class="nc">&nbsp;			int istartend = (bStartStart ? cutEventsTemp.size() - 2</b>
+<b class="nc">&nbsp;					: cutEventsTemp.size() - 1);</b>
+&nbsp;
+<b class="nc">&nbsp;			if (cutEventsTemp.get(istartend).m_count == 2) {</b>
+&nbsp;				// Replace bEndEnd with bEndStart, and remove duplicate
+&nbsp;				// bEndStart (get rid of bEndEnd)
+<b class="nc">&nbsp;				cutEvents.set(iendstart - 1, cutEvents.get(iendstart));</b>
+<b class="nc">&nbsp;				cutEvents.remove(cutEvents.size() - 1);</b>
+&nbsp;			}
+<b class="nc">&nbsp;		} else if (bEndEnd &amp;&amp; bEndStart &amp;&amp; bStartStart) {</b>
+<b class="fc">&nbsp;			int istartstart = cutEventsTemp.size() - 1;</b>
+&nbsp;
+<b class="fc">&nbsp;			if (cutEventsTemp.get(istartstart).m_count == 2) {</b>
+&nbsp;				// Remove bEndStart
+<b class="fc">&nbsp;				CutEvent lastEvent = cutEvents.get(cutEvents.size() - 1);</b>
+<b class="fc">&nbsp;				cutEvents.remove(cutEvents.get(cutEvents.size() - 1));</b>
+<b class="fc">&nbsp;				int icutEvent = editShape.getUserIndex(</b>
+&nbsp;						lastEvent.m_ivertexCuttee, eventIndex);
+<b class="fc">&nbsp;				if (icutEvent == cutEvents.size())</b>
+<b class="fc">&nbsp;					editShape.setUserIndex(lastEvent.m_ivertexCuttee,</b>
+&nbsp;							eventIndex, -1);
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return bEndEnd || bEndStart || bStartEnd || bStartStart;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private static boolean _cutteeEndCutterEndEvent(int eventIndex,
+&nbsp;			EditShape editShape, ArrayList&lt;CutEvent&gt; cutEvents,
+&nbsp;			int ipartCuttee, int ivertexCuttee, int ipartCutter,
+&nbsp;			int ivertexCutter) {
+&nbsp;		Segment segmentCuttee;
+&nbsp;		Segment segmentCutter;
+<b class="fc">&nbsp;		Line lineCuttee = new Line();</b>
+<b class="fc">&nbsp;		Line lineCutter = new Line();</b>
+<b class="fc">&nbsp;		double[] scalarsCuttee = new double[2];</b>
+<b class="fc">&nbsp;		double[] scalarsCutter = new double[2];</b>
+&nbsp;
+&nbsp;		CutEvent cutEvent;
+&nbsp;
+<b class="fc">&nbsp;		segmentCuttee = editShape.getSegment(ivertexCuttee);</b>
+<b class="fc">&nbsp;		if (segmentCuttee == null) {</b>
+<b class="fc">&nbsp;			editShape.queryLineConnector(ivertexCuttee, lineCuttee);</b>
+<b class="fc">&nbsp;			segmentCuttee = lineCuttee;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		segmentCutter = editShape.getSegment(ivertexCutter);</b>
+<b class="fc">&nbsp;		if (segmentCutter == null) {</b>
+<b class="fc">&nbsp;			editShape.queryLineConnector(ivertexCutter, lineCutter);</b>
+<b class="fc">&nbsp;			segmentCutter = lineCutter;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		int count = segmentCuttee.intersect(segmentCutter, null, scalarsCuttee,</b>
+&nbsp;				scalarsCutter, 0.0);
+&nbsp;		// _ASSERT(count &gt; 0);
+&nbsp;		int icutEvent;
+&nbsp;
+&nbsp;		// If count == 2 (i.e. when they overlap), this this event would have
+&nbsp;		// been discovered by _CutteeStartCutterStartEvent at the previous index
+<b class="fc">&nbsp;		if (count &lt; 2) {</b>
+<b class="fc">&nbsp;			cutEvent = new CutEvent(ivertexCuttee, ipartCuttee,</b>
+<b class="fc">&nbsp;					scalarsCuttee[0], NumberUtils.NaN(), count, ivertexCutter,</b>
+<b class="fc">&nbsp;					ipartCutter, scalarsCutter[0], NumberUtils.NaN());</b>
+<b class="fc">&nbsp;			cutEvents.add(cutEvent);</b>
+<b class="fc">&nbsp;			icutEvent = editShape.getUserIndex(ivertexCuttee, eventIndex);</b>
+&nbsp;
+<b class="fc">&nbsp;			if (icutEvent &lt; 0)</b>
+<b class="fc">&nbsp;				editShape.setUserIndex(ivertexCuttee, eventIndex,</b>
+<b class="fc">&nbsp;						cutEvents.size() - 1);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return true;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private static boolean _cutteeEndCutterStartEvent(int eventIndex,
+&nbsp;			EditShape editShape, ArrayList&lt;CutEvent&gt; cutEvents,
+&nbsp;			int ipartCuttee, int ivertexCuttee, int ipartCutter,
+&nbsp;			int ivertexCutter) {
+&nbsp;		Segment segmentCuttee;
+&nbsp;		Segment segmentCutter;
+<b class="fc">&nbsp;		Line lineCuttee = new Line();</b>
+<b class="fc">&nbsp;		Line lineCutter = new Line();</b>
+<b class="fc">&nbsp;		double[] scalarsCuttee = new double[2];</b>
+<b class="fc">&nbsp;		double[] scalarsCutter = new double[2];</b>
+&nbsp;
+&nbsp;		CutEvent cutEvent;
+&nbsp;
+<b class="fc">&nbsp;		segmentCuttee = editShape.getSegment(ivertexCuttee);</b>
+<b class="fc">&nbsp;		if (segmentCuttee == null) {</b>
+<b class="fc">&nbsp;			editShape.queryLineConnector(ivertexCuttee, lineCuttee);</b>
+<b class="fc">&nbsp;			segmentCuttee = lineCuttee;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		segmentCutter = editShape.getSegment(ivertexCutter);</b>
+<b class="fc">&nbsp;		if (segmentCutter == null) {</b>
+<b class="fc">&nbsp;			editShape.queryLineConnector(ivertexCutter, lineCutter);</b>
+<b class="fc">&nbsp;			segmentCutter = lineCutter;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		int count = segmentCuttee.intersect(segmentCutter, null, scalarsCuttee,</b>
+&nbsp;				scalarsCutter, 0.0);
+&nbsp;		// _ASSERT(count &gt; 0);
+&nbsp;		int icutEvent;
+&nbsp;
+&nbsp;		// If count == 2 (i.e. when they overlap), this this event would have
+&nbsp;		// been discovered by _CutteeStartCutterEndEvent at the previous index
+<b class="fc">&nbsp;		if (count &lt; 2) {</b>
+<b class="fc">&nbsp;			cutEvent = new CutEvent(ivertexCuttee, ipartCuttee,</b>
+<b class="fc">&nbsp;					scalarsCuttee[0], NumberUtils.NaN(), count, ivertexCutter,</b>
+<b class="fc">&nbsp;					ipartCutter, scalarsCutter[0], NumberUtils.NaN());</b>
+<b class="fc">&nbsp;			cutEvents.add(cutEvent);</b>
+<b class="fc">&nbsp;			icutEvent = editShape.getUserIndex(ivertexCuttee, eventIndex);</b>
+&nbsp;
+<b class="fc">&nbsp;			if (icutEvent &lt; 0)</b>
+<b class="fc">&nbsp;				editShape.setUserIndex(ivertexCuttee, eventIndex,</b>
+<b class="fc">&nbsp;						cutEvents.size() - 1);</b>
+&nbsp;
+<b class="fc">&nbsp;			return true;</b>
+&nbsp;		}
+&nbsp;
+<b class="nc">&nbsp;		return false;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private static boolean _cutteeStartCutterEndEvent(int eventIndex,
+&nbsp;			EditShape editShape, ArrayList&lt;CutEvent&gt; cutEvents,
+&nbsp;			int ipartCuttee, int ivertexCuttee, int ipartCutter,
+&nbsp;			int ivertexCutter, int ifirstVertexCuttee) {
+&nbsp;		Segment segmentCuttee;
+&nbsp;		Segment segmentCutter;
+<b class="fc">&nbsp;		Line lineCuttee = new Line();</b>
+<b class="fc">&nbsp;		Line lineCutter = new Line();</b>
+<b class="fc">&nbsp;		double[] scalarsCuttee = new double[2];</b>
+<b class="fc">&nbsp;		double[] scalarsCutter = new double[2];</b>
+&nbsp;
+&nbsp;		CutEvent cutEvent;
+&nbsp;
+<b class="fc">&nbsp;		segmentCuttee = editShape.getSegment(ivertexCuttee);</b>
+<b class="fc">&nbsp;		if (segmentCuttee == null) {</b>
+<b class="fc">&nbsp;			editShape.queryLineConnector(ivertexCuttee, lineCuttee);</b>
+<b class="fc">&nbsp;			segmentCuttee = lineCuttee;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		segmentCutter = editShape.getSegment(ivertexCutter);</b>
+<b class="fc">&nbsp;		if (segmentCutter == null) {</b>
+<b class="fc">&nbsp;			editShape.queryLineConnector(ivertexCutter, lineCutter);</b>
+<b class="fc">&nbsp;			segmentCutter = lineCutter;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		int count = segmentCuttee.intersect(segmentCutter, null, scalarsCuttee,</b>
+&nbsp;				scalarsCutter, 0.0);
+&nbsp;		// _ASSERT(count &gt; 0);
+&nbsp;		int icutEvent;
+&nbsp;
+<b class="fc">&nbsp;		if (count == 2) {</b>
+<b class="nc">&nbsp;			cutEvent = new CutEvent(ivertexCuttee, ipartCuttee,</b>
+&nbsp;					scalarsCuttee[0], scalarsCuttee[1], count, ivertexCutter,
+&nbsp;					ipartCutter, scalarsCutter[0], scalarsCutter[1]);
+<b class="nc">&nbsp;			cutEvents.add(cutEvent);</b>
+<b class="nc">&nbsp;			icutEvent = editShape.getUserIndex(ivertexCuttee, eventIndex);</b>
+&nbsp;
+<b class="nc">&nbsp;			if (icutEvent &lt; 0)</b>
+<b class="nc">&nbsp;				editShape.setUserIndex(ivertexCuttee, eventIndex,</b>
+<b class="nc">&nbsp;						cutEvents.size() - 1);</b>
+&nbsp;
+<b class="nc">&nbsp;			return true;</b>
+&nbsp;		} else {
+<b class="fc">&nbsp;			boolean bCutEvent = false;</b>
+&nbsp;
+<b class="fc">&nbsp;			if (ivertexCuttee == ifirstVertexCuttee) {</b>
+<b class="nc">&nbsp;				cutEvent = new CutEvent(ivertexCuttee, ipartCuttee,</b>
+<b class="nc">&nbsp;						scalarsCuttee[0], NumberUtils.NaN(), count,</b>
+&nbsp;						ivertexCutter, ipartCutter, scalarsCutter[0],
+<b class="nc">&nbsp;						NumberUtils.NaN());</b>
+<b class="nc">&nbsp;				cutEvents.add(cutEvent);</b>
+<b class="nc">&nbsp;				icutEvent = editShape.getUserIndex(ivertexCuttee, eventIndex);</b>
+&nbsp;
+<b class="nc">&nbsp;				if (icutEvent &lt; 0)</b>
+<b class="nc">&nbsp;					editShape.setUserIndex(ivertexCuttee, eventIndex,</b>
+<b class="nc">&nbsp;							cutEvents.size() - 1);</b>
+&nbsp;
+<b class="nc">&nbsp;				bCutEvent = true;</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			return bCutEvent;</b>
+&nbsp;		}
+&nbsp;
+&nbsp;	}
+&nbsp;
+&nbsp;	private static boolean _cutteeStartCutterStartEvent(int eventIndex,
+&nbsp;			EditShape editShape, ArrayList&lt;CutEvent&gt; cutEvents,
+&nbsp;			int ipartCuttee, int ivertexCuttee, int ipartCutter,
+&nbsp;			int ivertexCutter, int ifirstVertexCuttee) {
+&nbsp;		Segment segmentCuttee;
+&nbsp;		Segment segmentCutter;
+<b class="fc">&nbsp;		Line lineCuttee = new Line();</b>
+<b class="fc">&nbsp;		Line lineCutter = new Line();</b>
+<b class="fc">&nbsp;		double[] scalarsCuttee = new double[2];</b>
+<b class="fc">&nbsp;		double[] scalarsCutter = new double[2];</b>
+&nbsp;
+&nbsp;		CutEvent cutEvent;
+&nbsp;
+<b class="fc">&nbsp;		segmentCuttee = editShape.getSegment(ivertexCuttee);</b>
+<b class="fc">&nbsp;		if (segmentCuttee == null) {</b>
+<b class="fc">&nbsp;			editShape.queryLineConnector(ivertexCuttee, lineCuttee);</b>
+<b class="fc">&nbsp;			segmentCuttee = lineCuttee;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		segmentCutter = editShape.getSegment(ivertexCutter);</b>
+<b class="fc">&nbsp;		if (segmentCutter == null) {</b>
+<b class="fc">&nbsp;			editShape.queryLineConnector(ivertexCutter, lineCutter);</b>
+<b class="fc">&nbsp;			segmentCutter = lineCutter;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		int count = segmentCuttee.intersect(segmentCutter, null, scalarsCuttee,</b>
+&nbsp;				scalarsCutter, 0.0);
+&nbsp;		// _ASSERT(count &gt; 0);
+&nbsp;		int icutEvent;
+&nbsp;
+<b class="fc">&nbsp;		if (count == 2) {</b>
+<b class="fc">&nbsp;			cutEvent = new CutEvent(ivertexCuttee, ipartCuttee,</b>
+&nbsp;					scalarsCuttee[0], scalarsCuttee[1], count, ivertexCutter,
+&nbsp;					ipartCutter, scalarsCutter[0], scalarsCutter[1]);
+<b class="fc">&nbsp;			cutEvents.add(cutEvent);</b>
+<b class="fc">&nbsp;			icutEvent = editShape.getUserIndex(ivertexCuttee, eventIndex);</b>
+&nbsp;
+<b class="fc">&nbsp;			if (icutEvent &lt; 0)</b>
+<b class="fc">&nbsp;				editShape.setUserIndex(ivertexCuttee, eventIndex,</b>
+<b class="fc">&nbsp;						cutEvents.size() - 1);</b>
+&nbsp;
+<b class="fc">&nbsp;			return true;</b>
+&nbsp;		} else {
+<b class="fc">&nbsp;			boolean bCutEvent = false;</b>
+&nbsp;
+<b class="fc">&nbsp;			if (ivertexCuttee == ifirstVertexCuttee) {</b>
+<b class="nc">&nbsp;				cutEvent = new CutEvent(ivertexCuttee, ipartCuttee,</b>
+<b class="nc">&nbsp;						scalarsCuttee[0], NumberUtils.NaN(), count,</b>
+&nbsp;						ivertexCutter, ipartCutter, scalarsCutter[0],
+<b class="nc">&nbsp;						NumberUtils.NaN());</b>
+<b class="nc">&nbsp;				cutEvents.add(cutEvent);</b>
+<b class="nc">&nbsp;				icutEvent = editShape.getUserIndex(ivertexCuttee, eventIndex);</b>
+&nbsp;
+<b class="nc">&nbsp;				if (icutEvent &lt; 0)</b>
+<b class="nc">&nbsp;					editShape.setUserIndex(ivertexCuttee, eventIndex,</b>
+<b class="nc">&nbsp;							cutEvents.size() - 1);</b>
+&nbsp;
+<b class="nc">&nbsp;				bCutEvent = true;</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			return bCutEvent;</b>
+&nbsp;		}
+&nbsp;
+&nbsp;	}
+&nbsp;
+&nbsp;	static void _Cut(boolean bConsiderTouch, boolean bLocalCutsOnly,
+&nbsp;			ArrayList&lt;CutEvent&gt; cutEvents, EditShape shape,
+&nbsp;			ArrayList&lt;OperatorCutLocal.CutPair&gt; cutPairs,
+&nbsp;			AttributeStreamOfInt32 segmentCounts) {
+&nbsp;		OperatorCutLocal.CutPair cutPair;
+&nbsp;
+<b class="fc">&nbsp;		Point2D[] tangents = new Point2D[4];</b>
+<b class="fc">&nbsp;		tangents[0] = new Point2D();</b>
+<b class="fc">&nbsp;		tangents[1] = new Point2D();</b>
+<b class="fc">&nbsp;		tangents[2] = new Point2D();</b>
+<b class="fc">&nbsp;		tangents[3] = new Point2D();</b>
+<b class="fc">&nbsp;		Point2D tangent0 = new Point2D();</b>
+<b class="fc">&nbsp;		Point2D tangent1 = new Point2D();</b>
+<b class="fc">&nbsp;		Point2D tangent2 = new Point2D();</b>
+<b class="fc">&nbsp;		Point2D tangent3 = new Point2D();</b>
+&nbsp;
+<b class="fc">&nbsp;		SegmentBuffer segmentBufferCuttee = null;</b>
+<b class="fc">&nbsp;		if (cutPairs != null) {</b>
+<b class="fc">&nbsp;			segmentBufferCuttee = new SegmentBuffer();</b>
+<b class="fc">&nbsp;			segmentBufferCuttee.createLine();</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		Segment segmentCuttee = null;</b>
+<b class="fc">&nbsp;		int icutEvent = 0;</b>
+<b class="fc">&nbsp;		MultiPath multipath = null;</b>
+&nbsp;
+<b class="fc">&nbsp;		Line lineCuttee = new Line();</b>
+<b class="fc">&nbsp;		Line lineCutter = new Line();</b>
+&nbsp;
+<b class="fc">&nbsp;		int polyline = shape.getFirstGeometry();</b>
+<b class="fc">&nbsp;		for (int ipath = shape.getFirstPath(polyline); ipath != -1; ipath = shape</b>
+<b class="fc">&nbsp;				.getNextPath(ipath)) {</b>
+&nbsp;			int cut;
+<b class="fc">&nbsp;			int cutPrev = OperatorCutLocal.Side.Uncut;</b>
+<b class="fc">&nbsp;			int ipartCuttee = -1;</b>
+<b class="fc">&nbsp;			int ivertexCuttee = -1;</b>
+<b class="fc">&nbsp;			double scalarCuttee = NumberUtils.NaN();</b>
+<b class="fc">&nbsp;			int ipartCutteePrev = -1;</b>
+<b class="fc">&nbsp;			int ivertexCutteePrev = -1;</b>
+<b class="fc">&nbsp;			double scalarCutteePrev = NumberUtils.NaN();</b>
+<b class="fc">&nbsp;			int ipartCutter = -1;</b>
+<b class="fc">&nbsp;			int ivertexCutter = -1;</b>
+<b class="fc">&nbsp;			double scalarCutter = NumberUtils.NaN();</b>
+<b class="fc">&nbsp;			int ipartCutterPrev = -1;</b>
+<b class="fc">&nbsp;			int ivertexCutterPrev = -1;</b>
+<b class="fc">&nbsp;			double scalarCutterPrev = NumberUtils.NaN();</b>
+<b class="fc">&nbsp;			boolean bNoCutYet = true; // Indicates whether a cut as occured for</b>
+&nbsp;										// the current part
+<b class="fc">&nbsp;			boolean bCoincidentNotAdded = false; // Indicates whether the</b>
+&nbsp;													// current coincident
+&nbsp;													// multipath has been added
+&nbsp;													// to cutPairs
+<b class="fc">&nbsp;			boolean bCurrentMultiPathNotAdded = true; // Indicates whether there</b>
+&nbsp;														// is a multipath not
+&nbsp;														// yet added to cutPairs
+&nbsp;														// (left, right, or
+&nbsp;														// undefined)
+<b class="fc">&nbsp;			boolean bStartNewPath = true;</b>
+<b class="fc">&nbsp;			boolean bCreateNewMultiPath = true;</b>
+<b class="fc">&nbsp;			int segmentCount = 0;</b>
+&nbsp;
+<b class="fc">&nbsp;			ipartCutteePrev = ipath;</b>
+<b class="fc">&nbsp;			scalarCutteePrev = 0.0;</b>
+&nbsp;
+<b class="fc">&nbsp;			for (int ivertex = shape.getFirstVertex(ipath), n = shape</b>
+<b class="fc">&nbsp;					.getPathSize(ipath), i = 0; i &lt; n; ivertex = shape</b>
+<b class="fc">&nbsp;					.getNextVertex(ivertex), i++) {</b>
+<b class="fc">&nbsp;				segmentCuttee = shape.getSegment(ivertex);</b>
+<b class="fc">&nbsp;				if (segmentCuttee == null) {</b>
+<b class="fc">&nbsp;					if (!shape.queryLineConnector(ivertex, lineCuttee))</b>
+<b class="fc">&nbsp;						continue;</b>
+<b class="fc">&nbsp;					segmentCuttee = lineCuttee;</b>
+&nbsp;				}
+&nbsp;
+<b class="fc">&nbsp;				if (ivertexCutteePrev == -1)</b>
+<b class="fc">&nbsp;					ivertexCutteePrev = ivertex;</b>
+&nbsp;
+<b class="fc">&nbsp;				double lastScalarCuttee = 0.0; // last scalar along the current</b>
+&nbsp;												// segment
+&nbsp;
+<b class="fc">&nbsp;				while (icutEvent &lt; cutEvents.size()</b>
+<b class="fc">&nbsp;						&amp;&amp; ivertex == cutEvents.get(icutEvent).m_ivertexCuttee) {</b>
+<b class="fc">&nbsp;					ipartCuttee = cutEvents.get(icutEvent).m_ipartCuttee;</b>
+<b class="fc">&nbsp;					ivertexCuttee = cutEvents.get(icutEvent).m_ivertexCuttee;</b>
+<b class="fc">&nbsp;					scalarCuttee = cutEvents.get(icutEvent).m_scalarCuttee0;</b>
+<b class="fc">&nbsp;					ipartCutter = cutEvents.get(icutEvent).m_ipartCutter;</b>
+<b class="fc">&nbsp;					ivertexCutter = cutEvents.get(icutEvent).m_ivertexCutter;</b>
+<b class="fc">&nbsp;					scalarCutter = cutEvents.get(icutEvent).m_scalarCutter0;</b>
+&nbsp;
+<b class="fc">&nbsp;					if (cutEvents.get(icutEvent).m_count == 2) {</b>
+&nbsp;						// We have an overlap
+&nbsp;
+<b class="fc">&nbsp;						if (!bCoincidentNotAdded) {</b>
+<b class="fc">&nbsp;							ipartCutteePrev = ipartCuttee;</b>
+<b class="fc">&nbsp;							ivertexCutteePrev = ivertexCuttee;</b>
+<b class="fc">&nbsp;							scalarCutteePrev = scalarCuttee;</b>
+<b class="fc">&nbsp;							ipartCutterPrev = ipartCutter;</b>
+<b class="fc">&nbsp;							ivertexCutterPrev = ivertexCutter;</b>
+<b class="fc">&nbsp;							scalarCutterPrev = scalarCutter;</b>
+<b class="fc">&nbsp;							cutPrev = OperatorCutLocal.Side.Coincident;</b>
+&nbsp;
+&nbsp;							// Create new multipath
+<b class="fc">&nbsp;							if (cutPairs != null)</b>
+<b class="fc">&nbsp;								multipath = new Polyline();</b>
+&nbsp;							else
+<b class="nc">&nbsp;								segmentCount = 0;</b>
+&nbsp;
+<b class="fc">&nbsp;							bCreateNewMultiPath = false;</b>
+<b class="fc">&nbsp;							bStartNewPath = true;</b>
+&nbsp;						}
+&nbsp;
+<b class="fc">&nbsp;						scalarCuttee = cutEvents.get(icutEvent).m_scalarCuttee1;</b>
+<b class="fc">&nbsp;						scalarCutter = cutEvents.get(icutEvent).m_scalarCutter1;</b>
+&nbsp;
+<b class="fc">&nbsp;						if (cutPairs != null) {</b>
+<b class="fc">&nbsp;							segmentCuttee.cut(lastScalarCuttee,</b>
+<b class="fc">&nbsp;									cutEvents.get(icutEvent).m_scalarCuttee1,</b>
+&nbsp;									segmentBufferCuttee);
+<b class="fc">&nbsp;							multipath.addSegment(segmentBufferCuttee.get(),</b>
+&nbsp;									bStartNewPath);
+&nbsp;						} else
+<b class="nc">&nbsp;							segmentCount++;</b>
+&nbsp;
+<b class="fc">&nbsp;						lastScalarCuttee = scalarCuttee;</b>
+&nbsp;
+<b class="fc">&nbsp;						bCoincidentNotAdded = true;</b>
+<b class="fc">&nbsp;						bNoCutYet = false;</b>
+<b class="fc">&nbsp;						bStartNewPath = false;</b>
+&nbsp;
+<b class="fc">&nbsp;						if (icutEvent + 1 == cutEvents.size()</b>
+<b class="fc">&nbsp;								|| cutEvents.get(icutEvent + 1).m_count != 2</b>
+<b class="fc">&nbsp;								|| cutEvents.get(icutEvent + 1).m_ivertexCuttee == ivertexCuttee</b>
+<b class="nc">&nbsp;								&amp;&amp; cutEvents.get(icutEvent + 1).m_scalarCuttee0 != lastScalarCuttee) {</b>
+<b class="fc">&nbsp;							if (cutPairs != null) {</b>
+<b class="fc">&nbsp;								cutPair = new OperatorCutLocal.CutPair(</b>
+&nbsp;										(Geometry) multipath,
+&nbsp;										OperatorCutLocal.Side.Coincident,
+&nbsp;										ipartCuttee, ivertexCuttee,
+&nbsp;										scalarCuttee, cutPrev, ipartCutteePrev,
+&nbsp;										ivertexCutteePrev, scalarCutteePrev,
+&nbsp;										ipartCutter, ivertexCutter,
+&nbsp;										scalarCutter, ipartCutterPrev,
+&nbsp;										ivertexCutterPrev, scalarCutterPrev);
+<b class="fc">&nbsp;								cutPairs.add(cutPair);</b>
+&nbsp;							} else {
+<b class="nc">&nbsp;								segmentCounts.add(segmentCount);</b>
+&nbsp;							}
+&nbsp;
+<b class="fc">&nbsp;							ipartCutteePrev = ipartCuttee;</b>
+<b class="fc">&nbsp;							ivertexCutteePrev = ivertexCuttee;</b>
+<b class="fc">&nbsp;							scalarCutteePrev = scalarCuttee;</b>
+<b class="fc">&nbsp;							ipartCutterPrev = ipartCutter;</b>
+<b class="fc">&nbsp;							ivertexCutterPrev = ivertexCutter;</b>
+<b class="fc">&nbsp;							scalarCutterPrev = scalarCutter;</b>
+<b class="fc">&nbsp;							cutPrev = OperatorCutLocal.Side.Coincident;</b>
+&nbsp;
+<b class="fc">&nbsp;							bNoCutYet = false;</b>
+<b class="fc">&nbsp;							bCoincidentNotAdded = false;</b>
+<b class="fc">&nbsp;							bCreateNewMultiPath = true;</b>
+<b class="fc">&nbsp;							bStartNewPath = true;</b>
+&nbsp;						}
+&nbsp;
+<b class="fc">&nbsp;						icutEvent++;</b>
+<b class="fc">&nbsp;						continue;</b>
+&nbsp;					}
+&nbsp;
+<b class="fc">&nbsp;					int ivertexCutteePlus = shape.getNextVertex(ivertexCuttee);</b>
+<b class="fc">&nbsp;					int ivertexCutterPlus = shape.getNextVertex(ivertexCutter);</b>
+<b class="fc">&nbsp;					int ivertexCutterMinus = shape.getPrevVertex(ivertexCutter);</b>
+&nbsp;
+<b class="fc">&nbsp;					if (icutEvent &lt; cutEvents.size() - 1</b>
+<b class="fc">&nbsp;							&amp;&amp; cutEvents.get(icutEvent + 1).m_ivertexCuttee == ivertexCutteePlus</b>
+<b class="fc">&nbsp;							&amp;&amp; cutEvents.get(icutEvent + 1).m_ivertexCutter == ivertexCutter</b>
+<b class="fc">&nbsp;							&amp;&amp; cutEvents.get(icutEvent + 1).m_count == 2) {</b>
+<b class="fc">&nbsp;						if (scalarCuttee != lastScalarCuttee) {</b>
+<b class="fc">&nbsp;							if (bCreateNewMultiPath) {</b>
+<b class="fc">&nbsp;								if (cutPairs != null)</b>
+<b class="fc">&nbsp;									multipath = new Polyline();</b>
+&nbsp;								else
+<b class="nc">&nbsp;									segmentCount = 0;</b>
+&nbsp;							}
+&nbsp;
+<b class="fc">&nbsp;							if (icutEvent &gt; 0</b>
+<b class="fc">&nbsp;									&amp;&amp; cutEvents.get(icutEvent - 1).m_ipartCuttee == ipartCuttee) {</b>
+<b class="fc">&nbsp;								if (cutPrev == OperatorCutLocal.Side.Right)</b>
+<b class="nc">&nbsp;									cut = OperatorCutLocal.Side.Left;</b>
+<b class="fc">&nbsp;								else if (cutPrev == OperatorCutLocal.Side.Left)</b>
+<b class="fc">&nbsp;									cut = OperatorCutLocal.Side.Right;</b>
+&nbsp;								else
+<b class="fc">&nbsp;									cut = OperatorCutLocal.Side.Undefined;</b>
+&nbsp;							} else
+<b class="fc">&nbsp;								cut = OperatorCutLocal.Side.Undefined;</b>
+&nbsp;
+<b class="fc">&nbsp;							if (cutPairs != null) {</b>
+<b class="fc">&nbsp;								segmentCuttee.cut(lastScalarCuttee,</b>
+&nbsp;										scalarCuttee, segmentBufferCuttee);
+<b class="fc">&nbsp;								multipath.addSegment(segmentBufferCuttee.get(),</b>
+&nbsp;										bStartNewPath);
+<b class="fc">&nbsp;								cutPair = new OperatorCutLocal.CutPair(</b>
+&nbsp;										multipath, cut, ipartCuttee,
+&nbsp;										ivertexCuttee, scalarCuttee, cutPrev,
+&nbsp;										ipartCutteePrev, ivertexCutteePrev,
+&nbsp;										scalarCutteePrev, ipartCutter,
+&nbsp;										ivertexCutter, scalarCutter,
+&nbsp;										ipartCutterPrev, ivertexCutterPrev,
+&nbsp;										scalarCutterPrev);
+<b class="fc">&nbsp;								cutPairs.add(cutPair);</b>
+&nbsp;							} else {
+<b class="nc">&nbsp;								segmentCount++;</b>
+<b class="nc">&nbsp;								segmentCounts.add(segmentCount);</b>
+&nbsp;							}
+&nbsp;
+<b class="fc">&nbsp;							lastScalarCuttee = scalarCuttee;</b>
+&nbsp;
+<b class="fc">&nbsp;							ipartCutteePrev = ipartCuttee;</b>
+<b class="fc">&nbsp;							ivertexCutteePrev = ivertexCuttee;</b>
+<b class="fc">&nbsp;							scalarCutteePrev = scalarCuttee;</b>
+<b class="fc">&nbsp;							ipartCutterPrev = ipartCutter;</b>
+<b class="fc">&nbsp;							ivertexCutterPrev = ivertexCutter;</b>
+<b class="fc">&nbsp;							scalarCutterPrev = scalarCutter;</b>
+<b class="fc">&nbsp;							cutPrev = cut;</b>
+&nbsp;
+<b class="fc">&nbsp;							bCurrentMultiPathNotAdded = false;</b>
+<b class="fc">&nbsp;							bNoCutYet = false;</b>
+<b class="fc">&nbsp;							bCreateNewMultiPath = true;</b>
+<b class="fc">&nbsp;							bStartNewPath = true;</b>
+&nbsp;						}
+&nbsp;
+<b class="fc">&nbsp;						icutEvent++;</b>
+<b class="fc">&nbsp;						continue;</b>
+&nbsp;					}
+&nbsp;
+<b class="fc">&nbsp;					boolean bContinue = _cutterTangents(bConsiderTouch, shape,</b>
+&nbsp;							cutEvents, icutEvent, tangent0, tangent1);
+<b class="fc">&nbsp;					if (bContinue) {</b>
+<b class="fc">&nbsp;						icutEvent++;</b>
+<b class="fc">&nbsp;						continue;</b>
+&nbsp;					}
+&nbsp;
+<b class="fc">&nbsp;					_cutteeTangents(shape, cutEvents, icutEvent, ipath,</b>
+&nbsp;							ivertex, tangent2, tangent3);
+&nbsp;
+<b class="fc">&nbsp;					boolean bCut = false;</b>
+<b class="fc">&nbsp;					boolean bTouch = false;</b>
+<b class="fc">&nbsp;					boolean bCutRight = true;</b>
+&nbsp;
+<b class="fc">&nbsp;					if (!tangent0.isEqual(tangent2)</b>
+<b class="fc">&nbsp;							&amp;&amp; !tangent1.isEqual(tangent2)</b>
+<b class="fc">&nbsp;							&amp;&amp; !tangent0.isEqual(tangent3)</b>
+<b class="fc">&nbsp;							&amp;&amp; !tangent1.isEqual(tangent3)) {</b>
+<b class="fc">&nbsp;						tangents[0].setCoords(tangent0);</b>
+<b class="fc">&nbsp;						tangents[1].setCoords(tangent1);</b>
+<b class="fc">&nbsp;						tangents[2].setCoords(tangent2);</b>
+<b class="fc">&nbsp;						tangents[3].setCoords(tangent3);</b>
+&nbsp;
+<b class="fc">&nbsp;						Arrays.sort(tangents, new Point2D.CompareVectors());</b>
+&nbsp;						// SORTARRAY(tangents, Point2D,
+&nbsp;						// Point2D::_CompareVectors);
+&nbsp;
+<b class="fc">&nbsp;						Point2D value0 = (Point2D) tangents[0];</b>
+<b class="fc">&nbsp;						Point2D value1 = (Point2D) tangents[1];</b>
+<b class="fc">&nbsp;						Point2D value2 = (Point2D) tangents[2];</b>
+<b class="fc">&nbsp;						Point2D value3 = (Point2D) tangents[3];</b>
+&nbsp;
+<b class="fc">&nbsp;						if (value0.isEqual(tangent0)) {</b>
+<b class="nc">&nbsp;							if (value1.isEqual(tangent1)) {</b>
+<b class="nc">&nbsp;								if (!bConsiderTouch)</b>
+<b class="nc">&nbsp;									bCut = false;</b>
+&nbsp;								else {
+<b class="nc">&nbsp;									bCut = true;</b>
+<b class="nc">&nbsp;									bTouch = true;</b>
+<b class="nc">&nbsp;									bCutRight = false;</b>
+&nbsp;								}
+<b class="nc">&nbsp;							} else if (value3.isEqual(tangent1)) {</b>
+<b class="nc">&nbsp;								if (!bConsiderTouch)</b>
+<b class="nc">&nbsp;									bCut = false;</b>
+&nbsp;								else {
+<b class="nc">&nbsp;									bCut = true;</b>
+<b class="nc">&nbsp;									bTouch = true;</b>
+<b class="nc">&nbsp;									bCutRight = true;</b>
+&nbsp;								}
+&nbsp;							} else {
+<b class="nc">&nbsp;								bCut = true;</b>
+<b class="nc">&nbsp;								bCutRight = value1.isEqual(tangent2);</b>
+&nbsp;							}
+<b class="fc">&nbsp;						} else if (value1.isEqual(tangent0)) {</b>
+<b class="fc">&nbsp;							if (value2.isEqual(tangent1)) {</b>
+<b class="nc">&nbsp;								if (!bConsiderTouch)</b>
+<b class="nc">&nbsp;									bCut = false;</b>
+&nbsp;								else {
+<b class="nc">&nbsp;									bCut = true;</b>
+<b class="nc">&nbsp;									bTouch = true;</b>
+<b class="nc">&nbsp;									bCutRight = false;</b>
+&nbsp;								}
+<b class="fc">&nbsp;							} else if (value0.isEqual(tangent1)) {</b>
+<b class="nc">&nbsp;								if (!bConsiderTouch)</b>
+<b class="nc">&nbsp;									bCut = false;</b>
+&nbsp;								else {
+<b class="nc">&nbsp;									bCut = true;</b>
+<b class="nc">&nbsp;									bTouch = true;</b>
+<b class="nc">&nbsp;									bCutRight = true;</b>
+&nbsp;								}
+&nbsp;							} else {
+<b class="fc">&nbsp;								bCut = true;</b>
+<b class="fc">&nbsp;								bCutRight = value2.isEqual(tangent2);</b>
+&nbsp;							}
+<b class="fc">&nbsp;						} else if (value2.isEqual(tangent0)) {</b>
+<b class="fc">&nbsp;							if (value3.isEqual(tangent1)) {</b>
+<b class="fc">&nbsp;								if (!bConsiderTouch)</b>
+<b class="nc">&nbsp;									bCut = false;</b>
+&nbsp;								else {
+<b class="fc">&nbsp;									bCut = true;</b>
+<b class="fc">&nbsp;									bTouch = true;</b>
+<b class="fc">&nbsp;									bCutRight = false;</b>
+&nbsp;								}
+<b class="nc">&nbsp;							} else if (value1.isEqual(tangent1)) {</b>
+<b class="nc">&nbsp;								if (!bConsiderTouch)</b>
+<b class="nc">&nbsp;									bCut = false;</b>
+&nbsp;								else {
+<b class="nc">&nbsp;									bCut = true;</b>
+<b class="nc">&nbsp;									bTouch = true;</b>
+<b class="nc">&nbsp;									bCutRight = true;</b>
+&nbsp;								}
+&nbsp;							} else {
+<b class="nc">&nbsp;								bCut = true;</b>
+<b class="nc">&nbsp;								bCutRight = value3.isEqual(tangent2);</b>
+&nbsp;							}
+&nbsp;						} else {
+<b class="fc">&nbsp;							if (value0.isEqual(tangent1)) {</b>
+<b class="nc">&nbsp;								if (!bConsiderTouch)</b>
+<b class="nc">&nbsp;									bCut = false;</b>
+&nbsp;								else {
+<b class="nc">&nbsp;									bCut = true;</b>
+<b class="nc">&nbsp;									bTouch = true;</b>
+<b class="nc">&nbsp;									bCutRight = false;</b>
+&nbsp;								}
+<b class="fc">&nbsp;							} else if (value2.isEqual(tangent1)) {</b>
+<b class="nc">&nbsp;								if (!bConsiderTouch)</b>
+<b class="nc">&nbsp;									bCut = false;</b>
+&nbsp;								else {
+<b class="nc">&nbsp;									bCut = true;</b>
+<b class="nc">&nbsp;									bTouch = true;</b>
+<b class="nc">&nbsp;									bCutRight = true;</b>
+&nbsp;								}
+&nbsp;							} else {
+<b class="fc">&nbsp;								bCut = true;</b>
+<b class="fc">&nbsp;								bCutRight = value0.isEqual(tangent2);</b>
+&nbsp;							}
+&nbsp;						}
+&nbsp;					}
+&nbsp;
+<b class="fc">&nbsp;					if (bCut) {</b>
+<b class="fc">&nbsp;						boolean bIsFirstSegmentInPath = (ivertex == ivertexCuttee);</b>
+&nbsp;
+<b class="fc">&nbsp;						if (scalarCuttee != lastScalarCuttee</b>
+&nbsp;								|| bIsFirstSegmentInPath
+&nbsp;								&amp;&amp; lastScalarCuttee == 0.0) {
+<b class="fc">&nbsp;							if (bCreateNewMultiPath) {</b>
+<b class="fc">&nbsp;								if (cutPairs != null)</b>
+<b class="fc">&nbsp;									multipath = new Polyline();</b>
+&nbsp;								else
+<b class="nc">&nbsp;									segmentCount = 0;</b>
+&nbsp;							}
+&nbsp;
+<b class="fc">&nbsp;							if (cutPairs != null) {</b>
+<b class="fc">&nbsp;								segmentCuttee.cut(lastScalarCuttee,</b>
+&nbsp;										scalarCuttee, segmentBufferCuttee);
+<b class="fc">&nbsp;								multipath.addSegment(segmentBufferCuttee.get(),</b>
+&nbsp;										bStartNewPath);
+&nbsp;							} else
+<b class="nc">&nbsp;								segmentCount++;</b>
+&nbsp;						}
+&nbsp;
+<b class="fc">&nbsp;						if (bCutRight) {</b>
+<b class="fc">&nbsp;							if (cutPrev != OperatorCutLocal.Side.Right</b>
+&nbsp;									|| bLocalCutsOnly) {
+<b class="fc">&nbsp;								if (scalarCuttee != lastScalarCuttee</b>
+&nbsp;										|| bIsFirstSegmentInPath
+&nbsp;										&amp;&amp; lastScalarCuttee == 0.0
+&nbsp;										|| bLocalCutsOnly) {
+<b class="fc">&nbsp;									if (cutPairs != null) {</b>
+<b class="fc">&nbsp;										cutPair = new OperatorCutLocal.CutPair(</b>
+&nbsp;												multipath,
+&nbsp;												OperatorCutLocal.Side.Right,
+&nbsp;												ipartCuttee, ivertexCuttee,
+&nbsp;												scalarCuttee, cutPrev,
+&nbsp;												ipartCutteePrev,
+&nbsp;												ivertexCutteePrev,
+&nbsp;												scalarCutteePrev, ipartCutter,
+&nbsp;												ivertexCutter, scalarCutter,
+&nbsp;												ipartCutterPrev,
+&nbsp;												ivertexCutterPrev,
+&nbsp;												scalarCutterPrev);
+<b class="fc">&nbsp;										cutPairs.add(cutPair);</b>
+&nbsp;									} else {
+<b class="nc">&nbsp;										segmentCounts.add(segmentCount);</b>
+&nbsp;									}
+&nbsp;								}
+&nbsp;
+<b class="fc">&nbsp;								if (!bTouch)</b>
+<b class="fc">&nbsp;									cutPrev = OperatorCutLocal.Side.Right;</b>
+<b class="nc">&nbsp;								else if (icutEvent == cutEvents.size() - 2</b>
+<b class="nc">&nbsp;										|| cutEvents.get(icutEvent + 2).m_ipartCuttee != ipartCuttee)</b>
+<b class="nc">&nbsp;									cutPrev = OperatorCutLocal.Side.Left;</b>
+&nbsp;							} else {
+<b class="fc">&nbsp;								if (scalarCuttee != lastScalarCuttee</b>
+&nbsp;										|| bIsFirstSegmentInPath
+&nbsp;										&amp;&amp; lastScalarCuttee == 0.0
+&nbsp;										|| bLocalCutsOnly) {
+<b class="fc">&nbsp;									if (cutPairs != null) {</b>
+<b class="fc">&nbsp;										cutPair = new OperatorCutLocal.CutPair(</b>
+&nbsp;												multipath,
+&nbsp;												OperatorCutLocal.Side.Undefined,
+&nbsp;												ipartCuttee, ivertexCuttee,
+&nbsp;												scalarCuttee, cutPrev,
+&nbsp;												ipartCutteePrev,
+&nbsp;												ivertexCutteePrev,
+&nbsp;												scalarCutteePrev, ipartCutter,
+&nbsp;												ivertexCutter, scalarCutter,
+&nbsp;												ipartCutterPrev,
+&nbsp;												ivertexCutterPrev,
+&nbsp;												scalarCutterPrev);
+<b class="fc">&nbsp;										cutPairs.add(cutPair);</b>
+&nbsp;									} else {
+<b class="nc">&nbsp;										segmentCounts.add(segmentCount);</b>
+&nbsp;									}
+&nbsp;								}
+&nbsp;
+<b class="fc">&nbsp;								cutPrev = OperatorCutLocal.Side.Right;</b>
+&nbsp;							}
+&nbsp;						} else {
+<b class="fc">&nbsp;							if (cutPrev != OperatorCutLocal.Side.Left</b>
+&nbsp;									|| bLocalCutsOnly) {
+<b class="fc">&nbsp;								if (scalarCuttee != lastScalarCuttee</b>
+&nbsp;										|| bIsFirstSegmentInPath
+&nbsp;										&amp;&amp; lastScalarCuttee == 0.0
+&nbsp;										|| bLocalCutsOnly) {
+<b class="fc">&nbsp;									if (cutPairs != null) {</b>
+<b class="fc">&nbsp;										cutPair = new OperatorCutLocal.CutPair(</b>
+&nbsp;												multipath,
+&nbsp;												OperatorCutLocal.Side.Left,
+&nbsp;												ipartCuttee, ivertexCuttee,
+&nbsp;												scalarCuttee, cutPrev,
+&nbsp;												ipartCutteePrev,
+&nbsp;												ivertexCutteePrev,
+&nbsp;												scalarCutteePrev, ipartCutter,
+&nbsp;												ivertexCutter, scalarCutter,
+&nbsp;												ipartCutterPrev,
+&nbsp;												ivertexCutterPrev,
+&nbsp;												scalarCutterPrev);
+<b class="fc">&nbsp;										cutPairs.add(cutPair);</b>
+&nbsp;									} else {
+<b class="nc">&nbsp;										segmentCounts.add(segmentCount);</b>
+&nbsp;									}
+&nbsp;								}
+&nbsp;
+<b class="fc">&nbsp;								if (!bTouch)</b>
+<b class="fc">&nbsp;									cutPrev = OperatorCutLocal.Side.Left;</b>
+<b class="fc">&nbsp;								else if (icutEvent == cutEvents.size() - 2</b>
+<b class="fc">&nbsp;										|| cutEvents.get(icutEvent + 2).m_ipartCuttee != ipartCuttee)</b>
+<b class="nc">&nbsp;									cutPrev = OperatorCutLocal.Side.Right;</b>
+&nbsp;							} else {
+<b class="fc">&nbsp;								if (scalarCuttee != lastScalarCuttee</b>
+&nbsp;										|| bIsFirstSegmentInPath
+&nbsp;										&amp;&amp; lastScalarCuttee == 0.0
+&nbsp;										|| bLocalCutsOnly) {
+<b class="fc">&nbsp;									if (cutPairs != null) {</b>
+<b class="fc">&nbsp;										cutPair = new OperatorCutLocal.CutPair(</b>
+&nbsp;												multipath,
+&nbsp;												OperatorCutLocal.Side.Undefined,
+&nbsp;												ipartCuttee, ivertexCuttee,
+&nbsp;												scalarCuttee, cutPrev,
+&nbsp;												ipartCutteePrev,
+&nbsp;												ivertexCutteePrev,
+&nbsp;												scalarCutteePrev, ipartCutter,
+&nbsp;												ivertexCutter, scalarCutter,
+&nbsp;												ipartCutterPrev,
+&nbsp;												ivertexCutterPrev,
+&nbsp;												scalarCutterPrev);
+<b class="fc">&nbsp;										cutPairs.add(cutPair);</b>
+&nbsp;									} else {
+<b class="nc">&nbsp;										segmentCounts.add(segmentCount);</b>
+&nbsp;									}
+&nbsp;								}
+&nbsp;
+<b class="fc">&nbsp;								cutPrev = OperatorCutLocal.Side.Left;</b>
+&nbsp;							}
+&nbsp;						}
+&nbsp;
+<b class="fc">&nbsp;						if (scalarCuttee != lastScalarCuttee</b>
+&nbsp;								|| bIsFirstSegmentInPath
+&nbsp;								&amp;&amp; lastScalarCuttee == 0.0 || bLocalCutsOnly) {
+<b class="fc">&nbsp;							lastScalarCuttee = scalarCuttee;</b>
+&nbsp;
+<b class="fc">&nbsp;							ipartCutteePrev = ipartCuttee;</b>
+<b class="fc">&nbsp;							ivertexCutteePrev = ivertexCuttee;</b>
+<b class="fc">&nbsp;							scalarCutteePrev = scalarCuttee;</b>
+<b class="fc">&nbsp;							ipartCutterPrev = ipartCutter;</b>
+<b class="fc">&nbsp;							ivertexCutterPrev = ivertexCutter;</b>
+<b class="fc">&nbsp;							scalarCutterPrev = scalarCutter;</b>
+&nbsp;
+<b class="fc">&nbsp;							bCurrentMultiPathNotAdded = false;</b>
+<b class="fc">&nbsp;							bNoCutYet = false;</b>
+<b class="fc">&nbsp;							bCreateNewMultiPath = true;</b>
+<b class="fc">&nbsp;							bStartNewPath = true;</b>
+&nbsp;						}
+&nbsp;					}
+&nbsp;
+<b class="fc">&nbsp;					icutEvent++;</b>
+<b class="fc">&nbsp;				}</b>
+&nbsp;
+<b class="fc">&nbsp;				if (lastScalarCuttee != 1.0) {</b>
+<b class="fc">&nbsp;					if (bCreateNewMultiPath) {</b>
+<b class="fc">&nbsp;						if (cutPairs != null)</b>
+<b class="fc">&nbsp;							multipath = new Polyline();</b>
+&nbsp;						else
+<b class="nc">&nbsp;							segmentCount = 0;</b>
+&nbsp;					}
+&nbsp;
+<b class="fc">&nbsp;					if (cutPairs != null) {</b>
+<b class="fc">&nbsp;						segmentCuttee.cut(lastScalarCuttee, 1.0,</b>
+&nbsp;								segmentBufferCuttee);
+<b class="fc">&nbsp;						multipath.addSegment(segmentBufferCuttee.get(),</b>
+&nbsp;								bStartNewPath);
+&nbsp;					} else
+<b class="nc">&nbsp;						segmentCount++;</b>
+&nbsp;
+<b class="fc">&nbsp;					bCreateNewMultiPath = false;</b>
+<b class="fc">&nbsp;					bStartNewPath = false;</b>
+<b class="fc">&nbsp;					bCurrentMultiPathNotAdded = true;</b>
+&nbsp;				}
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			if (bCurrentMultiPathNotAdded) {</b>
+<b class="fc">&nbsp;				scalarCuttee = 1.0;</b>
+<b class="fc">&nbsp;				ivertexCuttee = shape.getLastVertex(ipath);</b>
+<b class="fc">&nbsp;				ivertexCuttee = shape.getPrevVertex(ivertexCuttee);</b>
+&nbsp;
+<b class="fc">&nbsp;				ipartCutter = -1;</b>
+<b class="fc">&nbsp;				ivertexCutter = -1;</b>
+<b class="fc">&nbsp;				scalarCutter = NumberUtils.NaN();</b>
+&nbsp;
+<b class="fc">&nbsp;				if (bNoCutYet) {</b>
+<b class="nc">&nbsp;					if (cutPairs != null) {</b>
+<b class="nc">&nbsp;						cutPair = new OperatorCutLocal.CutPair(multipath,</b>
+&nbsp;								OperatorCutLocal.Side.Uncut, ipartCuttee,
+&nbsp;								ivertexCuttee, scalarCuttee, cutPrev,
+&nbsp;								ipartCutteePrev, ivertexCutteePrev,
+&nbsp;								scalarCutteePrev, ipartCutter, ivertexCutter,
+&nbsp;								scalarCutter, ipartCutterPrev,
+&nbsp;								ivertexCutterPrev, scalarCutterPrev);
+<b class="nc">&nbsp;						cutPairs.add(cutPair);</b>
+&nbsp;					} else {
+<b class="nc">&nbsp;						segmentCounts.add(segmentCount);</b>
+&nbsp;					}
+&nbsp;				} else {
+<b class="fc">&nbsp;					if (cutPrev == OperatorCutLocal.Side.Right)</b>
+<b class="fc">&nbsp;						cut = OperatorCutLocal.Side.Left;</b>
+<b class="nc">&nbsp;					else if (cutPrev == OperatorCutLocal.Side.Left)</b>
+<b class="nc">&nbsp;						cut = OperatorCutLocal.Side.Right;</b>
+&nbsp;					else
+<b class="nc">&nbsp;						cut = OperatorCutLocal.Side.Undefined;</b>
+&nbsp;
+<b class="fc">&nbsp;					if (cutPairs != null) {</b>
+<b class="fc">&nbsp;						cutPair = new OperatorCutLocal.CutPair(multipath, cut,</b>
+&nbsp;								ipartCuttee, ivertexCuttee, scalarCuttee,
+&nbsp;								cutPrev, ipartCutteePrev, ivertexCutteePrev,
+&nbsp;								scalarCutteePrev, ipartCutter, ivertexCutter,
+&nbsp;								scalarCutter, ipartCutterPrev,
+&nbsp;								ivertexCutterPrev, scalarCutterPrev);
+<b class="fc">&nbsp;						cutPairs.add(cutPair);</b>
+&nbsp;					} else {
+<b class="nc">&nbsp;						segmentCounts.add(segmentCount);</b>
+&nbsp;					}
+&nbsp;				}
+&nbsp;			}
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	static boolean _cutterTangents(boolean bConsiderTouch, EditShape shape,
+&nbsp;			ArrayList&lt;CutEvent&gt; cutEvents, int icutEvent, Point2D tangent0,
+&nbsp;			Point2D tangent1) {
+<b class="fc">&nbsp;		double scalarCutter = cutEvents.get(icutEvent).m_scalarCutter0;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (scalarCutter == 1.0)</b>
+<b class="fc">&nbsp;			return _cutterEndTangents(bConsiderTouch, shape, cutEvents,</b>
+&nbsp;					icutEvent, tangent0, tangent1);
+&nbsp;
+<b class="fc">&nbsp;		if (scalarCutter == 0.0)</b>
+<b class="fc">&nbsp;			return _cutterStartTangents(bConsiderTouch, shape, cutEvents,</b>
+&nbsp;					icutEvent, tangent0, tangent1);
+&nbsp;
+<b class="nc">&nbsp;		throw GeometryException.GeometryInternalError();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	static boolean _cutterEndTangents(boolean bConsiderTouch, EditShape shape,
+&nbsp;			ArrayList&lt;CutEvent&gt; cutEvents, int icutEvent, Point2D tangent0,
+&nbsp;			Point2D tangent1) {
+<b class="fc">&nbsp;		Line lineCutter = new Line();</b>
+&nbsp;		Segment segmentCutter;
+&nbsp;
+<b class="fc">&nbsp;		int ivertexCuttee = cutEvents.get(icutEvent).m_ivertexCuttee;</b>
+<b class="fc">&nbsp;		int ipartCutter = cutEvents.get(icutEvent).m_ipartCutter;</b>
+<b class="fc">&nbsp;		int ivertexCutter = cutEvents.get(icutEvent).m_ivertexCutter;</b>
+&nbsp;
+<b class="fc">&nbsp;		int ivertexCutteePrev = -1;</b>
+<b class="fc">&nbsp;		int ipartCutterPrev = -1;</b>
+<b class="fc">&nbsp;		int ivertexCutterPrev = -1;</b>
+<b class="fc">&nbsp;		int countPrev = -1;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (!bConsiderTouch &amp;&amp; icutEvent &gt; 0) {</b>
+<b class="nc">&nbsp;			CutEvent cutEvent = cutEvents.get(icutEvent - 1);</b>
+<b class="nc">&nbsp;			ivertexCutteePrev = cutEvent.m_ivertexCuttee;</b>
+<b class="nc">&nbsp;			ipartCutterPrev = cutEvent.m_ipartCutter;</b>
+<b class="nc">&nbsp;			ivertexCutterPrev = cutEvent.m_ivertexCutter;</b>
+<b class="nc">&nbsp;			countPrev = cutEvent.m_count;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		int ivertexCutteeNext = -1;</b>
+<b class="fc">&nbsp;		int ipartCutterNext = -1;</b>
+<b class="fc">&nbsp;		int ivertexCutterNext = -1;</b>
+<b class="fc">&nbsp;		int countNext = -1;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (icutEvent &lt; cutEvents.size() - 1) {</b>
+<b class="fc">&nbsp;			CutEvent cutEvent = cutEvents.get(icutEvent + 1);</b>
+<b class="fc">&nbsp;			ivertexCutteeNext = cutEvent.m_ivertexCuttee;</b>
+<b class="fc">&nbsp;			ipartCutterNext = cutEvent.m_ipartCutter;</b>
+<b class="fc">&nbsp;			ivertexCutterNext = cutEvent.m_ivertexCutter;</b>
+<b class="fc">&nbsp;			countNext = cutEvent.m_count;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		int ivertexCutteePlus = shape.getNextVertex(ivertexCuttee);</b>
+<b class="fc">&nbsp;		int ivertexCutterPlus = shape.getNextVertex(ivertexCutter);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (!bConsiderTouch) {</b>
+<b class="nc">&nbsp;			if ((icutEvent &gt; 0 &amp;&amp; ivertexCutteePrev == ivertexCuttee</b>
+&nbsp;					&amp;&amp; ipartCutterPrev == ipartCutter
+&nbsp;					&amp;&amp; ivertexCutterPrev == ivertexCutterPlus &amp;&amp; countPrev == 2)
+<b class="nc">&nbsp;					|| (icutEvent &lt; cutEvents.size() - 1</b>
+&nbsp;							&amp;&amp; ivertexCutteeNext == ivertexCutteePlus
+&nbsp;							&amp;&amp; ipartCutterNext == ipartCutter
+&nbsp;							&amp;&amp; ivertexCutterNext == ivertexCutterPlus &amp;&amp; countNext == 2)) {
+<b class="nc">&nbsp;				segmentCutter = shape.getSegment(ivertexCutter);</b>
+<b class="nc">&nbsp;				if (segmentCutter == null) {</b>
+<b class="nc">&nbsp;					shape.queryLineConnector(ivertexCutter, lineCutter);</b>
+<b class="nc">&nbsp;					segmentCutter = lineCutter;</b>
+&nbsp;				}
+&nbsp;
+<b class="nc">&nbsp;				tangent1.setCoords(segmentCutter._getTangent(1.0));</b>
+<b class="nc">&nbsp;				tangent0.negate(tangent1);</b>
+<b class="nc">&nbsp;				tangent1.normalize();</b>
+<b class="nc">&nbsp;				tangent0.normalize();</b>
+&nbsp;
+<b class="nc">&nbsp;				return false;</b>
+&nbsp;			}
+&nbsp;
+<b class="nc">&nbsp;			if (icutEvent &lt; cutEvents.size() - 1</b>
+&nbsp;					&amp;&amp; ivertexCutteeNext == ivertexCuttee
+&nbsp;					&amp;&amp; ipartCutterNext == ipartCutter
+&nbsp;					&amp;&amp; ivertexCutterNext == ivertexCutterPlus) {
+<b class="nc">&nbsp;				segmentCutter = shape.getSegment(ivertexCutter);</b>
+<b class="nc">&nbsp;				if (segmentCutter == null) {</b>
+<b class="nc">&nbsp;					shape.queryLineConnector(ivertexCutter, lineCutter);</b>
+<b class="nc">&nbsp;					segmentCutter = lineCutter;</b>
+&nbsp;				}
+&nbsp;
+<b class="nc">&nbsp;				tangent0.setCoords(segmentCutter._getTangent(1.0));</b>
+&nbsp;
+<b class="nc">&nbsp;				segmentCutter = shape.getSegment(ivertexCutterPlus);</b>
+<b class="nc">&nbsp;				if (segmentCutter == null) {</b>
+<b class="nc">&nbsp;					shape.queryLineConnector(ivertexCutterPlus, lineCutter);</b>
+<b class="nc">&nbsp;					segmentCutter = lineCutter;</b>
+&nbsp;				}
+&nbsp;
+<b class="nc">&nbsp;				tangent1.setCoords(segmentCutter._getTangent(0.0));</b>
+<b class="nc">&nbsp;				tangent0.negate();</b>
+<b class="nc">&nbsp;				tangent1.normalize();</b>
+<b class="nc">&nbsp;				tangent0.normalize();</b>
+&nbsp;
+<b class="nc">&nbsp;				return false;</b>
+&nbsp;			}
+&nbsp;
+<b class="nc">&nbsp;			return true;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (icutEvent == cutEvents.size() - 1</b>
+&nbsp;				|| ivertexCutteeNext != ivertexCuttee
+&nbsp;				|| ipartCutterNext != ipartCutter
+&nbsp;				|| ivertexCutterNext != ivertexCutterPlus || countNext == 2) {
+<b class="fc">&nbsp;			segmentCutter = shape.getSegment(ivertexCutter);</b>
+<b class="fc">&nbsp;			if (segmentCutter == null) {</b>
+<b class="fc">&nbsp;				shape.queryLineConnector(ivertexCutter, lineCutter);</b>
+<b class="fc">&nbsp;				segmentCutter = lineCutter;</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			tangent1.setCoords(segmentCutter._getTangent(1.0));</b>
+<b class="fc">&nbsp;			tangent0.negate(tangent1);</b>
+<b class="fc">&nbsp;			tangent1.normalize();</b>
+<b class="fc">&nbsp;			tangent0.normalize();</b>
+&nbsp;
+<b class="fc">&nbsp;			return false;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		segmentCutter = shape.getSegment(ivertexCutter);</b>
+<b class="fc">&nbsp;		if (segmentCutter == null) {</b>
+<b class="fc">&nbsp;			shape.queryLineConnector(ivertexCutter, lineCutter);</b>
+<b class="fc">&nbsp;			segmentCutter = lineCutter;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		tangent0.setCoords(segmentCutter._getTangent(1.0));</b>
+&nbsp;
+<b class="fc">&nbsp;		segmentCutter = shape.getSegment(ivertexCutterPlus);</b>
+<b class="fc">&nbsp;		if (segmentCutter == null) {</b>
+<b class="fc">&nbsp;			shape.queryLineConnector(ivertexCutterPlus, lineCutter);</b>
+<b class="fc">&nbsp;			segmentCutter = lineCutter;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		tangent1.setCoords(segmentCutter._getTangent(0.0));</b>
+<b class="fc">&nbsp;		tangent0.negate();</b>
+<b class="fc">&nbsp;		tangent1.normalize();</b>
+<b class="fc">&nbsp;		tangent0.normalize();</b>
+&nbsp;
+<b class="fc">&nbsp;		return false;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	static boolean _cutterStartTangents(boolean bConsiderTouch,
+&nbsp;			EditShape shape, ArrayList&lt;CutEvent&gt; cutEvents, int icutEvent,
+&nbsp;			Point2D tangent0, Point2D tangent1) {
+<b class="fc">&nbsp;		Line lineCutter = new Line();</b>
+&nbsp;		Segment segmentCutter;
+&nbsp;
+<b class="fc">&nbsp;		int ivertexCuttee = cutEvents.get(icutEvent).m_ivertexCuttee;</b>
+<b class="fc">&nbsp;		int ipartCutter = cutEvents.get(icutEvent).m_ipartCutter;</b>
+<b class="fc">&nbsp;		int ivertexCutter = cutEvents.get(icutEvent).m_ivertexCutter;</b>
+&nbsp;
+<b class="fc">&nbsp;		int ivertexCutteeNext = -1;</b>
+<b class="fc">&nbsp;		int ipartCutterNext = -1;</b>
+<b class="fc">&nbsp;		int ivertexCutterNext = -1;</b>
+<b class="fc">&nbsp;		int countNext = -1;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (!bConsiderTouch &amp;&amp; icutEvent &lt; cutEvents.size() - 1) {</b>
+<b class="nc">&nbsp;			CutEvent cutEvent = cutEvents.get(icutEvent + 1);</b>
+<b class="nc">&nbsp;			ivertexCutteeNext = cutEvent.m_ivertexCuttee;</b>
+<b class="nc">&nbsp;			ipartCutterNext = cutEvent.m_ipartCutter;</b>
+<b class="nc">&nbsp;			ivertexCutterNext = cutEvent.m_ivertexCutter;</b>
+<b class="nc">&nbsp;			countNext = cutEvent.m_count;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		int ivertexCutteePrev = -1;</b>
+<b class="fc">&nbsp;		int ipartCutterPrev = -1;</b>
+<b class="fc">&nbsp;		int ivertexCutterPrev = -1;</b>
+<b class="fc">&nbsp;		int countPrev = -1;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (icutEvent &gt; 0) {</b>
+<b class="fc">&nbsp;			CutEvent cutEvent = cutEvents.get(icutEvent - 1);</b>
+<b class="fc">&nbsp;			ivertexCutteePrev = cutEvent.m_ivertexCuttee;</b>
+<b class="fc">&nbsp;			ipartCutterPrev = cutEvent.m_ipartCutter;</b>
+<b class="fc">&nbsp;			ivertexCutterPrev = cutEvent.m_ivertexCutter;</b>
+<b class="fc">&nbsp;			countPrev = cutEvent.m_count;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		int ivertexCutteePlus = shape.getNextVertex(ivertexCuttee);</b>
+<b class="fc">&nbsp;		int ivertexCutterMinus = shape.getPrevVertex(ivertexCutter);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (!bConsiderTouch) {</b>
+<b class="nc">&nbsp;			if ((icutEvent &gt; 0 &amp;&amp; ivertexCutteePrev == ivertexCuttee</b>
+&nbsp;					&amp;&amp; ipartCutterPrev == ipartCutter
+&nbsp;					&amp;&amp; ivertexCutterPrev == ivertexCutterMinus &amp;&amp; countPrev == 2)
+<b class="nc">&nbsp;					|| (icutEvent &lt; cutEvents.size() - 1</b>
+&nbsp;							&amp;&amp; ivertexCutteeNext == ivertexCutteePlus
+&nbsp;							&amp;&amp; ipartCutterNext == ipartCutter
+&nbsp;							&amp;&amp; ivertexCutterNext == ivertexCutterMinus &amp;&amp; countNext == 2)) {
+<b class="nc">&nbsp;				segmentCutter = shape.getSegment(ivertexCutter);</b>
+<b class="nc">&nbsp;				if (segmentCutter == null) {</b>
+<b class="nc">&nbsp;					shape.queryLineConnector(ivertexCutter, lineCutter);</b>
+<b class="nc">&nbsp;					segmentCutter = lineCutter;</b>
+&nbsp;				}
+&nbsp;
+<b class="nc">&nbsp;				tangent1.setCoords(segmentCutter._getTangent(0.0));</b>
+<b class="nc">&nbsp;				tangent0.negate(tangent1);</b>
+<b class="nc">&nbsp;				tangent1.normalize();</b>
+<b class="nc">&nbsp;				tangent0.normalize();</b>
+&nbsp;
+<b class="nc">&nbsp;				return false;</b>
+&nbsp;			}
+&nbsp;
+<b class="nc">&nbsp;			return true;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (icutEvent == 0 || ivertexCutteePrev != ivertexCuttee</b>
+&nbsp;				|| ipartCutterPrev != ipartCutter
+&nbsp;				|| ivertexCutterPrev != ivertexCutterMinus || countPrev == 2) {
+<b class="fc">&nbsp;			segmentCutter = shape.getSegment(ivertexCutter);</b>
+<b class="fc">&nbsp;			if (segmentCutter == null) {</b>
+<b class="fc">&nbsp;				shape.queryLineConnector(ivertexCutter, lineCutter);</b>
+<b class="fc">&nbsp;				segmentCutter = lineCutter;</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			tangent1.setCoords(segmentCutter._getTangent(0.0));</b>
+<b class="fc">&nbsp;			tangent0.negate(tangent1);</b>
+<b class="fc">&nbsp;			tangent1.normalize();</b>
+<b class="fc">&nbsp;			tangent0.normalize();</b>
+&nbsp;
+<b class="fc">&nbsp;			return false;</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		// Already processed the event
+&nbsp;
+<b class="fc">&nbsp;		return true;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	static boolean _cutteeTangents(EditShape shape,
+&nbsp;			ArrayList&lt;CutEvent&gt; cutEvents, int icutEvent, int ipath,
+&nbsp;			int ivertex, Point2D tangent2, Point2D tangent3) {
+<b class="fc">&nbsp;		Line lineCuttee = new Line();</b>
+<b class="fc">&nbsp;		Segment segmentCuttee = shape.getSegment(ivertex);</b>
+<b class="fc">&nbsp;		if (segmentCuttee == null) {</b>
+<b class="fc">&nbsp;			shape.queryLineConnector(ivertex, lineCuttee);</b>
+<b class="fc">&nbsp;			segmentCuttee = lineCuttee;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		CutEvent cutEvent = cutEvents.get(icutEvent);</b>
+<b class="fc">&nbsp;		int ivertexCuttee = cutEvent.m_ivertexCuttee;</b>
+<b class="fc">&nbsp;		double scalarCuttee = cutEvent.m_scalarCuttee0;</b>
+&nbsp;
+<b class="fc">&nbsp;		int ivertexCutteePlus = shape.getNextVertex(ivertexCuttee);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (scalarCuttee == 1.0) {</b>
+<b class="fc">&nbsp;			tangent2.setCoords(segmentCuttee._getTangent(1.0));</b>
+&nbsp;
+<b class="fc">&nbsp;			if (ivertexCutteePlus != -1</b>
+<b class="fc">&nbsp;					&amp;&amp; ivertexCutteePlus != shape.getLastVertex(ipath)) {</b>
+<b class="fc">&nbsp;				segmentCuttee = shape.getSegment(ivertexCutteePlus);</b>
+<b class="fc">&nbsp;				if (segmentCuttee == null) {</b>
+<b class="fc">&nbsp;					shape.queryLineConnector(ivertexCutteePlus, lineCuttee);</b>
+<b class="fc">&nbsp;					segmentCuttee = lineCuttee;</b>
+&nbsp;				}
+&nbsp;
+<b class="fc">&nbsp;				tangent3.setCoords(segmentCuttee._getTangent(0.0));</b>
+&nbsp;
+<b class="fc">&nbsp;				segmentCuttee = shape.getSegment(ivertexCuttee);</b>
+<b class="fc">&nbsp;				if (segmentCuttee == null) {</b>
+<b class="fc">&nbsp;					shape.queryLineConnector(ivertexCuttee, lineCuttee);</b>
+<b class="fc">&nbsp;					segmentCuttee = lineCuttee;</b>
+&nbsp;				}
+&nbsp;			} else
+<b class="fc">&nbsp;				tangent3.setCoords(tangent2);</b>
+&nbsp;
+<b class="fc">&nbsp;			tangent2.negate();</b>
+&nbsp;
+<b class="fc">&nbsp;			tangent3.normalize();</b>
+<b class="fc">&nbsp;			tangent2.normalize();</b>
+&nbsp;
+<b class="fc">&nbsp;			return false;</b>
+&nbsp;		}
+&nbsp;
+<b class="nc">&nbsp;		if (scalarCuttee == 0.0) {</b>
+<b class="nc">&nbsp;			tangent3.setCoords(segmentCuttee._getTangent(scalarCuttee));</b>
+<b class="nc">&nbsp;			tangent2.negate(tangent3);</b>
+<b class="nc">&nbsp;			tangent3.normalize();</b>
+<b class="nc">&nbsp;			tangent2.normalize();</b>
+&nbsp;
+<b class="nc">&nbsp;			return false;</b>
+&nbsp;		}
+&nbsp;
+<b class="nc">&nbsp;		throw GeometryException.GeometryInternalError();</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-02-21 16:04</div>
+</div>
+</body>
+</html>

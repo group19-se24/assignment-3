@@ -1,0 +1,830 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > WktParser</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.esri.core.geometry</a>
+</div>
+
+<h1>Coverage Summary for Class: WktParser (com.esri.core.geometry)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">WktParser</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (43/43)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    90,4%
+  </span>
+  <span class="absValue">
+    (319/353)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">WktParser$Number</td>
+  </tr>
+  <tr>
+    <td class="name">WktParser$State</td>
+  </tr>
+  <tr>
+    <td class="name">WktParser$WktToken</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (43/43)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    90,4%
+  </span>
+  <span class="absValue">
+    (319/353)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; Copyright 1995-2015 Esri
+&nbsp;
+&nbsp;   Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp;   you may not use this file except in compliance with the License.
+&nbsp;   You may obtain a copy of the License at
+&nbsp;
+&nbsp;       http://www.apache.org/licenses/LICENSE-2.0
+&nbsp;
+&nbsp;   Unless required by applicable law or agreed to in writing, software
+&nbsp;   distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp;   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp;   See the License for the specific language governing permissions and
+&nbsp;   limitations under the License.
+&nbsp;
+&nbsp; For additional information, contact:
+&nbsp; Environmental Systems Research Institute, Inc.
+&nbsp; Attn: Contracts Dept
+&nbsp; 380 New York Street
+&nbsp; Redlands, California, USA 92373
+&nbsp;
+&nbsp; email: contracts@esri.com
+&nbsp; */
+&nbsp;package com.esri.core.geometry;
+&nbsp;
+&nbsp;final class WktParser {
+&nbsp;	interface WktToken {
+&nbsp;		static final int not_available = 0;
+&nbsp;		static final int empty = 50;
+&nbsp;		static final int left_paren = 51;
+&nbsp;		static final int right_paren = 52;
+&nbsp;		static final int x_literal = 0x80000000;
+&nbsp;		static final int y_literal = 0x40000000;
+&nbsp;		static final int z_literal = 0x20000000;
+&nbsp;		static final int m_literal = 0x10000000;
+&nbsp;		static final int point = 1;
+&nbsp;		static final int linestring = 2;
+&nbsp;		static final int polygon = 3;
+&nbsp;		static final int multipoint = 4;
+&nbsp;		static final int multilinestring = 5;
+&nbsp;		static final int multipolygon = 6;
+&nbsp;		static final int geometrycollection = 7;
+&nbsp;		static final int attribute_z = 1000;
+&nbsp;		static final int attribute_m = 2000;
+&nbsp;		static final int attribute_zm = 3000;
+&nbsp;	}
+&nbsp;
+<b class="fc">&nbsp;	WktParser() {</b>
+&nbsp;	}
+&nbsp;
+<b class="fc">&nbsp;	WktParser(String string) {</b>
+<b class="fc">&nbsp;		resetParser(string);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void resetParser(String string) {
+<b class="fc">&nbsp;		if (m_function_stack == null)</b>
+<b class="fc">&nbsp;			m_function_stack = new AttributeStreamOfInt32(0);</b>
+&nbsp;
+<b class="fc">&nbsp;		reset_();</b>
+<b class="fc">&nbsp;		m_wkt_string = string;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	int nextToken() {
+<b class="fc">&nbsp;		switch (m_function_stack.getLast()) {</b>
+&nbsp;		case State.xLiteral:
+<b class="fc">&nbsp;			xLiteral_();</b>
+<b class="fc">&nbsp;			break;</b>
+&nbsp;		case State.yLiteral:
+<b class="fc">&nbsp;			yLiteral_();</b>
+<b class="fc">&nbsp;			break;</b>
+&nbsp;		case State.zLiteral:
+<b class="fc">&nbsp;			zLiteral_();</b>
+<b class="fc">&nbsp;			break;</b>
+&nbsp;		case State.mLiteral:
+<b class="fc">&nbsp;			mLiteral_();</b>
+<b class="fc">&nbsp;			break;</b>
+&nbsp;		case State.pointStart:
+<b class="fc">&nbsp;			pointStart_();</b>
+<b class="fc">&nbsp;			break;</b>
+&nbsp;		case State.pointStartAlt:
+<b class="fc">&nbsp;			pointStartAlt_();</b>
+<b class="fc">&nbsp;			break;</b>
+&nbsp;		case State.pointEnd:
+<b class="fc">&nbsp;			pointEnd_();</b>
+<b class="fc">&nbsp;			break;</b>
+&nbsp;		case State.lineStringStart:
+<b class="fc">&nbsp;			lineStringStart_();</b>
+<b class="fc">&nbsp;			break;</b>
+&nbsp;		case State.lineStringEnd:
+<b class="fc">&nbsp;			lineStringEnd_();</b>
+<b class="fc">&nbsp;			break;</b>
+&nbsp;		case State.multiPointStart:
+<b class="fc">&nbsp;			multiPointStart_();</b>
+<b class="fc">&nbsp;			break;</b>
+&nbsp;		case State.multiPointEnd:
+<b class="fc">&nbsp;			multiPointEnd_();</b>
+<b class="fc">&nbsp;			break;</b>
+&nbsp;		case State.polygonStart:
+<b class="fc">&nbsp;			polygonStart_();</b>
+<b class="fc">&nbsp;			break;</b>
+&nbsp;		case State.polygonEnd:
+<b class="fc">&nbsp;			polygonEnd_();</b>
+<b class="fc">&nbsp;			break;</b>
+&nbsp;		case State.multiLineStringStart:
+<b class="fc">&nbsp;			multiLineStringStart_();</b>
+<b class="fc">&nbsp;			break;</b>
+&nbsp;		case State.multiLineStringEnd:
+<b class="fc">&nbsp;			multiLineStringEnd_();</b>
+<b class="fc">&nbsp;			break;</b>
+&nbsp;		case State.multiPolygonStart:
+<b class="fc">&nbsp;			multiPolygonStart_();</b>
+<b class="fc">&nbsp;			break;</b>
+&nbsp;		case State.multiPolygonEnd:
+<b class="fc">&nbsp;			multiPolygonEnd_();</b>
+<b class="fc">&nbsp;			break;</b>
+&nbsp;		case State.geometryCollectionStart:
+<b class="fc">&nbsp;			geometryCollectionStart_();</b>
+<b class="fc">&nbsp;			break;</b>
+&nbsp;		case State.geometryCollectionEnd:
+<b class="fc">&nbsp;			geometryCollectionEnd_();</b>
+<b class="fc">&nbsp;			break;</b>
+&nbsp;		case State.accept:
+<b class="fc">&nbsp;			accept_();</b>
+<b class="fc">&nbsp;			break;</b>
+&nbsp;		case State.geometry:
+<b class="fc">&nbsp;			geometry_();</b>
+<b class="fc">&nbsp;			break;</b>
+&nbsp;		case State.attributes:
+<b class="fc">&nbsp;			attributes_();</b>
+&nbsp;			break;
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return m_current_token_type;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	double currentNumericLiteral() {
+<b class="fc">&nbsp;		if (((int) m_current_token_type &amp; (int) Number.signed_numeric_literal) == 0)</b>
+<b class="nc">&nbsp;			throw new GeometryException(&quot;runtime error&quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (m_b_nan)</b>
+<b class="nc">&nbsp;			return NumberUtils.TheNaN;</b>
+&nbsp;
+<b class="fc">&nbsp;		double value = Double.parseDouble(m_wkt_string.substring(m_start_token,</b>
+&nbsp;				m_end_token));
+<b class="fc">&nbsp;		return value;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	int currentToken() {
+<b class="fc">&nbsp;		return m_current_token_type;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	boolean hasZs() {
+<b class="fc">&nbsp;		return m_b_has_zs;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	boolean hasMs() {
+<b class="fc">&nbsp;		return m_b_has_ms;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private String m_wkt_string;
+&nbsp;	private int m_start_token;
+&nbsp;	private int m_end_token;
+&nbsp;	private int m_current_token_type;
+&nbsp;
+&nbsp;	private boolean m_b_has_zs;
+&nbsp;	private boolean m_b_has_ms;
+&nbsp;	private boolean m_b_check_consistent_attributes;
+&nbsp;	private boolean m_b_nan;
+&nbsp;
+&nbsp;	private AttributeStreamOfInt32 m_function_stack;
+&nbsp;
+&nbsp;	private interface State {
+&nbsp;		static final int xLiteral = 0;
+&nbsp;		static final int yLiteral = 1;
+&nbsp;		static final int zLiteral = 2;
+&nbsp;		static final int mLiteral = 3;
+&nbsp;		static final int pointStart = 4;
+&nbsp;		static final int pointStartAlt = 5;
+&nbsp;		static final int pointEnd = 6;
+&nbsp;		static final int lineStringStart = 7;
+&nbsp;		static final int lineStringEnd = 8;
+&nbsp;		static final int multiPointStart = 9;
+&nbsp;		static final int multiPointEnd = 10;
+&nbsp;		static final int polygonStart = 11;
+&nbsp;		static final int polygonEnd = 12;
+&nbsp;		static final int multiLineStringStart = 13;
+&nbsp;		static final int multiLineStringEnd = 14;
+&nbsp;		static final int multiPolygonStart = 15;
+&nbsp;		static final int multiPolygonEnd = 16;
+&nbsp;		static final int geometryCollectionStart = 17;
+&nbsp;		static final int geometryCollectionEnd = 18;
+&nbsp;		static final int accept = 19;
+&nbsp;		static final int geometry = 20;
+&nbsp;		static final int attributes = 21;
+&nbsp;	}
+&nbsp;
+&nbsp;	private interface Number {
+&nbsp;		static final int signed_numeric_literal = WktToken.x_literal
+&nbsp;				| WktToken.y_literal | WktToken.z_literal | WktToken.m_literal;
+&nbsp;	}
+&nbsp;
+&nbsp;	private void reset_() {
+<b class="fc">&nbsp;		m_function_stack.add(State.accept);</b>
+<b class="fc">&nbsp;		m_function_stack.add(State.geometry);</b>
+<b class="fc">&nbsp;		m_start_token = -1;</b>
+<b class="fc">&nbsp;		m_end_token = 0;</b>
+<b class="fc">&nbsp;		m_current_token_type = WktToken.not_available;</b>
+<b class="fc">&nbsp;		m_b_has_zs = false;</b>
+<b class="fc">&nbsp;		m_b_has_ms = false;</b>
+<b class="fc">&nbsp;		m_b_check_consistent_attributes = false;</b>
+<b class="fc">&nbsp;		m_b_nan = false;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private void accept_() {
+<b class="fc">&nbsp;		m_start_token = m_end_token;</b>
+<b class="fc">&nbsp;		m_current_token_type = WktToken.not_available;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private void geometry_() {
+<b class="fc">&nbsp;		skipWhiteSpace_();</b>
+<b class="fc">&nbsp;		m_start_token = m_end_token;</b>
+<b class="fc">&nbsp;		m_function_stack.removeLast();</b>
+&nbsp;
+<b class="fc">&nbsp;		if (m_start_token + 5 &lt;= m_wkt_string.length()</b>
+<b class="fc">&nbsp;				&amp;&amp; m_wkt_string.regionMatches(true, m_start_token, &quot;point&quot;, 0,</b>
+&nbsp;						5)) {
+<b class="fc">&nbsp;			m_end_token = m_start_token + 5;</b>
+<b class="fc">&nbsp;			m_current_token_type = WktToken.point;</b>
+<b class="fc">&nbsp;			m_function_stack.add(State.pointStart);</b>
+<b class="fc">&nbsp;		} else if (m_start_token + 10 &lt;= m_wkt_string.length()</b>
+<b class="fc">&nbsp;				&amp;&amp; m_wkt_string.regionMatches(true, m_start_token,</b>
+&nbsp;						&quot;linestring&quot;, 0, 10)) {
+<b class="fc">&nbsp;			m_end_token = m_start_token + 10;</b>
+<b class="fc">&nbsp;			m_current_token_type = WktToken.linestring;</b>
+<b class="fc">&nbsp;			m_function_stack.add(State.lineStringStart);</b>
+<b class="fc">&nbsp;		} else if (m_start_token + 10 &lt;= m_wkt_string.length()</b>
+<b class="fc">&nbsp;				&amp;&amp; m_wkt_string.regionMatches(true, m_start_token,</b>
+&nbsp;						&quot;multipoint&quot;, 0, 10)) {
+<b class="fc">&nbsp;			m_end_token = m_start_token + 10;</b>
+<b class="fc">&nbsp;			m_current_token_type = WktToken.multipoint;</b>
+<b class="fc">&nbsp;			m_function_stack.add(State.multiPointStart);</b>
+<b class="fc">&nbsp;		} else if (m_start_token + 7 &lt;= m_wkt_string.length()</b>
+<b class="fc">&nbsp;				&amp;&amp; m_wkt_string.regionMatches(true, m_start_token, &quot;polygon&quot;,</b>
+&nbsp;						0, 7)) {
+<b class="fc">&nbsp;			m_end_token = m_start_token + 7;</b>
+<b class="fc">&nbsp;			m_current_token_type = WktToken.polygon;</b>
+<b class="fc">&nbsp;			m_function_stack.add(State.polygonStart);</b>
+<b class="fc">&nbsp;		} else if (m_start_token + 15 &lt;= m_wkt_string.length()</b>
+<b class="fc">&nbsp;				&amp;&amp; m_wkt_string.regionMatches(true, m_start_token,</b>
+&nbsp;						&quot;multilinestring&quot;, 0, 15)) {
+<b class="fc">&nbsp;			m_end_token = m_start_token + 15;</b>
+<b class="fc">&nbsp;			m_current_token_type = WktToken.multilinestring;</b>
+<b class="fc">&nbsp;			m_function_stack.add(State.multiLineStringStart);</b>
+<b class="fc">&nbsp;		} else if (m_start_token + 12 &lt;= m_wkt_string.length()</b>
+<b class="fc">&nbsp;				&amp;&amp; m_wkt_string.regionMatches(true, m_start_token,</b>
+&nbsp;						&quot;multipolygon&quot;, 0, 12)) {
+<b class="fc">&nbsp;			m_end_token = m_start_token + 12;</b>
+<b class="fc">&nbsp;			m_current_token_type = WktToken.multipolygon;</b>
+<b class="fc">&nbsp;			m_function_stack.add(State.multiPolygonStart);</b>
+<b class="fc">&nbsp;		} else if (m_start_token + 18 &lt;= m_wkt_string.length()</b>
+<b class="fc">&nbsp;				&amp;&amp; m_wkt_string.regionMatches(true, m_start_token,</b>
+&nbsp;						&quot;geometrycollection&quot;, 0, 18)) {
+<b class="fc">&nbsp;			m_end_token = m_start_token + 18;</b>
+<b class="fc">&nbsp;			m_current_token_type = WktToken.geometrycollection;</b>
+<b class="fc">&nbsp;			m_function_stack.add(State.geometryCollectionStart);</b>
+&nbsp;		} else {
+&nbsp;			//String snippet = (m_wkt_string.length() &gt; 200 ? m_wkt_string
+&nbsp;			//		.substring(0, 200) + &quot;...&quot; : m_wkt_string);
+&nbsp;			//throw new IllegalArgumentException(
+&nbsp;			//		&quot;Could not parse Well-Known Text: &quot; + snippet);
+<b class="nc">&nbsp;			throw new IllegalArgumentException(</b>
+&nbsp;					&quot;Could not parse Well-Known Text around position: &quot; + m_end_token);
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		m_function_stack.add(State.attributes);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private void attributes_() {
+<b class="fc">&nbsp;		skipWhiteSpace_();</b>
+<b class="fc">&nbsp;		m_start_token = m_end_token;</b>
+<b class="fc">&nbsp;		m_function_stack.removeLast();</b>
+&nbsp;
+&nbsp;		// Z and M is not allowed to have a space between them
+<b class="fc">&nbsp;		boolean b_has_zs = false, b_has_ms = false;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (m_wkt_string.charAt(m_end_token) == &#39;z&#39;</b>
+<b class="fc">&nbsp;				|| m_wkt_string.charAt(m_end_token) == &#39;Z&#39;) {</b>
+<b class="fc">&nbsp;			b_has_zs = true;</b>
+&nbsp;
+<b class="fc">&nbsp;			if (++m_end_token &gt;= m_wkt_string.length())</b>
+<b class="nc">&nbsp;				throw new IllegalArgumentException();</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (m_wkt_string.charAt(m_end_token) == &#39;m&#39;</b>
+<b class="fc">&nbsp;				|| m_wkt_string.charAt(m_end_token) == &#39;M&#39;) {</b>
+<b class="fc">&nbsp;			b_has_ms = true;</b>
+&nbsp;
+<b class="fc">&nbsp;			if (++m_end_token &gt;= m_wkt_string.length())</b>
+<b class="nc">&nbsp;				throw new IllegalArgumentException();</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (m_b_check_consistent_attributes) {</b>
+<b class="fc">&nbsp;			if (b_has_zs != m_b_has_zs || b_has_ms != m_b_has_ms)</b>
+<b class="nc">&nbsp;				throw new IllegalArgumentException();</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		m_b_has_zs = b_has_zs;</b>
+<b class="fc">&nbsp;		m_b_has_ms = b_has_ms;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (m_b_has_zs || m_b_has_ms) {</b>
+<b class="fc">&nbsp;			if (m_b_has_zs &amp;&amp; !m_b_has_ms)</b>
+<b class="fc">&nbsp;				m_current_token_type = WktToken.attribute_z;</b>
+<b class="fc">&nbsp;			else if (m_b_has_ms &amp;&amp; !m_b_has_zs)</b>
+<b class="fc">&nbsp;				m_current_token_type = WktToken.attribute_m;</b>
+&nbsp;			else
+<b class="fc">&nbsp;				m_current_token_type = WktToken.attribute_zm;</b>
+&nbsp;		} else {
+<b class="fc">&nbsp;			nextToken();</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	private void geometryCollectionStart_() {
+<b class="fc">&nbsp;		skipWhiteSpace_();</b>
+<b class="fc">&nbsp;		m_start_token = m_end_token;</b>
+<b class="fc">&nbsp;		m_b_check_consistent_attributes = true;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (empty_()) {</b>
+<b class="fc">&nbsp;			m_function_stack.removeLast();</b>
+<b class="fc">&nbsp;		} else if (leftParen_()) {</b>
+<b class="fc">&nbsp;			m_function_stack.removeLast();</b>
+<b class="fc">&nbsp;			m_function_stack.add(State.geometryCollectionEnd);</b>
+<b class="fc">&nbsp;			m_function_stack.add(State.geometry);</b>
+&nbsp;		} else {
+<b class="nc">&nbsp;			throw new IllegalArgumentException();</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	private void geometryCollectionEnd_() {
+<b class="fc">&nbsp;		skipWhiteSpace_();</b>
+<b class="fc">&nbsp;		m_start_token = m_end_token;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (comma_()) {</b>
+<b class="fc">&nbsp;			m_function_stack.add(State.geometry);</b>
+<b class="fc">&nbsp;			geometry_();</b>
+<b class="fc">&nbsp;		} else if (rightParen_()) {</b>
+<b class="fc">&nbsp;			m_function_stack.removeLast();</b>
+&nbsp;		} else {
+<b class="nc">&nbsp;			throw new IllegalArgumentException();</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	private void multiPolygonStart_() {
+<b class="fc">&nbsp;		skipWhiteSpace_();</b>
+<b class="fc">&nbsp;		m_start_token = m_end_token;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (empty_()) {</b>
+<b class="fc">&nbsp;			m_function_stack.removeLast();</b>
+<b class="fc">&nbsp;		} else if (leftParen_()) {</b>
+<b class="fc">&nbsp;			m_function_stack.removeLast();</b>
+<b class="fc">&nbsp;			m_function_stack.add(State.multiPolygonEnd);</b>
+<b class="fc">&nbsp;			m_function_stack.add(State.polygonStart);</b>
+&nbsp;		} else {
+<b class="nc">&nbsp;			throw new IllegalArgumentException();</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	private void multiPolygonEnd_() {
+<b class="fc">&nbsp;		skipWhiteSpace_();</b>
+<b class="fc">&nbsp;		m_start_token = m_end_token;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (comma_()) {</b>
+<b class="fc">&nbsp;			m_function_stack.add(State.polygonStart);</b>
+<b class="fc">&nbsp;			polygonStart_();</b>
+<b class="fc">&nbsp;		} else if (rightParen_()) {</b>
+<b class="fc">&nbsp;			m_function_stack.removeLast();</b>
+&nbsp;		} else {
+<b class="nc">&nbsp;			throw new IllegalArgumentException();</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	private void multiLineStringStart_() {
+<b class="fc">&nbsp;		skipWhiteSpace_();</b>
+<b class="fc">&nbsp;		m_start_token = m_end_token;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (empty_()) {</b>
+<b class="fc">&nbsp;			m_function_stack.removeLast();</b>
+<b class="fc">&nbsp;		} else if (leftParen_()) {</b>
+<b class="fc">&nbsp;			m_function_stack.removeLast();</b>
+<b class="fc">&nbsp;			m_function_stack.add(State.multiLineStringEnd);</b>
+<b class="fc">&nbsp;			m_function_stack.add(State.lineStringStart);</b>
+&nbsp;		} else {
+<b class="nc">&nbsp;			throw new IllegalArgumentException();</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	private void multiLineStringEnd_() {
+<b class="fc">&nbsp;		skipWhiteSpace_();</b>
+<b class="fc">&nbsp;		m_start_token = m_end_token;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (comma_()) {</b>
+<b class="fc">&nbsp;			m_function_stack.add(State.lineStringStart);</b>
+<b class="fc">&nbsp;			lineStringStart_();</b>
+<b class="fc">&nbsp;		} else if (rightParen_()) {</b>
+<b class="fc">&nbsp;			m_function_stack.removeLast();</b>
+&nbsp;		} else {
+<b class="nc">&nbsp;			throw new IllegalArgumentException();</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	private void multiPointStart_() {
+<b class="fc">&nbsp;		skipWhiteSpace_();</b>
+<b class="fc">&nbsp;		m_start_token = m_end_token;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (empty_()) {</b>
+<b class="fc">&nbsp;			m_function_stack.removeLast();</b>
+<b class="fc">&nbsp;		} else if (leftParen_()) {</b>
+<b class="fc">&nbsp;			m_function_stack.removeLast();</b>
+<b class="fc">&nbsp;			m_function_stack.add(State.multiPointEnd);</b>
+<b class="fc">&nbsp;			m_function_stack.add(State.pointStartAlt);</b>
+&nbsp;		} else {
+<b class="nc">&nbsp;			throw new IllegalArgumentException();</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	private void multiPointEnd_() {
+<b class="fc">&nbsp;		skipWhiteSpace_();</b>
+<b class="fc">&nbsp;		m_start_token = m_end_token;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (comma_()) {</b>
+<b class="fc">&nbsp;			m_function_stack.add(State.pointStart);</b>
+<b class="fc">&nbsp;			pointStart_();</b>
+<b class="fc">&nbsp;		} else if (rightParen_()) {</b>
+<b class="fc">&nbsp;			m_function_stack.removeLast();</b>
+&nbsp;		} else {
+<b class="nc">&nbsp;			throw new IllegalArgumentException();</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	private void polygonStart_() {
+<b class="fc">&nbsp;		skipWhiteSpace_();</b>
+<b class="fc">&nbsp;		m_start_token = m_end_token;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (empty_()) {</b>
+<b class="fc">&nbsp;			m_function_stack.removeLast();</b>
+<b class="fc">&nbsp;		} else if (leftParen_()) {</b>
+<b class="fc">&nbsp;			m_function_stack.removeLast();</b>
+<b class="fc">&nbsp;			m_function_stack.add(State.polygonEnd);</b>
+<b class="fc">&nbsp;			m_function_stack.add(State.lineStringStart);</b>
+&nbsp;		} else {
+<b class="nc">&nbsp;			throw new IllegalArgumentException();</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	private void polygonEnd_() {
+<b class="fc">&nbsp;		skipWhiteSpace_();</b>
+<b class="fc">&nbsp;		m_start_token = m_end_token;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (comma_()) {</b>
+<b class="fc">&nbsp;			m_function_stack.add(State.lineStringStart);</b>
+<b class="fc">&nbsp;			lineStringStart_();</b>
+<b class="fc">&nbsp;		} else if (rightParen_()) {</b>
+<b class="fc">&nbsp;			m_function_stack.removeLast();</b>
+&nbsp;		} else {
+<b class="nc">&nbsp;			throw new IllegalArgumentException();</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	private void lineStringStart_() {
+<b class="fc">&nbsp;		skipWhiteSpace_();</b>
+<b class="fc">&nbsp;		m_start_token = m_end_token;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (empty_()) {</b>
+<b class="fc">&nbsp;			m_function_stack.removeLast();</b>
+<b class="fc">&nbsp;		} else if (leftParen_()) {</b>
+<b class="fc">&nbsp;			m_function_stack.removeLast();</b>
+<b class="fc">&nbsp;			m_function_stack.add(State.lineStringEnd);</b>
+<b class="fc">&nbsp;			m_function_stack.add(State.xLiteral);</b>
+&nbsp;		} else {
+<b class="nc">&nbsp;			throw new IllegalArgumentException();</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	private void lineStringEnd_() {
+<b class="fc">&nbsp;		skipWhiteSpace_();</b>
+<b class="fc">&nbsp;		m_start_token = m_end_token;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (comma_()) {</b>
+<b class="fc">&nbsp;			m_function_stack.add(State.xLiteral);</b>
+<b class="fc">&nbsp;			xLiteral_();</b>
+<b class="fc">&nbsp;		} else if (rightParen_()) {</b>
+<b class="fc">&nbsp;			m_function_stack.removeLast();</b>
+&nbsp;		} else {
+<b class="nc">&nbsp;			throw new IllegalArgumentException();</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	private void pointStart_() {
+<b class="fc">&nbsp;		skipWhiteSpace_();</b>
+<b class="fc">&nbsp;		m_start_token = m_end_token;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (empty_()) {</b>
+<b class="fc">&nbsp;			m_function_stack.removeLast();</b>
+<b class="fc">&nbsp;		} else if (leftParen_()) {</b>
+<b class="fc">&nbsp;			m_function_stack.removeLast();</b>
+<b class="fc">&nbsp;			m_function_stack.add(State.pointEnd);</b>
+<b class="fc">&nbsp;			m_function_stack.add(State.xLiteral);</b>
+&nbsp;		} else {
+<b class="nc">&nbsp;			throw new IllegalArgumentException();</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	private void pointStartAlt_() {
+<b class="fc">&nbsp;		skipWhiteSpace_();</b>
+<b class="fc">&nbsp;		m_start_token = m_end_token;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (empty_()) {// ogc standard</b>
+<b class="fc">&nbsp;			m_function_stack.removeLast();</b>
+<b class="fc">&nbsp;		} else if (leftParen_()) {// ogc standard</b>
+<b class="fc">&nbsp;			m_function_stack.removeLast();</b>
+<b class="fc">&nbsp;			m_function_stack.add(State.pointEnd);</b>
+<b class="fc">&nbsp;			m_function_stack.add(State.xLiteral);</b>
+&nbsp;		} else {// not ogc standard. treat as linestring
+<b class="fc">&nbsp;			m_function_stack.removeLast();</b>
+<b class="fc">&nbsp;			m_function_stack.removeLast();</b>
+<b class="fc">&nbsp;			m_function_stack.add(State.lineStringEnd);</b>
+<b class="fc">&nbsp;			m_function_stack.add(State.xLiteral);</b>
+<b class="fc">&nbsp;			nextToken();</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	private void pointEnd_() {
+<b class="fc">&nbsp;		skipWhiteSpace_();</b>
+<b class="fc">&nbsp;		m_start_token = m_end_token;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (rightParen_()) {</b>
+<b class="fc">&nbsp;			m_function_stack.removeLast();</b>
+&nbsp;		} else {
+<b class="nc">&nbsp;			throw new IllegalArgumentException();</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	private void xLiteral_() {
+<b class="fc">&nbsp;		signedNumericLiteral_();</b>
+<b class="fc">&nbsp;		m_current_token_type = WktToken.x_literal;</b>
+<b class="fc">&nbsp;		m_function_stack.removeLast();</b>
+<b class="fc">&nbsp;		m_function_stack.add(State.yLiteral);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private void yLiteral_() {
+<b class="fc">&nbsp;		signedNumericLiteral_();</b>
+<b class="fc">&nbsp;		m_current_token_type = WktToken.y_literal;</b>
+<b class="fc">&nbsp;		m_function_stack.removeLast();</b>
+&nbsp;
+<b class="fc">&nbsp;		if (m_b_has_zs)</b>
+<b class="fc">&nbsp;			m_function_stack.add(State.zLiteral);</b>
+<b class="fc">&nbsp;		else if (m_b_has_ms)</b>
+<b class="fc">&nbsp;			m_function_stack.add(State.mLiteral);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private void zLiteral_() {
+<b class="fc">&nbsp;		signedNumericLiteral_();</b>
+<b class="fc">&nbsp;		m_current_token_type = WktToken.z_literal;</b>
+<b class="fc">&nbsp;		m_function_stack.removeLast();</b>
+&nbsp;
+<b class="fc">&nbsp;		if (m_b_has_ms)</b>
+<b class="fc">&nbsp;			m_function_stack.add(State.mLiteral);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private void mLiteral_() {
+<b class="fc">&nbsp;		signedNumericLiteral_();</b>
+<b class="fc">&nbsp;		m_current_token_type = WktToken.m_literal;</b>
+<b class="fc">&nbsp;		m_function_stack.removeLast();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private boolean nan_() {
+<b class="fc">&nbsp;		if (m_wkt_string.regionMatches(true, m_start_token, &quot;nan&quot;, 0, 3)) {</b>
+<b class="nc">&nbsp;			m_end_token += 3;</b>
+<b class="nc">&nbsp;			m_b_nan = true;</b>
+<b class="nc">&nbsp;			return true;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		m_b_nan = false;</b>
+<b class="fc">&nbsp;		return false;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private void sign_() {
+&nbsp;		// Optional - or + sign
+<b class="fc">&nbsp;		if (m_wkt_string.charAt(m_end_token) == &#39;-&#39;</b>
+<b class="fc">&nbsp;				|| m_wkt_string.charAt(m_end_token) == &#39;+&#39;) {</b>
+<b class="fc">&nbsp;			if (++m_end_token &gt;= m_wkt_string.length())</b>
+<b class="nc">&nbsp;				throw new IllegalArgumentException();</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	private void signedNumericLiteral_() {
+<b class="fc">&nbsp;		skipWhiteSpace_();</b>
+<b class="fc">&nbsp;		m_start_token = m_end_token;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (nan_())</b>
+&nbsp;			return;
+&nbsp;
+<b class="fc">&nbsp;		sign_(); // Optional</b>
+<b class="fc">&nbsp;		unsignedNumericLiteral_();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private void unsignedNumericLiteral_() {
+<b class="fc">&nbsp;		exactNumericLiteral_();</b>
+<b class="fc">&nbsp;		exp_(); // Optional</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private void exactNumericLiteral_() {
+<b class="fc">&nbsp;		if (Character.isDigit(m_wkt_string.charAt(m_end_token))) {</b>
+<b class="fc">&nbsp;			digits_();</b>
+&nbsp;
+&nbsp;			// Optional
+<b class="fc">&nbsp;			if (m_wkt_string.charAt(m_end_token) == &#39;.&#39;) {</b>
+<b class="fc">&nbsp;				if (++m_end_token &gt;= m_wkt_string.length())</b>
+<b class="nc">&nbsp;					throw new IllegalArgumentException();</b>
+&nbsp;
+&nbsp;				// Optional
+<b class="fc">&nbsp;				if (Character.isDigit(m_wkt_string.charAt(m_end_token)))</b>
+<b class="fc">&nbsp;					digits_();</b>
+&nbsp;			}
+<b class="fc">&nbsp;		} else if (m_wkt_string.charAt(m_end_token) == &#39;.&#39;) {</b>
+<b class="fc">&nbsp;			if (++m_end_token &gt;= m_wkt_string.length())</b>
+<b class="nc">&nbsp;				throw new IllegalArgumentException();</b>
+&nbsp;
+<b class="fc">&nbsp;			if (!Character.isDigit(m_wkt_string.charAt(m_end_token)))</b>
+<b class="nc">&nbsp;				throw new IllegalArgumentException();</b>
+&nbsp;
+<b class="fc">&nbsp;			digits_();</b>
+&nbsp;		} else {
+<b class="nc">&nbsp;			throw new IllegalArgumentException();</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	private void digits_() {
+&nbsp;		do {
+<b class="fc">&nbsp;			if (++m_end_token &gt;= m_wkt_string.length())</b>
+<b class="nc">&nbsp;				throw new IllegalArgumentException();</b>
+&nbsp;
+<b class="fc">&nbsp;		} while (Character.isDigit(m_wkt_string.charAt(m_end_token)));</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private void exp_() {
+&nbsp;		// This is an optional state
+<b class="fc">&nbsp;		if (m_wkt_string.charAt(m_end_token) == &#39;e&#39;</b>
+<b class="fc">&nbsp;				|| m_wkt_string.charAt(m_end_token) == &#39;E&#39;) {</b>
+<b class="fc">&nbsp;			if (++m_end_token &gt;= m_wkt_string.length())</b>
+<b class="nc">&nbsp;				throw new IllegalArgumentException();</b>
+&nbsp;
+<b class="fc">&nbsp;			sign_(); // optional</b>
+&nbsp;
+<b class="fc">&nbsp;			if (!Character.isDigit(m_wkt_string.charAt(m_end_token)))</b>
+<b class="nc">&nbsp;				throw new IllegalArgumentException();</b>
+&nbsp;
+<b class="fc">&nbsp;			digits_();</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	private void skipWhiteSpace_() {
+<b class="fc">&nbsp;		if (m_end_token &gt;= m_wkt_string.length())</b>
+<b class="nc">&nbsp;			throw new IllegalArgumentException();</b>
+&nbsp;
+<b class="fc">&nbsp;		while (Character.isWhitespace(m_wkt_string.charAt(m_end_token))) {</b>
+<b class="fc">&nbsp;			if (++m_end_token &gt;= m_wkt_string.length())</b>
+<b class="nc">&nbsp;				throw new IllegalArgumentException();</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	private boolean empty_() {
+<b class="fc">&nbsp;		if (m_wkt_string.regionMatches(true, m_start_token, &quot;empty&quot;, 0, 5)) {</b>
+<b class="fc">&nbsp;			m_end_token += 5;</b>
+<b class="fc">&nbsp;			m_current_token_type = WktToken.empty;</b>
+<b class="fc">&nbsp;			return true;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return false;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private boolean comma_() {
+<b class="fc">&nbsp;		if (m_wkt_string.charAt(m_end_token) == &#39;,&#39;) {</b>
+<b class="fc">&nbsp;			m_end_token++;</b>
+<b class="fc">&nbsp;			return true;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return false;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private boolean leftParen_() {
+<b class="fc">&nbsp;		if (m_wkt_string.charAt(m_end_token) == &#39;(&#39;) {</b>
+<b class="fc">&nbsp;			m_end_token++;</b>
+<b class="fc">&nbsp;			m_current_token_type = WktToken.left_paren;</b>
+<b class="fc">&nbsp;			return true;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return false;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private boolean rightParen_() {
+<b class="fc">&nbsp;		if (m_wkt_string.charAt(m_end_token) == &#39;)&#39;) {</b>
+<b class="fc">&nbsp;			m_end_token++;</b>
+<b class="fc">&nbsp;			m_current_token_type = WktToken.right_paren;</b>
+<b class="fc">&nbsp;			return true;</b>
+&nbsp;		}
+&nbsp;
+<b class="nc">&nbsp;		return false;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-02-21 16:04</div>
+</div>
+</body>
+</html>

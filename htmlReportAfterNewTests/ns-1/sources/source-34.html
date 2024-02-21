@@ -1,0 +1,1128 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > Line</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.esri.core.geometry</a>
+</div>
+
+<h1>Coverage Summary for Class: Line (com.esri.core.geometry)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">Line</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    68%
+  </span>
+  <span class="absValue">
+    (34/50)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    67,5%
+  </span>
+  <span class="absValue">
+    (324/480)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; Copyright 1995-2015 Esri
+&nbsp;
+&nbsp;   Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp;   you may not use this file except in compliance with the License.
+&nbsp;   You may obtain a copy of the License at
+&nbsp;
+&nbsp;       http://www.apache.org/licenses/LICENSE-2.0
+&nbsp;
+&nbsp;   Unless required by applicable law or agreed to in writing, software
+&nbsp;   distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp;   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp;   See the License for the specific language governing permissions and
+&nbsp;   limitations under the License.
+&nbsp;
+&nbsp; For additional information, contact:
+&nbsp; Environmental Systems Research Institute, Inc.
+&nbsp; Attn: Contracts Dept
+&nbsp; 380 New York Street
+&nbsp; Redlands, California, USA 92373
+&nbsp;
+&nbsp; email: contracts@esri.com
+&nbsp; */
+&nbsp;
+&nbsp;
+&nbsp;package com.esri.core.geometry;
+&nbsp;
+&nbsp;import com.esri.core.geometry.VertexDescription.Semantics;
+&nbsp;
+&nbsp;import java.io.Serializable;
+&nbsp;
+&nbsp;import static com.esri.core.geometry.SizeOf.SIZE_OF_LINE;
+&nbsp;
+&nbsp;/**
+&nbsp; * A straight line between a pair of points.
+&nbsp; * 
+&nbsp; */
+<b class="fc">&nbsp;public final class Line extends Segment implements Serializable {</b>
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public Geometry.Type getType() {
+<b class="fc">&nbsp;		return Type.Line;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public long estimateMemorySize()
+&nbsp;	{
+<b class="nc">&nbsp;		return SIZE_OF_LINE + estimateMemorySize(m_attributes);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public double calculateLength2D() {
+<b class="fc">&nbsp;		double dx = m_xStart - m_xEnd;</b>
+<b class="fc">&nbsp;		double dy = m_yStart - m_yEnd;</b>
+<b class="fc">&nbsp;		return Math.sqrt(dx * dx + dy * dy);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	boolean isDegenerate(double tolerance) {
+<b class="fc">&nbsp;		double dx = m_xStart - m_xEnd;</b>
+<b class="fc">&nbsp;		double dy = m_yStart - m_yEnd;</b>
+<b class="fc">&nbsp;		return Math.sqrt(dx * dx + dy * dy) &lt;= tolerance;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Indicates if the line segment is a curve.
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public boolean isCurve() {
+<b class="nc">&nbsp;		return false;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	Point2D _getTangent(double t) {
+<b class="fc">&nbsp;		Point2D pt = new Point2D();</b>
+<b class="fc">&nbsp;		pt.sub(getEndXY(), getStartXY());</b>
+<b class="fc">&nbsp;		return pt;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	boolean _isDegenerate(double tolerance) {
+<b class="nc">&nbsp;		return calculateLength2D() &lt;= tolerance;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// HEADER DEF
+&nbsp;
+&nbsp;	// Cpp
+&nbsp;	/**
+&nbsp;	 * Creates a line segment.
+&nbsp;	 */
+<b class="fc">&nbsp;	public Line() {</b>
+<b class="fc">&nbsp;		m_description = VertexDescriptionDesignerImpl.getDefaultDescriptor2D();</b>
+&nbsp;	}
+&nbsp;
+<b class="fc">&nbsp;	Line(VertexDescription vd) {</b>
+<b class="fc">&nbsp;		m_description = vd;</b>
+&nbsp;	}
+&nbsp;
+<b class="fc">&nbsp;	public Line(double x1, double y1, double x2, double y2) {</b>
+<b class="fc">&nbsp;		m_description = VertexDescriptionDesignerImpl.getDefaultDescriptor2D();</b>
+<b class="fc">&nbsp;		setStartXY(x1, y1);</b>
+<b class="fc">&nbsp;		setEndXY(x2, y2);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public void queryEnvelope(Envelope env) {
+<b class="nc">&nbsp;		env.setEmpty();</b>
+<b class="nc">&nbsp;		env.assignVertexDescription(m_description);</b>
+<b class="nc">&nbsp;		Envelope2D env2D = new Envelope2D();</b>
+<b class="nc">&nbsp;		queryEnvelope2D(env2D);</b>
+<b class="nc">&nbsp;		env.setEnvelope2D(env2D);</b>
+&nbsp;
+<b class="nc">&nbsp;		for (int i = 1, n = m_description.getAttributeCount(); i &lt; n; i++) {</b>
+<b class="nc">&nbsp;			int semantics = m_description.getSemantics(i);</b>
+<b class="nc">&nbsp;			for (int iord = 0, nord = VertexDescription</b>
+<b class="nc">&nbsp;					.getComponentCount(semantics); i &lt; nord; i++) {</b>
+<b class="nc">&nbsp;				Envelope1D interval = queryInterval(semantics, iord);</b>
+<b class="nc">&nbsp;				env.setInterval(semantics, iord, interval);</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public void queryEnvelope2D(Envelope2D env) {
+<b class="fc">&nbsp;		env.setCoords(m_xStart, m_yStart, m_xEnd, m_yEnd);</b>
+<b class="fc">&nbsp;		env.normalize();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	void queryEnvelope3D(Envelope3D env) {
+<b class="nc">&nbsp;		env.setEmpty();</b>
+<b class="nc">&nbsp;		env.merge(m_xStart, m_yStart, _getAttributeAsDbl(0, Semantics.Z, 0));</b>
+<b class="nc">&nbsp;		env.merge(m_xEnd, m_yEnd, _getAttributeAsDbl(1, Semantics.Z, 0));</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public void applyTransformation(Transformation2D transform) {
+<b class="nc">&nbsp;		_touch();</b>
+<b class="nc">&nbsp;		Point2D pt = new Point2D();</b>
+<b class="nc">&nbsp;		pt.x = m_xStart;</b>
+<b class="nc">&nbsp;		pt.y = m_yStart;</b>
+<b class="nc">&nbsp;		transform.transform(pt, pt);</b>
+<b class="nc">&nbsp;		m_xStart = pt.x;</b>
+<b class="nc">&nbsp;		m_yStart = pt.y;</b>
+<b class="nc">&nbsp;		pt.x = m_xEnd;</b>
+<b class="nc">&nbsp;		pt.y = m_yEnd;</b>
+<b class="nc">&nbsp;		transform.transform(pt, pt);</b>
+<b class="nc">&nbsp;		m_xEnd = pt.x;</b>
+<b class="nc">&nbsp;		m_yEnd = pt.y;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	void applyTransformation(Transformation3D transform) {
+<b class="nc">&nbsp;		_touch();</b>
+<b class="nc">&nbsp;		Point3D pt = new Point3D();</b>
+<b class="nc">&nbsp;		pt.x = m_xStart;</b>
+<b class="nc">&nbsp;		pt.y = m_yStart;</b>
+<b class="nc">&nbsp;		pt.z = _getAttributeAsDbl(0, Semantics.Z, 0);</b>
+<b class="nc">&nbsp;		pt = transform.transform(pt);</b>
+<b class="nc">&nbsp;		m_xStart = pt.x;</b>
+<b class="nc">&nbsp;		m_yStart = pt.y;</b>
+<b class="nc">&nbsp;		_setAttribute(0, Semantics.Z, 0, pt.z);</b>
+<b class="nc">&nbsp;		pt.x = m_xEnd;</b>
+<b class="nc">&nbsp;		pt.y = m_yEnd;</b>
+<b class="nc">&nbsp;		pt.z = _getAttributeAsDbl(1, Semantics.Z, 0);</b>
+<b class="nc">&nbsp;		pt = transform.transform(pt);</b>
+<b class="nc">&nbsp;		m_xEnd = pt.x;</b>
+<b class="nc">&nbsp;		m_yEnd = pt.y;</b>
+<b class="nc">&nbsp;		_setAttribute(1, Semantics.Z, 0, pt.z);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public Geometry createInstance() {
+<b class="fc">&nbsp;		return new Line(m_description);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	double _calculateArea2DHelper(double xorg, double yorg) {
+<b class="fc">&nbsp;		return ((m_xEnd - xorg) - (m_xStart - xorg))</b>
+&nbsp;				* ((m_yEnd - yorg) + (m_yStart - yorg)) * 0.5;
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	double tToLength(double t) {
+<b class="nc">&nbsp;		return t * calculateLength2D();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	double lengthToT(double len) {
+<b class="nc">&nbsp;		return len / calculateLength2D();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	double getCoordX_(double t) {
+&nbsp;		// Must match query_coord_2D and vice verse
+&nbsp;		// Also match get_attribute_as_dbl
+<b class="fc">&nbsp;		return MathUtils.lerp(m_xStart,  m_xEnd, t);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	double getCoordY_(double t) {
+&nbsp;		// Must match query_coord_2D and vice verse
+&nbsp;		// Also match get_attribute_as_dbl
+<b class="fc">&nbsp;		return MathUtils.lerp(m_yStart,  m_yEnd, t);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public void getCoord2D(double t, Point2D pt) {
+&nbsp;		// We want:
+&nbsp;		// 1. When t == 0, get exactly Start
+&nbsp;		// 2. When t == 1, get exactly End
+&nbsp;		// 3. When m_x_end == m_x_start, we want m_x_start exactly
+&nbsp;		// 4. When m_y_end == m_y_start, we want m_y_start exactly
+<b class="fc">&nbsp;		MathUtils.lerp(m_xStart, m_yStart, m_xEnd, m_yEnd, t, pt);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public Segment cut(double t1, double t2) {
+<b class="nc">&nbsp;		SegmentBuffer segmentBuffer = new SegmentBuffer();</b>
+<b class="nc">&nbsp;		cut(t1, t2, segmentBuffer);</b>
+<b class="nc">&nbsp;		return segmentBuffer.get();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	void cut(double t1, double t2, SegmentBuffer subSegmentBuffer) {
+<b class="fc">&nbsp;		if (subSegmentBuffer == null)</b>
+<b class="nc">&nbsp;			throw new IllegalArgumentException();</b>
+&nbsp;
+<b class="fc">&nbsp;		subSegmentBuffer.createLine();// Make sure buffer contains Line class.</b>
+<b class="fc">&nbsp;		Segment subSegment = subSegmentBuffer.get();</b>
+<b class="fc">&nbsp;		subSegment.assignVertexDescription(m_description);</b>
+&nbsp;
+<b class="fc">&nbsp;		Point2D point = new Point2D();</b>
+<b class="fc">&nbsp;		getCoord2D(t1, point);</b>
+<b class="fc">&nbsp;		subSegment.setStartXY(point.x, point.y);</b>
+<b class="fc">&nbsp;		getCoord2D(t2, point);</b>
+<b class="fc">&nbsp;		subSegment.setEndXY(point.x, point.y);</b>
+&nbsp;
+<b class="fc">&nbsp;		for (int iattr = 1, nattr = m_description.getAttributeCount(); iattr &lt; nattr; iattr++) {</b>
+<b class="fc">&nbsp;			int semantics = m_description._getSemanticsImpl(iattr);</b>
+<b class="fc">&nbsp;			int ncomps = VertexDescription.getComponentCount(semantics);</b>
+&nbsp;
+<b class="fc">&nbsp;			for (int ordinate = 0; ordinate &lt; ncomps; ordinate++) {</b>
+<b class="fc">&nbsp;				double value1 = getAttributeAsDbl(t1, semantics, ordinate);</b>
+<b class="fc">&nbsp;				subSegment.setStartAttribute(semantics, ordinate, value1);</b>
+&nbsp;
+<b class="fc">&nbsp;				double value2 = getAttributeAsDbl(t2, semantics, ordinate);</b>
+<b class="fc">&nbsp;				subSegment.setEndAttribute(semantics, ordinate, value2);</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public double getAttributeAsDbl(double t, int semantics, int ordinate) {
+<b class="fc">&nbsp;		if (semantics == VertexDescription.Semantics.POSITION)</b>
+<b class="nc">&nbsp;			return ordinate == 0 ? getCoord2D(t).x : getCoord2D(t).y;</b>
+&nbsp;
+<b class="fc">&nbsp;		int interpolation = VertexDescription.getInterpolation(semantics);</b>
+<b class="fc">&nbsp;		switch (interpolation) {</b>
+&nbsp;		case VertexDescription.Interpolation.NONE:
+<b class="fc">&nbsp;			if (t &lt; 0.5)</b>
+<b class="fc">&nbsp;				return getStartAttributeAsDbl(semantics, ordinate);</b>
+&nbsp;			else
+<b class="fc">&nbsp;				return getEndAttributeAsDbl(semantics, ordinate);</b>
+&nbsp;		case VertexDescription.Interpolation.LINEAR: {
+<b class="fc">&nbsp;			double s = getStartAttributeAsDbl(semantics, ordinate);</b>
+<b class="fc">&nbsp;			double e = getEndAttributeAsDbl(semantics, ordinate);</b>
+<b class="fc">&nbsp;			return MathUtils.lerp(s,  e,  t);</b>
+&nbsp;		}
+&nbsp;		case VertexDescription.Interpolation.ANGULAR: {
+<b class="nc">&nbsp;			throw new GeometryException(&quot;not implemented&quot;);</b>
+&nbsp;		}
+&nbsp;		}
+&nbsp;
+<b class="nc">&nbsp;		throw GeometryException.GeometryInternalError();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public double getClosestCoordinate(Point2D inputPt, boolean bExtrapolate) {
+<b class="fc">&nbsp;		double vx = m_xEnd - m_xStart;</b>
+<b class="fc">&nbsp;		double vy = m_yEnd - m_yStart;</b>
+<b class="fc">&nbsp;		double v2 = vx * vx + vy * vy;</b>
+<b class="fc">&nbsp;		if (v2 == 0)</b>
+<b class="fc">&nbsp;			return 0.5;</b>
+<b class="fc">&nbsp;		double rx = inputPt.x - m_xStart;</b>
+<b class="fc">&nbsp;		double ry = inputPt.y - m_yStart;</b>
+<b class="fc">&nbsp;		double t = (rx * vx + ry * vy) / v2;</b>
+<b class="fc">&nbsp;		if (!bExtrapolate) {</b>
+<b class="fc">&nbsp;			if (t &lt; 0.0)</b>
+<b class="fc">&nbsp;				t = 0.0;</b>
+<b class="fc">&nbsp;			else if (t &gt; 1.0)</b>
+<b class="fc">&nbsp;				t = 1.0;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return t;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public int intersectionWithAxis2D(boolean b_axis_x, double ordinate,
+&nbsp;			double[] result_ordinates, double[] parameters) {
+<b class="fc">&nbsp;		if (b_axis_x) {</b>
+<b class="fc">&nbsp;			double a = (m_yEnd - m_yStart);</b>
+&nbsp;
+<b class="fc">&nbsp;			if (a == 0)</b>
+<b class="nc">&nbsp;				return (ordinate == m_yEnd) ? -1 : 0;</b>
+&nbsp;
+<b class="fc">&nbsp;			double t = (ordinate - m_yStart) / a;</b>
+&nbsp;
+<b class="fc">&nbsp;			if (t &lt; 0.0 || t &gt; 1.0)</b>
+<b class="nc">&nbsp;				return 0;</b>
+&nbsp;
+<b class="fc">&nbsp;			if (result_ordinates != null)</b>
+<b class="fc">&nbsp;				(result_ordinates)[0] = getCoordX_(t);</b>
+&nbsp;
+<b class="fc">&nbsp;			if (parameters != null)</b>
+<b class="fc">&nbsp;				(parameters)[0] = t;</b>
+&nbsp;
+<b class="fc">&nbsp;			return 1;</b>
+&nbsp;		} else {
+<b class="fc">&nbsp;			double a = (m_xEnd - m_xStart);</b>
+&nbsp;
+<b class="fc">&nbsp;			if (a == 0)</b>
+<b class="nc">&nbsp;				return (ordinate == m_xEnd) ? -1 : 0;</b>
+&nbsp;
+<b class="fc">&nbsp;			double t = (ordinate - m_xStart) / a;</b>
+&nbsp;
+<b class="fc">&nbsp;			if (t &lt; 0.0 || t &gt; 1.0)</b>
+<b class="nc">&nbsp;				return 0;</b>
+&nbsp;
+<b class="fc">&nbsp;			if (result_ordinates != null)</b>
+<b class="fc">&nbsp;				(result_ordinates)[0] = getCoordY_(t);</b>
+&nbsp;
+<b class="fc">&nbsp;			if (parameters != null)</b>
+<b class="fc">&nbsp;				(parameters)[0] = t;</b>
+&nbsp;
+<b class="fc">&nbsp;			return 1;</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	// line segment can have 0 or 1 intersection interval with clipEnv2D.
+&nbsp;	// The function return 0 or 2 segParams (e.g. 0.0, 0.4; or 0.1, 0.9; or 0.6,
+&nbsp;	// 1.0; or 0.0, 1.0)
+&nbsp;	// segParams will be sorted in ascending order; the order of the
+&nbsp;	// envelopeDistances will correspond (i.e. the envelopeDistances may not be
+&nbsp;	// in ascending order);
+&nbsp;	// an envelopeDistance can be -1.0 if the corresponding endpoint is properly
+&nbsp;	// inside clipEnv2D.
+&nbsp;	int intersectionWithEnvelope2D(Envelope2D clipEnv2D,
+&nbsp;			boolean includeEnvBoundary, double[] segParams,
+&nbsp;			double[] envelopeDistances) {
+<b class="nc">&nbsp;		Point2D p1 = getStartXY();</b>
+<b class="nc">&nbsp;		Point2D p2 = getEndXY();</b>
+&nbsp;
+&nbsp;		// includeEnvBoundary xxx ???
+&nbsp;
+<b class="nc">&nbsp;		int modified = clipEnv2D.clipLine(p1, p2, 0, segParams,</b>
+&nbsp;				envelopeDistances);
+<b class="nc">&nbsp;		return modified != 0 ? 2 : 0;</b>
+&nbsp;
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	double intersectionOfYMonotonicWithAxisX(double y, double x_parallel) {
+<b class="fc">&nbsp;		double a = (m_yEnd - m_yStart);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (a == 0)</b>
+<b class="fc">&nbsp;			return (y == m_yEnd) ? x_parallel : NumberUtils.NaN();</b>
+&nbsp;
+<b class="fc">&nbsp;		double t = (y - m_yStart) / a;</b>
+<b class="fc">&nbsp;		assert (t &gt;= 0 &amp;&amp; t &lt;= 1.0);</b>
+&nbsp;		// double t_1 = 1.0 - t;
+&nbsp;		// assert(t + t_1 == 1.0);
+<b class="fc">&nbsp;		double resx = getCoordX_(t);</b>
+<b class="fc">&nbsp;		if (t == 1.0)</b>
+<b class="fc">&nbsp;			resx = m_xEnd;</b>
+<b class="fc">&nbsp;		assert ((resx &gt;= m_xStart &amp;&amp; resx &lt;= m_xEnd) || (resx &lt;= m_xStart &amp;&amp; resx &gt;= m_xEnd));</b>
+<b class="fc">&nbsp;		return resx;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	boolean _isIntersectingPoint(Point2D pt, double tolerance,
+&nbsp;			boolean bExcludeExactEndpoints) {
+<b class="fc">&nbsp;		return _intersection(pt, tolerance, bExcludeExactEndpoints) &gt;= 0;// must</b>
+&nbsp;																			// use
+&nbsp;																			// same
+&nbsp;																			// method
+&nbsp;																			// that
+&nbsp;																			// the
+&nbsp;																			// intersection
+&nbsp;																			// routine
+&nbsp;																			// uses.
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns True if point and the segment intersect (not disjoint) for the
+&nbsp;	 * given tolerance.
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public boolean isIntersecting(Point2D pt, double tolerance) {
+<b class="fc">&nbsp;		return _isIntersectingPoint(pt, tolerance, false);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void orientBottomUp_() {
+<b class="fc">&nbsp;		if (m_yEnd &lt; m_yStart || (m_yEnd == m_yStart &amp;&amp; m_xEnd &lt; m_xStart)) {</b>
+<b class="fc">&nbsp;			double x = m_xStart;</b>
+<b class="fc">&nbsp;			m_xStart = m_xEnd;</b>
+<b class="fc">&nbsp;			m_xEnd = x;</b>
+&nbsp;
+<b class="fc">&nbsp;			double y = m_yStart;</b>
+<b class="fc">&nbsp;			m_yStart = m_yEnd;</b>
+<b class="fc">&nbsp;			m_yEnd = y;</b>
+<b class="fc">&nbsp;			for (int i = 0, n = m_description.getTotalComponentCount() - 2; i &lt; n; i++) {</b>
+<b class="fc">&nbsp;				double a = m_attributes[i];</b>
+<b class="fc">&nbsp;				m_attributes[i] = m_attributes[i + n];</b>
+<b class="fc">&nbsp;				m_attributes[i + n] = a;</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	// return -1 for the left side from the infinite line passing through thais
+&nbsp;	// Line, 1 for the right side of the line, 0 if on the line (in the bounds
+&nbsp;	// of the roundoff error)
+&nbsp;	int _side(Point2D pt) {
+<b class="nc">&nbsp;		return _side(pt.x, pt.y);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// return -1 for the left side from the infinite line passing through thais
+&nbsp;	// Line, 1 for the right side of the line, 0 if on the line (in the bounds
+&nbsp;	// of the roundoff error)
+&nbsp;	int _side(double ptX, double ptY) {
+<b class="fc">&nbsp;		Point2D v1 = new Point2D(ptX, ptY);</b>
+<b class="fc">&nbsp;		v1.sub(getStartXY());</b>
+<b class="fc">&nbsp;		Point2D v2 = new Point2D();</b>
+<b class="fc">&nbsp;		v2.sub(getEndXY(), getStartXY());</b>
+<b class="fc">&nbsp;		double cross = v2.crossProduct(v1);</b>
+<b class="fc">&nbsp;		double crossError = 4 * NumberUtils.doubleEps()</b>
+<b class="fc">&nbsp;				* (Math.abs(v2.x * v1.y) + Math.abs(v2.y * v1.x));</b>
+<b class="fc">&nbsp;		return cross &gt; crossError ? -1 : cross &lt; -crossError ? 1 : 0;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	double _intersection(Point2D pt, double tolerance,
+&nbsp;			boolean bExcludeExactEndPoints) {
+<b class="fc">&nbsp;		Point2D v = new Point2D();</b>
+<b class="fc">&nbsp;		Point2D start = new Point2D();</b>
+&nbsp;
+&nbsp;		// Test start point distance to pt.
+<b class="fc">&nbsp;		start.setCoords(m_xStart, m_yStart);</b>
+<b class="fc">&nbsp;		v.sub(pt, start);</b>
+<b class="fc">&nbsp;		double vlength = v.length();</b>
+<b class="fc">&nbsp;		double vLengthError = vlength * 3 * NumberUtils.doubleEps();</b>
+<b class="fc">&nbsp;		if (vlength &lt;= Math.max(tolerance, vLengthError)) {</b>
+<b class="fc">&nbsp;			assert (vlength != 0 || pt.isEqual(start));// probably never asserts</b>
+<b class="fc">&nbsp;			if (bExcludeExactEndPoints &amp;&amp; vlength == 0)</b>
+<b class="fc">&nbsp;				return NumberUtils.TheNaN;</b>
+&nbsp;			else
+<b class="fc">&nbsp;				return 0;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		Point2D end2D = getEndXY();</b>
+&nbsp;		// Test end point distance to pt.
+<b class="fc">&nbsp;		v.sub(pt, end2D);</b>
+<b class="fc">&nbsp;		vlength = v.length();</b>
+<b class="fc">&nbsp;		vLengthError = vlength * 3 * NumberUtils.doubleEps();</b>
+<b class="fc">&nbsp;		if (vlength &lt;= Math.max(tolerance, vLengthError)) {</b>
+<b class="fc">&nbsp;			assert (vlength != 0 || pt.isEqual(end2D));// probably never asserts</b>
+<b class="fc">&nbsp;			if (bExcludeExactEndPoints &amp;&amp; vlength == 0)</b>
+<b class="fc">&nbsp;				return NumberUtils.TheNaN;</b>
+&nbsp;			else
+<b class="fc">&nbsp;				return 1.0;</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		// Find a distance from the line to pt.
+<b class="fc">&nbsp;		v.setCoords(m_xEnd - m_xStart, m_yEnd - m_yStart);</b>
+<b class="fc">&nbsp;		double len = v.length();</b>
+<b class="fc">&nbsp;		if (len &gt; 0) {</b>
+<b class="fc">&nbsp;			double invertedLength = 1.0 / len;</b>
+<b class="fc">&nbsp;			v.scale(invertedLength);</b>
+<b class="fc">&nbsp;			Point2D relativePoint = new Point2D();</b>
+<b class="fc">&nbsp;			relativePoint.sub(pt, start);</b>
+<b class="fc">&nbsp;			double projection = relativePoint.dotProduct(v);</b>
+<b class="fc">&nbsp;			double projectionError = 8 * relativePoint._dotProductAbs(v)</b>
+<b class="fc">&nbsp;					* NumberUtils.doubleEps();// See Error Estimation Rules In</b>
+&nbsp;												// Borg.docx
+<b class="fc">&nbsp;			v.leftPerpendicular();// get left normal to v</b>
+<b class="fc">&nbsp;			double distance = relativePoint.dotProduct(v);</b>
+<b class="fc">&nbsp;			double distanceError = 8 * relativePoint._dotProductAbs(v)</b>
+<b class="fc">&nbsp;					* NumberUtils.doubleEps();// See Error Estimation Rules In</b>
+&nbsp;												// Borg.docx
+&nbsp;
+<b class="fc">&nbsp;			double perror = Math.max(tolerance, projectionError);</b>
+<b class="fc">&nbsp;			if (projection &lt; -perror || projection &gt; len + perror)</b>
+<b class="fc">&nbsp;				return NumberUtils.TheNaN;</b>
+&nbsp;
+<b class="fc">&nbsp;			double merror = Math.max(tolerance, distanceError);</b>
+<b class="fc">&nbsp;			if (Math.abs(distance) &lt;= merror) {</b>
+<b class="fc">&nbsp;				double t = projection * invertedLength;</b>
+<b class="fc">&nbsp;				t = NumberUtils.snap(t, 0.0, 1.0);</b>
+<b class="fc">&nbsp;				Point2D ptOnLine = new Point2D();</b>
+<b class="fc">&nbsp;				getCoord2D(t, ptOnLine);</b>
+<b class="fc">&nbsp;				if (Point2D.distance(ptOnLine, pt) &lt;= tolerance) {</b>
+<b class="fc">&nbsp;					if (t &lt; 0.5) {</b>
+<b class="fc">&nbsp;						if (Point2D.distance(ptOnLine, start) &lt;= tolerance)// the</b>
+&nbsp;																			// projected
+&nbsp;																			// point
+&nbsp;																			// is
+&nbsp;																			// close
+&nbsp;																			// to
+&nbsp;																			// the
+&nbsp;																			// start
+&nbsp;																			// point.
+&nbsp;																			// Need
+&nbsp;																			// to
+&nbsp;																			// return
+&nbsp;																			// 0.
+<b class="nc">&nbsp;							return 0;</b>
+<b class="fc">&nbsp;					} else if (Point2D.distance(ptOnLine, end2D) &lt;= tolerance)// the</b>
+&nbsp;																				// projected
+&nbsp;																				// point
+&nbsp;																				// is
+&nbsp;																				// close
+&nbsp;																				// to
+&nbsp;																				// the
+&nbsp;																				// end
+&nbsp;																				// point.
+&nbsp;																				// Need
+&nbsp;																				// to
+&nbsp;																				// return
+&nbsp;																				// 1.0.
+<b class="nc">&nbsp;						return 1.0;</b>
+&nbsp;
+<b class="fc">&nbsp;					return t;</b>
+&nbsp;				}
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return NumberUtils.TheNaN;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public boolean equals(Object other) {
+<b class="nc">&nbsp;		if (other == null)</b>
+<b class="nc">&nbsp;			return false;</b>
+&nbsp;
+<b class="nc">&nbsp;		if (other == this)</b>
+<b class="nc">&nbsp;			return true;</b>
+&nbsp;
+<b class="nc">&nbsp;		if (other.getClass() != getClass())</b>
+<b class="nc">&nbsp;			return false;</b>
+&nbsp;
+<b class="nc">&nbsp;		return _equalsImpl((Segment)other);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public int hashCode() {
+<b class="nc">&nbsp;		return super.hashCode();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	boolean equals(Line other) {
+<b class="fc">&nbsp;		if (other == this)</b>
+<b class="nc">&nbsp;			return true;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (!(other instanceof Line))</b>
+<b class="nc">&nbsp;			return false;</b>
+&nbsp;
+<b class="fc">&nbsp;		return _equalsImpl((Segment) other);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	boolean _projectionIntersectHelper(Line other, Point2D v, boolean bStart) {
+&nbsp;		// v is the vector in the direction of this line == end - start.
+<b class="fc">&nbsp;		double orgX = bStart ? m_xStart : m_xEnd;</b>
+<b class="fc">&nbsp;		double orgY = bStart ? m_yStart : m_yEnd;</b>
+<b class="fc">&nbsp;		Point2D m = new Point2D();</b>
+<b class="fc">&nbsp;		m.x = other.getEndX() - orgX;</b>
+<b class="fc">&nbsp;		m.y = other.getEndY() - orgY;</b>
+<b class="fc">&nbsp;		double dot = v.dotProduct(m);</b>
+<b class="fc">&nbsp;		double dotError = 3 * NumberUtils.doubleEps() * v._dotProductAbs(m);</b>
+<b class="fc">&nbsp;		if (dot &gt; dotError) {</b>
+<b class="fc">&nbsp;			m.x = other.getStartX() - orgX;</b>
+<b class="fc">&nbsp;			m.y = other.getStartY() - orgY;</b>
+<b class="fc">&nbsp;			double dot2 = v.dotProduct(m);</b>
+<b class="fc">&nbsp;			double dotError2 = 3 * NumberUtils.doubleEps()</b>
+<b class="fc">&nbsp;					* v._dotProductAbs(m);</b>
+<b class="fc">&nbsp;			return dot2 &lt;= dotError2;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return true;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	boolean _projectionIntersect(Line other) {
+&nbsp;		// This function returns true, if the &quot;other&quot;&#39;s projection on &quot;this&quot;
+<b class="fc">&nbsp;		Point2D v = new Point2D();</b>
+<b class="fc">&nbsp;		v.x = m_xEnd - m_xStart;</b>
+<b class="fc">&nbsp;		v.y = m_yEnd - m_yStart;</b>
+<b class="fc">&nbsp;		if (!_projectionIntersectHelper(other, v, false))</b>
+<b class="fc">&nbsp;			return false; // Both other.Start and other.End projections on</b>
+&nbsp;							// &quot;this&quot; lie to the right of the this.End
+&nbsp;
+<b class="fc">&nbsp;		v.negate();</b>
+<b class="fc">&nbsp;		if (!_projectionIntersectHelper(other, v, true))</b>
+<b class="fc">&nbsp;			return false; // Both other.Start and other.End projections on</b>
+&nbsp;							// &quot;this&quot; lie to the left of the this.End
+&nbsp;
+<b class="fc">&nbsp;		return true;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Tests if two lines intersect using projection of one line to another.
+&nbsp;	static boolean _isIntersectingHelper(Line line1, Line line2) {
+<b class="fc">&nbsp;		int s11 = line1._side(line2.m_xStart, line2.m_yStart);</b>
+<b class="fc">&nbsp;		int s12 = line1._side(line2.m_xEnd, line2.m_yEnd);</b>
+<b class="fc">&nbsp;		if (s11 &lt; 0 &amp;&amp; s12 &lt; 0 || s11 &gt; 0 &amp;&amp; s12 &gt; 0)</b>
+<b class="fc">&nbsp;			return false;// no intersection. The line2 lies to one side of an</b>
+&nbsp;							// infinite line passing through line1
+&nbsp;
+<b class="fc">&nbsp;		int s21 = line2._side(line1.m_xStart, line1.m_yStart);</b>
+<b class="fc">&nbsp;		int s22 = line2._side(line1.m_xEnd, line1.m_yEnd);</b>
+<b class="fc">&nbsp;		if (s21 &lt; 0 &amp;&amp; s22 &lt; 0 || s21 &gt; 0 &amp;&amp; s22 &gt; 0)</b>
+<b class="fc">&nbsp;			return false;// no intersection.The line1 lies to one side of an</b>
+&nbsp;							// infinite line passing through line2
+&nbsp;
+<b class="fc">&nbsp;		double len1 = line1.calculateLength2D();</b>
+<b class="fc">&nbsp;		double len2 = line2.calculateLength2D();</b>
+<b class="fc">&nbsp;		if (len1 &gt; len2) {</b>
+<b class="fc">&nbsp;			return line1._projectionIntersect(line2);</b>
+&nbsp;		} else {
+<b class="fc">&nbsp;			return line2._projectionIntersect(line1);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	static Point2D _intersectHelper1(Line line1, Line line2, double tolerance) {
+<b class="fc">&nbsp;		Point2D result = new Point2D(NumberUtils.NaN(), NumberUtils.NaN());</b>
+<b class="fc">&nbsp;		double k1x = line1.m_xEnd - line1.m_xStart;</b>
+<b class="fc">&nbsp;		double k1y = line1.m_yEnd - line1.m_yStart;</b>
+<b class="fc">&nbsp;		double k2x = line2.m_xEnd - line2.m_xStart;</b>
+<b class="fc">&nbsp;		double k2y = line2.m_yEnd - line2.m_yStart;</b>
+&nbsp;
+<b class="fc">&nbsp;		double det = k2x * k1y - k1x * k2y;</b>
+<b class="fc">&nbsp;		if (det == 0)</b>
+<b class="fc">&nbsp;			return result;</b>
+&nbsp;
+&nbsp;		// estimate roundoff error for det:
+<b class="fc">&nbsp;		double errdet = 4 * NumberUtils.doubleEps()</b>
+<b class="fc">&nbsp;				* (Math.abs(k2x * k1y) + Math.abs(k1x * k2y));</b>
+&nbsp;
+<b class="fc">&nbsp;		double bx = line2.m_xStart - line1.m_xStart;</b>
+<b class="fc">&nbsp;		double by = line2.m_yStart - line1.m_yStart;</b>
+&nbsp;
+<b class="fc">&nbsp;		double a0 = (k2x * by - bx * k2y);</b>
+<b class="fc">&nbsp;		double a0error = 4 * NumberUtils.doubleEps()</b>
+<b class="fc">&nbsp;				* (Math.abs(k2x * by) + Math.abs(bx * k2y));</b>
+<b class="fc">&nbsp;		double t0 = a0 / det;</b>
+<b class="fc">&nbsp;		double absdet = Math.abs(det);</b>
+<b class="fc">&nbsp;		double t0error = (a0error * absdet + errdet * Math.abs(a0))</b>
+<b class="fc">&nbsp;				/ (det * det) + NumberUtils.doubleEps() * Math.abs(t0);</b>
+<b class="fc">&nbsp;		if (t0 &lt; -t0error || t0 &gt; 1.0 + t0error)</b>
+<b class="fc">&nbsp;			return result;</b>
+&nbsp;
+<b class="fc">&nbsp;		double a1 = (k1x * by - bx * k1y);</b>
+<b class="fc">&nbsp;		double a1error = 4 * NumberUtils.doubleEps()</b>
+<b class="fc">&nbsp;				* (Math.abs(k1x * by) + Math.abs(bx * k1y));</b>
+<b class="fc">&nbsp;		double t1 = a1 / det;</b>
+<b class="fc">&nbsp;		double t1error = (a1error * absdet + errdet * Math.abs(a1))</b>
+<b class="fc">&nbsp;				/ (det * det) + NumberUtils.doubleEps() * Math.abs(t1);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (t1 &lt; -t1error || t1 &gt; 1.0 + t1error)</b>
+<b class="fc">&nbsp;			return result;</b>
+&nbsp;
+<b class="fc">&nbsp;		double t0r = NumberUtils.snap(t0, 0.0, 1.0);</b>
+<b class="fc">&nbsp;		double t1r = NumberUtils.snap(t1, 0.0, 1.0);</b>
+<b class="fc">&nbsp;		Point2D pt0 = line1.getCoord2D(t0r);</b>
+<b class="fc">&nbsp;		Point2D pt1 = line2.getCoord2D(t1r);</b>
+<b class="fc">&nbsp;		Point2D pt = new Point2D();</b>
+<b class="fc">&nbsp;		pt.sub(pt0, pt1);</b>
+<b class="fc">&nbsp;		if (pt.length() &gt; tolerance) {</b>
+&nbsp;			// Roundoff errors cause imprecise result. Try recalculate.
+&nbsp;			// 1. Use averaged point and recalculate the t values
+&nbsp;			// Point2D pt;
+<b class="nc">&nbsp;			pt.add(pt0, pt1);</b>
+<b class="nc">&nbsp;			pt.scale(0.5);</b>
+<b class="nc">&nbsp;			t0r = line1.getClosestCoordinate(pt, false);</b>
+<b class="nc">&nbsp;			t1r = line2.getClosestCoordinate(pt, false);</b>
+<b class="nc">&nbsp;			Point2D pt01 = line1.getCoord2D(t0r);</b>
+<b class="nc">&nbsp;			Point2D pt11 = line2.getCoord2D(t1r);</b>
+<b class="nc">&nbsp;			pt01.sub(pt11);</b>
+<b class="nc">&nbsp;			if (pt01.length() &gt; tolerance) {</b>
+&nbsp;				// Seems to be no intersection here actually. Return NaNs
+<b class="nc">&nbsp;				return result;</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		result.setCoords(t0r, t1r);</b>
+<b class="fc">&nbsp;		return result;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	static int _isIntersectingLineLine(Line line1, Line line2,
+&nbsp;			double tolerance, boolean bExcludeExactEndpoints) {
+&nbsp;		// _ASSERT(line1 != line2);
+&nbsp;		// Check for the endpoints.
+&nbsp;		// The bExcludeExactEndpoints is True, means we care only about overlaps
+&nbsp;		// and real intersections, but do not care if the endpoints are exactly
+&nbsp;		// equal.
+&nbsp;		// bExcludeExactEndpoints is used in Cracking check test, because during
+&nbsp;		// cracking test all points are either coincident or further than the
+&nbsp;		// tolerance.
+<b class="fc">&nbsp;		int counter = 0;</b>
+<b class="fc">&nbsp;		if (line1.m_xStart == line2.m_xStart</b>
+&nbsp;				&amp;&amp; line1.m_yStart == line2.m_yStart
+&nbsp;				|| line1.m_xStart == line2.m_xEnd
+&nbsp;				&amp;&amp; line1.m_yStart == line2.m_yEnd) {
+<b class="fc">&nbsp;			counter++;</b>
+<b class="fc">&nbsp;			if (!bExcludeExactEndpoints)</b>
+<b class="nc">&nbsp;				return 1;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (line1.m_xEnd == line2.m_xStart &amp;&amp; line1.m_yEnd == line2.m_yStart</b>
+&nbsp;				|| line1.m_xEnd == line2.m_xEnd &amp;&amp; line1.m_yEnd == line2.m_yEnd) {
+<b class="fc">&nbsp;			counter++;</b>
+<b class="fc">&nbsp;			if (counter == 2)</b>
+<b class="fc">&nbsp;				return 2; // counter == 2 means both endpoints coincide (Lines</b>
+&nbsp;							// overlap).
+<b class="fc">&nbsp;			if (!bExcludeExactEndpoints)</b>
+<b class="fc">&nbsp;				return 1;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (line2._isIntersectingPoint(line1.getStartXY(), tolerance, true))</b>
+<b class="fc">&nbsp;			return 1;// return true;</b>
+<b class="fc">&nbsp;		if (line2._isIntersectingPoint(line1.getEndXY(), tolerance, true))</b>
+<b class="fc">&nbsp;			return 1;// return true;</b>
+<b class="fc">&nbsp;		if (line1._isIntersectingPoint(line2.getStartXY(), tolerance, true))</b>
+<b class="fc">&nbsp;			return 1;// return true;</b>
+<b class="fc">&nbsp;		if (line1._isIntersectingPoint(line2.getEndXY(), tolerance, true))</b>
+<b class="fc">&nbsp;			return 1;// return true;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (bExcludeExactEndpoints &amp;&amp; (counter != 0))</b>
+<b class="fc">&nbsp;			return 0;// return false;</b>
+&nbsp;
+<b class="fc">&nbsp;		return _isIntersectingHelper(line1, line2) == false ? 0 : 1;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	int _intersectLineLineExact(Line line1, Line line2,
+&nbsp;			Point2D[] intersectionPoints, double[] param1, double[] param2) {
+<b class="nc">&nbsp;		int counter = 0;</b>
+<b class="nc">&nbsp;		if (line1.m_xStart == line2.m_xStart</b>
+&nbsp;				&amp;&amp; line1.m_yStart == line2.m_yStart) {
+<b class="nc">&nbsp;			if (param1 != null)// if (param1)</b>
+<b class="nc">&nbsp;				param1[counter] = 0.0;</b>
+<b class="nc">&nbsp;			if (param2 != null)// if (param2)</b>
+<b class="nc">&nbsp;				param2[counter] = 0.0;</b>
+&nbsp;
+<b class="nc">&nbsp;			if (intersectionPoints != null)// if (intersectionPoints)</b>
+<b class="nc">&nbsp;				intersectionPoints[counter] = Point2D.construct(line1.m_xStart,</b>
+&nbsp;						line1.m_yStart);
+&nbsp;
+<b class="nc">&nbsp;			counter++;</b>
+&nbsp;		}
+&nbsp;
+<b class="nc">&nbsp;		if (line1.m_xStart == line2.m_xEnd &amp;&amp; line1.m_yStart == line2.m_yEnd) {</b>
+<b class="nc">&nbsp;			if (param1 != null)// if (param1)</b>
+<b class="nc">&nbsp;				param1[counter] = 0.0;</b>
+<b class="nc">&nbsp;			if (param2 != null)// if (param2)</b>
+<b class="nc">&nbsp;				param2[counter] = 1.0;</b>
+&nbsp;
+<b class="nc">&nbsp;			if (intersectionPoints != null)// if (intersectionPoints)</b>
+<b class="nc">&nbsp;				intersectionPoints[counter] = Point2D.construct(line1.m_xStart,</b>
+&nbsp;						line1.m_yStart);
+&nbsp;
+<b class="nc">&nbsp;			counter++;</b>
+&nbsp;		}
+&nbsp;
+<b class="nc">&nbsp;		if (line1.m_xEnd == line2.m_xStart &amp;&amp; line1.m_yEnd == line2.m_yStart) {</b>
+<b class="nc">&nbsp;			if (counter == 2) {// both segments a degenerate</b>
+<b class="nc">&nbsp;				if (param1 != null)// if (param1)</b>
+&nbsp;				{
+<b class="nc">&nbsp;					param1[0] = 0.0;</b>
+<b class="nc">&nbsp;					param1[1] = 1.0;</b>
+&nbsp;				}
+<b class="nc">&nbsp;				if (param2 != null)// if (param2)</b>
+&nbsp;				{
+<b class="nc">&nbsp;					param2[0] = 1.0;</b>
+&nbsp;				}
+&nbsp;
+<b class="nc">&nbsp;				if (intersectionPoints != null)// if (intersectionPoints)</b>
+&nbsp;				{
+<b class="nc">&nbsp;					intersectionPoints[0] = Point2D.construct(line1.m_xEnd,</b>
+&nbsp;							line1.m_yEnd);
+<b class="nc">&nbsp;					intersectionPoints[1] = Point2D.construct(line1.m_xEnd,</b>
+&nbsp;							line1.m_yEnd);
+&nbsp;				}
+&nbsp;
+<b class="nc">&nbsp;				return counter;</b>
+&nbsp;			}
+&nbsp;
+<b class="nc">&nbsp;			if (param1 != null)// if (param1)</b>
+<b class="nc">&nbsp;				param1[counter] = 1.0;</b>
+<b class="nc">&nbsp;			if (param2 != null)// if (param2)</b>
+<b class="nc">&nbsp;				param2[counter] = 0.0;</b>
+&nbsp;
+<b class="nc">&nbsp;			if (intersectionPoints != null)// if (intersectionPoints)</b>
+<b class="nc">&nbsp;				intersectionPoints[counter] = Point2D.construct(line1.m_xEnd,</b>
+&nbsp;						line1.m_yEnd);
+&nbsp;
+<b class="nc">&nbsp;			counter++;</b>
+&nbsp;		}
+&nbsp;
+<b class="nc">&nbsp;		if (line1.m_xEnd == line2.m_xEnd &amp;&amp; line1.m_yEnd == line2.m_yEnd) {</b>
+<b class="nc">&nbsp;			if (counter == 2) {// both segments are degenerate</b>
+<b class="nc">&nbsp;				if (param1 != null)// if (param1)</b>
+&nbsp;				{
+<b class="nc">&nbsp;					param1[0] = 0.0;</b>
+<b class="nc">&nbsp;					param1[1] = 1.0;</b>
+&nbsp;				}
+<b class="nc">&nbsp;				if (param2 != null)// if (param2)</b>
+&nbsp;				{
+<b class="nc">&nbsp;					param2[0] = 1.0;</b>
+&nbsp;				}
+&nbsp;
+<b class="nc">&nbsp;				if (intersectionPoints != null)// if (intersectionPoints)</b>
+&nbsp;				{
+<b class="nc">&nbsp;					intersectionPoints[0] = Point2D.construct(line1.m_xEnd,</b>
+&nbsp;							line1.m_yEnd);
+<b class="nc">&nbsp;					intersectionPoints[1] = Point2D.construct(line1.m_xEnd,</b>
+&nbsp;							line1.m_yEnd);
+&nbsp;				}
+&nbsp;
+<b class="nc">&nbsp;				return counter;</b>
+&nbsp;			}
+&nbsp;
+<b class="nc">&nbsp;			if (param1 != null)// if (param1)</b>
+<b class="nc">&nbsp;				param1[counter] = 1.0;</b>
+<b class="nc">&nbsp;			if (param2 != null)// if (param2)</b>
+<b class="nc">&nbsp;				param2[counter] = 1.0;</b>
+&nbsp;
+<b class="nc">&nbsp;			if (intersectionPoints != null)// if (intersectionPoints)</b>
+<b class="nc">&nbsp;				intersectionPoints[counter] = Point2D.construct(line1.m_xEnd,</b>
+&nbsp;						line1.m_yEnd);
+<b class="nc">&nbsp;			counter++;</b>
+&nbsp;		}
+&nbsp;
+<b class="nc">&nbsp;		return counter;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	static int _intersectLineLine(Line line1, Line line2,
+&nbsp;			Point2D[] intersectionPoints, double[] param1, double[] param2,
+&nbsp;			double tolerance) {
+&nbsp;		// _ASSERT(!param1 &amp;&amp; !param2 || param1);
+<b class="fc">&nbsp;		int counter = 0;</b>
+&nbsp;		// Test the end points for exact coincidence.
+<b class="fc">&nbsp;		double t11 = line1._intersection(line2.getStartXY(), tolerance, false);</b>
+<b class="fc">&nbsp;		double t12 = line1._intersection(line2.getEndXY(), tolerance, false);</b>
+<b class="fc">&nbsp;		double t21 = line2._intersection(line1.getStartXY(), tolerance, false);</b>
+<b class="fc">&nbsp;		double t22 = line2._intersection(line1.getEndXY(), tolerance, false);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (!NumberUtils.isNaN(t11)) {</b>
+<b class="fc">&nbsp;			if (param1 != null)// if (param1)</b>
+<b class="fc">&nbsp;				param1[counter] = t11;</b>
+<b class="fc">&nbsp;			if (param2 != null)// if (param2)</b>
+<b class="fc">&nbsp;				param2[counter] = 0;</b>
+&nbsp;
+<b class="fc">&nbsp;			if (intersectionPoints != null)// if (intersectionPoints)</b>
+<b class="nc">&nbsp;				intersectionPoints[counter] = Point2D.construct(line2.m_xStart,</b>
+&nbsp;						line2.m_yStart);
+<b class="fc">&nbsp;			counter++;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (!NumberUtils.isNaN(t12)) {</b>
+<b class="fc">&nbsp;			if (param1 != null)// if (param1)</b>
+<b class="fc">&nbsp;				param1[counter] = t12;</b>
+<b class="fc">&nbsp;			if (param2 != null)// if (param2)</b>
+<b class="fc">&nbsp;				param2[counter] = 1.0;</b>
+&nbsp;
+<b class="fc">&nbsp;			if (intersectionPoints != null)// if (intersectionPoints)</b>
+<b class="nc">&nbsp;				intersectionPoints[counter] = Point2D.construct(line2.m_xEnd,</b>
+&nbsp;						line2.m_yEnd);
+<b class="fc">&nbsp;			counter++;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (counter != 2 &amp;&amp; !NumberUtils.isNaN(t21)) {</b>
+<b class="fc">&nbsp;			if (!(t11 == 0 &amp;&amp; t21 == 0) &amp;&amp; !(t12 == 0 &amp;&amp; t21 == 1.0))// the &quot;if&quot;</b>
+&nbsp;																		// makes
+&nbsp;																		// sure
+&nbsp;																		// this
+&nbsp;																		// has
+&nbsp;																		// not
+&nbsp;																		// been
+&nbsp;																		// already
+&nbsp;																		// calculated
+&nbsp;			{
+<b class="fc">&nbsp;				if (param1 != null)// if (param1)</b>
+<b class="fc">&nbsp;					param1[counter] = 0;</b>
+<b class="fc">&nbsp;				if (param2 != null)// if (param2)</b>
+<b class="fc">&nbsp;					param2[counter] = t21;</b>
+&nbsp;
+<b class="fc">&nbsp;				if (intersectionPoints != null)// if (intersectionPoints)</b>
+<b class="nc">&nbsp;					intersectionPoints[counter] = Point2D.construct(</b>
+&nbsp;							line1.m_xStart, line1.m_yStart);
+<b class="fc">&nbsp;				counter++;</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (counter != 2 &amp;&amp; !NumberUtils.isNaN(t22)) {</b>
+<b class="fc">&nbsp;			if (!(t11 == 1.0 &amp;&amp; t22 == 0) &amp;&amp; !(t12 == 1.0 &amp;&amp; t22 == 1.0))// the</b>
+&nbsp;																			// &quot;if&quot;
+&nbsp;																			// makes
+&nbsp;																			// sure
+&nbsp;																			// this
+&nbsp;																			// has
+&nbsp;																			// not
+&nbsp;																			// been
+&nbsp;																			// already
+&nbsp;																			// calculated
+&nbsp;			{
+<b class="fc">&nbsp;				if (param1 != null)// if (param1)</b>
+<b class="fc">&nbsp;					param1[counter] = 1.0;</b>
+<b class="fc">&nbsp;				if (param2 != null)// if (param2)</b>
+<b class="fc">&nbsp;					param2[counter] = t22;</b>
+&nbsp;
+<b class="fc">&nbsp;				if (intersectionPoints != null)// if (intersectionPoints)</b>
+<b class="nc">&nbsp;					intersectionPoints[counter] = Point2D.construct(</b>
+&nbsp;							line2.m_xEnd, line2.m_yEnd);
+<b class="fc">&nbsp;				counter++;</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (counter &gt; 0) {</b>
+<b class="fc">&nbsp;			if (counter == 2 &amp;&amp; param1 != null &amp;&amp; param1[0] &gt; param1[1]) {// make</b>
+&nbsp;																			// sure
+&nbsp;																			// the
+&nbsp;																			// intersection
+&nbsp;																			// events
+&nbsp;																			// are
+&nbsp;																			// sorted
+&nbsp;																			// along
+&nbsp;																			// the
+&nbsp;																			// line1
+&nbsp;																			// can&#39;t
+&nbsp;																			// swap
+&nbsp;																			// doulbes
+&nbsp;																			// in
+&nbsp;																			// java
+&nbsp;																			// NumberUtils::Swap(param1[0],
+&nbsp;																			// param1[1]);
+<b class="fc">&nbsp;				double zeroParam1 = param1[0];</b>
+<b class="fc">&nbsp;				param1[0] = param1[1];</b>
+<b class="fc">&nbsp;				param1[1] = zeroParam1;</b>
+&nbsp;
+<b class="fc">&nbsp;				if (param2 != null)// if (param2)</b>
+&nbsp;				{
+<b class="fc">&nbsp;					double zeroParam2 = param2[0];</b>
+<b class="fc">&nbsp;					param2[0] = param2[1];</b>
+<b class="fc">&nbsp;					param2[1] = zeroParam2;// NumberUtils::Swap(ARRAYELEMENT(param2,</b>
+&nbsp;											// 0), ARRAYELEMENT(param2, 1));
+&nbsp;				}
+&nbsp;
+<b class="fc">&nbsp;				if (intersectionPoints != null)// if (intersectionPoints)</b>
+&nbsp;				{
+<b class="nc">&nbsp;					Point2D tmp = new Point2D(intersectionPoints[0].x,</b>
+&nbsp;							intersectionPoints[0].y);
+<b class="nc">&nbsp;					intersectionPoints[0] = intersectionPoints[1];</b>
+<b class="nc">&nbsp;					intersectionPoints[1] = tmp;</b>
+&nbsp;				}
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			return counter;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		Point2D params = _intersectHelper1(line1, line2, tolerance);</b>
+<b class="fc">&nbsp;		if (NumberUtils.isNaN(params.x))</b>
+<b class="fc">&nbsp;			return 0;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (intersectionPoints != null)// if (intersectionPoints)</b>
+&nbsp;		{
+<b class="fc">&nbsp;			intersectionPoints[0] = line1.getCoord2D(params.x);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (param1 != null)// if (param1)</b>
+&nbsp;		{
+<b class="fc">&nbsp;			param1[0] = params.x;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (param2 != null)// if (param2)</b>
+&nbsp;		{
+<b class="fc">&nbsp;			param2[0] = params.y;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return 1;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;    @Override
+&nbsp;    public void replaceNaNs(int semantics, double value) {
+<b class="nc">&nbsp;    	addAttribute(semantics);</b>
+<b class="nc">&nbsp;    	if (isEmpty())</b>
+&nbsp;    		return;
+&nbsp;    	
+<b class="nc">&nbsp;    	int ncomps = VertexDescription.getComponentCount(semantics);</b>
+<b class="nc">&nbsp;    	for (int i = 0; i &lt; ncomps; i++) {</b>
+<b class="nc">&nbsp;    		double v = _getAttributeAsDbl(0, semantics, i);</b>
+<b class="nc">&nbsp;    		if (Double.isNaN(v))</b>
+<b class="nc">&nbsp;    			_setAttribute(0, semantics, 0, value);</b>
+&nbsp;    		
+<b class="nc">&nbsp;    		v = _getAttributeAsDbl(1, semantics, i);</b>
+<b class="nc">&nbsp;    		if (Double.isNaN(v))</b>
+<b class="nc">&nbsp;    			_setAttribute(1, semantics, 0, value);</b>
+&nbsp;    	}
+&nbsp;    }
+&nbsp;	
+&nbsp;
+&nbsp;	@Override
+&nbsp;	int getYMonotonicParts(SegmentBuffer[] monotonicSegments) {
+<b class="fc">&nbsp;		return 0;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	void _copyToImpl(Segment dst) {
+&nbsp;		// TODO Auto-generated method stub
+&nbsp;
+<b class="fc">&nbsp;	}</b>
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * The output of this method can be only used for debugging. It is subject to change without notice. 
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public String toString() {
+<b class="fc">&nbsp;		String s = &quot;Line: [&quot; + m_xStart + &quot;, &quot; + m_yStart + &quot;, &quot; + m_xEnd + &quot;, &quot; + m_yEnd +&quot;]&quot;; </b>
+<b class="fc">&nbsp;		return s;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-02-21 16:04</div>
+</div>
+</body>
+</html>

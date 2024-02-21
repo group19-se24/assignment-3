@@ -1,0 +1,1346 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > IntervalTreeImpl</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.esri.core.geometry</a>
+</div>
+
+<h1>Coverage Summary for Class: IntervalTreeImpl (com.esri.core.geometry)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">IntervalTreeImpl</td>
+<td class="coverageStat">
+  <span class="percent">
+    94,2%
+  </span>
+  <span class="absValue">
+    (49/52)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    93,1%
+  </span>
+  <span class="absValue">
+    (335/360)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">IntervalTreeImpl$EndPointsComparer</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (7/7)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">IntervalTreeImpl$IntervalTreeBucketSortHelper</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (4/4)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">IntervalTreeImpl$IntervalTreeIteratorImpl</td>
+<td class="coverageStat">
+  <span class="percent">
+    94,7%
+  </span>
+  <span class="absValue">
+    (18/19)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    96,2%
+  </span>
+  <span class="absValue">
+    (177/184)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">IntervalTreeImpl$IntervalTreeIteratorImpl$State</td>
+  </tr>
+  <tr>
+    <td class="name">IntervalTreeImpl$SecondaryComparator</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (14/14)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    94,9%
+  </span>
+  <span class="absValue">
+    (74/78)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    94,4%
+  </span>
+  <span class="absValue">
+    (537/569)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; Copyright 1995-2015 Esri
+&nbsp;
+&nbsp;   Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp;   you may not use this file except in compliance with the License.
+&nbsp;   You may obtain a copy of the License at
+&nbsp;
+&nbsp;       http://www.apache.org/licenses/LICENSE-2.0
+&nbsp;
+&nbsp;   Unless required by applicable law or agreed to in writing, software
+&nbsp;   distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp;   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp;   See the License for the specific language governing permissions and
+&nbsp;   limitations under the License.
+&nbsp;
+&nbsp; For additional information, contact:
+&nbsp; Environmental Systems Research Institute, Inc.
+&nbsp; Attn: Contracts Dept
+&nbsp; 380 New York Street
+&nbsp; Redlands, California, USA 92373
+&nbsp;
+&nbsp; email: contracts@esri.com
+&nbsp; */
+&nbsp;package com.esri.core.geometry;
+&nbsp;
+&nbsp;import java.util.ArrayList;
+&nbsp;
+<b class="fc">&nbsp;final class IntervalTreeImpl {</b>
+&nbsp;	private void sortEndIndices_(AttributeStreamOfInt32 end_indices, int begin_, int end_) {
+<b class="fc">&nbsp;		IntervalTreeBucketSortHelper sorter = new IntervalTreeBucketSortHelper(this);</b>
+<b class="fc">&nbsp;		BucketSort bucket_sort = new BucketSort();</b>
+<b class="fc">&nbsp;		bucket_sort.sort(end_indices, begin_, end_, sorter);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private void sortEndIndicesHelper_(AttributeStreamOfInt32 end_indices, int begin_, int end_) {
+<b class="fc">&nbsp;		end_indices.Sort(begin_, end_, new EndPointsComparer(this));</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private double getValue_(int e) {
+<b class="fc">&nbsp;		if (!m_b_envelopes_ref) {</b>
+<b class="fc">&nbsp;			Envelope1D interval = m_intervals.get(e &gt;&gt; 1);</b>
+<b class="fc">&nbsp;			double v = (isLeft_(e) ? interval.vmin : interval.vmax);</b>
+<b class="fc">&nbsp;			return v;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		Envelope2D interval = m_envelopes_ref.get(e &gt;&gt; 1);</b>
+<b class="fc">&nbsp;		double v = (isLeft_(e) ? interval.xmin : interval.xmax);</b>
+<b class="fc">&nbsp;		return v;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private static final class EndPointsComparer extends AttributeStreamOfInt32.IntComparator { // For user sort
+&nbsp;
+<b class="fc">&nbsp;		EndPointsComparer(IntervalTreeImpl interval_tree) {</b>
+<b class="fc">&nbsp;			m_interval_tree = interval_tree;</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		@Override
+&nbsp;		public int compare(int e_1, int e_2) {
+<b class="fc">&nbsp;			double v_1 = m_interval_tree.getValue_(e_1);</b>
+<b class="fc">&nbsp;			double v_2 = m_interval_tree.getValue_(e_2);</b>
+&nbsp;
+<b class="fc">&nbsp;			if (v_1 &lt; v_2 || (v_1 == v_2 &amp;&amp; isLeft_(e_1) &amp;&amp; isRight_(e_2)))</b>
+<b class="fc">&nbsp;				return -1;</b>
+&nbsp;
+<b class="fc">&nbsp;			return 1;</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		private IntervalTreeImpl m_interval_tree;
+&nbsp;	}
+&nbsp;
+&nbsp;	private class IntervalTreeBucketSortHelper extends ClassicSort { // For bucket sort
+&nbsp;
+<b class="fc">&nbsp;		IntervalTreeBucketSortHelper(IntervalTreeImpl interval_tree) {</b>
+<b class="fc">&nbsp;			m_interval_tree = interval_tree;</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		@Override
+&nbsp;		public void userSort(int begin, int end, AttributeStreamOfInt32 indices) {
+<b class="fc">&nbsp;			m_interval_tree.sortEndIndicesHelper_(indices, begin, end);</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		@Override
+&nbsp;		public double getValue(int e) {
+<b class="fc">&nbsp;			return m_interval_tree.getValue_(e);</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		private IntervalTreeImpl m_interval_tree;
+&nbsp;	}
+&nbsp;
+<b class="fc">&nbsp;	IntervalTreeImpl(boolean b_offline_dynamic) {</b>
+<b class="fc">&nbsp;		m_b_envelopes_ref = false;</b>
+<b class="fc">&nbsp;		m_b_offline_dynamic = b_offline_dynamic;</b>
+<b class="fc">&nbsp;		m_b_constructing = false;</b>
+<b class="fc">&nbsp;		m_b_construction_ended = false;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void addEnvelopesRef(ArrayList&lt;Envelope2D&gt; envelopes) {
+<b class="fc">&nbsp;		reset_(true, true);</b>
+<b class="fc">&nbsp;		m_b_envelopes_ref = true;</b>
+<b class="fc">&nbsp;		m_envelopes_ref = envelopes;</b>
+&nbsp;
+<b class="fc">&nbsp;		m_b_constructing = false;</b>
+<b class="fc">&nbsp;		m_b_construction_ended = true;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (!m_b_offline_dynamic) {</b>
+<b class="nc">&nbsp;			insertIntervalsStatic_();</b>
+<b class="nc">&nbsp;			m_c_count = m_envelopes_ref.size();</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	void startConstruction() {
+<b class="fc">&nbsp;		reset_(true, false);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void addInterval(Envelope1D interval) {
+<b class="fc">&nbsp;		if (!m_b_constructing)</b>
+<b class="nc">&nbsp;			throw new GeometryException(&quot;invalid call&quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;		m_intervals.add(interval);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void addInterval(double min, double max) {
+<b class="nc">&nbsp;		if (!m_b_constructing)</b>
+<b class="nc">&nbsp;			throw new GeometryException(&quot;invald call&quot;);</b>
+&nbsp;
+<b class="nc">&nbsp;		m_intervals.add(new Envelope1D(min, max));</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void endConstruction() {
+<b class="fc">&nbsp;		if (!m_b_constructing)</b>
+<b class="nc">&nbsp;			throw new GeometryException(&quot;invalid call&quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;		m_b_constructing = false;</b>
+<b class="fc">&nbsp;		m_b_construction_ended = true;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (!m_b_offline_dynamic) {</b>
+<b class="fc">&nbsp;			insertIntervalsStatic_();</b>
+<b class="fc">&nbsp;			m_c_count = m_intervals.size();</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	/*
+&nbsp;	 * Resets the Interval_tree_impl to an empty state, but maintains a handle
+&nbsp;	 * on the current intervals.
+&nbsp;	 */
+&nbsp;	void reset() {
+<b class="nc">&nbsp;		if (!m_b_offline_dynamic || !m_b_construction_ended)</b>
+<b class="nc">&nbsp;			throw new IllegalArgumentException(&quot;invalid call&quot;);</b>
+&nbsp;
+<b class="nc">&nbsp;		reset_(false, m_b_envelopes_ref);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns the number of intervals stored in the Interval_tree_impl
+&nbsp;	 */
+&nbsp;	int size() {
+<b class="fc">&nbsp;		return m_c_count;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Gets an iterator on the Interval_tree_impl using the input Envelope_1D
+&nbsp;	 * interval as the query. To reuse the existing iterator on the same
+&nbsp;	 * Interval_tree_impl but with a new query, use the reset_iterator function
+&nbsp;	 * on the Interval_tree_iterator_impl. \param query The Envelope_1D interval
+&nbsp;	 * used for the query. \param tolerance The tolerance used for the
+&nbsp;	 * intersection tests.
+&nbsp;	 */
+&nbsp;	IntervalTreeIteratorImpl getIterator(Envelope1D query, double tolerance) {
+<b class="fc">&nbsp;		return new IntervalTreeImpl.IntervalTreeIteratorImpl(this, query, tolerance);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Gets an iterator on the Interval_tree_impl using the input double as the
+&nbsp;	 * stabbing query. To reuse the existing iterator on the same
+&nbsp;	 * Interval_tree_impl but with a new query, use the reset_iterator function
+&nbsp;	 * on the Interval_tree_iterator_impl. \param query The double used for the
+&nbsp;	 * stabbing query. \param tolerance The tolerance used for the intersection
+&nbsp;	 * tests.
+&nbsp;	 */
+&nbsp;	IntervalTreeIteratorImpl getIterator(double query, double tolerance) {
+<b class="nc">&nbsp;		return new IntervalTreeImpl.IntervalTreeIteratorImpl(this, query, tolerance);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Gets an iterator on the Interval_tree_impl.
+&nbsp;	 */
+&nbsp;	IntervalTreeIteratorImpl getIterator() {
+<b class="fc">&nbsp;		return new IntervalTreeImpl.IntervalTreeIteratorImpl(this);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private boolean m_b_envelopes_ref;
+&nbsp;	private boolean m_b_offline_dynamic;
+&nbsp;	private ArrayList&lt;Envelope1D&gt; m_intervals;
+&nbsp;	private ArrayList&lt;Envelope2D&gt; m_envelopes_ref;
+&nbsp;	private StridedIndexTypeCollection m_tertiary_nodes; // 5 elements for offline dynamic case, 4 elements for static case
+&nbsp;	private StridedIndexTypeCollection m_interval_nodes; // 3 elements
+&nbsp;	private AttributeStreamOfInt32 m_interval_handles; // for offline dynamic// case
+&nbsp;	private IndexMultiDCList m_secondary_lists; // for static case
+&nbsp;	private Treap m_secondary_treaps; // for off-line dynamic case
+&nbsp;	private AttributeStreamOfInt32 m_end_indices_unique; // for both offline dynamic and static cases
+&nbsp;	private int m_c_count;
+&nbsp;	private int m_root;
+&nbsp;	private boolean m_b_sort_intervals;
+&nbsp;	private boolean m_b_constructing;
+&nbsp;	private boolean m_b_construction_ended;
+&nbsp;
+&nbsp;      /* m_tertiary_nodes
+&nbsp;      * 0: m_discriminant_index_1
+&nbsp;      * 1: m_secondary
+&nbsp;      * 2: m_lptr
+&nbsp;      * 3: m_rptr
+&nbsp;      * 4: m_pptr
+&nbsp;      */
+&nbsp;
+&nbsp;	private void querySortedEndPointIndices_(AttributeStreamOfInt32 end_indices) {
+<b class="fc">&nbsp;		int size = (!m_b_envelopes_ref ? m_intervals.size() : m_envelopes_ref.size());</b>
+&nbsp;
+<b class="fc">&nbsp;		for (int i = 0; i &lt; 2 * size; i++)</b>
+<b class="fc">&nbsp;			end_indices.add(i);</b>
+&nbsp;
+<b class="fc">&nbsp;		sortEndIndices_(end_indices, 0, 2 * size);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private void querySortedDuplicatesRemoved_(AttributeStreamOfInt32 end_indices_sorted) {
+&nbsp;		// remove duplicates
+&nbsp;
+<b class="fc">&nbsp;		double prev = NumberUtils.TheNaN;</b>
+<b class="fc">&nbsp;		for (int i = 0; i &lt; end_indices_sorted.size(); i++) {</b>
+<b class="fc">&nbsp;			int e = end_indices_sorted.get(i);</b>
+<b class="fc">&nbsp;			double v = getValue_(e);</b>
+&nbsp;
+<b class="fc">&nbsp;			if (v != prev) {</b>
+<b class="fc">&nbsp;				m_end_indices_unique.add(e);</b>
+<b class="fc">&nbsp;				prev = v;</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	void insert(int index) {
+<b class="fc">&nbsp;		if (!m_b_offline_dynamic || !m_b_construction_ended)</b>
+<b class="nc">&nbsp;			throw new IllegalArgumentException(&quot;invalid call&quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (m_root == -1) {</b>
+&nbsp;
+<b class="fc">&nbsp;			int size = (!m_b_envelopes_ref ? m_intervals.size() : m_envelopes_ref.size());</b>
+&nbsp;
+<b class="fc">&nbsp;			if (m_b_sort_intervals) {</b>
+&nbsp;				// sort
+<b class="fc">&nbsp;				AttributeStreamOfInt32 end_point_indices_sorted = new AttributeStreamOfInt32(0);</b>
+<b class="fc">&nbsp;				end_point_indices_sorted.reserve(2 * size);</b>
+<b class="fc">&nbsp;				querySortedEndPointIndices_(end_point_indices_sorted);</b>
+&nbsp;
+&nbsp;				// remove duplicates
+<b class="fc">&nbsp;				m_end_indices_unique.resize(0);</b>
+<b class="fc">&nbsp;				querySortedDuplicatesRemoved_(end_point_indices_sorted);</b>
+<b class="fc">&nbsp;				m_interval_handles.resize(size, -1);</b>
+<b class="fc">&nbsp;				m_interval_handles.setRange(-1, 0, size);</b>
+<b class="fc">&nbsp;				m_b_sort_intervals = false;</b>
+<b class="fc">&nbsp;			} else {</b>
+<b class="nc">&nbsp;				m_interval_handles.setRange(-1, 0, size);</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			m_root = createRoot_();</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		int interval_handle = insertIntervalEnd_(index &lt;&lt; 1, m_root);</b>
+<b class="fc">&nbsp;		int secondary_handle = getSecondaryFromInterval_(interval_handle);</b>
+<b class="fc">&nbsp;		int right_end_handle = m_secondary_treaps.addElement((index &lt;&lt; 1) + 1, secondary_handle);</b>
+<b class="fc">&nbsp;		setRightEnd_(interval_handle, right_end_handle);</b>
+<b class="fc">&nbsp;		m_interval_handles.set(index, interval_handle);</b>
+<b class="fc">&nbsp;		m_c_count++;</b>
+&nbsp;		// assert(check_validation_());
+&nbsp;	}
+&nbsp;
+&nbsp;	private void insertIntervalsStatic_() {
+<b class="fc">&nbsp;		int size = (!m_b_envelopes_ref ? m_intervals.size() : m_envelopes_ref.size());</b>
+&nbsp;
+<b class="fc">&nbsp;		assert (m_b_sort_intervals);</b>
+&nbsp;
+&nbsp;		// sort
+<b class="fc">&nbsp;		AttributeStreamOfInt32 end_indices_sorted = new AttributeStreamOfInt32(0);</b>
+<b class="fc">&nbsp;		end_indices_sorted.reserve(2 * size);</b>
+<b class="fc">&nbsp;		querySortedEndPointIndices_(end_indices_sorted);</b>
+&nbsp;
+&nbsp;		// remove duplicates
+<b class="fc">&nbsp;		m_end_indices_unique.resize(0);</b>
+<b class="fc">&nbsp;		querySortedDuplicatesRemoved_(end_indices_sorted);</b>
+&nbsp;
+<b class="fc">&nbsp;		assert (m_tertiary_nodes.size() == 0);</b>
+<b class="fc">&nbsp;		m_interval_nodes.setCapacity(size); // one for each interval being inserted. each element contains a tertiary node, a left secondary node, and a right secondary node.</b>
+<b class="fc">&nbsp;		m_secondary_lists.reserveNodes(2 * size); // one for each end point of the original interval set (not the unique set)</b>
+&nbsp;
+<b class="fc">&nbsp;		AttributeStreamOfInt32 interval_handles = (AttributeStreamOfInt32) AttributeStreamBase.createIndexStream(size);</b>
+<b class="fc">&nbsp;		interval_handles.setRange(-1, 0, size);</b>
+&nbsp;
+<b class="fc">&nbsp;		m_root = createRoot_();</b>
+&nbsp;
+<b class="fc">&nbsp;		for (int i = 0; i &lt; end_indices_sorted.size(); i++) {</b>
+<b class="fc">&nbsp;			int e = end_indices_sorted.get(i);</b>
+<b class="fc">&nbsp;			int interval_handle = interval_handles.get(e &gt;&gt; 1);</b>
+&nbsp;
+<b class="fc">&nbsp;			if (interval_handle != -1) {// insert the right end point</b>
+<b class="fc">&nbsp;				assert (isRight_(e));</b>
+<b class="fc">&nbsp;				int secondary_handle = getSecondaryFromInterval_(interval_handle);</b>
+<b class="fc">&nbsp;				setRightEnd_(interval_handle, m_secondary_lists.addElement(secondary_handle, e));</b>
+<b class="fc">&nbsp;			} else {// insert the left end point</b>
+<b class="fc">&nbsp;				assert (isLeft_(e));</b>
+<b class="fc">&nbsp;				interval_handle = insertIntervalEnd_(e, m_root);</b>
+<b class="fc">&nbsp;				interval_handles.set(e &gt;&gt; 1, interval_handle);</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		assert (m_secondary_lists.getNodeCount() == 2 * size);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private int createRoot_() {
+<b class="fc">&nbsp;		int discriminant_index_1 = calculateDiscriminantIndex1_(0, m_end_indices_unique.size() - 1);</b>
+<b class="fc">&nbsp;		return createTertiaryNode_(discriminant_index_1);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private int insertIntervalEnd_(int end_index, int root) {
+<b class="fc">&nbsp;		assert (isLeft_(end_index));</b>
+<b class="fc">&nbsp;		int pptr = -1;</b>
+<b class="fc">&nbsp;		int ptr = root;</b>
+<b class="fc">&nbsp;		int secondary_handle = -1;</b>
+<b class="fc">&nbsp;		int interval_handle = -1;</b>
+<b class="fc">&nbsp;		int il = 0, ir = m_end_indices_unique.size() - 1, im = 0;</b>
+<b class="fc">&nbsp;		int index = end_index &gt;&gt; 1;</b>
+<b class="fc">&nbsp;		double discriminant_pptr = NumberUtils.NaN();</b>
+<b class="fc">&nbsp;		double discriminant_ptr = NumberUtils.NaN();</b>
+<b class="fc">&nbsp;		boolean bSearching = true;</b>
+&nbsp;
+<b class="fc">&nbsp;		double min = getMin_(index);</b>
+<b class="fc">&nbsp;		double max = getMax_(index);</b>
+&nbsp;
+<b class="fc">&nbsp;		int discriminant_index_1 = -1;</b>
+&nbsp;
+<b class="fc">&nbsp;		while (bSearching) {</b>
+<b class="fc">&nbsp;			im = il + (ir - il) / 2;</b>
+<b class="fc">&nbsp;			assert (il != ir || min == max);</b>
+<b class="fc">&nbsp;			discriminant_index_1 = calculateDiscriminantIndex1_(il, ir);</b>
+<b class="fc">&nbsp;			double discriminant = getDiscriminantFromIndex1_(discriminant_index_1);</b>
+<b class="fc">&nbsp;			assert (!NumberUtils.isNaN(discriminant));</b>
+&nbsp;
+<b class="fc">&nbsp;			if (max &lt; discriminant) {</b>
+<b class="fc">&nbsp;				if (ptr != -1) {</b>
+<b class="fc">&nbsp;					if (discriminant_index_1 == getDiscriminantIndex1_(ptr)) {</b>
+<b class="fc">&nbsp;						assert (getDiscriminantFromIndex1_(discriminant_index_1) == getDiscriminant_(ptr));</b>
+&nbsp;
+<b class="fc">&nbsp;						pptr = ptr;</b>
+<b class="fc">&nbsp;						discriminant_pptr = discriminant;</b>
+<b class="fc">&nbsp;						ptr = getLPTR_(ptr);</b>
+&nbsp;
+<b class="fc">&nbsp;						if (ptr != -1)</b>
+<b class="fc">&nbsp;							discriminant_ptr = getDiscriminant_(ptr);</b>
+&nbsp;						else
+<b class="fc">&nbsp;							discriminant_ptr = NumberUtils.NaN();</b>
+<b class="fc">&nbsp;					} else if (discriminant_ptr &gt; discriminant) {</b>
+<b class="fc">&nbsp;						int tertiary_handle = createTertiaryNode_(discriminant_index_1);</b>
+&nbsp;
+<b class="fc">&nbsp;						if (discriminant &lt; discriminant_pptr)</b>
+<b class="fc">&nbsp;							setLPTR_(pptr, tertiary_handle);</b>
+&nbsp;						else
+<b class="fc">&nbsp;							setRPTR_(pptr, tertiary_handle);</b>
+&nbsp;
+<b class="fc">&nbsp;						setRPTR_(tertiary_handle, ptr);</b>
+&nbsp;
+<b class="fc">&nbsp;						if (m_b_offline_dynamic) {</b>
+<b class="fc">&nbsp;							setPPTR_(tertiary_handle, pptr);</b>
+<b class="fc">&nbsp;							setPPTR_(ptr, tertiary_handle);</b>
+&nbsp;						}
+&nbsp;
+<b class="fc">&nbsp;						pptr = tertiary_handle;</b>
+<b class="fc">&nbsp;						discriminant_pptr = discriminant;</b>
+<b class="fc">&nbsp;						ptr = -1;</b>
+<b class="fc">&nbsp;						discriminant_ptr = NumberUtils.NaN();</b>
+&nbsp;					}
+&nbsp;				}
+&nbsp;
+<b class="fc">&nbsp;				ir = im;</b>
+&nbsp;
+<b class="fc">&nbsp;				continue;</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			if (min &gt; discriminant) {</b>
+<b class="fc">&nbsp;				if (ptr != -1) {</b>
+<b class="fc">&nbsp;					if (discriminant_index_1 == getDiscriminantIndex1_(ptr)) {</b>
+<b class="fc">&nbsp;						assert (getDiscriminantFromIndex1_(discriminant_index_1) == getDiscriminant_(ptr));</b>
+&nbsp;
+<b class="fc">&nbsp;						pptr = ptr;</b>
+<b class="fc">&nbsp;						discriminant_pptr = discriminant;</b>
+<b class="fc">&nbsp;						ptr = getRPTR_(ptr);</b>
+&nbsp;
+<b class="fc">&nbsp;						if (ptr != -1)</b>
+<b class="fc">&nbsp;							discriminant_ptr = getDiscriminant_(ptr);</b>
+&nbsp;						else
+<b class="fc">&nbsp;							discriminant_ptr = NumberUtils.NaN();</b>
+<b class="fc">&nbsp;					} else if (discriminant_ptr &lt; discriminant) {</b>
+<b class="fc">&nbsp;						int tertiary_handle = createTertiaryNode_(discriminant_index_1);</b>
+&nbsp;
+<b class="fc">&nbsp;						if (discriminant &lt; discriminant_pptr)</b>
+<b class="fc">&nbsp;							setLPTR_(pptr, tertiary_handle);</b>
+&nbsp;						else
+<b class="fc">&nbsp;							setRPTR_(pptr, tertiary_handle);</b>
+&nbsp;
+<b class="fc">&nbsp;						setLPTR_(tertiary_handle, ptr);</b>
+&nbsp;
+<b class="fc">&nbsp;						if (m_b_offline_dynamic) {</b>
+<b class="fc">&nbsp;							setPPTR_(tertiary_handle, pptr);</b>
+<b class="fc">&nbsp;							setPPTR_(ptr, tertiary_handle);</b>
+&nbsp;						}
+&nbsp;
+<b class="fc">&nbsp;						pptr = tertiary_handle;</b>
+<b class="fc">&nbsp;						discriminant_pptr = discriminant;</b>
+<b class="fc">&nbsp;						ptr = -1;</b>
+<b class="fc">&nbsp;						discriminant_ptr = NumberUtils.NaN();</b>
+&nbsp;					}
+&nbsp;				}
+&nbsp;
+<b class="fc">&nbsp;				il = im + 1;</b>
+&nbsp;
+<b class="fc">&nbsp;				continue;</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			int tertiary_handle = -1;</b>
+&nbsp;
+<b class="fc">&nbsp;			if (ptr == -1 || discriminant_index_1 != getDiscriminantIndex1_(ptr)) {</b>
+<b class="fc">&nbsp;				tertiary_handle = createTertiaryNode_(discriminant_index_1);</b>
+&nbsp;			} else {
+<b class="fc">&nbsp;				tertiary_handle = ptr;</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			secondary_handle = getSecondaryFromTertiary_(tertiary_handle);</b>
+&nbsp;
+<b class="fc">&nbsp;			if (secondary_handle == -1) {</b>
+<b class="fc">&nbsp;				secondary_handle = createSecondary_(tertiary_handle);</b>
+<b class="fc">&nbsp;				setSecondaryToTertiary_(tertiary_handle, secondary_handle);</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			int left_end_handle = addEndIndex_(secondary_handle, end_index);</b>
+<b class="fc">&nbsp;			interval_handle = createIntervalNode_();</b>
+<b class="fc">&nbsp;			setSecondaryToInterval_(interval_handle, secondary_handle);</b>
+<b class="fc">&nbsp;			setLeftEnd_(interval_handle, left_end_handle);</b>
+&nbsp;
+<b class="fc">&nbsp;			if (ptr == -1 || discriminant_index_1 != getDiscriminantIndex1_(ptr)) {</b>
+<b class="fc">&nbsp;				assert (tertiary_handle != -1);</b>
+<b class="fc">&nbsp;				assert (getLPTR_(tertiary_handle) == -1 &amp;&amp; getRPTR_(tertiary_handle) == -1 &amp;&amp; (!m_b_offline_dynamic || getPPTR_(tertiary_handle) == -1));</b>
+&nbsp;
+<b class="fc">&nbsp;				if (discriminant &lt; discriminant_pptr)</b>
+<b class="fc">&nbsp;					setLPTR_(pptr, tertiary_handle);</b>
+&nbsp;				else
+<b class="fc">&nbsp;					setRPTR_(pptr, tertiary_handle);</b>
+&nbsp;
+<b class="fc">&nbsp;				if (m_b_offline_dynamic)</b>
+<b class="fc">&nbsp;					setPPTR_(tertiary_handle, pptr);</b>
+&nbsp;
+<b class="fc">&nbsp;				if (ptr != -1) {</b>
+<b class="fc">&nbsp;					if (discriminant_ptr &lt; discriminant)</b>
+<b class="fc">&nbsp;						setLPTR_(tertiary_handle, ptr);</b>
+&nbsp;					else
+<b class="fc">&nbsp;						setRPTR_(tertiary_handle, ptr);</b>
+&nbsp;
+<b class="fc">&nbsp;					if (m_b_offline_dynamic)</b>
+<b class="fc">&nbsp;						setPPTR_(ptr, tertiary_handle);</b>
+&nbsp;				}
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			bSearching = false;</b>
+<b class="fc">&nbsp;			break;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return interval_handle;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void remove(int index) {
+<b class="fc">&nbsp;		if (!m_b_offline_dynamic || !m_b_construction_ended)</b>
+<b class="nc">&nbsp;			throw new GeometryException(&quot;invalid call&quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;		int interval_handle = m_interval_handles.get(index);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (interval_handle == -1)</b>
+<b class="nc">&nbsp;			throw new GeometryException(&quot;the interval does not exist in the interval tree&quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;		m_interval_handles.set(index, -1);</b>
+&nbsp;
+<b class="fc">&nbsp;		assert (getSecondaryFromInterval_(interval_handle) != -1);</b>
+<b class="fc">&nbsp;		assert (getLeftEnd_(interval_handle) != -1);</b>
+<b class="fc">&nbsp;		assert (getRightEnd_(interval_handle) != -1);</b>
+&nbsp;
+<b class="fc">&nbsp;		m_c_count--;</b>
+&nbsp;
+&nbsp;		int size;
+<b class="fc">&nbsp;		int secondary_handle = getSecondaryFromInterval_(interval_handle);</b>
+<b class="fc">&nbsp;		int tertiary_handle = -1;</b>
+&nbsp;
+<b class="fc">&nbsp;		tertiary_handle = m_secondary_treaps.getTreapData(secondary_handle);</b>
+<b class="fc">&nbsp;		m_secondary_treaps.deleteNode(getLeftEnd_(interval_handle), secondary_handle);</b>
+<b class="fc">&nbsp;		m_secondary_treaps.deleteNode(getRightEnd_(interval_handle), secondary_handle);</b>
+<b class="fc">&nbsp;		size = m_secondary_treaps.size(secondary_handle);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (size == 0) {</b>
+<b class="fc">&nbsp;			m_secondary_treaps.deleteTreap(secondary_handle);</b>
+<b class="fc">&nbsp;			setSecondaryToTertiary_(tertiary_handle, -1);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		m_interval_nodes.deleteElement(interval_handle);</b>
+<b class="fc">&nbsp;		int pptr = getPPTR_(tertiary_handle);</b>
+<b class="fc">&nbsp;		int lptr = getLPTR_(tertiary_handle);</b>
+<b class="fc">&nbsp;		int rptr = getRPTR_(tertiary_handle);</b>
+&nbsp;
+<b class="fc">&nbsp;		int iterations = 0;</b>
+<b class="fc">&nbsp;		while (!(size &gt; 0 || tertiary_handle == m_root || (lptr != -1 &amp;&amp; rptr != -1))) {</b>
+<b class="fc">&nbsp;			assert (size == 0);</b>
+<b class="fc">&nbsp;			assert (lptr == -1 || rptr == -1);</b>
+<b class="fc">&nbsp;			assert (tertiary_handle != 0);</b>
+&nbsp;
+<b class="fc">&nbsp;			if (tertiary_handle == getLPTR_(pptr)) {</b>
+<b class="fc">&nbsp;				if (lptr != -1) {</b>
+<b class="fc">&nbsp;					setLPTR_(pptr, lptr);</b>
+<b class="fc">&nbsp;					setPPTR_(lptr, pptr);</b>
+<b class="fc">&nbsp;					setLPTR_(tertiary_handle, -1);</b>
+<b class="fc">&nbsp;					setPPTR_(tertiary_handle, -1);</b>
+<b class="fc">&nbsp;				} else if (rptr != -1) {</b>
+<b class="fc">&nbsp;					setLPTR_(pptr, rptr);</b>
+<b class="fc">&nbsp;					setPPTR_(rptr, pptr);</b>
+<b class="fc">&nbsp;					setRPTR_(tertiary_handle, -1);</b>
+<b class="fc">&nbsp;					setPPTR_(tertiary_handle, -1);</b>
+&nbsp;				} else {
+<b class="fc">&nbsp;					setLPTR_(pptr, -1);</b>
+<b class="fc">&nbsp;					setPPTR_(tertiary_handle, -1);</b>
+&nbsp;				}
+&nbsp;			} else {
+<b class="fc">&nbsp;				if (lptr != -1) {</b>
+<b class="fc">&nbsp;					setRPTR_(pptr, lptr);</b>
+<b class="fc">&nbsp;					setPPTR_(lptr, pptr);</b>
+<b class="fc">&nbsp;					setLPTR_(tertiary_handle, -1);</b>
+<b class="fc">&nbsp;					setPPTR_(tertiary_handle, -1);</b>
+<b class="fc">&nbsp;				} else if (rptr != -1) {</b>
+<b class="fc">&nbsp;					setRPTR_(pptr, rptr);</b>
+<b class="fc">&nbsp;					setPPTR_(rptr, pptr);</b>
+<b class="fc">&nbsp;					setRPTR_(tertiary_handle, -1);</b>
+<b class="fc">&nbsp;					setPPTR_(tertiary_handle, -1);</b>
+&nbsp;				} else {
+<b class="fc">&nbsp;					setRPTR_(pptr, -1);</b>
+<b class="fc">&nbsp;					setPPTR_(tertiary_handle, -1);</b>
+&nbsp;				}
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			m_tertiary_nodes.deleteElement(tertiary_handle);</b>
+&nbsp;
+<b class="fc">&nbsp;			iterations++;</b>
+<b class="fc">&nbsp;			tertiary_handle = pptr;</b>
+<b class="fc">&nbsp;			secondary_handle = getSecondaryFromTertiary_(tertiary_handle);</b>
+<b class="fc">&nbsp;			size = (secondary_handle != -1 ? m_secondary_treaps.size(secondary_handle) : 0);</b>
+<b class="fc">&nbsp;			lptr = getLPTR_(tertiary_handle);</b>
+<b class="fc">&nbsp;			rptr = getRPTR_(tertiary_handle);</b>
+<b class="fc">&nbsp;			pptr = getPPTR_(tertiary_handle);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		assert (iterations &lt;= 2);</b>
+&nbsp;		//assert(check_validation_());
+&nbsp;	}
+&nbsp;
+&nbsp;	private void reset_(boolean b_new_intervals, boolean b_envelopes_ref) {
+<b class="fc">&nbsp;		if (b_new_intervals) {</b>
+<b class="fc">&nbsp;			m_b_envelopes_ref = false;</b>
+<b class="fc">&nbsp;			m_envelopes_ref = null;</b>
+&nbsp;
+<b class="fc">&nbsp;			m_b_sort_intervals = true;</b>
+<b class="fc">&nbsp;			m_b_constructing = true;</b>
+<b class="fc">&nbsp;			m_b_construction_ended = false;</b>
+&nbsp;
+<b class="fc">&nbsp;			if (m_end_indices_unique == null)</b>
+<b class="fc">&nbsp;				m_end_indices_unique = (AttributeStreamOfInt32) (AttributeStreamBase.createIndexStream(0));</b>
+&nbsp;			else
+<b class="nc">&nbsp;				m_end_indices_unique.resize(0);</b>
+&nbsp;
+<b class="fc">&nbsp;			if (!b_envelopes_ref) {</b>
+<b class="fc">&nbsp;				if (m_intervals == null)</b>
+<b class="fc">&nbsp;					m_intervals = new ArrayList&lt;Envelope1D&gt;(0);</b>
+&nbsp;				else
+<b class="nc">&nbsp;					m_intervals.clear();</b>
+&nbsp;			} else {
+<b class="fc">&nbsp;				if (m_intervals != null)</b>
+<b class="nc">&nbsp;					m_intervals.clear();</b>
+&nbsp;
+<b class="fc">&nbsp;				m_b_envelopes_ref = true;</b>
+&nbsp;			}
+&nbsp;		} else {
+<b class="nc">&nbsp;			assert (m_b_offline_dynamic &amp;&amp; m_b_construction_ended);</b>
+<b class="nc">&nbsp;			m_b_sort_intervals = false;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (m_b_offline_dynamic) {</b>
+<b class="fc">&nbsp;			if (m_interval_handles == null) {</b>
+<b class="fc">&nbsp;				m_interval_handles = (AttributeStreamOfInt32) (AttributeStreamBase.createIndexStream(0));</b>
+<b class="fc">&nbsp;				m_secondary_treaps = new Treap();</b>
+<b class="fc">&nbsp;				m_secondary_treaps.setComparator(new SecondaryComparator(this));</b>
+&nbsp;			} else {
+<b class="nc">&nbsp;				m_secondary_treaps.clear();</b>
+&nbsp;			}
+&nbsp;		} else {
+<b class="fc">&nbsp;			if (m_secondary_lists == null)</b>
+<b class="fc">&nbsp;				m_secondary_lists = new IndexMultiDCList();</b>
+&nbsp;			else
+<b class="nc">&nbsp;				m_secondary_lists.clear();</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (m_tertiary_nodes == null) {</b>
+<b class="fc">&nbsp;			m_interval_nodes = new StridedIndexTypeCollection(3);</b>
+<b class="fc">&nbsp;			m_tertiary_nodes = new StridedIndexTypeCollection(m_b_offline_dynamic ? 5 : 4);</b>
+&nbsp;		} else {
+<b class="nc">&nbsp;			m_interval_nodes.deleteAll(false);</b>
+<b class="nc">&nbsp;			m_tertiary_nodes.deleteAll(false);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		m_root = -1;</b>
+<b class="fc">&nbsp;		m_c_count = 0;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private double getDiscriminant_(int tertiary_handle) {
+<b class="fc">&nbsp;		int discriminant_index_1 = getDiscriminantIndex1_(tertiary_handle);</b>
+<b class="fc">&nbsp;		return getDiscriminantFromIndex1_(discriminant_index_1);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private double getDiscriminantFromIndex1_(int discriminant_index_1) {
+<b class="fc">&nbsp;		if (discriminant_index_1 == -1)</b>
+<b class="nc">&nbsp;			return NumberUtils.NaN();</b>
+&nbsp;
+<b class="fc">&nbsp;		if (discriminant_index_1 &gt; 0) {</b>
+<b class="fc">&nbsp;			int j = discriminant_index_1 - 2;</b>
+<b class="fc">&nbsp;			int e_1 = m_end_indices_unique.get(j);</b>
+<b class="fc">&nbsp;			int e_2 = m_end_indices_unique.get(j + 1);</b>
+&nbsp;
+<b class="fc">&nbsp;			double v_1 = getValue_(e_1);</b>
+<b class="fc">&nbsp;			double v_2 = getValue_(e_2);</b>
+<b class="fc">&nbsp;			assert (v_1 &lt; v_2);</b>
+&nbsp;
+<b class="fc">&nbsp;			return 0.5 * (v_1 + v_2);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		int j = -discriminant_index_1 - 2;</b>
+<b class="fc">&nbsp;		assert (j &gt;= 0);</b>
+<b class="fc">&nbsp;		int e = m_end_indices_unique.get(j);</b>
+<b class="fc">&nbsp;		double v = getValue_(e);</b>
+&nbsp;
+<b class="fc">&nbsp;		return v;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private int calculateDiscriminantIndex1_(int il, int ir) {
+&nbsp;		int discriminant_index_1;
+&nbsp;
+<b class="fc">&nbsp;		if (il &lt; ir) {</b>
+<b class="fc">&nbsp;			int im = il + (ir - il) / 2;</b>
+<b class="fc">&nbsp;			discriminant_index_1 = im + 2; // positive discriminant means use average of im and im + 1</b>
+<b class="fc">&nbsp;		} else {</b>
+<b class="fc">&nbsp;			discriminant_index_1 = -(il + 2); // negative discriminant just means use il (-(il + 2) will never be -1)</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return discriminant_index_1;</b>
+&nbsp;	}
+&nbsp;
+<b class="fc">&nbsp;	static final class IntervalTreeIteratorImpl {</b>
+&nbsp;
+&nbsp;		private IntervalTreeImpl m_interval_tree;
+<b class="fc">&nbsp;		private Envelope1D m_query = new Envelope1D();</b>
+&nbsp;		private int m_tertiary_handle;
+&nbsp;		private int m_next_tertiary_handle;
+&nbsp;		private int m_forked_handle;
+&nbsp;		private int m_current_end_handle;
+&nbsp;		private int m_next_end_handle;
+<b class="fc">&nbsp;		private AttributeStreamOfInt32 m_tertiary_stack = new AttributeStreamOfInt32(0);</b>
+&nbsp;		private int m_function_index;
+<b class="fc">&nbsp;		private int[] m_function_stack = new int[2];</b>
+&nbsp;
+&nbsp;		private interface State {
+&nbsp;			static final int initialize = 0;
+&nbsp;			static final int pIn = 1;
+&nbsp;			static final int pL = 2;
+&nbsp;			static final int pR = 3;
+&nbsp;			static final int pT = 4;
+&nbsp;			static final int right = 5;
+&nbsp;			static final int left = 6;
+&nbsp;			static final int all = 7;
+&nbsp;		}
+&nbsp;
+&nbsp;		private int getNext_() {
+<b class="fc">&nbsp;			if (!m_interval_tree.m_b_offline_dynamic)</b>
+<b class="fc">&nbsp;				return m_interval_tree.m_secondary_lists.getNext(m_current_end_handle);</b>
+&nbsp;
+<b class="fc">&nbsp;			return m_interval_tree.m_secondary_treaps.getNext(m_current_end_handle);</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		private int getPrev_() {
+<b class="fc">&nbsp;			if (!m_interval_tree.m_b_offline_dynamic)</b>
+<b class="fc">&nbsp;				return m_interval_tree.m_secondary_lists.getPrev(m_current_end_handle);</b>
+&nbsp;
+<b class="fc">&nbsp;			return m_interval_tree.m_secondary_treaps.getPrev(m_current_end_handle);</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		private int getCurrentEndIndex_() {
+<b class="fc">&nbsp;			if (!m_interval_tree.m_b_offline_dynamic)</b>
+<b class="fc">&nbsp;				return m_interval_tree.m_secondary_lists.getData(m_current_end_handle);</b>
+&nbsp;
+<b class="fc">&nbsp;			return m_interval_tree.m_secondary_treaps.getElement(m_current_end_handle);</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		int next() {
+<b class="fc">&nbsp;			if (!m_interval_tree.m_b_construction_ended)</b>
+<b class="nc">&nbsp;				throw new GeometryException(&quot;invalid call&quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;			if (m_function_index &lt; 0)</b>
+<b class="nc">&nbsp;				return -1;</b>
+&nbsp;
+<b class="fc">&nbsp;			boolean b_searching = true;</b>
+&nbsp;
+<b class="fc">&nbsp;			while (b_searching) {</b>
+<b class="fc">&nbsp;				switch (m_function_stack[m_function_index]) {</b>
+&nbsp;				case State.pIn:
+<b class="fc">&nbsp;					b_searching = pIn_();</b>
+<b class="fc">&nbsp;					break;</b>
+&nbsp;				case State.pL:
+<b class="fc">&nbsp;					b_searching = pL_();</b>
+<b class="fc">&nbsp;					break;</b>
+&nbsp;				case State.pR:
+<b class="fc">&nbsp;					b_searching = pR_();</b>
+<b class="fc">&nbsp;					break;</b>
+&nbsp;				case State.pT:
+<b class="fc">&nbsp;					b_searching = pT_();</b>
+<b class="fc">&nbsp;					break;</b>
+&nbsp;				case State.right:
+<b class="fc">&nbsp;					b_searching = right_();</b>
+<b class="fc">&nbsp;					break;</b>
+&nbsp;				case State.left:
+<b class="fc">&nbsp;					b_searching = left_();</b>
+<b class="fc">&nbsp;					break;</b>
+&nbsp;				case State.all:
+<b class="fc">&nbsp;					b_searching = all_();</b>
+<b class="fc">&nbsp;					break;</b>
+&nbsp;				case State.initialize:
+<b class="fc">&nbsp;					b_searching = initialize_();</b>
+<b class="fc">&nbsp;					break;</b>
+&nbsp;				default:
+<b class="nc">&nbsp;					throw GeometryException.GeometryInternalError();</b>
+&nbsp;				}
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			if (m_current_end_handle != -1)</b>
+<b class="fc">&nbsp;				return getCurrentEndIndex_() &gt;&gt; 1;</b>
+&nbsp;
+<b class="fc">&nbsp;			return -1;</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		private boolean initialize_() {
+<b class="fc">&nbsp;			m_tertiary_handle = -1;</b>
+<b class="fc">&nbsp;			m_next_tertiary_handle = -1;</b>
+<b class="fc">&nbsp;			m_forked_handle = -1;</b>
+<b class="fc">&nbsp;			m_current_end_handle = -1;</b>
+&nbsp;
+<b class="fc">&nbsp;			if (m_interval_tree.m_tertiary_nodes != null &amp;&amp; m_interval_tree.m_tertiary_nodes.size() &gt; 0) {</b>
+<b class="fc">&nbsp;				m_function_stack[0] = State.pIn; // overwrite initialize</b>
+<b class="fc">&nbsp;				m_next_tertiary_handle = m_interval_tree.m_root;</b>
+<b class="fc">&nbsp;				return true;</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			m_function_index = -1;</b>
+<b class="fc">&nbsp;			return false;</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		private boolean pIn_() {
+<b class="fc">&nbsp;			m_tertiary_handle = m_next_tertiary_handle;</b>
+&nbsp;
+<b class="fc">&nbsp;			if (m_tertiary_handle == -1) {</b>
+<b class="fc">&nbsp;				m_function_index = -1;</b>
+<b class="fc">&nbsp;				m_current_end_handle = -1;</b>
+<b class="fc">&nbsp;				return false;</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			double discriminant = m_interval_tree.getDiscriminant_(m_tertiary_handle);</b>
+&nbsp;
+<b class="fc">&nbsp;			if (m_query.vmax &lt; discriminant) {</b>
+<b class="fc">&nbsp;				int secondary_handle = m_interval_tree.getSecondaryFromTertiary_(m_tertiary_handle);</b>
+<b class="fc">&nbsp;				m_next_tertiary_handle = m_interval_tree.getLPTR_(m_tertiary_handle);</b>
+&nbsp;
+<b class="fc">&nbsp;				if (secondary_handle != -1) {</b>
+<b class="fc">&nbsp;					m_next_end_handle = m_interval_tree.getFirst_(secondary_handle);</b>
+<b class="fc">&nbsp;					m_function_stack[++m_function_index] = State.left;</b>
+&nbsp;				}
+&nbsp;
+<b class="fc">&nbsp;				return true;</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			if (discriminant &lt; m_query.vmin) {</b>
+<b class="fc">&nbsp;				int secondary_handle = m_interval_tree.getSecondaryFromTertiary_(m_tertiary_handle);</b>
+<b class="fc">&nbsp;				m_next_tertiary_handle = m_interval_tree.getRPTR_(m_tertiary_handle);</b>
+&nbsp;
+<b class="fc">&nbsp;				if (secondary_handle != -1) {</b>
+<b class="fc">&nbsp;					m_next_end_handle = m_interval_tree.getLast_(secondary_handle);</b>
+<b class="fc">&nbsp;					m_function_stack[++m_function_index] = State.right;</b>
+&nbsp;				}
+&nbsp;
+<b class="fc">&nbsp;				return true;</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			assert (m_query.contains(discriminant));</b>
+&nbsp;
+<b class="fc">&nbsp;			m_function_stack[m_function_index] = State.pL; // overwrite pIn</b>
+<b class="fc">&nbsp;			m_forked_handle = m_tertiary_handle;</b>
+<b class="fc">&nbsp;			int secondary_handle = m_interval_tree.getSecondaryFromTertiary_(m_tertiary_handle);</b>
+<b class="fc">&nbsp;			m_next_tertiary_handle = m_interval_tree.getLPTR_(m_tertiary_handle);</b>
+&nbsp;
+<b class="fc">&nbsp;			if (secondary_handle != -1) {</b>
+<b class="fc">&nbsp;				m_next_end_handle = m_interval_tree.getFirst_(secondary_handle);</b>
+<b class="fc">&nbsp;				m_function_stack[++m_function_index] = State.all;</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			return true;</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		private boolean pL_() {
+<b class="fc">&nbsp;			m_tertiary_handle = m_next_tertiary_handle;</b>
+&nbsp;
+<b class="fc">&nbsp;			if (m_tertiary_handle == -1) {</b>
+<b class="fc">&nbsp;				m_function_stack[m_function_index] = State.pR; // overwrite pL</b>
+<b class="fc">&nbsp;				m_next_tertiary_handle = m_interval_tree.getRPTR_(m_forked_handle);</b>
+<b class="fc">&nbsp;				return true;</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			double discriminant = m_interval_tree.getDiscriminant_(m_tertiary_handle);</b>
+&nbsp;
+<b class="fc">&nbsp;			if (discriminant &lt; m_query.vmin) {</b>
+<b class="fc">&nbsp;				int secondary_handle = m_interval_tree.getSecondaryFromTertiary_(m_tertiary_handle);</b>
+<b class="fc">&nbsp;				m_next_tertiary_handle = m_interval_tree.getRPTR_(m_tertiary_handle);</b>
+&nbsp;
+<b class="fc">&nbsp;				if (secondary_handle != -1) {</b>
+<b class="fc">&nbsp;					m_next_end_handle = m_interval_tree.getLast_(secondary_handle);</b>
+<b class="fc">&nbsp;					m_function_stack[++m_function_index] = State.right;</b>
+&nbsp;				}
+&nbsp;
+<b class="fc">&nbsp;				return true;</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			assert (m_query.contains(discriminant));</b>
+&nbsp;
+<b class="fc">&nbsp;			int secondary_handle = m_interval_tree.getSecondaryFromTertiary_(m_tertiary_handle);</b>
+<b class="fc">&nbsp;			m_next_tertiary_handle = m_interval_tree.getLPTR_(m_tertiary_handle);</b>
+&nbsp;
+<b class="fc">&nbsp;			if (secondary_handle != -1) {</b>
+<b class="fc">&nbsp;				m_next_end_handle = m_interval_tree.getFirst_(secondary_handle);</b>
+<b class="fc">&nbsp;				m_function_stack[++m_function_index] = State.all;</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			int rptr = m_interval_tree.getRPTR_(m_tertiary_handle);</b>
+&nbsp;
+<b class="fc">&nbsp;			if (rptr != -1) {</b>
+<b class="fc">&nbsp;				m_tertiary_stack.add(rptr); // we&#39;ll search this in the pT state</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			return true;</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		private boolean pR_() {
+<b class="fc">&nbsp;			m_tertiary_handle = m_next_tertiary_handle;</b>
+&nbsp;
+<b class="fc">&nbsp;			if (m_tertiary_handle == -1) {</b>
+<b class="fc">&nbsp;				m_function_stack[m_function_index] = State.pT; // overwrite pR</b>
+<b class="fc">&nbsp;				return true;</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			double discriminant = m_interval_tree.getDiscriminant_(m_tertiary_handle);</b>
+&nbsp;
+<b class="fc">&nbsp;			if (m_query.vmax &lt; discriminant) {</b>
+<b class="fc">&nbsp;				int secondary_handle = m_interval_tree.getSecondaryFromTertiary_(m_tertiary_handle);</b>
+<b class="fc">&nbsp;				m_next_tertiary_handle = m_interval_tree.getLPTR_(m_tertiary_handle);</b>
+&nbsp;
+<b class="fc">&nbsp;				if (secondary_handle != -1) {</b>
+<b class="fc">&nbsp;					m_next_end_handle = m_interval_tree.getFirst_(secondary_handle);</b>
+<b class="fc">&nbsp;					m_function_stack[++m_function_index] = State.left;</b>
+&nbsp;				}
+&nbsp;
+<b class="fc">&nbsp;				return true;</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			assert (m_query.contains(discriminant));</b>
+&nbsp;
+<b class="fc">&nbsp;			int secondary_handle = m_interval_tree.getSecondaryFromTertiary_(m_tertiary_handle);</b>
+&nbsp;
+<b class="fc">&nbsp;			m_next_tertiary_handle = m_interval_tree.getRPTR_(m_tertiary_handle);</b>
+&nbsp;
+<b class="fc">&nbsp;			if (secondary_handle != -1) {</b>
+<b class="fc">&nbsp;				m_next_end_handle = m_interval_tree.getFirst_(secondary_handle);</b>
+<b class="fc">&nbsp;				m_function_stack[++m_function_index] = State.all;</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			int lptr = m_interval_tree.getLPTR_(m_tertiary_handle);</b>
+&nbsp;
+<b class="fc">&nbsp;			if (lptr != -1) {</b>
+<b class="fc">&nbsp;				m_tertiary_stack.add(lptr); // we&#39;ll search this in the pT state</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			return true;</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		private boolean pT_() {
+<b class="fc">&nbsp;			if (m_tertiary_stack.size() == 0) {</b>
+<b class="fc">&nbsp;				m_function_index = -1;</b>
+<b class="fc">&nbsp;				m_current_end_handle = -1;</b>
+<b class="fc">&nbsp;				return false;</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			m_tertiary_handle = m_tertiary_stack.get(m_tertiary_stack.size() - 1);</b>
+<b class="fc">&nbsp;			m_tertiary_stack.resize(m_tertiary_stack.size() - 1);</b>
+&nbsp;
+<b class="fc">&nbsp;			int secondary_handle = m_interval_tree.getSecondaryFromTertiary_(m_tertiary_handle);</b>
+&nbsp;
+<b class="fc">&nbsp;			if (secondary_handle != -1) {</b>
+<b class="fc">&nbsp;				m_next_end_handle = m_interval_tree.getFirst_(secondary_handle);</b>
+<b class="fc">&nbsp;				m_function_stack[++m_function_index] = State.all;</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			if (m_interval_tree.getLPTR_(m_tertiary_handle) != -1)</b>
+<b class="fc">&nbsp;				m_tertiary_stack.add(m_interval_tree.getLPTR_(m_tertiary_handle));</b>
+&nbsp;
+<b class="fc">&nbsp;			if (m_interval_tree.getRPTR_(m_tertiary_handle) != -1)</b>
+<b class="fc">&nbsp;				m_tertiary_stack.add(m_interval_tree.getRPTR_(m_tertiary_handle));</b>
+&nbsp;
+<b class="fc">&nbsp;			return true;</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		private boolean left_() {
+<b class="fc">&nbsp;			m_current_end_handle = m_next_end_handle;</b>
+&nbsp;
+<b class="fc">&nbsp;			if (m_current_end_handle != -1 &amp;&amp; IntervalTreeImpl.isLeft_(getCurrentEndIndex_()) &amp;&amp; m_interval_tree.getValue_(getCurrentEndIndex_()) &lt;= m_query.vmax) {</b>
+<b class="fc">&nbsp;				m_next_end_handle = getNext_();</b>
+<b class="fc">&nbsp;				return false;</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			m_function_index--;</b>
+<b class="fc">&nbsp;			return true;</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		private boolean right_() {
+<b class="fc">&nbsp;			m_current_end_handle = m_next_end_handle;</b>
+&nbsp;
+<b class="fc">&nbsp;			if (m_current_end_handle != -1 &amp;&amp; IntervalTreeImpl.isRight_(getCurrentEndIndex_()) &amp;&amp; m_interval_tree.getValue_(getCurrentEndIndex_()) &gt;= m_query.vmin) {</b>
+<b class="fc">&nbsp;				m_next_end_handle = getPrev_();</b>
+<b class="fc">&nbsp;				return false;</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			m_function_index--;</b>
+<b class="fc">&nbsp;			return true;</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		private boolean all_() {
+<b class="fc">&nbsp;			m_current_end_handle = m_next_end_handle;</b>
+&nbsp;
+<b class="fc">&nbsp;			if (m_current_end_handle != -1 &amp;&amp; IntervalTreeImpl.isLeft_(getCurrentEndIndex_())) {</b>
+<b class="fc">&nbsp;				m_next_end_handle = getNext_();</b>
+<b class="fc">&nbsp;				return false;</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			m_function_index--;</b>
+<b class="fc">&nbsp;			return true;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		IntervalTreeIteratorImpl(IntervalTreeImpl interval_tree, Envelope1D query, double tolerance) {</b>
+<b class="fc">&nbsp;			m_interval_tree = interval_tree;</b>
+<b class="fc">&nbsp;			m_tertiary_stack.reserve(20);</b>
+<b class="fc">&nbsp;			resetIterator(query, tolerance);</b>
+&nbsp;		}
+&nbsp;
+<b class="nc">&nbsp;		IntervalTreeIteratorImpl(IntervalTreeImpl interval_tree, double query, double tolerance) {</b>
+<b class="nc">&nbsp;			m_interval_tree = interval_tree;</b>
+<b class="nc">&nbsp;			m_tertiary_stack.reserve(20);</b>
+<b class="nc">&nbsp;			resetIterator(query, tolerance);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		IntervalTreeIteratorImpl(IntervalTreeImpl interval_tree) {</b>
+<b class="fc">&nbsp;			m_interval_tree = interval_tree;</b>
+<b class="fc">&nbsp;			m_tertiary_stack.reserve(20);</b>
+<b class="fc">&nbsp;			m_function_index = -1;</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		void resetIterator(Envelope1D query, double tolerance) {
+<b class="fc">&nbsp;			m_query.vmin = query.vmin - tolerance;</b>
+<b class="fc">&nbsp;			m_query.vmax = query.vmax + tolerance;</b>
+<b class="fc">&nbsp;			m_tertiary_stack.resize(0);</b>
+<b class="fc">&nbsp;			m_function_index = 0;</b>
+<b class="fc">&nbsp;			m_function_stack[0] = State.initialize;</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		void resetIterator(double query_min, double query_max, double tolerance) {
+<b class="fc">&nbsp;			m_query.vmin = query_min - tolerance;</b>
+<b class="fc">&nbsp;			m_query.vmax = query_max + tolerance;</b>
+<b class="fc">&nbsp;			m_tertiary_stack.resize(0);</b>
+<b class="fc">&nbsp;			m_function_index = 0;</b>
+<b class="fc">&nbsp;			m_function_stack[0] = State.initialize;</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		void resetIterator(double query, double tolerance) {
+<b class="fc">&nbsp;			m_query.vmin = query - tolerance;</b>
+<b class="fc">&nbsp;			m_query.vmax = query + tolerance;</b>
+<b class="fc">&nbsp;			m_tertiary_stack.resize(0);</b>
+<b class="fc">&nbsp;			m_function_index = 0;</b>
+<b class="fc">&nbsp;			m_function_stack[0] = State.initialize;</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	private static final class SecondaryComparator extends Treap.Comparator {
+<b class="fc">&nbsp;		SecondaryComparator(IntervalTreeImpl interval_tree) {</b>
+<b class="fc">&nbsp;			m_interval_tree = interval_tree;</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		@Override
+&nbsp;		public int compare(Treap treap, int e_1, int node) {
+<b class="fc">&nbsp;			int e_2 = treap.getElement(node);</b>
+<b class="fc">&nbsp;			double v_1 = m_interval_tree.getValue_(e_1);</b>
+<b class="fc">&nbsp;			double v_2 = m_interval_tree.getValue_(e_2);</b>
+&nbsp;
+<b class="fc">&nbsp;			if (v_1 &lt; v_2)</b>
+<b class="fc">&nbsp;				return -1;</b>
+<b class="fc">&nbsp;			if (v_1 == v_2) {</b>
+<b class="fc">&nbsp;				if (isLeft_(e_1) &amp;&amp; isRight_(e_2))</b>
+<b class="fc">&nbsp;					return -1;</b>
+<b class="fc">&nbsp;				if (isLeft_(e_2) &amp;&amp; isRight_(e_1))</b>
+<b class="fc">&nbsp;					return 1;</b>
+<b class="fc">&nbsp;				return 0;</b>
+&nbsp;			}
+<b class="fc">&nbsp;			return 1;</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		private IntervalTreeImpl m_interval_tree;
+&nbsp;	}
+&nbsp;
+&nbsp;	private int createTertiaryNode_(int discriminant_index_1) {
+<b class="fc">&nbsp;		int tertiary_handle = m_tertiary_nodes.newElement();</b>
+<b class="fc">&nbsp;		setDiscriminantIndex1_(tertiary_handle, discriminant_index_1);</b>
+<b class="fc">&nbsp;		return tertiary_handle;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private int createSecondary_(int tertiary_handle) {
+<b class="fc">&nbsp;		if (!m_b_offline_dynamic)</b>
+<b class="fc">&nbsp;			return m_secondary_lists.createList(tertiary_handle);</b>
+&nbsp;
+<b class="fc">&nbsp;		return m_secondary_treaps.createTreap(tertiary_handle);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private int createIntervalNode_() {
+<b class="fc">&nbsp;		return m_interval_nodes.newElement();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private void setDiscriminantIndex1_(int tertiary_handle, int end_index) {
+<b class="fc">&nbsp;		m_tertiary_nodes.setField(tertiary_handle, 0, end_index);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private void setSecondaryToTertiary_(int tertiary_handle, int secondary_handle) {
+<b class="fc">&nbsp;		m_tertiary_nodes.setField(tertiary_handle, 1, secondary_handle);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private void setLPTR_(int tertiary_handle, int lptr) {
+<b class="fc">&nbsp;		m_tertiary_nodes.setField(tertiary_handle, 2, lptr);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private void setRPTR_(int tertiary_handle, int rptr) {
+<b class="fc">&nbsp;		m_tertiary_nodes.setField(tertiary_handle, 3, rptr);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private void setPPTR_(int tertiary_handle, int pptr) {
+<b class="fc">&nbsp;		m_tertiary_nodes.setField(tertiary_handle, 4, pptr);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private void setSecondaryToInterval_(int interval_handle, int secondary_handle) {
+<b class="fc">&nbsp;		m_interval_nodes.setField(interval_handle, 0, secondary_handle);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private int addEndIndex_(int secondary_handle, int end_index) {
+&nbsp;		int end_index_handle;
+&nbsp;
+<b class="fc">&nbsp;		if (!m_b_offline_dynamic)</b>
+<b class="fc">&nbsp;			end_index_handle = m_secondary_lists.addElement(secondary_handle, end_index);</b>
+&nbsp;		else
+<b class="fc">&nbsp;			end_index_handle = m_secondary_treaps.addElement(end_index, secondary_handle);</b>
+&nbsp;
+<b class="fc">&nbsp;		return end_index_handle;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private void setLeftEnd_(int interval_handle, int left_end_handle) {
+<b class="fc">&nbsp;		m_interval_nodes.setField(interval_handle, 1, left_end_handle);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private void setRightEnd_(int interval_handle, int right_end_handle) {
+<b class="fc">&nbsp;		m_interval_nodes.setField(interval_handle, 2, right_end_handle);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private int getDiscriminantIndex1_(int tertiary_handle) {
+<b class="fc">&nbsp;		return m_tertiary_nodes.getField(tertiary_handle, 0);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private int getSecondaryFromTertiary_(int tertiary_handle) {
+<b class="fc">&nbsp;		return m_tertiary_nodes.getField(tertiary_handle, 1);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private int getLPTR_(int tertiary_handle) {
+<b class="fc">&nbsp;		return m_tertiary_nodes.getField(tertiary_handle, 2);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private int getRPTR_(int tertiary_handle) {
+<b class="fc">&nbsp;		return m_tertiary_nodes.getField(tertiary_handle, 3);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private int getPPTR_(int tertiary_handle) {
+<b class="fc">&nbsp;		return m_tertiary_nodes.getField(tertiary_handle, 4);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private int getSecondaryFromInterval_(int interval_handle) {
+<b class="fc">&nbsp;		return m_interval_nodes.getField(interval_handle, 0);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private int getLeftEnd_(int interval_handle) {
+<b class="fc">&nbsp;		return m_interval_nodes.getField(interval_handle, 1);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private int getRightEnd_(int interval_handle) {
+<b class="fc">&nbsp;		return m_interval_nodes.getField(interval_handle, 2);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private double getMin_(int i) {
+<b class="fc">&nbsp;		return (!m_b_envelopes_ref ? m_intervals.get(i).vmin : m_envelopes_ref.get(i).xmin);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private double getMax_(int i) {
+<b class="fc">&nbsp;		return (!m_b_envelopes_ref ? m_intervals.get(i).vmax : m_envelopes_ref.get(i).xmax);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private int getFirst_(int secondary_handle) {
+<b class="fc">&nbsp;		if (!m_b_offline_dynamic)</b>
+<b class="fc">&nbsp;			return m_secondary_lists.getFirst(secondary_handle);</b>
+&nbsp;
+<b class="fc">&nbsp;		return m_secondary_treaps.getFirst(secondary_handle);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private int getLast_(int secondary_handle) {
+<b class="fc">&nbsp;		if (!m_b_offline_dynamic)</b>
+<b class="fc">&nbsp;			return m_secondary_lists.getLast(secondary_handle);</b>
+&nbsp;
+<b class="fc">&nbsp;		return m_secondary_treaps.getLast(secondary_handle);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private static boolean isLeft_(int end_index) {
+<b class="fc">&nbsp;		return (end_index &amp; 0x1) == 0;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private static boolean isRight_(int end_index) {
+<b class="fc">&nbsp;		return (end_index &amp; 0x1) == 1;</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-02-21 16:04</div>
+</div>
+</body>
+</html>

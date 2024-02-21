@@ -1,0 +1,194 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > OperatorBuffer</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.esri.core.geometry</a>
+</div>
+
+<h1>Coverage Summary for Class: OperatorBuffer (com.esri.core.geometry)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">OperatorBuffer</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    66,7%
+  </span>
+  <span class="absValue">
+    (2/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    66,7%
+  </span>
+  <span class="absValue">
+    (2/3)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; Copyright 1995-2015 Esri
+&nbsp;
+&nbsp;   Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp;   you may not use this file except in compliance with the License.
+&nbsp;   You may obtain a copy of the License at
+&nbsp;
+&nbsp;       http://www.apache.org/licenses/LICENSE-2.0
+&nbsp;
+&nbsp;   Unless required by applicable law or agreed to in writing, software
+&nbsp;   distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp;   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp;   See the License for the specific language governing permissions and
+&nbsp;   limitations under the License.
+&nbsp;
+&nbsp; For additional information, contact:
+&nbsp; Environmental Systems Research Institute, Inc.
+&nbsp; Attn: Contracts Dept
+&nbsp; 380 New York Street
+&nbsp; Redlands, California, USA 92373
+&nbsp;
+&nbsp; email: contracts@esri.com
+&nbsp; */
+&nbsp;
+&nbsp;package com.esri.core.geometry;
+&nbsp;
+&nbsp;import com.esri.core.geometry.Operator.Type;
+&nbsp;
+&nbsp;/**
+&nbsp; *Creates buffer polygons around geometries.
+&nbsp; */
+<b class="fc">&nbsp;public abstract class OperatorBuffer extends Operator {</b>
+&nbsp;	@Override
+&nbsp;	public Type getType() {
+<b class="nc">&nbsp;		return Type.Buffer;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 *Creates a buffer around the input geometries
+&nbsp;	 *
+&nbsp;	 *@param inputGeometries The geometries to buffer.
+&nbsp;	 *@param sr The SpatialReference of the Geometries.
+&nbsp;	 *@param distances The buffer distances for the Geometries. If the size of the distances array is less than the number of geometries in the inputGeometries, the last distance value is used for the rest of geometries.
+&nbsp;	 *@param bUnion If True, the buffered geometries will be unioned, otherwise they wont be unioned.
+&nbsp;	 */
+&nbsp;	public abstract GeometryCursor execute(GeometryCursor inputGeometries,
+&nbsp;			SpatialReference sr, double[] distances, boolean bUnion,
+&nbsp;			ProgressTracker progressTracker);
+&nbsp;
+&nbsp;	/**
+&nbsp;	 *Creates a buffer around the input geometry
+&nbsp;	 *
+&nbsp;	 *@param inputGeometry The geometry to buffer.
+&nbsp;	 *@param sr The SpatialReference of the Geometry.
+&nbsp;	 *@param distance The buffer distance for the Geometry.
+&nbsp;	 */
+&nbsp;	public abstract Geometry execute(Geometry inputGeometry,
+&nbsp;			SpatialReference sr, double distance,
+&nbsp;			ProgressTracker progressTracker);
+&nbsp;
+&nbsp;    /**
+&nbsp;    *Creates a buffer around the input geometries
+&nbsp;    *
+&nbsp;    *@param input_geometries The geometries to buffer.
+&nbsp;    *@param sr The Spatial_reference of the Geometries. It is used to obtain the tolerance. Can be null.
+&nbsp;    *@param distances The buffer distances for the Geometries. If the size of the distances array is less than the number of geometries in the input_geometries, the last distance value is used for the rest of geometries.
+&nbsp;    *@param max_deviation The max deviation of the result buffer from the true buffer in the units of the sr.
+&nbsp;    *When max_deviation is NaN or 0, it is replaced with 1e-5 * abs(distance).
+&nbsp;    *When max_deviation is larger than MIN = 0.5 * abs(distance), it is replaced with MIN. See below for more information.
+&nbsp;    *@param max_vertices_in_full_circle The maximum number of vertices in polygon produced from a buffered point. A value of 96 is used in methods that do not accept max_vertices_in_full_circle.
+&nbsp;    *If the value is less than MIN=12, it is set to MIN. See below for more information.
+&nbsp;    *@param b_union If True, the buffered geometries will be unioned, otherwise they wont be unioned.
+&nbsp;    *@param progress_tracker The progress tracker that allows to cancel the operation. Pass null if not needed.
+&nbsp;    *
+&nbsp;    *The max_deviation and max_vertices_in_full_circle control the quality of round joins in the buffer. That is, the precision of the buffer is max_deviation unless
+&nbsp;    *the number of required vertices is too large.
+&nbsp;    *The max_vertices_in_full_circle controls how many vertices can be in each round join in the buffer. It is approximately equal to the number of vertices in the polygon around a
+&nbsp;    *buffered point. It has a priority over max_deviation. The max deviation is the distance from the result polygon to a true buffer.
+&nbsp;    *The real deviation is calculated as the max(max_deviation, abs(distance) * (1 - cos(PI / max_vertex_in_complete_circle))).
+&nbsp;    *
+&nbsp;    *Note that max_deviation can be exceeded because geometry is generalized with 0.25 * real_deviation, also input segments closer than 0.25 * real_deviation are 
+&nbsp;    *snapped to a point.
+&nbsp;    */
+&nbsp;    abstract GeometryCursor execute(GeometryCursor input_geometries, SpatialReference sr, double[] distances, double max_deviation, int max_vertices_in_full_circle, boolean b_union, ProgressTracker progress_tracker);
+&nbsp;	
+&nbsp;	public static OperatorBuffer local() {
+<b class="fc">&nbsp;		return (OperatorBuffer) OperatorFactoryLocal.getInstance().getOperator(</b>
+&nbsp;				Type.Buffer);
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-02-21 16:04</div>
+</div>
+</body>
+</html>

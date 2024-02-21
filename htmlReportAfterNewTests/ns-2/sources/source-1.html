@@ -1,0 +1,1107 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > OGCConcreteGeometryCollection</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.esri.core.geometry.ogc</a>
+</div>
+
+<h1>Coverage Summary for Class: OGCConcreteGeometryCollection (com.esri.core.geometry.ogc)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">OGCConcreteGeometryCollection</td>
+<td class="coverageStat">
+  <span class="percent">
+    60,3%
+  </span>
+  <span class="absValue">
+    (35/58)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    72,9%
+  </span>
+  <span class="absValue">
+    (280/384)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">OGCConcreteGeometryCollection$FlatteningCollectionCursor</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/19)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">OGCConcreteGeometryCollection$GeometryCursorOGC</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    96%
+  </span>
+  <span class="absValue">
+    (24/25)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    59,4%
+  </span>
+  <span class="absValue">
+    (38/64)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    71%
+  </span>
+  <span class="absValue">
+    (304/428)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; Copyright 1995-2018 Esri
+&nbsp;
+&nbsp;   Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp;   you may not use this file except in compliance with the License.
+&nbsp;   You may obtain a copy of the License at
+&nbsp;
+&nbsp;       http://www.apache.org/licenses/LICENSE-2.0
+&nbsp;
+&nbsp;   Unless required by applicable law or agreed to in writing, software
+&nbsp;   distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp;   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp;   See the License for the specific language governing permissions and
+&nbsp;   limitations under the License.
+&nbsp;
+&nbsp; For additional information, contact:
+&nbsp; Environmental Systems Research Institute, Inc.
+&nbsp; Attn: Contracts Dept
+&nbsp; 380 New York Street
+&nbsp; Redlands, California, USA 92373
+&nbsp;
+&nbsp; email: contracts@esri.com
+&nbsp; */
+&nbsp;
+&nbsp;package com.esri.core.geometry.ogc;
+&nbsp;
+&nbsp;import com.esri.core.geometry.Envelope;
+&nbsp;import com.esri.core.geometry.GeoJsonExportFlags;
+&nbsp;import com.esri.core.geometry.Geometry;
+&nbsp;import com.esri.core.geometry.GeometryCursor;
+&nbsp;import com.esri.core.geometry.GeometryException;
+&nbsp;import com.esri.core.geometry.MultiPath;
+&nbsp;import com.esri.core.geometry.MultiPoint;
+&nbsp;import com.esri.core.geometry.MultiVertexGeometry;
+&nbsp;import com.esri.core.geometry.NumberUtils;
+&nbsp;import com.esri.core.geometry.OGCStructureInternal;
+&nbsp;import com.esri.core.geometry.OperatorConvexHull;
+&nbsp;import com.esri.core.geometry.OperatorDifference;
+&nbsp;import com.esri.core.geometry.OperatorExportToGeoJson;
+&nbsp;import com.esri.core.geometry.OperatorIntersection;
+&nbsp;import com.esri.core.geometry.OperatorUnion;
+&nbsp;import com.esri.core.geometry.Point;
+&nbsp;import com.esri.core.geometry.Polygon;
+&nbsp;import com.esri.core.geometry.Polyline;
+&nbsp;import com.esri.core.geometry.SimpleGeometryCursor;
+&nbsp;import com.esri.core.geometry.SpatialReference;
+&nbsp;import com.esri.core.geometry.VertexDescription;
+&nbsp;
+&nbsp;import java.nio.ByteBuffer;
+&nbsp;import java.nio.ByteOrder;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;import static com.esri.core.geometry.SizeOf.SIZE_OF_OGC_CONCRETE_GEOMETRY_COLLECTION;
+&nbsp;
+<b class="fc">&nbsp;public class OGCConcreteGeometryCollection extends OGCGeometryCollection {</b>
+<b class="fc">&nbsp;	static public String TYPE = &quot;GeometryCollection&quot;;</b>
+&nbsp;	
+&nbsp;	List&lt;OGCGeometry&gt; geometries;
+&nbsp;	
+&nbsp;	public OGCConcreteGeometryCollection(List&lt;OGCGeometry&gt; geoms,
+<b class="fc">&nbsp;			SpatialReference sr) {</b>
+<b class="fc">&nbsp;		geometries = geoms;</b>
+<b class="fc">&nbsp;		esriSR = sr;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public OGCConcreteGeometryCollection(GeometryCursor geoms,
+<b class="fc">&nbsp;			SpatialReference sr) {</b>
+<b class="fc">&nbsp;		List&lt;OGCGeometry&gt; ogcGeoms = new ArrayList&lt;OGCGeometry&gt;(10);</b>
+<b class="fc">&nbsp;		for (Geometry g = geoms.next(); g != null; g = geoms.next()) {</b>
+<b class="fc">&nbsp;			ogcGeoms.add(createFromEsriGeometry(g, sr));</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		geometries = ogcGeoms;</b>
+<b class="fc">&nbsp;		esriSR = sr;</b>
+&nbsp;	}
+&nbsp;
+<b class="fc">&nbsp;	public OGCConcreteGeometryCollection(OGCGeometry geom, SpatialReference sr) {</b>
+<b class="fc">&nbsp;		geometries = new ArrayList&lt;OGCGeometry&gt;(1);</b>
+<b class="fc">&nbsp;		geometries.add(geom);</b>
+<b class="fc">&nbsp;		esriSR = sr;</b>
+&nbsp;	}
+&nbsp;
+<b class="fc">&nbsp;	public OGCConcreteGeometryCollection(SpatialReference sr) {</b>
+<b class="fc">&nbsp;		geometries = new ArrayList&lt;OGCGeometry&gt;();</b>
+<b class="fc">&nbsp;		esriSR = sr;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public int dimension() {
+<b class="nc">&nbsp;		int maxD = 0;</b>
+<b class="nc">&nbsp;		for (int i = 0, n = numGeometries(); i &lt; n; i++)</b>
+<b class="nc">&nbsp;			maxD = Math.max(geometryN(i).dimension(), maxD);</b>
+&nbsp;
+<b class="nc">&nbsp;		return maxD;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public int coordinateDimension() {
+<b class="nc">&nbsp;		return isEmpty() ? 2 : geometryN(0).coordinateDimension();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public boolean is3D() {
+<b class="fc">&nbsp;		return !isEmpty() &amp;&amp; geometries.get(0).is3D();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public boolean isMeasured() {
+<b class="fc">&nbsp;		return !isEmpty() &amp;&amp; geometries.get(0).isMeasured();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public OGCGeometry envelope() {
+<b class="nc">&nbsp;		GeometryCursor gc = getEsriGeometryCursor();</b>
+<b class="nc">&nbsp;		Envelope env = new Envelope();</b>
+<b class="nc">&nbsp;		for (Geometry g = gc.next(); g != null; g = gc.next()) {</b>
+<b class="nc">&nbsp;			Envelope e = new Envelope();</b>
+<b class="nc">&nbsp;			g.queryEnvelope(e);</b>
+<b class="nc">&nbsp;			env.merge(e);</b>
+&nbsp;		}
+&nbsp;
+<b class="nc">&nbsp;		Polygon polygon = new Polygon();</b>
+<b class="nc">&nbsp;		polygon.addEnvelope(env, false);</b>
+<b class="nc">&nbsp;		return new OGCPolygon(polygon, esriSR);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public int numGeometries() {
+<b class="fc">&nbsp;		return geometries.size();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public OGCGeometry geometryN(int n) {
+<b class="fc">&nbsp;		return geometries.get(n);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public String geometryType() {
+<b class="fc">&nbsp;		return TYPE;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public long estimateMemorySize()
+&nbsp;	{
+<b class="fc">&nbsp;		long size = SIZE_OF_OGC_CONCRETE_GEOMETRY_COLLECTION;</b>
+<b class="fc">&nbsp;		if (geometries != null) {</b>
+<b class="fc">&nbsp;			for (OGCGeometry geometry : geometries) {</b>
+<b class="fc">&nbsp;				size += geometry.estimateMemorySize();</b>
+<b class="fc">&nbsp;			}</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return size;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public String asText() {
+<b class="fc">&nbsp;		StringBuilder sb = new StringBuilder(&quot;GEOMETRYCOLLECTION &quot;);</b>
+<b class="fc">&nbsp;		if (is3D()) {</b>
+<b class="nc">&nbsp;			sb.append(&#39;Z&#39;);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (isMeasured()) {</b>
+<b class="nc">&nbsp;			sb.append(&#39;M&#39;);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (is3D() || isMeasured())</b>
+<b class="nc">&nbsp;			sb.append(&#39; &#39;);</b>
+&nbsp;
+<b class="fc">&nbsp;		int n = numGeometries();</b>
+&nbsp;
+<b class="fc">&nbsp;		if (n == 0) {</b>
+<b class="fc">&nbsp;			sb.append(&quot;EMPTY&quot;);</b>
+<b class="fc">&nbsp;			return sb.toString();</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		sb.append(&#39;(&#39;);</b>
+<b class="fc">&nbsp;		for (int i = 0; i &lt; n; i++) {</b>
+<b class="fc">&nbsp;			if (i &gt; 0)</b>
+<b class="fc">&nbsp;				sb.append(&quot;, &quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;			sb.append(geometryN(i).asText());</b>
+&nbsp;		}
+<b class="fc">&nbsp;		sb.append(&#39;)&#39;);</b>
+&nbsp;
+<b class="fc">&nbsp;		return sb.toString();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public ByteBuffer asBinary() {
+&nbsp;
+<b class="fc">&nbsp;		ArrayList&lt;ByteBuffer&gt; buffers = new ArrayList&lt;ByteBuffer&gt;(0);</b>
+&nbsp;
+<b class="fc">&nbsp;		int size = 9;</b>
+<b class="fc">&nbsp;		int n = numGeometries();</b>
+<b class="fc">&nbsp;		for (int i = 0; i &lt; n; i++) {</b>
+<b class="fc">&nbsp;			ByteBuffer buffer = geometryN(i).asBinary();</b>
+<b class="fc">&nbsp;			buffers.add(buffer);</b>
+<b class="fc">&nbsp;			size += buffer.capacity();</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		ByteBuffer wkbBuffer = ByteBuffer.allocate(size).order(</b>
+<b class="fc">&nbsp;				ByteOrder.nativeOrder());</b>
+&nbsp;
+<b class="fc">&nbsp;		byte byteOrder = (byte) (wkbBuffer.order() == ByteOrder.LITTLE_ENDIAN ? 1</b>
+<b class="nc">&nbsp;				: 0);</b>
+<b class="fc">&nbsp;		int wkbType = 7;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (is3D())</b>
+<b class="nc">&nbsp;			wkbType += 1000;</b>
+<b class="fc">&nbsp;		if (isMeasured())</b>
+<b class="nc">&nbsp;			wkbType += 2000;</b>
+&nbsp;
+<b class="fc">&nbsp;		wkbBuffer.put(0, byteOrder);</b>
+<b class="fc">&nbsp;		wkbBuffer.putInt(1, wkbType);</b>
+<b class="fc">&nbsp;		wkbBuffer.putInt(5, n);</b>
+&nbsp;
+<b class="fc">&nbsp;		int offset = 9;</b>
+<b class="fc">&nbsp;		for (int i = 0; i &lt; n; i++) {</b>
+<b class="fc">&nbsp;			byte[] arr = buffers.get(i).array();</b>
+<b class="fc">&nbsp;			System.arraycopy(arr, 0, wkbBuffer.array(), offset, arr.length);</b>
+<b class="fc">&nbsp;			offset += arr.length;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return wkbBuffer;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public String asGeoJson() {
+<b class="fc">&nbsp;		return asGeoJsonImpl(GeoJsonExportFlags.geoJsonExportDefaults);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	String asGeoJsonImpl(int export_flags) {
+<b class="fc">&nbsp;		StringBuilder sb = new StringBuilder();</b>
+&nbsp;
+<b class="fc">&nbsp;		sb.append(&quot;{\&quot;type\&quot;:\&quot;GeometryCollection\&quot;,\&quot;geometries\&quot;:&quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;		sb.append(&quot;[&quot;);</b>
+<b class="fc">&nbsp;		for (int i = 0, n = numGeometries(); i &lt; n; i++) {</b>
+<b class="fc">&nbsp;			if (i &gt; 0)</b>
+<b class="fc">&nbsp;				sb.append(&quot;,&quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;			if (geometryN(i) != null)</b>
+<b class="fc">&nbsp;				sb.append(geometryN(i).asGeoJsonImpl(GeoJsonExportFlags.geoJsonExportSkipCRS));</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		sb.append(&quot;],\&quot;crs\&quot;:&quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (esriSR != null) {</b>
+<b class="fc">&nbsp;			String crs_value = OperatorExportToGeoJson.local().exportSpatialReference(0, esriSR);</b>
+<b class="fc">&nbsp;			sb.append(crs_value);</b>
+<b class="fc">&nbsp;		} else {</b>
+<b class="nc">&nbsp;			sb.append(&quot;\&quot;null\&quot;&quot;);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		sb.append(&quot;}&quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;		return sb.toString();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public boolean isEmpty() {
+<b class="fc">&nbsp;		return numGeometries() == 0;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public double MinZ() {
+<b class="nc">&nbsp;		double z = Double.NaN;</b>
+<b class="nc">&nbsp;		for (int i = 0, n = numGeometries(); i &lt; n; i++)</b>
+<b class="nc">&nbsp;			z = i == 0 ? geometryN(i).MinZ() : Math.min(geometryN(i).MinZ(), z);</b>
+<b class="nc">&nbsp;		return z;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public double MaxZ() {
+<b class="nc">&nbsp;		double z = Double.NaN;</b>
+<b class="nc">&nbsp;		for (int i = 0, n = numGeometries(); i &lt; n; i++)</b>
+<b class="nc">&nbsp;			z = i == 0 ? geometryN(i).MaxZ() : Math.min(geometryN(i).MaxZ(), z);</b>
+<b class="nc">&nbsp;		return z;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public double MinMeasure() {
+<b class="nc">&nbsp;		double z = Double.NaN;</b>
+<b class="nc">&nbsp;		for (int i = 0, n = numGeometries(); i &lt; n; i++)</b>
+<b class="nc">&nbsp;			z = i == 0 ? geometryN(i).MinMeasure() : Math.min(geometryN(i)</b>
+<b class="nc">&nbsp;					.MinMeasure(), z);</b>
+<b class="nc">&nbsp;		return z;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public double MaxMeasure() {
+<b class="nc">&nbsp;		double z = Double.NaN;</b>
+<b class="nc">&nbsp;		for (int i = 0, n = numGeometries(); i &lt; n; i++)</b>
+<b class="nc">&nbsp;			z = i == 0 ? geometryN(i).MaxMeasure() : Math.min(geometryN(i)</b>
+<b class="nc">&nbsp;					.MaxMeasure(), z);</b>
+<b class="nc">&nbsp;		return z;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public boolean isSimple() {
+<b class="nc">&nbsp;		for (int i = 0, n = numGeometries(); i &lt; n; i++)</b>
+<b class="nc">&nbsp;			if (!geometryN(i).isSimple())</b>
+<b class="nc">&nbsp;				return false;</b>
+&nbsp;
+<b class="nc">&nbsp;		return true;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * makeSimpleRelaxed is not supported for the GeometryCollection instance.
+&nbsp;	 * 
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public OGCGeometry makeSimple() {
+<b class="nc">&nbsp;		throw new UnsupportedOperationException();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public boolean isSimpleRelaxed() {
+<b class="nc">&nbsp;		for (int i = 0, n = numGeometries(); i &lt; n; i++)</b>
+<b class="nc">&nbsp;			if (!geometryN(i).isSimpleRelaxed())</b>
+<b class="nc">&nbsp;				return false;</b>
+<b class="nc">&nbsp;		return true;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * makeSimpleRelaxed is not supported for the GeometryCollection instance.
+&nbsp;	 * 
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public OGCGeometry makeSimpleRelaxed(boolean forceProcessing) {
+<b class="nc">&nbsp;		throw new UnsupportedOperationException();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public OGCGeometry boundary() {
+<b class="nc">&nbsp;		throw new UnsupportedOperationException();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public OGCGeometry locateAlong(double mValue) {
+&nbsp;		// TODO Auto-generated method stub
+<b class="nc">&nbsp;		throw new UnsupportedOperationException();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public OGCGeometry locateBetween(double mStart, double mEnd) {
+&nbsp;		// TODO Auto-generated method stub
+<b class="nc">&nbsp;		throw new UnsupportedOperationException();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public Geometry getEsriGeometry() {
+<b class="nc">&nbsp;		return null;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public GeometryCursor getEsriGeometryCursor() {
+<b class="fc">&nbsp;		return new GeometryCursorOGC(geometries);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	protected boolean isConcreteGeometryCollection() {
+<b class="fc">&nbsp;		return true;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private static class GeometryCursorOGC extends GeometryCursor {
+&nbsp;		private int m_index;
+&nbsp;		private int m_ind;
+&nbsp;		private List&lt;OGCGeometry&gt; m_geoms;
+&nbsp;		GeometryCursor m_curs;
+&nbsp;
+<b class="fc">&nbsp;		GeometryCursorOGC(List&lt;OGCGeometry&gt; geoms) {</b>
+<b class="fc">&nbsp;			m_geoms = geoms;</b>
+<b class="fc">&nbsp;			m_index = -1;</b>
+<b class="fc">&nbsp;			m_curs = null;</b>
+<b class="fc">&nbsp;			m_ind = 0;</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		@Override
+&nbsp;		public Geometry next() {
+&nbsp;			while (true) {
+<b class="fc">&nbsp;				if (m_curs != null) {</b>
+<b class="fc">&nbsp;					Geometry g = m_curs.next();</b>
+<b class="fc">&nbsp;					if (g != null) {</b>
+<b class="fc">&nbsp;						m_index++;</b>
+<b class="fc">&nbsp;						return g;</b>
+&nbsp;					}
+<b class="fc">&nbsp;					m_curs = null;</b>
+&nbsp;				}
+<b class="fc">&nbsp;				if (m_ind &gt;= m_geoms.size())</b>
+<b class="fc">&nbsp;					return null;</b>
+&nbsp;
+<b class="fc">&nbsp;				int i = m_ind;</b>
+<b class="fc">&nbsp;				m_ind++;</b>
+<b class="fc">&nbsp;				if (m_geoms.get(i) == null)</b>
+<b class="nc">&nbsp;					continue;// filter out nulls</b>
+<b class="fc">&nbsp;				if (!m_geoms.get(i).isConcreteGeometryCollection()) {</b>
+<b class="fc">&nbsp;					m_index++;</b>
+<b class="fc">&nbsp;					return m_geoms.get(i).getEsriGeometry();</b>
+&nbsp;				} else {
+<b class="fc">&nbsp;					OGCConcreteGeometryCollection gc = (OGCConcreteGeometryCollection) m_geoms</b>
+<b class="fc">&nbsp;							.get(i);</b>
+<b class="fc">&nbsp;					m_curs = new GeometryCursorOGC(gc.geometries);</b>
+<b class="fc">&nbsp;					return next();</b>
+&nbsp;				}
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+&nbsp;		@Override
+&nbsp;		public int getGeometryID() {
+<b class="fc">&nbsp;			return m_index;</b>
+&nbsp;		}
+&nbsp;
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public OGCGeometry convexHull() {
+<b class="fc">&nbsp;		GeometryCursor cursor = OperatorConvexHull.local().execute(</b>
+<b class="fc">&nbsp;				getEsriGeometryCursor(), false, null);</b>
+<b class="fc">&nbsp;		MultiPoint mp = new MultiPoint();</b>
+<b class="fc">&nbsp;		Polygon polygon = new Polygon();</b>
+<b class="fc">&nbsp;		VertexDescription vd = null;</b>
+<b class="fc">&nbsp;		for (Geometry geom = cursor.next(); geom != null; geom = cursor.next()) {</b>
+<b class="fc">&nbsp;			vd = geom.getDescription();</b>
+<b class="fc">&nbsp;			if (geom.isEmpty())</b>
+<b class="fc">&nbsp;				continue;</b>
+&nbsp;
+<b class="fc">&nbsp;			if (geom.getType() == Geometry.Type.Polygon) {</b>
+<b class="fc">&nbsp;				polygon.add((MultiPath) geom, false);</b>
+&nbsp;			}
+<b class="fc">&nbsp;			else if (geom.getType() == Geometry.Type.Polyline) {</b>
+<b class="fc">&nbsp;				mp.add((MultiVertexGeometry) geom, 0, -1);</b>
+&nbsp;			}
+<b class="fc">&nbsp;			else if (geom.getType() == Geometry.Type.Point) {</b>
+<b class="fc">&nbsp;				mp.add((Point) geom);</b>
+&nbsp;			}
+&nbsp;			else {
+<b class="nc">&nbsp;				throw new GeometryException(&quot;internal error&quot;);</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		Geometry resultGeom = null;</b>
+<b class="fc">&nbsp;		if (!mp.isEmpty()) {</b>
+<b class="fc">&nbsp;			resultGeom = OperatorConvexHull.local().execute(mp, null);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (!polygon.isEmpty()) {</b>
+<b class="fc">&nbsp;			if (resultGeom != null &amp;&amp; !resultGeom.isEmpty()) {</b>
+<b class="fc">&nbsp;				Geometry[] geoms = { resultGeom, polygon };</b>
+<b class="fc">&nbsp;				resultGeom = OperatorConvexHull.local().execute(</b>
+<b class="fc">&nbsp;						new SimpleGeometryCursor(geoms), true, null).next();</b>
+<b class="fc">&nbsp;			}</b>
+&nbsp;			else {
+<b class="fc">&nbsp;				resultGeom = OperatorConvexHull.local().execute(polygon, null);</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (resultGeom == null) {</b>
+<b class="fc">&nbsp;			Point pt = new Point();</b>
+<b class="fc">&nbsp;			if (vd != null)</b>
+<b class="nc">&nbsp;				pt.assignVertexDescription(vd);</b>
+&nbsp;
+<b class="fc">&nbsp;			return new OGCPoint(pt, getEsriSpatialReference());</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return OGCGeometry.createFromEsriGeometry(resultGeom, getEsriSpatialReference(), false);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public void setSpatialReference(SpatialReference esriSR_) {
+<b class="fc">&nbsp;		esriSR = esriSR_;</b>
+<b class="fc">&nbsp;		for (int i = 0, n = geometries.size(); i &lt; n; i++) {</b>
+<b class="fc">&nbsp;			if (geometries.get(i) != null)</b>
+<b class="fc">&nbsp;				geometries.get(i).setSpatialReference(esriSR_);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public OGCGeometry convertToMulti() {
+<b class="nc">&nbsp;		return this;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public OGCGeometry reduceFromMulti() {
+<b class="fc">&nbsp;		int n = numGeometries();</b>
+<b class="fc">&nbsp;		if (n == 0) {</b>
+<b class="fc">&nbsp;			return this;</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		if (n == 1) {</b>
+<b class="fc">&nbsp;			return geometryN(0).reduceFromMulti();</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return this;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public String asJson() {
+<b class="nc">&nbsp;		throw new UnsupportedOperationException();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public boolean equals(Object other)	{
+<b class="fc">&nbsp;		if (other == null)</b>
+<b class="nc">&nbsp;			return false;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (other == this)</b>
+<b class="nc">&nbsp;			return true;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (other.getClass() != getClass())</b>
+<b class="nc">&nbsp;			return false;</b>
+&nbsp;		
+<b class="fc">&nbsp;		OGCConcreteGeometryCollection another = (OGCConcreteGeometryCollection)other;</b>
+<b class="fc">&nbsp;		if (geometries != null) {		</b>
+<b class="fc">&nbsp;			if (!geometries.equals(another.geometries))</b>
+<b class="nc">&nbsp;				return false;</b>
+&nbsp;		}
+<b class="nc">&nbsp;		else if (another.geometries != null)</b>
+<b class="nc">&nbsp;			return false;</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (esriSR == another.esriSR) {</b>
+<b class="nc">&nbsp;			return true;</b>
+&nbsp;		}
+&nbsp;			
+<b class="fc">&nbsp;		if (esriSR != null &amp;&amp; another.esriSR != null) {</b>
+<b class="fc">&nbsp;			return esriSR.equals(another.esriSR);</b>
+&nbsp;		}
+&nbsp;			
+<b class="nc">&nbsp;		return false;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public int hashCode() {
+<b class="fc">&nbsp;		int hash = 1;</b>
+<b class="fc">&nbsp;		if (geometries != null)</b>
+<b class="fc">&nbsp;			hash = geometries.hashCode();</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (esriSR != null)</b>
+<b class="fc">&nbsp;			hash = NumberUtils.hashCombine(hash, esriSR.hashCode());</b>
+&nbsp;		
+<b class="fc">&nbsp;		return hash;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public double distance(OGCGeometry another) {
+<b class="fc">&nbsp;		if (this == another)</b>
+<b class="nc">&nbsp;			return isEmpty() ? Double.NaN : 0;</b>
+&nbsp;
+<b class="fc">&nbsp;		double minD = Double.NaN;</b>
+<b class="fc">&nbsp;		for (int i = 0, n = numGeometries(); i &lt; n; ++i) {</b>
+&nbsp;			// TODO Skip expensive distance computation if bounding boxes are further away than minD
+<b class="fc">&nbsp;			double d = geometryN(i).distance(another);</b>
+<b class="fc">&nbsp;			if (d &lt; minD || Double.isNaN(minD)) {</b>
+<b class="fc">&nbsp;				minD = d;</b>
+&nbsp;				// TODO Replace zero with tolerance defined by the spatial reference
+<b class="fc">&nbsp;				if (minD == 0) {</b>
+<b class="fc">&nbsp;					break;</b>
+&nbsp;				}
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return minD;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	//
+&nbsp;	//Relational operations
+&nbsp;	@Override
+&nbsp;	public boolean overlaps(OGCGeometry another) {
+&nbsp;		//TODO
+<b class="nc">&nbsp;		throw new UnsupportedOperationException();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public boolean touches(OGCGeometry another) {
+&nbsp;		//TODO
+<b class="nc">&nbsp;		throw new UnsupportedOperationException();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public boolean crosses(OGCGeometry another) {
+&nbsp;		//TODO
+<b class="nc">&nbsp;		throw new UnsupportedOperationException();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public boolean relate(OGCGeometry another, String matrix) {
+<b class="nc">&nbsp;		throw new UnsupportedOperationException();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public boolean disjoint(OGCGeometry another) {
+<b class="fc">&nbsp;		if (isEmpty() || another.isEmpty())</b>
+<b class="fc">&nbsp;			return true;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (this == another)</b>
+<b class="nc">&nbsp;			return false;</b>
+&nbsp;
+&nbsp;		//TODO: a simple envelope test
+&nbsp;		
+<b class="fc">&nbsp;		OGCConcreteGeometryCollection flattened1 = flatten();</b>
+<b class="fc">&nbsp;		if (flattened1.isEmpty())</b>
+<b class="nc">&nbsp;			return true;</b>
+<b class="fc">&nbsp;		OGCConcreteGeometryCollection otherCol = new OGCConcreteGeometryCollection(another, esriSR);</b>
+<b class="fc">&nbsp;		OGCConcreteGeometryCollection flattened2 = otherCol.flatten();</b>
+<b class="fc">&nbsp;		if (flattened2.isEmpty())</b>
+<b class="nc">&nbsp;			return true;</b>
+&nbsp;		
+<b class="fc">&nbsp;		for (int i = 0, n1 = flattened1.numGeometries(); i &lt; n1; ++i) {</b>
+<b class="fc">&nbsp;			OGCGeometry g1 = flattened1.geometryN(i);</b>
+<b class="fc">&nbsp;			for (int j = 0, n2 = flattened2.numGeometries(); j &lt; n2; ++j) {</b>
+<b class="fc">&nbsp;				OGCGeometry g2 = flattened2.geometryN(j);</b>
+<b class="fc">&nbsp;				if (!g1.disjoint(g2))</b>
+<b class="fc">&nbsp;					return false;</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return true;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public boolean contains(OGCGeometry another) {
+<b class="fc">&nbsp;		if (isEmpty() || another.isEmpty())</b>
+<b class="nc">&nbsp;			return false;</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (this == another)</b>
+<b class="nc">&nbsp;			return true;</b>
+&nbsp;
+<b class="fc">&nbsp;		return another.difference(this).isEmpty();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public boolean Equals(OGCGeometry another) {
+<b class="nc">&nbsp;		if (this == another)</b>
+<b class="nc">&nbsp;			return !isEmpty();</b>
+&nbsp;		
+<b class="nc">&nbsp;		if (another == null)</b>
+<b class="nc">&nbsp;			return false;</b>
+&nbsp;		
+&nbsp;
+<b class="nc">&nbsp;		OGCGeometry g1 = reduceFromMulti();</b>
+<b class="nc">&nbsp;		String t1 = g1.geometryType();</b>
+<b class="nc">&nbsp;		OGCGeometry g2 = reduceFromMulti();</b>
+<b class="nc">&nbsp;		if (t1 != g2.geometryType()) {</b>
+<b class="nc">&nbsp;			return false;</b>
+&nbsp;		}
+&nbsp;		
+<b class="nc">&nbsp;		if (t1 != OGCConcreteGeometryCollection.TYPE) {</b>
+<b class="nc">&nbsp;			return g1.Equals(g2);</b>
+&nbsp;		}
+&nbsp;		
+<b class="nc">&nbsp;		OGCConcreteGeometryCollection gc1 = (OGCConcreteGeometryCollection)g1;</b>
+<b class="nc">&nbsp;		OGCConcreteGeometryCollection gc2 = (OGCConcreteGeometryCollection)g2;</b>
+&nbsp;		// TODO Assuming input geometries are simple and valid, remove-overlaps would be a no-op.
+&nbsp;		// Hence, calling flatten() should be sufficient.
+<b class="nc">&nbsp;		gc1 = gc1.flattenAndRemoveOverlaps();</b>
+<b class="nc">&nbsp;		gc2 = gc2.flattenAndRemoveOverlaps();</b>
+<b class="nc">&nbsp;		int n = gc1.numGeometries();</b>
+<b class="nc">&nbsp;		if (n != gc2.numGeometries()) {</b>
+<b class="nc">&nbsp;			return false;</b>
+&nbsp;		}
+&nbsp;		
+<b class="nc">&nbsp;		for (int i = 0; i &lt; n; ++i) {</b>
+<b class="nc">&nbsp;			if (!gc1.geometryN(i).Equals(gc2.geometryN(i))) {</b>
+<b class="nc">&nbsp;				return false;</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;		
+<b class="nc">&nbsp;		return n &gt; 0;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private static OGCConcreteGeometryCollection toGeometryCollection(OGCGeometry geometry)
+&nbsp;	{
+<b class="fc">&nbsp;		if (geometry.geometryType() != OGCConcreteGeometryCollection.TYPE) {</b>
+<b class="fc">&nbsp;			return new OGCConcreteGeometryCollection(geometry, geometry.getEsriSpatialReference());</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return (OGCConcreteGeometryCollection) geometry;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private static List&lt;Geometry&gt; toList(GeometryCursor cursor)
+&nbsp;	{
+<b class="fc">&nbsp;		List&lt;Geometry&gt; geometries = new ArrayList&lt;Geometry&gt;();</b>
+<b class="fc">&nbsp;		for (Geometry geometry = cursor.next(); geometry != null; geometry = cursor.next()) {</b>
+<b class="fc">&nbsp;			geometries.add(geometry);</b>
+&nbsp;		}
+<b class="fc">&nbsp;		return geometries;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	//Topological
+&nbsp;	@Override
+&nbsp;	public OGCGeometry difference(OGCGeometry another) {
+<b class="fc">&nbsp;		if (isEmpty() || another.isEmpty()) {</b>
+<b class="nc">&nbsp;			return this;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		List&lt;Geometry&gt; geometries = toList(prepare_for_ops_(toGeometryCollection(this)));</b>
+<b class="fc">&nbsp;		List&lt;Geometry&gt; otherGeometries = toList(prepare_for_ops_(toGeometryCollection(another)));</b>
+&nbsp;
+<b class="fc">&nbsp;		List&lt;OGCGeometry&gt; result = new ArrayList&lt;OGCGeometry&gt;();</b>
+<b class="fc">&nbsp;		for (Geometry geometry : geometries) {</b>
+<b class="fc">&nbsp;			for (Geometry otherGeometry : otherGeometries) {</b>
+<b class="fc">&nbsp;				if (geometry.getDimension() &gt; otherGeometry.getDimension()) {</b>
+<b class="nc">&nbsp;					continue; //subtracting lower dimension has no effect.</b>
+&nbsp;				}
+&nbsp;
+<b class="fc">&nbsp;				geometry = OperatorDifference.local().execute(geometry, otherGeometry, esriSR, null);</b>
+<b class="fc">&nbsp;				if (geometry.isEmpty()) {</b>
+<b class="fc">&nbsp;					break;</b>
+&nbsp;				}
+<b class="fc">&nbsp;			}</b>
+&nbsp;
+<b class="fc">&nbsp;			if (!geometry.isEmpty()) {</b>
+<b class="nc">&nbsp;				result.add(OGCGeometry.createFromEsriGeometry(geometry, esriSR));</b>
+&nbsp;			}
+<b class="fc">&nbsp;		}</b>
+&nbsp;
+<b class="fc">&nbsp;		if (result.size() == 1) {</b>
+<b class="nc">&nbsp;			return result.get(0).reduceFromMulti();</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return new OGCConcreteGeometryCollection(result, esriSR).flattenAndRemoveOverlaps();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public OGCGeometry intersection(OGCGeometry another) {
+<b class="fc">&nbsp;		if (isEmpty() || another.isEmpty()) {</b>
+<b class="fc">&nbsp;			return new OGCConcreteGeometryCollection(esriSR);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		List&lt;Geometry&gt; geometries = toList(prepare_for_ops_(toGeometryCollection(this)));</b>
+<b class="fc">&nbsp;		List&lt;Geometry&gt; otherGeometries = toList(prepare_for_ops_(toGeometryCollection(another)));</b>
+&nbsp;
+<b class="fc">&nbsp;		List&lt;OGCGeometry&gt; result = new ArrayList&lt;OGCGeometry&gt;();</b>
+<b class="fc">&nbsp;		for (Geometry geometry : geometries) {</b>
+<b class="fc">&nbsp;			for (Geometry otherGeometry : otherGeometries) {</b>
+<b class="fc">&nbsp;				GeometryCursor intersectionCursor = OperatorIntersection.local().execute(new SimpleGeometryCursor(geometry), new SimpleGeometryCursor(otherGeometry), esriSR, null, 7);</b>
+<b class="fc">&nbsp;				OGCGeometry intersection = OGCGeometry.createFromEsriCursor(intersectionCursor, esriSR, true);</b>
+<b class="fc">&nbsp;				if (!intersection.isEmpty()) {</b>
+<b class="fc">&nbsp;					result.add(intersection);</b>
+&nbsp;				}
+<b class="fc">&nbsp;			}</b>
+<b class="fc">&nbsp;		}</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (result.size() == 1) {</b>
+<b class="fc">&nbsp;			return result.get(0).reduceFromMulti();</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return new OGCConcreteGeometryCollection(result, esriSR).flattenAndRemoveOverlaps();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	@Override
+&nbsp;	public OGCGeometry symDifference(OGCGeometry another) {
+&nbsp;		//TODO
+<b class="nc">&nbsp;		throw new UnsupportedOperationException();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Checks if collection is flattened.
+&nbsp;	 * @return True for the flattened collection. A flattened collection contains up to three non-empty geometries:
+&nbsp;	 * an OGCMultiPoint, an OGCMultiPolygon, and an OGCMultiLineString.
+&nbsp;	 */
+&nbsp;	public boolean isFlattened() {
+<b class="fc">&nbsp;		int n = numGeometries();</b>
+<b class="fc">&nbsp;		if (n &gt; 3)</b>
+<b class="fc">&nbsp;			return false;</b>
+&nbsp;
+<b class="fc">&nbsp;		int dimension = -1;</b>
+<b class="fc">&nbsp;		for (int i = 0; i &lt; n; ++i) {</b>
+<b class="fc">&nbsp;			OGCGeometry g = geometryN(i);</b>
+<b class="fc">&nbsp;			if (g.isEmpty())</b>
+<b class="fc">&nbsp;				return false;//no empty allowed</b>
+&nbsp;			
+<b class="fc">&nbsp;			String t = g.geometryType();</b>
+<b class="fc">&nbsp;			if (t != OGCMultiPoint.TYPE &amp;&amp; t != OGCMultiPolygon.TYPE &amp;&amp; t != OGCMultiLineString.TYPE)</b>
+<b class="fc">&nbsp;				return false;</b>
+&nbsp;			
+&nbsp;			//check strict order of geometry dimensions
+<b class="fc">&nbsp;			int d = g.dimension();</b>
+<b class="fc">&nbsp;			if (d &lt;= dimension)</b>
+<b class="fc">&nbsp;				return false;</b>
+&nbsp;
+<b class="fc">&nbsp;			dimension = d;</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return true;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Flattens Geometry Collection.
+&nbsp;	 * The result collection contains up to three geometries:
+&nbsp;	 * an OGCMultiPoint, an OGCMultilineString, and an OGCMultiPolygon (in that order).
+&nbsp;	 * @return A flattened Geometry Collection, or self if already flattened.
+&nbsp;	 */
+&nbsp;	public OGCConcreteGeometryCollection flatten() {
+<b class="fc">&nbsp;		if (isFlattened()) {</b>
+<b class="fc">&nbsp;			return this;</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		OGCMultiPoint multiPoint = null;</b>
+<b class="fc">&nbsp;		ArrayList&lt;Geometry&gt; polygons = null;</b>
+<b class="fc">&nbsp;		OGCMultiLineString polyline = null;</b>
+<b class="fc">&nbsp;		GeometryCursor gc = getEsriGeometryCursor();</b>
+<b class="fc">&nbsp;		for (Geometry g = gc.next(); g != null; g = gc.next()) {</b>
+<b class="fc">&nbsp;			if (g.isEmpty())</b>
+<b class="fc">&nbsp;				continue;</b>
+&nbsp;			
+<b class="fc">&nbsp;			Geometry.Type t = g.getType();</b>
+&nbsp;
+<b class="fc">&nbsp;			if (t == Geometry.Type.Point) {</b>
+<b class="fc">&nbsp;				if (multiPoint == null) {</b>
+<b class="fc">&nbsp;					multiPoint = new OGCMultiPoint(esriSR);</b>
+&nbsp;				}
+&nbsp;
+<b class="fc">&nbsp;				((MultiPoint)multiPoint.getEsriGeometry()).add((Point)g);</b>
+<b class="fc">&nbsp;				continue;</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			if (t == Geometry.Type.MultiPoint) {</b>
+<b class="fc">&nbsp;				if (multiPoint == null)</b>
+<b class="fc">&nbsp;					multiPoint = new OGCMultiPoint(esriSR);</b>
+&nbsp;				
+<b class="fc">&nbsp;				((MultiPoint)multiPoint.getEsriGeometry()).add((MultiPoint)g, 0, -1);</b>
+<b class="fc">&nbsp;				continue;</b>
+&nbsp;			}
+&nbsp;			
+<b class="fc">&nbsp;			if (t == Geometry.Type.Polyline) {</b>
+<b class="fc">&nbsp;				if (polyline == null)</b>
+<b class="fc">&nbsp;					polyline = new OGCMultiLineString(esriSR);</b>
+&nbsp;				
+<b class="fc">&nbsp;				((MultiPath)polyline.getEsriGeometry()).add((Polyline)g, false);</b>
+<b class="fc">&nbsp;				continue;</b>
+&nbsp;			}
+&nbsp;			
+<b class="fc">&nbsp;			if (t == Geometry.Type.Polygon) {</b>
+<b class="fc">&nbsp;				if (polygons == null)</b>
+<b class="fc">&nbsp;					polygons = new ArrayList&lt;Geometry&gt;();</b>
+&nbsp;				
+<b class="fc">&nbsp;				polygons.add(g);</b>
+<b class="fc">&nbsp;				continue;</b>
+&nbsp;			}
+&nbsp;			
+<b class="nc">&nbsp;			throw new GeometryException(&quot;internal error&quot;);//what else?</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		List&lt;OGCGeometry&gt; list = new ArrayList&lt;OGCGeometry&gt;();</b>
+&nbsp;
+<b class="fc">&nbsp;		if (multiPoint != null)</b>
+<b class="fc">&nbsp;			list.add(multiPoint);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (polyline != null)</b>
+<b class="fc">&nbsp;			list.add(polyline);</b>
+&nbsp;		
+<b class="fc">&nbsp;		if (polygons != null) {</b>
+<b class="fc">&nbsp;			GeometryCursor unionedPolygons = OperatorUnion.local().execute(new SimpleGeometryCursor(polygons), esriSR, null);</b>
+<b class="fc">&nbsp;			Geometry g = unionedPolygons.next();</b>
+<b class="fc">&nbsp;			if (!g.isEmpty()) {</b>
+<b class="fc">&nbsp;				list.add(new OGCMultiPolygon((Polygon)g, esriSR));</b>
+&nbsp;			}
+&nbsp;
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return new OGCConcreteGeometryCollection(list, esriSR);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Fixes topological overlaps in the GeometryCollecion.
+&nbsp;	 * This is equivalent to union of the geometry collection elements.
+&nbsp;	 *
+&nbsp;	 * TODO &quot;flattened&quot; collection is supposed to contain only mutli-geometries, but this method may return single geometries
+&nbsp;	 * e.g. for GEOMETRYCOLLECTION (LINESTRING (...)) it returns GEOMETRYCOLLECTION (LINESTRING (...))
+&nbsp;	 * and not GEOMETRYCOLLECTION (MULTILINESTRING (...))
+&nbsp;	 * @return A geometry collection that is flattened and has no overlapping elements.
+&nbsp;	 */
+&nbsp;	public OGCConcreteGeometryCollection flattenAndRemoveOverlaps() {
+&nbsp;
+&nbsp;		//flatten and crack/cluster
+<b class="fc">&nbsp;		GeometryCursor cursor = OGCStructureInternal.prepare_for_ops_(flatten().getEsriGeometryCursor(), esriSR);</b>
+&nbsp;
+&nbsp;		//make sure geometries don&#39;t overlap
+<b class="fc">&nbsp;		return new OGCConcreteGeometryCollection(removeOverlapsHelper_(toList(cursor)), esriSR);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private GeometryCursor removeOverlapsHelper_(List&lt;Geometry&gt; geoms) {
+<b class="fc">&nbsp;		List&lt;Geometry&gt; result = new ArrayList&lt;Geometry&gt;();</b>
+<b class="fc">&nbsp;		for (int i = 0; i &lt; geoms.size(); ++i) {</b>
+<b class="fc">&nbsp;			Geometry current = geoms.get(i);</b>
+<b class="fc">&nbsp;			if (current.isEmpty())</b>
+<b class="nc">&nbsp;				continue;</b>
+&nbsp;			
+<b class="fc">&nbsp;			for (int j = i + 1; j &lt; geoms.size(); ++j) {</b>
+<b class="fc">&nbsp;				Geometry subG = geoms.get(j);</b>
+<b class="fc">&nbsp;				current = OperatorDifference.local().execute(current, subG, esriSR, null);</b>
+<b class="fc">&nbsp;				if (current.isEmpty())</b>
+<b class="fc">&nbsp;					break;</b>
+&nbsp;			}
+&nbsp;			
+<b class="fc">&nbsp;			if (current.isEmpty())</b>
+<b class="fc">&nbsp;				continue;</b>
+&nbsp;			
+<b class="fc">&nbsp;			result.add(current);</b>
+&nbsp;		}
+&nbsp;		
+<b class="fc">&nbsp;		return new SimpleGeometryCursor(result);</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	private static class FlatteningCollectionCursor extends GeometryCursor {
+&nbsp;		private List&lt;OGCConcreteGeometryCollection&gt; m_collections;
+&nbsp;		private GeometryCursor m_current;
+&nbsp;		private int m_index;
+<b class="nc">&nbsp;		FlatteningCollectionCursor(List&lt;OGCConcreteGeometryCollection&gt; collections) {</b>
+<b class="nc">&nbsp;			m_collections = collections;</b>
+<b class="nc">&nbsp;			m_index = -1;</b>
+<b class="nc">&nbsp;			m_current = null;</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;		@Override
+&nbsp;		public Geometry next() {
+<b class="nc">&nbsp;			while (m_collections != null) {</b>
+<b class="nc">&nbsp;				if (m_current != null) {</b>
+<b class="nc">&nbsp;					Geometry g = m_current.next();</b>
+<b class="nc">&nbsp;					if (g == null) {</b>
+<b class="nc">&nbsp;						m_current = null;</b>
+<b class="nc">&nbsp;						continue;</b>
+&nbsp;					}
+&nbsp;					
+<b class="nc">&nbsp;					return g;</b>
+&nbsp;				}
+&nbsp;				else {
+<b class="nc">&nbsp;					m_index++;</b>
+<b class="nc">&nbsp;					if (m_index &lt; m_collections.size()) {</b>
+<b class="nc">&nbsp;						m_current = m_collections.get(m_index).flatten().getEsriGeometryCursor();</b>
+<b class="nc">&nbsp;						continue;</b>
+&nbsp;					}
+&nbsp;					else {
+<b class="nc">&nbsp;						m_collections = null;</b>
+<b class="nc">&nbsp;						m_index = -1;</b>
+&nbsp;					}
+&nbsp;				}
+&nbsp;			}
+&nbsp;			
+<b class="nc">&nbsp;			return null;</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		@Override
+&nbsp;		public int getGeometryID() {
+<b class="nc">&nbsp;			return m_index;</b>
+&nbsp;		}
+&nbsp;		
+&nbsp;	};
+&nbsp;	
+&nbsp;	//Collectively processes group of geometry collections (intersects all segments and clusters points).
+&nbsp;	//Flattens collections, removes overlaps.
+&nbsp;	//Once done, the result collections would work well for topological and relational operations.
+&nbsp;	private GeometryCursor prepare_for_ops_(OGCConcreteGeometryCollection collection) {
+<b class="fc">&nbsp;		assert(collection != null &amp;&amp; !collection.isEmpty());</b>
+<b class="fc">&nbsp;		GeometryCursor prepared = OGCStructureInternal.prepare_for_ops_(collection.flatten().getEsriGeometryCursor(), esriSR);</b>
+<b class="fc">&nbsp;		return removeOverlapsHelper_(toList(prepared));</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-02-21 16:04</div>
+</div>
+</body>
+</html>

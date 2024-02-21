@@ -1,0 +1,1173 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > ConstructOffset</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.esri.core.geometry</a>
+</div>
+
+<h1>Coverage Summary for Class: ConstructOffset (com.esri.core.geometry)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ConstructOffset</td>
+<td class="coverageStat">
+  <span class="percent">
+    88,9%
+  </span>
+  <span class="absValue">
+    (16/18)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    80,7%
+  </span>
+  <span class="absValue">
+    (390/483)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">ConstructOffset$GraphicPoint</td>
+<td class="coverageStat">
+  <span class="percent">
+    83,3%
+  </span>
+  <span class="absValue">
+    (5/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    83,3%
+  </span>
+  <span class="absValue">
+    (25/30)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">ConstructOffset$GraphicRect</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">ConstructOffset$IntersectionInfo</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    84,6%
+  </span>
+  <span class="absValue">
+    (22/26)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    80,8%
+  </span>
+  <span class="absValue">
+    (416/515)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; Copyright 1995-2015 Esri
+&nbsp;
+&nbsp;   Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp;   you may not use this file except in compliance with the License.
+&nbsp;   You may obtain a copy of the License at
+&nbsp;
+&nbsp;       http://www.apache.org/licenses/LICENSE-2.0
+&nbsp;
+&nbsp;   Unless required by applicable law or agreed to in writing, software
+&nbsp;   distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp;   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp;   See the License for the specific language governing permissions and
+&nbsp;   limitations under the License.
+&nbsp;
+&nbsp; For additional information, contact:
+&nbsp; Environmental Systems Research Institute, Inc.
+&nbsp; Attn: Contracts Dept
+&nbsp; 380 New York Street
+&nbsp; Redlands, California, USA 92373
+&nbsp;
+&nbsp; email: contracts@esri.com
+&nbsp; */
+&nbsp;package com.esri.core.geometry;
+&nbsp;
+&nbsp;import java.util.ArrayList;
+&nbsp;
+&nbsp;// Note: m_distance&lt;0 offsets to the left, m_distance&gt;0 offsets to the right
+&nbsp;
+&nbsp;class ConstructOffset {
+&nbsp;	ProgressTracker m_progressTracker;
+&nbsp;	Geometry m_inputGeometry;
+&nbsp;	double m_distance;
+&nbsp;	double m_tolerance;
+&nbsp;	OperatorOffset.JoinType m_joins;
+&nbsp;	double m_miterLimit;
+&nbsp;
+&nbsp;	// multipath offset
+&nbsp;	static class GraphicPoint {
+&nbsp;		double x, y;
+&nbsp;		int m_next, m_prev;
+&nbsp;		double m;
+&nbsp;		int type;
+&nbsp;
+<b class="fc">&nbsp;		GraphicPoint(double x_, double y_) {</b>
+<b class="fc">&nbsp;			x = x_;</b>
+<b class="fc">&nbsp;			y = y_;</b>
+<b class="fc">&nbsp;			type = 0;</b>
+<b class="fc">&nbsp;			m = 0;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		GraphicPoint(Point2D r) {</b>
+<b class="fc">&nbsp;			x = r.x;</b>
+<b class="fc">&nbsp;			y = r.y;</b>
+<b class="fc">&nbsp;			type = 0;</b>
+<b class="fc">&nbsp;			m = 0;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		GraphicPoint(GraphicPoint pt) {</b>
+<b class="fc">&nbsp;			x = pt.x;</b>
+<b class="fc">&nbsp;			y = pt.y;</b>
+<b class="fc">&nbsp;			type = pt.type;</b>
+<b class="fc">&nbsp;			m = pt.m;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		GraphicPoint(GraphicPoint srcPt, double d, double angle) {</b>
+<b class="fc">&nbsp;			x = srcPt.x + d * Math.cos(angle);</b>
+<b class="fc">&nbsp;			y = srcPt.y + d * Math.sin(angle);</b>
+<b class="fc">&nbsp;			type = srcPt.type;</b>
+<b class="fc">&nbsp;			m = srcPt.m;</b>
+&nbsp;		}
+&nbsp;
+<b class="nc">&nbsp;		GraphicPoint(GraphicPoint pt1, GraphicPoint pt2) {</b>
+<b class="nc">&nbsp;			x = (pt1.x + pt2.x) * 0.5;</b>
+<b class="nc">&nbsp;			y = (pt1.y + pt2.y) * 0.5;</b>
+<b class="nc">&nbsp;			type = pt1.type;</b>
+<b class="nc">&nbsp;			m = pt1.m;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		GraphicPoint(GraphicPoint pt1, GraphicPoint pt2, double ratio) {</b>
+<b class="fc">&nbsp;			x = pt1.x + (pt2.x - pt1.x) * ratio;</b>
+<b class="fc">&nbsp;			y = pt1.y + (pt2.y - pt1.y) * ratio;</b>
+<b class="fc">&nbsp;			type = pt1.type;</b>
+<b class="fc">&nbsp;			m = pt1.m;</b>
+&nbsp;		}
+&nbsp;
+&nbsp;	};
+&nbsp;
+<b class="nc">&nbsp;	static class GraphicRect {</b>
+&nbsp;		double x1, x2, y1, y2;
+&nbsp;	};
+&nbsp;
+<b class="fc">&nbsp;	static class IntersectionInfo {</b>
+&nbsp;		GraphicPoint pt;
+&nbsp;		double rFirst;
+&nbsp;		double rSecond;
+&nbsp;		boolean atExistingPt;
+&nbsp;	};
+&nbsp;
+&nbsp;	ArrayList&lt;GraphicPoint&gt; m_srcPts;
+&nbsp;	int m_srcPtCount;
+&nbsp;	ArrayList&lt;GraphicPoint&gt; m_offsetPts;
+&nbsp;	int m_offsetPtCount;
+&nbsp;
+&nbsp;	MultiPath m_resultPath;
+&nbsp;	int m_resultPoints;
+&nbsp;	double m_a1, m_a2;
+&nbsp;	boolean m_bBadSegs;
+&nbsp;
+<b class="fc">&nbsp;	ConstructOffset(ProgressTracker progressTracker) {</b>
+<b class="fc">&nbsp;		m_progressTracker = progressTracker;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// static
+&nbsp;	static Geometry execute(Geometry inputGeometry, double distance,
+&nbsp;			OperatorOffset.JoinType joins, double miterLimit, double tolerance,
+&nbsp;			ProgressTracker progressTracker) {
+<b class="fc">&nbsp;		if (inputGeometry == null)</b>
+<b class="nc">&nbsp;			throw new IllegalArgumentException();</b>
+<b class="fc">&nbsp;		if (inputGeometry.getDimension() &lt; 1)// can offset Polygons and</b>
+&nbsp;												// Polylines only
+<b class="fc">&nbsp;			throw new IllegalArgumentException();</b>
+<b class="fc">&nbsp;		if (distance == 0 || inputGeometry.isEmpty())</b>
+<b class="fc">&nbsp;			return inputGeometry;</b>
+<b class="fc">&nbsp;		ConstructOffset offset = new ConstructOffset(progressTracker);</b>
+<b class="fc">&nbsp;		offset.m_inputGeometry = inputGeometry;</b>
+<b class="fc">&nbsp;		offset.m_distance = distance;</b>
+<b class="fc">&nbsp;		offset.m_tolerance = tolerance;</b>
+<b class="fc">&nbsp;		offset.m_joins = joins;</b>
+<b class="fc">&nbsp;		offset.m_miterLimit = miterLimit;</b>
+<b class="fc">&nbsp;		return offset._ConstructOffset();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	Geometry _OffsetLine() {
+<b class="nc">&nbsp;		Line line = (Line) m_inputGeometry;</b>
+<b class="nc">&nbsp;		Point2D start = line.getStartXY();</b>
+<b class="nc">&nbsp;		Point2D end = line.getEndXY();</b>
+<b class="nc">&nbsp;		Point2D v = new Point2D();</b>
+<b class="nc">&nbsp;		v.sub(end, start);</b>
+<b class="nc">&nbsp;		v.normalize();</b>
+<b class="nc">&nbsp;		v.leftPerpendicular();</b>
+<b class="nc">&nbsp;		v.scale(m_distance);</b>
+<b class="nc">&nbsp;		start.add(v);</b>
+<b class="nc">&nbsp;		end.add(v);</b>
+<b class="nc">&nbsp;		Line resLine = (Line) line.createInstance();</b>
+<b class="nc">&nbsp;		line.setStartXY(start);</b>
+<b class="nc">&nbsp;		line.setEndXY(end);</b>
+<b class="nc">&nbsp;		return resLine;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	Geometry _OffsetEnvelope() {
+<b class="nc">&nbsp;		Envelope envelope = (Envelope) m_inputGeometry;</b>
+<b class="nc">&nbsp;		if ((m_distance &gt; 0) &amp;&amp; (m_joins != OperatorOffset.JoinType.Miter)) {</b>
+<b class="nc">&nbsp;			Polygon poly = new Polygon();</b>
+<b class="nc">&nbsp;			poly.addEnvelope(envelope, false);</b>
+<b class="nc">&nbsp;			m_inputGeometry = poly;</b>
+<b class="nc">&nbsp;			return _ConstructOffset();</b>
+&nbsp;		}
+&nbsp;
+<b class="nc">&nbsp;		Envelope resEnv = new Envelope(envelope.m_envelope);</b>
+<b class="nc">&nbsp;		resEnv.inflate(m_distance, m_distance);</b>
+<b class="nc">&nbsp;		return resEnv;</b>
+&nbsp;	}
+&nbsp;
+<b class="fc">&nbsp;	private final double pi = Math.PI;// GEOMETRYX_PI;</b>
+<b class="fc">&nbsp;	private final double two_pi = Math.PI * 2;// GEOMETRYX_2PI;</b>
+<b class="fc">&nbsp;	private final double half_pi = Math.PI / 2;// GEOMETRYX_HalfPI;</b>
+<b class="fc">&nbsp;	private final double sqrt2 = 1.4142135623730950488016887242097;</b>
+<b class="fc">&nbsp;	private final double oneDegree = 0.01745329251994329576923690768489;</b>
+&nbsp;
+<b class="fc">&nbsp;	private final int BAD_SEG = 0x0100;</b>
+<b class="fc">&nbsp;	private final int IS_END = 0x0200;</b>
+<b class="fc">&nbsp;	private final int CLOSING_SEG = 0x0400;</b>
+&nbsp;
+&nbsp;	void addPoint(GraphicPoint pt) {
+<b class="fc">&nbsp;		m_offsetPts.add(pt);</b>
+<b class="fc">&nbsp;		m_offsetPtCount++;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	double scal(GraphicPoint pt1, GraphicPoint pt2, GraphicPoint pt3,
+&nbsp;			GraphicPoint pt4) {
+<b class="fc">&nbsp;		return (pt2.x - pt1.x) * (pt4.x - pt3.x) + (pt2.y - pt1.y)</b>
+&nbsp;				* (pt4.y - pt3.y);
+&nbsp;	}
+&nbsp;
+&nbsp;	// offPt is the point to add.
+&nbsp;	// this point corresponds to the offset version of the end of seg1.
+&nbsp;	// it could generate a segment going in the opposite direction of the
+&nbsp;	// original segment
+&nbsp;	// this situation is handled here by adding an additional &quot;bad&quot; segment
+&nbsp;	void addPoint(GraphicPoint offPt, int i_src) {
+<b class="fc">&nbsp;		if (m_offsetPtCount == 0) // TODO: can we have this outside of this</b>
+&nbsp;									// method?
+&nbsp;		{
+<b class="fc">&nbsp;			addPoint(offPt);</b>
+&nbsp;			return;
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		int n_src = m_srcPtCount;</b>
+&nbsp;		GraphicPoint pt1, pt;
+<b class="fc">&nbsp;		pt1 = m_srcPts.get(i_src == 0 ? n_src - 1 : i_src - 1);</b>
+<b class="fc">&nbsp;		pt = m_srcPts.get(i_src);</b>
+&nbsp;
+&nbsp;		// calculate scalar product to determine if the offset segment goes in
+&nbsp;		// the same/opposite direction compared to the original one
+<b class="fc">&nbsp;		double s = scal(pt1, pt, m_offsetPts.get(m_offsetPtCount - 1), offPt);</b>
+<b class="fc">&nbsp;		if (s &gt; 0)</b>
+&nbsp;		// original segment and offset segment go in the same direction. Just
+&nbsp;		// add the point
+&nbsp;		{
+<b class="fc">&nbsp;			addPoint(offPt);</b>
+&nbsp;			return;
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (s &lt; 0) {</b>
+&nbsp;			// we will add a loop. We need to make sure the points we introduce
+&nbsp;			// don&#39;t generate a &quot;reversed&quot; segment
+&nbsp;			// let&#39;s project the first point of the reversed segment
+&nbsp;			// (m_offsetPts + m_offsetPtCount - 1) to check
+&nbsp;			// if it falls on the good side of the original segment (scalar
+&nbsp;			// product sign again)
+<b class="fc">&nbsp;			if (scal(pt1, pt, pt, m_offsetPts.get(m_offsetPtCount - 1)) &gt; 0) {</b>
+&nbsp;				GraphicPoint p;
+&nbsp;
+&nbsp;				// change value of m_offsetPts + m_offsetPtCount - 1
+&nbsp;				int k;
+<b class="fc">&nbsp;				if (i_src == 0)</b>
+<b class="nc">&nbsp;					k = n_src - 2;</b>
+<b class="fc">&nbsp;				else if (i_src == 1)</b>
+<b class="nc">&nbsp;					k = n_src - 1;</b>
+&nbsp;				else
+<b class="fc">&nbsp;					k = i_src - 2;</b>
+<b class="fc">&nbsp;				GraphicPoint pt0 = m_srcPts.get(k);</b>
+&nbsp;
+<b class="fc">&nbsp;				double a = Math.atan2(pt1.y - pt0.y, pt1.x - pt0.x);</b>
+<b class="fc">&nbsp;				p = new GraphicPoint(pt1, m_distance, a - half_pi);</b>
+<b class="fc">&nbsp;				m_offsetPts.set(m_offsetPtCount - 1, p);</b>
+&nbsp;
+<b class="fc">&nbsp;				if (m_joins == OperatorOffset.JoinType.Bevel</b>
+&nbsp;						|| m_joins == OperatorOffset.JoinType.Miter) {
+&nbsp;					// this block is added as well as the commented BAD_SEG in
+&nbsp;					// the next block
+<b class="nc">&nbsp;					p = new GraphicPoint(p, pt1);</b>
+<b class="nc">&nbsp;					addPoint(p);</b>
+&nbsp;
+&nbsp;					// &quot;bad&quot; segment
+<b class="nc">&nbsp;					p = new GraphicPoint(pt1, m_distance, m_a1 + half_pi);</b>
+&nbsp;
+<b class="nc">&nbsp;					GraphicPoint p_ = new GraphicPoint(p, pt1);</b>
+<b class="nc">&nbsp;					p_.type |= BAD_SEG;</b>
+<b class="nc">&nbsp;					addPoint(p_);</b>
+&nbsp;
+<b class="nc">&nbsp;					addPoint(p);</b>
+<b class="nc">&nbsp;				} else {</b>
+&nbsp;					// the working stuff for round and square
+&nbsp;
+&nbsp;					// &quot;bad&quot; segment
+<b class="fc">&nbsp;					p = new GraphicPoint(pt1, m_distance, m_a1 + half_pi);</b>
+<b class="fc">&nbsp;					p.type |= BAD_SEG;</b>
+<b class="fc">&nbsp;					addPoint(p);</b>
+&nbsp;				}
+&nbsp;
+&nbsp;				// add offPt
+<b class="fc">&nbsp;				addPoint(offPt, i_src);</b>
+<b class="fc">&nbsp;			} else {</b>
+&nbsp;				GraphicPoint p;
+&nbsp;
+&nbsp;				// we don&#39;t add offPt but the loop containing the &quot;bad&quot; segment
+<b class="fc">&nbsp;				p = new GraphicPoint(pt, m_distance, m_a1 + half_pi);</b>
+<b class="fc">&nbsp;				addPoint(p);</b>
+&nbsp;
+<b class="fc">&nbsp;				if (m_joins == OperatorOffset.JoinType.Bevel</b>
+&nbsp;						|| m_joins == OperatorOffset.JoinType.Miter) {
+&nbsp;					// this block is added as well as the commented BAD_SEG in
+&nbsp;					// the next block
+<b class="nc">&nbsp;					p = new GraphicPoint(p, pt);</b>
+<b class="nc">&nbsp;					addPoint(p);</b>
+&nbsp;
+<b class="nc">&nbsp;					p = new GraphicPoint(pt, m_distance, m_a2 - half_pi);</b>
+<b class="nc">&nbsp;					GraphicPoint p_ = new GraphicPoint(p, pt);</b>
+<b class="nc">&nbsp;					p_.type |= BAD_SEG;</b>
+<b class="nc">&nbsp;					addPoint(p_);</b>
+&nbsp;
+<b class="nc">&nbsp;					addPoint(p);</b>
+<b class="nc">&nbsp;				} else {</b>
+&nbsp;					// the working stuff for round and square
+<b class="fc">&nbsp;					p = new GraphicPoint(pt, m_distance, m_a2 - half_pi);</b>
+<b class="fc">&nbsp;					p.type |= BAD_SEG;</b>
+<b class="fc">&nbsp;					addPoint(p);</b>
+&nbsp;				}
+&nbsp;			}
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	boolean buildOffset() {
+&nbsp;		// make sure we have at least three points and no identical points
+&nbsp;		int i;
+&nbsp;		double a1, a2;
+&nbsp;		GraphicPoint pt, pt1, pt2;
+&nbsp;		GraphicPoint p;
+&nbsp;
+&nbsp;		// number of points to deal with
+<b class="fc">&nbsp;		int n = m_srcPtCount;</b>
+&nbsp;
+<b class="fc">&nbsp;		m_offsetPtCount = 0;</b>
+&nbsp;
+<b class="fc">&nbsp;		double flattenTolerance = m_tolerance * 0.5;</b>
+&nbsp;
+<b class="fc">&nbsp;		double a1_0 = 0;</b>
+<b class="fc">&nbsp;		double a2_0 = 0;</b>
+<b class="fc">&nbsp;		for (i = 0; i &lt; n; i++) {</b>
+<b class="fc">&nbsp;			pt = m_srcPts.get(i);</b>
+&nbsp;
+&nbsp;			// point before
+<b class="fc">&nbsp;			if (i == 0)</b>
+<b class="fc">&nbsp;				pt1 = m_srcPts.get(n - 1);</b>
+&nbsp;			else
+<b class="fc">&nbsp;				pt1 = m_srcPts.get(i - 1);</b>
+&nbsp;
+&nbsp;			// point after
+<b class="fc">&nbsp;			if (i == n - 1)</b>
+<b class="fc">&nbsp;				pt2 = m_srcPts.get(0);</b>
+&nbsp;			else
+<b class="fc">&nbsp;				pt2 = m_srcPts.get(i + 1);</b>
+&nbsp;
+&nbsp;			// angles of enclosing segments
+<b class="fc">&nbsp;			double dx1 = pt1.x - pt.x;</b>
+<b class="fc">&nbsp;			double dy1 = pt1.y - pt.y;</b>
+<b class="fc">&nbsp;			double dx2 = pt2.x - pt.x;</b>
+<b class="fc">&nbsp;			double dy2 = pt2.y - pt.y;</b>
+<b class="fc">&nbsp;			a1 = Math.atan2(dy1, dx1);</b>
+<b class="fc">&nbsp;			a2 = Math.atan2(dy2, dx2);</b>
+<b class="fc">&nbsp;			m_a1 = a1;</b>
+<b class="fc">&nbsp;			m_a2 = a2;</b>
+<b class="fc">&nbsp;			if (i == 0) {</b>
+<b class="fc">&nbsp;				a1_0 = a1;</b>
+<b class="fc">&nbsp;				a2_0 = a2;</b>
+&nbsp;			}
+&nbsp;
+&nbsp;			// double dot_product = dx1 * dx2 + dy1 * dy2;
+<b class="fc">&nbsp;			double cross_product = dx1 * dy2 - dx2 * dy1;</b>
+&nbsp;			// boolean bInnerAngle = (cross_product == 0) ? (m_distance &gt; 0) :
+&nbsp;			// (cross_product * m_distance &gt;= 0.0);
+&nbsp;
+&nbsp;			// check for inner angles (always managed the same, whatever the
+&nbsp;			// type of join)
+<b class="fc">&nbsp;			double saved_a2 = a2;</b>
+<b class="fc">&nbsp;			if (a2 &lt; a1)</b>
+<b class="fc">&nbsp;				a2 += two_pi; // this guaranties that (a1 + a2) / 2 is on the</b>
+&nbsp;								// right side of the curve
+<b class="fc">&nbsp;			if (cross_product * m_distance &gt; 0.0) // inner angle</b>
+&nbsp;			{
+&nbsp;				// inner angle
+<b class="fc">&nbsp;				if (m_joins == OperatorOffset.JoinType.Bevel</b>
+&nbsp;						|| m_joins == OperatorOffset.JoinType.Miter) {
+<b class="fc">&nbsp;					p = new GraphicPoint(pt, m_distance, a1 + half_pi);</b>
+<b class="fc">&nbsp;					addPoint(p);</b>
+&nbsp;
+&nbsp;					// this block is added as well as the commented BAD_SEG in
+&nbsp;					// the next block
+<b class="fc">&nbsp;					double ratio = 0.001; // TODO: the higher the ratio, the</b>
+&nbsp;											// better the result (shorter
+&nbsp;											// segments)
+<b class="fc">&nbsp;					p = new GraphicPoint(pt, p, ratio);</b>
+<b class="fc">&nbsp;					addPoint(p);</b>
+&nbsp;
+&nbsp;					// this is the &quot;bad&quot; segment
+<b class="fc">&nbsp;					p = new GraphicPoint(pt, m_distance, a2 - half_pi);</b>
+&nbsp;
+<b class="fc">&nbsp;					GraphicPoint p_ = new GraphicPoint(pt, p, ratio);</b>
+<b class="fc">&nbsp;					p_.type |= BAD_SEG;</b>
+<b class="fc">&nbsp;					addPoint(p_);</b>
+&nbsp;
+<b class="fc">&nbsp;					addPoint(p);</b>
+<b class="fc">&nbsp;				} else {</b>
+&nbsp;					// this method works for square and round, but not bevel
+<b class="fc">&nbsp;					double r = (a2 - a1) * 0.5;</b>
+<b class="fc">&nbsp;					double d = m_distance / Math.abs(Math.sin(r));</b>
+<b class="fc">&nbsp;					p = new GraphicPoint(pt, d, (a1 + a2) * 0.5);</b>
+<b class="fc">&nbsp;					addPoint(p, i); // will deal with reversed segments</b>
+&nbsp;				}
+<b class="fc">&nbsp;				continue;</b>
+&nbsp;			}
+&nbsp;
+&nbsp;			// outer angles
+&nbsp;			// check if we have an end point first
+<b class="fc">&nbsp;			if ((pt.type &amp; IS_END) != 0) {</b>
+&nbsp;				// TODO: deal with other options. assume rounded and
+&nbsp;				// perpendicular for now
+&nbsp;				// we need to use the outer regular polygon of the round join
+&nbsp;				// TODO: explain this in a doc
+&nbsp;
+&nbsp;				// calculate the number of points based on a flatten tolerance
+<b class="fc">&nbsp;				double r = 1.0 - flattenTolerance / Math.abs(m_distance);</b>
+<b class="fc">&nbsp;				long na = 1;</b>
+<b class="fc">&nbsp;				double da = (m_distance &lt; 0) ? -pi : pi; // da is negative when</b>
+&nbsp;															// m_offset is
+&nbsp;															// negative (???)
+<b class="fc">&nbsp;				if (r &gt; -1.0 &amp;&amp; r &lt; 1.0) {</b>
+<b class="fc">&nbsp;					double a = Math.acos(r) * 2; // angle where &quot;arrow?&quot; is less</b>
+&nbsp;													// than flattenTolerance
+&nbsp;					// do not consider an angle smaller than a degree
+<b class="fc">&nbsp;					if (a &lt; oneDegree)</b>
+<b class="fc">&nbsp;						a = oneDegree;</b>
+<b class="fc">&nbsp;					na = (long) (pi / a + 1.5);</b>
+<b class="fc">&nbsp;					if (na &gt; 1)</b>
+<b class="fc">&nbsp;						da /= na;</b>
+&nbsp;				}
+&nbsp;				// add first point
+<b class="fc">&nbsp;				double a = a1 + half_pi;</b>
+<b class="fc">&nbsp;				p = new GraphicPoint(pt, m_distance, a);</b>
+<b class="fc">&nbsp;				if (i == 0)</b>
+<b class="fc">&nbsp;					p.type |= CLOSING_SEG; // TODO: should we simplify this by</b>
+&nbsp;											// considering the last point
+&nbsp;											// instead of the first one??
+<b class="fc">&nbsp;				addPoint(p, i); // will deal with reversed segments</b>
+&nbsp;
+<b class="fc">&nbsp;				double d = m_distance / Math.cos(da / 2);</b>
+<b class="fc">&nbsp;				a += da / 2;</b>
+<b class="fc">&nbsp;				p = new GraphicPoint(pt, d, a);</b>
+<b class="fc">&nbsp;				p.type |= CLOSING_SEG;</b>
+<b class="fc">&nbsp;				addPoint(p);</b>
+&nbsp;
+<b class="fc">&nbsp;				while (--na &gt; 0) {</b>
+<b class="fc">&nbsp;					a += da;</b>
+<b class="fc">&nbsp;					p = new GraphicPoint(pt, d, a);</b>
+<b class="fc">&nbsp;					p.type |= CLOSING_SEG;</b>
+<b class="fc">&nbsp;					addPoint(p);</b>
+&nbsp;				}
+&nbsp;
+&nbsp;				// last point (optional except for the first point)
+<b class="fc">&nbsp;				p = new GraphicPoint(pt, m_distance, a2 - half_pi); // this one</b>
+&nbsp;																	// is
+&nbsp;																	// optional
+&nbsp;																	// except
+&nbsp;																	// for the
+&nbsp;																	// first
+&nbsp;																	// point
+<b class="fc">&nbsp;				p.type |= CLOSING_SEG;</b>
+<b class="fc">&nbsp;				addPoint(p);</b>
+&nbsp;
+<b class="fc">&nbsp;				continue;</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			else if (m_joins == OperatorOffset.JoinType.Bevel) // bevel</b>
+&nbsp;			{
+<b class="fc">&nbsp;				p = new GraphicPoint(pt, m_distance, a1 + half_pi);</b>
+<b class="fc">&nbsp;				addPoint(p, i); // will deal with reversed segments</b>
+<b class="fc">&nbsp;				p = new GraphicPoint(pt, m_distance, a2 - half_pi);</b>
+<b class="fc">&nbsp;				addPoint(p);</b>
+<b class="fc">&nbsp;				continue;</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			else if (m_joins == OperatorOffset.JoinType.Round) {</b>
+&nbsp;				// we need to use the outer regular polygon of the round join
+&nbsp;				// TODO: explain this in a doc
+&nbsp;
+&nbsp;				// calculate the number of points based on a flatten tolerance
+<b class="fc">&nbsp;				double r = 1.0 - flattenTolerance / Math.abs(m_distance);</b>
+<b class="fc">&nbsp;				long na = 1;</b>
+<b class="fc">&nbsp;				double da = (a2 - half_pi) - (a1 + half_pi); // da is negative</b>
+&nbsp;																// when
+&nbsp;																// m_distance is
+&nbsp;																// negative
+<b class="fc">&nbsp;				if (r &gt; -1.0 &amp;&amp; r &lt; 1.0) {</b>
+<b class="fc">&nbsp;					double a = Math.acos(r) * 2.0; // angle where &quot;arrow?&quot; is</b>
+&nbsp;													// less than
+&nbsp;													// flattenTolerance
+&nbsp;					// do not consider an angle smaller than a degree
+<b class="fc">&nbsp;					if (a &lt; oneDegree)</b>
+<b class="fc">&nbsp;						a = oneDegree;</b>
+<b class="fc">&nbsp;					na = (long) (Math.abs(da) / a + 1.5);</b>
+<b class="fc">&nbsp;					if (na &gt; 1)</b>
+<b class="fc">&nbsp;						da /= na;</b>
+&nbsp;				}
+<b class="fc">&nbsp;				double d = m_distance / Math.cos(da * 0.5);</b>
+<b class="fc">&nbsp;				double a = a1 + half_pi + da * 0.5;</b>
+<b class="fc">&nbsp;				p = new GraphicPoint(pt, d, a);</b>
+<b class="fc">&nbsp;				addPoint(p, i); // will deal with reversed segments</b>
+<b class="fc">&nbsp;				while (--na &gt; 0) {</b>
+<b class="fc">&nbsp;					a += da;</b>
+<b class="fc">&nbsp;					p = new GraphicPoint(pt, d, a);</b>
+<b class="fc">&nbsp;					addPoint(p);</b>
+&nbsp;				}
+&nbsp;				continue;
+<b class="fc">&nbsp;			} else if (m_joins == OperatorOffset.JoinType.Miter) {</b>
+<b class="fc">&nbsp;				dx1 = pt1.x - pt.x;</b>
+<b class="fc">&nbsp;				dy1 = pt1.y - pt.y;</b>
+<b class="fc">&nbsp;				dx2 = pt2.x - pt.x;</b>
+<b class="fc">&nbsp;				dy2 = pt2.y - pt.y;</b>
+<b class="fc">&nbsp;				double d1 = Math.sqrt(dx1 * dx1 + dy1 * dy1);</b>
+<b class="fc">&nbsp;				double d2 = Math.sqrt(dx2 * dx2 + dy2 * dy2);</b>
+<b class="fc">&nbsp;				double cosa = (dx1 * dx2 + dy1 * dy2) / d1 / d2;</b>
+<b class="fc">&nbsp;				if (cosa &gt; 1.0 - 1.0e-8) {</b>
+&nbsp;					// there&#39;s a spike in the polygon boundary; this could
+&nbsp;					// happen when filtering out short segments in Init()
+<b class="nc">&nbsp;					p = new GraphicPoint(pt, sqrt2 * m_distance, a2 - pi * 0.25);</b>
+<b class="nc">&nbsp;					addPoint(p, i);</b>
+<b class="nc">&nbsp;					p = new GraphicPoint(pt, sqrt2 * m_distance, a2 + pi * 0.25);</b>
+<b class="nc">&nbsp;					addPoint(p);</b>
+<b class="nc">&nbsp;					continue;</b>
+&nbsp;				}
+&nbsp;				// original miter code
+&nbsp;				// if (m_miterLimit * m_miterLimit * (1 - cosa) &lt; 2)
+&nbsp;				// {
+&nbsp;				// // bevel join
+&nbsp;				// p = new GraphicPoint(pt, m_distance, a1 + half_pi);
+&nbsp;				// AddPoint(p, src_poly, srcPtCount, i); // will deal with
+&nbsp;				// reversed segments
+&nbsp;				// p = new GraphicPoint(pt, m_distance, a2 - half_pi);
+&nbsp;				// AddPoint(p);
+&nbsp;				// continue;
+&nbsp;				// }
+<b class="fc">&nbsp;				double distanceFromCorner = Math.abs(m_distance</b>
+<b class="fc">&nbsp;						/ Math.sin(Math.acos(cosa) * 0.5));</b>
+<b class="fc">&nbsp;				double bevelDistance = Math.abs(m_miterLimit * m_distance);</b>
+<b class="fc">&nbsp;				if (distanceFromCorner &gt; bevelDistance) {</b>
+<b class="nc">&nbsp;					double r = (a2 - a1) * 0.5;</b>
+<b class="nc">&nbsp;					double d = m_distance / Math.abs(Math.sin(r));</b>
+<b class="nc">&nbsp;					p = new GraphicPoint(pt, d, (a1 + a2) * 0.5);</b>
+&nbsp;
+&nbsp;					// construct bevel points, see comment in
+&nbsp;					// c:\ArcGIS\System\Geometry\Geometry\ConstructCurveImpl.cpp,
+&nbsp;					// ESRI::OffsetCurve::EstimateBevelPoints
+<b class="nc">&nbsp;					Point2D corner = new Point2D(p.x, p.y);</b>
+<b class="nc">&nbsp;					Point2D through = new Point2D(pt.x, pt.y);</b>
+<b class="nc">&nbsp;					Point2D delta = new Point2D();</b>
+<b class="nc">&nbsp;					delta.sub(corner, through);</b>
+&nbsp;
+&nbsp;					// Point2D midPoint = through + delta * (bevelDistance /
+&nbsp;					// delta.Length());
+<b class="nc">&nbsp;					Point2D midPoint = new Point2D();</b>
+<b class="nc">&nbsp;					midPoint.scaleAdd(bevelDistance / delta.length(), delta,</b>
+&nbsp;							through);
+&nbsp;
+<b class="nc">&nbsp;					double sideLength = Math.sqrt(distanceFromCorner</b>
+<b class="nc">&nbsp;							* distanceFromCorner - m_distance * m_distance), halfWidth = (distanceFromCorner - bevelDistance)</b>
+<b class="nc">&nbsp;							* Math.abs(m_distance) / sideLength;</b>
+&nbsp;
+&nbsp;					// delta = delta.RotateDirect(0.0, m_distance &gt; 0.0 ? -1.0 :
+&nbsp;					// 1.0) * (halfWidth/delta.Length());
+<b class="nc">&nbsp;					if (m_distance &gt; 0.0)</b>
+<b class="nc">&nbsp;						delta.leftPerpendicular();</b>
+&nbsp;					else
+<b class="nc">&nbsp;						delta.rightPerpendicular();</b>
+<b class="nc">&nbsp;					delta.scale(halfWidth / delta.length());</b>
+&nbsp;
+<b class="nc">&nbsp;					Point2D from = new Point2D();</b>
+<b class="nc">&nbsp;					from.add(midPoint, delta);</b>
+<b class="nc">&nbsp;					Point2D to = new Point2D();</b>
+<b class="nc">&nbsp;					to.sub(midPoint, delta);</b>
+<b class="nc">&nbsp;					p = new GraphicPoint(from);</b>
+&nbsp;					// _ASSERT(::_finite(p.x));
+&nbsp;					// _ASSERT(::_finite(p.y));
+<b class="nc">&nbsp;					addPoint(p, i);</b>
+<b class="nc">&nbsp;					p = new GraphicPoint(to);</b>
+&nbsp;					// _ASSERT(::_finite(p.x));
+&nbsp;					// _ASSERT(::_finite(p.y));
+<b class="nc">&nbsp;					addPoint(p);</b>
+<b class="nc">&nbsp;					continue;</b>
+&nbsp;				}
+&nbsp;				// miter join
+<b class="fc">&nbsp;				double r = (a2 - a1) * 0.5;</b>
+<b class="fc">&nbsp;				double d = m_distance / Math.abs(Math.sin(r)); // r should not</b>
+&nbsp;																// be null
+&nbsp;																// (trapped by
+&nbsp;																// the bevel
+&nbsp;																// case)
+<b class="fc">&nbsp;				p = new GraphicPoint(pt, d, (a1 + a2) * 0.5);</b>
+<b class="fc">&nbsp;				addPoint(p, i); // will deal with reversed segments</b>
+<b class="fc">&nbsp;				continue;</b>
+&nbsp;			} else // the new &quot;square&quot; join
+&nbsp;			{
+<b class="fc">&nbsp;				a2 = saved_a2;</b>
+&nbsp;
+&nbsp;				// identify if angle is less than pi/2
+&nbsp;				// in this case, we introduce a segment that is perpendicular to
+&nbsp;				// the bissector of the angle
+&nbsp;				// TODO: see figure X for details
+&nbsp;				boolean bAddSegment;
+<b class="fc">&nbsp;				if (m_distance &gt; 0.0) {</b>
+<b class="fc">&nbsp;					if (a2 &gt; a1) // &gt; and not &gt;=</b>
+<b class="fc">&nbsp;						a2 -= two_pi;</b>
+<b class="fc">&nbsp;					bAddSegment = (a1 - a2 &lt; half_pi);</b>
+&nbsp;				} else {
+<b class="fc">&nbsp;					if (a2 &lt; a1) // &lt; and not &lt;=</b>
+<b class="fc">&nbsp;						a2 += two_pi;</b>
+<b class="fc">&nbsp;					bAddSegment = (a2 - a1 &lt; half_pi);</b>
+&nbsp;				}
+<b class="fc">&nbsp;				if (bAddSegment) {</b>
+&nbsp;					// make it continuous when angle is pi/2 (but not tangent to
+&nbsp;					// the round join)
+<b class="fc">&nbsp;					double d = m_distance * sqrt2;</b>
+&nbsp;					double a;
+&nbsp;
+<b class="fc">&nbsp;					if (d &lt; 0.0)</b>
+<b class="fc">&nbsp;						a = a1 + pi * 0.25;</b>
+&nbsp;					else
+<b class="nc">&nbsp;						a = a1 + 3.0 * pi * 0.25;</b>
+<b class="fc">&nbsp;					p = new GraphicPoint(pt, d, a);</b>
+<b class="fc">&nbsp;					addPoint(p, i);</b>
+&nbsp;
+<b class="fc">&nbsp;					if (d &lt; 0)</b>
+<b class="fc">&nbsp;						a = a2 - pi * 0.25;</b>
+&nbsp;					else
+<b class="nc">&nbsp;						a = a2 - 3.0 * pi * 0.25;</b>
+<b class="fc">&nbsp;					p = new GraphicPoint(pt, d, a);</b>
+<b class="fc">&nbsp;					addPoint(p);</b>
+<b class="fc">&nbsp;				} else // standard case: we just add the intersection point of</b>
+&nbsp;						// offset segments
+&nbsp;				{
+<b class="fc">&nbsp;					double r = (a2 - a1) * 0.5;</b>
+<b class="fc">&nbsp;					double d = m_distance / Math.abs(Math.sin(r));</b>
+<b class="fc">&nbsp;					if (a2 &lt; a1)</b>
+<b class="fc">&nbsp;						a2 += two_pi; // this guaranties that (a1 + a2) / 2 is</b>
+&nbsp;										// on the right side with a positive
+&nbsp;										// offset
+<b class="fc">&nbsp;					p = new GraphicPoint(pt, d, (a1 + a2) / 2);</b>
+<b class="fc">&nbsp;					addPoint(p, i);</b>
+&nbsp;				}
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+&nbsp;		// closing point
+<b class="fc">&nbsp;		m_a1 = a1_0;</b>
+<b class="fc">&nbsp;		m_a2 = a2_0;</b>
+<b class="fc">&nbsp;		addPoint(m_offsetPts.get(0), 0);</b>
+&nbsp;
+&nbsp;		// make sure the first point matches the last (in case a problem of
+&nbsp;		// reversed segment happens there)
+<b class="fc">&nbsp;		pt = new GraphicPoint(m_offsetPts.get(m_offsetPtCount - 1));</b>
+<b class="fc">&nbsp;		m_offsetPts.set(0, pt);</b>
+&nbsp;
+&nbsp;		// remove loops
+<b class="fc">&nbsp;		return removeBadSegsFast();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void addPart(int iStart, int cPts) {
+<b class="fc">&nbsp;		if (cPts &lt; 2)</b>
+&nbsp;			return;
+&nbsp;
+<b class="fc">&nbsp;		for (int i = 0; i &lt; cPts; i++) {</b>
+<b class="fc">&nbsp;			GraphicPoint pt = m_offsetPts.get(iStart + i);</b>
+<b class="fc">&nbsp;			if (i != 0)</b>
+<b class="fc">&nbsp;				m_resultPath.lineTo(new Point2D(pt.x, pt.y));</b>
+&nbsp;			else
+<b class="fc">&nbsp;				m_resultPath.startPath(new Point2D(pt.x, pt.y));</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	void _OffsetPath(MultiPath multiPath, int pathIndex, MultiPath resultingPath) {
+<b class="fc">&nbsp;		int startVertex = multiPath.getPathStart(pathIndex);</b>
+<b class="fc">&nbsp;		int endVertex = multiPath.getPathEnd(pathIndex);</b>
+&nbsp;
+<b class="fc">&nbsp;		m_offsetPts = new ArrayList&lt;GraphicPoint&gt;();</b>
+&nbsp;
+&nbsp;		// test if part is closed
+<b class="fc">&nbsp;		m_resultPath = resultingPath;</b>
+<b class="fc">&nbsp;		m_resultPoints = 0;</b>
+<b class="fc">&nbsp;		if (multiPath.isClosedPath(pathIndex)) {</b>
+&nbsp;			// check if last point is a duplicate of first
+<b class="fc">&nbsp;			Point2D ptStart = multiPath.getXY(startVertex);</b>
+<b class="fc">&nbsp;			while (multiPath.getXY(endVertex - 1).isEqual(ptStart))</b>
+<b class="nc">&nbsp;				endVertex--;</b>
+&nbsp;
+&nbsp;			// we need at least three points for a polygon
+<b class="fc">&nbsp;			if (endVertex - startVertex &gt;= 2) {</b>
+<b class="fc">&nbsp;				m_srcPtCount = endVertex - startVertex;</b>
+<b class="fc">&nbsp;				m_srcPts = new ArrayList&lt;GraphicPoint&gt;(m_srcPtCount);</b>
+&nbsp;				// TODO: may throw std::bad:alloc()
+<b class="fc">&nbsp;				for (int i = startVertex; i &lt; endVertex; i++)</b>
+<b class="fc">&nbsp;					m_srcPts.add(new GraphicPoint(multiPath.getXY(i)));</b>
+&nbsp;
+<b class="fc">&nbsp;				if (buildOffset())</b>
+<b class="fc">&nbsp;					addPart(0, m_offsetPtCount - 1); // do not repeat closing</b>
+&nbsp;														// point
+&nbsp;			}
+<b class="fc">&nbsp;		} else {</b>
+&nbsp;			// remove duplicate points at extremities
+<b class="fc">&nbsp;			Point2D ptStart = multiPath.getXY(startVertex);</b>
+<b class="fc">&nbsp;			while ((startVertex &lt; endVertex)</b>
+<b class="fc">&nbsp;					&amp;&amp; multiPath.getXY(startVertex + 1).isEqual(ptStart))</b>
+<b class="nc">&nbsp;				startVertex++;</b>
+<b class="fc">&nbsp;			Point2D ptEnd = multiPath.getXY(endVertex - 1);</b>
+<b class="fc">&nbsp;			while ((startVertex &lt; endVertex)</b>
+<b class="fc">&nbsp;					&amp;&amp; multiPath.getXY(endVertex - 2).isEqual(ptEnd))</b>
+<b class="nc">&nbsp;				endVertex--;</b>
+&nbsp;
+&nbsp;			// we need at least two points for a polyline
+<b class="fc">&nbsp;			if (endVertex - startVertex &gt;= 2) {</b>
+&nbsp;				// close the line and mark the opposite segments as non valid
+<b class="fc">&nbsp;				m_srcPtCount = (endVertex - startVertex) * 2 - 2;</b>
+<b class="fc">&nbsp;				m_srcPts = new ArrayList&lt;GraphicPoint&gt;(m_srcPtCount);</b>
+&nbsp;				// TODO: may throw std::bad:alloc()
+&nbsp;
+<b class="fc">&nbsp;				GraphicPoint pt = new GraphicPoint(multiPath.getXY(startVertex));</b>
+<b class="fc">&nbsp;				pt.type |= IS_END + CLOSING_SEG;</b>
+<b class="fc">&nbsp;				m_srcPts.add(pt);</b>
+&nbsp;
+<b class="fc">&nbsp;				for (int i = startVertex + 1; i &lt; endVertex - 1; i++) {</b>
+<b class="fc">&nbsp;					pt = new GraphicPoint(multiPath.getXY(i));</b>
+<b class="fc">&nbsp;					m_srcPts.add(pt);</b>
+&nbsp;				}
+&nbsp;
+<b class="fc">&nbsp;				pt = new GraphicPoint(multiPath.getXY(endVertex - 1));</b>
+<b class="fc">&nbsp;				pt.type |= IS_END;</b>
+<b class="fc">&nbsp;				m_srcPts.add(pt);</b>
+&nbsp;
+<b class="fc">&nbsp;				for (int i = endVertex - 2; i &gt;= startVertex + 1; i--) {</b>
+<b class="fc">&nbsp;					pt = new GraphicPoint(multiPath.getXY(i));</b>
+<b class="fc">&nbsp;					pt.type |= CLOSING_SEG;</b>
+<b class="fc">&nbsp;					m_srcPts.add(pt);</b>
+&nbsp;				}
+&nbsp;
+<b class="fc">&nbsp;				if (buildOffset())</b>
+&nbsp;
+<b class="fc">&nbsp;					if (m_offsetPts.size() &gt;= 2) {</b>
+&nbsp;						// extract the part that doesn&#39;t have the CLOSING_SEG
+&nbsp;						// attribute
+&nbsp;
+<b class="fc">&nbsp;						int iStart = -1;</b>
+<b class="fc">&nbsp;						int iEnd = -1;</b>
+<b class="fc">&nbsp;						boolean prevClosed = (m_offsetPts</b>
+<b class="fc">&nbsp;								.get(m_offsetPtCount - 1).type &amp; CLOSING_SEG) != 0;</b>
+<b class="fc">&nbsp;						if (!prevClosed)</b>
+<b class="nc">&nbsp;							iStart = 0;</b>
+<b class="fc">&nbsp;						for (int i = 1; i &lt; m_offsetPtCount; i++) {</b>
+<b class="fc">&nbsp;							boolean closed = (m_offsetPts.get(i).type &amp; CLOSING_SEG) != 0;</b>
+<b class="fc">&nbsp;							if (!closed) {</b>
+<b class="fc">&nbsp;								if (prevClosed) {</b>
+&nbsp;									// if ((m_offsetPts[i - 1].type &amp; MOVE_TO)
+&nbsp;									// == 0)
+&nbsp;									// m_offsetPts[i - 1].type += MOVE_TO -
+&nbsp;									// LINE_TO;
+<b class="fc">&nbsp;									iStart = i - 1;</b>
+&nbsp;								}
+&nbsp;							} else {
+<b class="fc">&nbsp;								if (!prevClosed) {</b>
+<b class="fc">&nbsp;									iEnd = i - 1;</b>
+&nbsp;									// for (long i = iStart; i &lt;= iEnd; i++)
+&nbsp;									// m_offsetPts[i].type &amp;= OUR_FLAGS_MASK;
+<b class="fc">&nbsp;									if (iEnd - iStart + 1 &gt; 1)</b>
+<b class="fc">&nbsp;										addPart(iStart, iEnd - iStart + 1);</b>
+&nbsp;								}
+&nbsp;							}
+<b class="fc">&nbsp;							prevClosed = closed;</b>
+&nbsp;						}
+<b class="fc">&nbsp;						if (!prevClosed) {</b>
+<b class="nc">&nbsp;							iEnd = m_offsetPtCount - 1;</b>
+&nbsp;							// for (long i = iStart; i &lt;= iEnd; i++)
+&nbsp;							// m_offsetPts[i].type &amp;= OUR_FLAGS_MASK;
+<b class="nc">&nbsp;							if (iEnd - iStart + 1 &gt; 1)</b>
+<b class="nc">&nbsp;								addPart(iStart, iEnd - iStart + 1);</b>
+&nbsp;						}
+<b class="fc">&nbsp;					} else {</b>
+<b class="nc">&nbsp;						int iStart = 0;</b>
+<b class="nc">&nbsp;						int iEnd = m_offsetPtCount - 1;</b>
+<b class="nc">&nbsp;						if (iStart &gt;= 0 &amp;&amp; iEnd - iStart &gt;= 1) {</b>
+&nbsp;							// for (long i = iStart; i &lt;= iEnd; i++)
+&nbsp;							// m_offsetPts[i].type &amp;= OUR_FLAGS_MASK;
+<b class="nc">&nbsp;							addPart(iStart, iEnd - iStart + 1);</b>
+&nbsp;						}
+&nbsp;					}
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+&nbsp;		// clear source
+<b class="fc">&nbsp;		m_srcPts = null;</b>
+<b class="fc">&nbsp;		m_srcPtCount = 0;</b>
+&nbsp;		// free offset buffer
+<b class="fc">&nbsp;		m_offsetPts = null;</b>
+<b class="fc">&nbsp;		m_offsetPtCount = 0;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	boolean removeBadSegsFast() {
+<b class="fc">&nbsp;		boolean bWrong = false;</b>
+&nbsp;
+&nbsp;		// initialize circular doubly-linked list
+&nbsp;		// skip last point which is dup of first point
+<b class="fc">&nbsp;		for (int i = 0; i &lt; m_offsetPtCount; i++) {</b>
+<b class="fc">&nbsp;			GraphicPoint pt = m_offsetPts.get(i);</b>
+<b class="fc">&nbsp;			pt.m_next = i + 1;</b>
+<b class="fc">&nbsp;			pt.m_prev = i - 1;</b>
+<b class="fc">&nbsp;			m_offsetPts.set(i, pt);</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		// need to update the first and last elements
+&nbsp;		GraphicPoint pt;
+&nbsp;
+<b class="fc">&nbsp;		pt = m_offsetPts.get(0);</b>
+<b class="fc">&nbsp;		pt.m_prev = m_offsetPtCount - 2;</b>
+<b class="fc">&nbsp;		m_offsetPts.set(0, pt);</b>
+&nbsp;
+<b class="fc">&nbsp;		pt = m_offsetPts.get(m_offsetPtCount - 2);</b>
+<b class="fc">&nbsp;		pt.m_next = 0;</b>
+<b class="fc">&nbsp;		m_offsetPts.set(m_offsetPtCount - 2, pt);</b>
+&nbsp;
+<b class="fc">&nbsp;		int w = 0;</b>
+<b class="fc">&nbsp;		for (int i = 0; i &lt; m_offsetPtCount; i++) {</b>
+<b class="fc">&nbsp;			if ((m_offsetPts.get(w).type &amp; BAD_SEG) != 0) {</b>
+<b class="fc">&nbsp;				int wNext = deleteClosedSeg(w);</b>
+<b class="fc">&nbsp;				if (wNext != -1)</b>
+<b class="fc">&nbsp;					w = wNext;</b>
+&nbsp;				else {
+<b class="fc">&nbsp;					bWrong = true;</b>
+<b class="fc">&nbsp;					break;</b>
+&nbsp;				}
+<b class="fc">&nbsp;			} else</b>
+<b class="fc">&nbsp;				w = m_offsetPts.get(w).m_next;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (bWrong)</b>
+<b class="fc">&nbsp;			return false;</b>
+&nbsp;
+&nbsp;		// w is the index of a known good (i.e. surviving ) point in the offset
+&nbsp;		// array
+<b class="fc">&nbsp;		compressOffsetArray(w);</b>
+<b class="fc">&nbsp;		return true;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	int deleteClosedSeg(int seg) {
+<b class="fc">&nbsp;		int n = m_offsetPtCount - 1; // number of segments</b>
+&nbsp;
+&nbsp;		// check combinations of segments
+<b class="fc">&nbsp;		int ip0 = seg, ip, im;</b>
+&nbsp;
+<b class="fc">&nbsp;		for (int i = 1; i &lt;= n - 2; i++) {</b>
+<b class="fc">&nbsp;			ip0 = m_offsetPts.get(ip0).m_next;</b>
+&nbsp;
+<b class="fc">&nbsp;			ip = ip0;</b>
+<b class="fc">&nbsp;			im = seg;</b>
+&nbsp;
+<b class="fc">&nbsp;			for (int j = 1; j &lt;= i; j++) {</b>
+<b class="fc">&nbsp;				im = m_offsetPts.get(im).m_prev;</b>
+&nbsp;
+<b class="fc">&nbsp;				if ((m_offsetPts.get(im).type &amp; BAD_SEG) == 0</b>
+<b class="fc">&nbsp;						&amp;&amp; (m_offsetPts.get(ip).type &amp; BAD_SEG) == 0) {</b>
+<b class="fc">&nbsp;					int rSegNext = handleClosedIntersection(im, ip);</b>
+<b class="fc">&nbsp;					if (rSegNext != -1)</b>
+<b class="fc">&nbsp;						return rSegNext;</b>
+&nbsp;				}
+&nbsp;
+<b class="fc">&nbsp;				ip = m_offsetPts.get(ip).m_prev;</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return -1;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// line segments defined by (im-1, im) and (ip-1, ip)
+&nbsp;	int handleClosedIntersection(int im, int ip) {
+&nbsp;		GraphicPoint pt1, pt2, pt3, pt4;
+<b class="fc">&nbsp;		pt1 = m_offsetPts.get(m_offsetPts.get(im).m_prev);</b>
+<b class="fc">&nbsp;		pt2 = m_offsetPts.get(im);</b>
+<b class="fc">&nbsp;		pt3 = m_offsetPts.get(m_offsetPts.get(ip).m_prev);</b>
+<b class="fc">&nbsp;		pt4 = m_offsetPts.get(ip);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (!sectGraphicRect(pt1, pt2, pt3, pt4))</b>
+<b class="fc">&nbsp;			return -1;</b>
+&nbsp;
+&nbsp;		// intersection
+<b class="fc">&nbsp;		IntersectionInfo ii = new IntersectionInfo();</b>
+<b class="fc">&nbsp;		if (findIntersection(pt1, pt2, pt3, pt4, ii) &amp;&amp; !ii.atExistingPt)</b>
+<b class="fc">&nbsp;			if (Math.signum((pt2.x - pt1.x) * (pt4.y - pt3.y) - (pt2.y - pt1.y)</b>
+<b class="fc">&nbsp;					* (pt4.x - pt3.x)) != Math.signum(m_distance)) {</b>
+<b class="fc">&nbsp;				int prev0 = m_offsetPts.get(im).m_prev;</b>
+&nbsp;
+<b class="fc">&nbsp;				ii.pt.type = pt2.type;</b>
+<b class="fc">&nbsp;				ii.pt.m_next = ip;</b>
+<b class="fc">&nbsp;				ii.pt.m_prev = prev0;</b>
+<b class="fc">&nbsp;				m_offsetPts.set(im, ii.pt);</b>
+&nbsp;
+<b class="fc">&nbsp;				ii.pt = m_offsetPts.get(ip);</b>
+<b class="fc">&nbsp;				ii.pt.m_prev = im;</b>
+<b class="fc">&nbsp;				m_offsetPts.set(ip, ii.pt);</b>
+&nbsp;
+<b class="fc">&nbsp;				return ip;</b>
+&nbsp;			}
+<b class="fc">&nbsp;		return -1;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	boolean sectGraphicRect(GraphicPoint pt1, GraphicPoint pt2,
+&nbsp;			GraphicPoint pt3, GraphicPoint pt4) {
+<b class="fc">&nbsp;		return (Math.max(pt1.x, pt2.x) &gt;= Math.min(pt3.x, pt4.x)</b>
+<b class="fc">&nbsp;				&amp;&amp; Math.max(pt3.x, pt4.x) &gt;= Math.min(pt1.x, pt2.x)</b>
+<b class="fc">&nbsp;				&amp;&amp; Math.max(pt1.y, pt2.y) &gt;= Math.min(pt3.y, pt4.y) &amp;&amp; Math</b>
+<b class="fc">&nbsp;				.max(pt3.y, pt4.y) &gt;= Math.min(pt1.y, pt2.y));</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	boolean findIntersection(GraphicPoint bp1, GraphicPoint bp2,
+&nbsp;			GraphicPoint bp3, GraphicPoint bp4,
+&nbsp;			IntersectionInfo intersectionInfo) {
+<b class="fc">&nbsp;		intersectionInfo.atExistingPt = false;</b>
+&nbsp;
+&nbsp;		// Note: test if rectangles intersect already done by caller
+&nbsp;
+&nbsp;		// intersection
+&nbsp;		double i, j, r, r1;
+<b class="fc">&nbsp;		i = (bp2.y - bp1.y) * (bp4.x - bp3.x) - (bp2.x - bp1.x)</b>
+&nbsp;				* (bp4.y - bp3.y);
+<b class="fc">&nbsp;		j = (bp3.y - bp1.y) * (bp2.x - bp1.x) - (bp3.x - bp1.x)</b>
+&nbsp;				* (bp2.y - bp1.y);
+<b class="fc">&nbsp;		if (i == 0.0)</b>
+<b class="fc">&nbsp;			r = 2.0;</b>
+&nbsp;		else
+<b class="fc">&nbsp;			r = j / i;</b>
+&nbsp;
+<b class="fc">&nbsp;		if ((r &gt;= 0.0) &amp;&amp; (r &lt;= 1.0)) {</b>
+<b class="fc">&nbsp;			r1 = r;</b>
+<b class="fc">&nbsp;			i = (bp4.y - bp3.y) * (bp2.x - bp1.x) - (bp4.x - bp3.x)</b>
+&nbsp;					* (bp2.y - bp1.y);
+<b class="fc">&nbsp;			j = (bp1.y - bp3.y) * (bp4.x - bp3.x) - (bp1.x - bp3.x)</b>
+&nbsp;					* (bp4.y - bp3.y);
+&nbsp;
+<b class="fc">&nbsp;			if (i == 0.0)</b>
+<b class="nc">&nbsp;				r = 2.0;</b>
+&nbsp;			else
+<b class="fc">&nbsp;				r = j / i;</b>
+&nbsp;
+<b class="fc">&nbsp;			if ((r &gt;= 0.0) &amp;&amp; (r &lt;= 1.0)) {</b>
+<b class="fc">&nbsp;				intersectionInfo.pt = new GraphicPoint(bp1.x + r</b>
+&nbsp;						* (bp2.x - bp1.x), bp1.y + r * (bp2.y - bp1.y));
+<b class="fc">&nbsp;				intersectionInfo.pt.m = bp3.m + r1 * (bp4.m - bp3.m);</b>
+<b class="fc">&nbsp;				if (((r1 == 0.0) || (r1 == 1.0)) &amp;&amp; ((r == 0.0) || (r == 1.0)))</b>
+<b class="fc">&nbsp;					intersectionInfo.atExistingPt = true;</b>
+&nbsp;
+<b class="fc">&nbsp;				intersectionInfo.rFirst = r;</b>
+<b class="fc">&nbsp;				intersectionInfo.rSecond = r1;</b>
+&nbsp;
+<b class="fc">&nbsp;				if (((r1 == 0.0) || (r1 == 1.0)) &amp;&amp; ((r &gt; 0.0) &amp;&amp; (r &lt; 1.0))</b>
+&nbsp;						|| ((r == 0.0) || (r == 1.0))
+&nbsp;						&amp;&amp; ((r1 &gt; 0.0) &amp;&amp; (r1 &lt; 1.0))) {
+<b class="fc">&nbsp;					return false;</b>
+&nbsp;				}
+&nbsp;
+<b class="fc">&nbsp;				return true;</b>
+&nbsp;			}
+&nbsp;		}
+<b class="fc">&nbsp;		return false;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// i0 is the index of a known good point in the offset points array; that
+&nbsp;	// is, its the index of a point that isn&#39;t part of a deleted loop
+&nbsp;	void compressOffsetArray(int i0) {
+<b class="fc">&nbsp;		int i_ = i0;</b>
+<b class="fc">&nbsp;		while (m_offsetPts.get(i_).m_prev &lt; i_)</b>
+<b class="fc">&nbsp;			i_ = m_offsetPts.get(i_).m_prev;</b>
+&nbsp;
+<b class="fc">&nbsp;		int j = 0, i = i_;</b>
+&nbsp;
+&nbsp;		do {
+<b class="fc">&nbsp;			GraphicPoint pt = m_offsetPts.get(i);</b>
+<b class="fc">&nbsp;			m_offsetPts.set(j, pt);</b>
+<b class="fc">&nbsp;			i = pt.m_next;</b>
+<b class="fc">&nbsp;			j++;</b>
+<b class="fc">&nbsp;		} while (i != i_);</b>
+&nbsp;
+<b class="fc">&nbsp;		m_offsetPts.set(j, m_offsetPts.get(0)); // duplicate closing point</b>
+&nbsp;
+<b class="fc">&nbsp;		m_offsetPtCount = j + 1;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void _OffsetMultiPath(MultiPath resultingPath) {
+&nbsp;		// we process all path independently, then merge the results
+<b class="fc">&nbsp;		MultiPath multiPath = (MultiPath) m_inputGeometry;</b>
+<b class="fc">&nbsp;		SegmentIterator segmentIterator = multiPath.querySegmentIterator();</b>
+<b class="fc">&nbsp;		if (segmentIterator == null)</b>
+&nbsp;			return; // TODO: strategy on error?
+&nbsp;
+<b class="fc">&nbsp;		segmentIterator.resetToFirstPath();</b>
+<b class="fc">&nbsp;		int pathIndex = -1;</b>
+<b class="fc">&nbsp;		while (segmentIterator.nextPath()) {</b>
+<b class="fc">&nbsp;			pathIndex++;</b>
+<b class="fc">&nbsp;			_OffsetPath(multiPath, pathIndex, resultingPath);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	Geometry _ConstructOffset() {
+<b class="fc">&nbsp;		int gt = m_inputGeometry.getType().value();</b>
+<b class="fc">&nbsp;		if (gt == Geometry.GeometryType.Line) {</b>
+<b class="nc">&nbsp;			return _OffsetLine();</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (gt == Geometry.GeometryType.Envelope) {</b>
+<b class="nc">&nbsp;			return _OffsetEnvelope();</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (Geometry.isSegment(gt)) {</b>
+<b class="nc">&nbsp;			Polyline poly = new Polyline();</b>
+<b class="nc">&nbsp;			poly.addSegment((Segment) m_inputGeometry, true);</b>
+<b class="nc">&nbsp;			m_inputGeometry = poly;</b>
+<b class="nc">&nbsp;			return _ConstructOffset();</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (gt == Geometry.GeometryType.Polyline) {</b>
+<b class="fc">&nbsp;			Polyline polyline = new Polyline();</b>
+<b class="fc">&nbsp;			_OffsetMultiPath(polyline);</b>
+<b class="fc">&nbsp;			return polyline;</b>
+&nbsp;		}
+<b class="fc">&nbsp;		if (gt == Geometry.GeometryType.Polygon) {</b>
+<b class="fc">&nbsp;			Polygon polygon = new Polygon();</b>
+<b class="fc">&nbsp;			_OffsetMultiPath(polygon);</b>
+<b class="fc">&nbsp;			return polygon;</b>
+&nbsp;		}
+&nbsp;		// throw new GeometryException(&quot;not implemented&quot;);
+<b class="nc">&nbsp;		return null;</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-02-21 16:04</div>
+</div>
+</body>
+</html>

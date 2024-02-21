@@ -1,0 +1,344 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > SpatialReference</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.esri.core.geometry</a>
+</div>
+
+<h1>Coverage Summary for Class: SpatialReference (com.esri.core.geometry)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">SpatialReference</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    60%
+  </span>
+  <span class="absValue">
+    (6/10)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    76,2%
+  </span>
+  <span class="absValue">
+    (48/63)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; Copyright 1995-2018 Esri
+&nbsp;
+&nbsp;   Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp;   you may not use this file except in compliance with the License.
+&nbsp;   You may obtain a copy of the License at
+&nbsp;
+&nbsp;       http://www.apache.org/licenses/LICENSE-2.0
+&nbsp;
+&nbsp;   Unless required by applicable law or agreed to in writing, software
+&nbsp;   distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp;   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp;   See the License for the specific language governing permissions and
+&nbsp;   limitations under the License.
+&nbsp;
+&nbsp; For additional information, contact:
+&nbsp; Environmental Systems Research Institute, Inc.
+&nbsp; Attn: Contracts Dept
+&nbsp; 380 New York Street
+&nbsp; Redlands, California, USA 92373
+&nbsp;
+&nbsp; email: contracts@esri.com
+&nbsp; */
+&nbsp;
+&nbsp;package com.esri.core.geometry;
+&nbsp;
+&nbsp;import com.fasterxml.jackson.core.JsonParser;
+&nbsp;
+&nbsp;import java.io.ObjectStreamException;
+&nbsp;import java.io.Serializable;
+&nbsp;
+&nbsp;/**
+&nbsp; * A class that represents the spatial reference for the geometry.
+&nbsp; * This class provide tolerance value for the topological and relational operations.
+&nbsp; */
+<b class="fc">&nbsp;public abstract class SpatialReference implements Serializable {</b>
+&nbsp;	// Note: We use writeReplace with SpatialReferenceSerializer. This field is
+&nbsp;	// irrelevant. Needs to be removed after final.
+&nbsp;	private static final long serialVersionUID = 2L;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Creates an instance of the spatial reference based on the provided well
+&nbsp;	 * known ID for the horizontal coordinate system.
+&nbsp;	 * 
+&nbsp;	 * @param wkid
+&nbsp;	 *            The well-known ID.
+&nbsp;	 * @return SpatialReference The spatial reference.
+&nbsp;	 * @throws IllegalArgumentException
+&nbsp;	 *             if wkid is not supported or does not exist.
+&nbsp;	 */
+&nbsp;	public static SpatialReference create(int wkid) {
+<b class="fc">&nbsp;		SpatialReferenceImpl spatRef = SpatialReferenceImpl.createImpl(wkid);</b>
+<b class="fc">&nbsp;		return spatRef;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Creates an instance of the spatial reference based on the provided well
+&nbsp;	 * known text representation for the horizontal coordinate system.
+&nbsp;	 * 
+&nbsp;	 * @param wktext
+&nbsp;	 *            The well-known text string representation of spatial
+&nbsp;	 *            reference.
+&nbsp;	 * @return SpatialReference The spatial reference.
+&nbsp;	 */
+&nbsp;	public static SpatialReference create(String wktext) {
+<b class="fc">&nbsp;		return SpatialReferenceImpl.createImpl(wktext);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * @return boolean Is spatial reference local?
+&nbsp;	 */
+&nbsp;	boolean isLocal() {
+<b class="nc">&nbsp;		return false;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns spatial reference from the JsonParser.
+&nbsp;	 * 
+&nbsp;	 * @param parser
+&nbsp;	 *            The JSON parser.
+&nbsp;	 * @return The spatial reference or null if there is no spatial reference
+&nbsp;	 *         information, or the parser does not point to an object start.
+&nbsp;	 * @throws Exception
+&nbsp;	 *             if parsing has failed
+&nbsp;	 */
+&nbsp;	public static SpatialReference fromJson(JsonParser parser) throws Exception {
+<b class="nc">&nbsp;		return fromJson(new JsonParserReader(parser));</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public static SpatialReference fromJson(String string) throws Exception {
+<b class="nc">&nbsp;		return fromJson(JsonParserReader.createFromString(string));</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public static SpatialReference fromJson(JsonReader parser) throws Exception {
+&nbsp;		// Note this class is processed specially: it is expected that the
+&nbsp;		// iterator points to the first element of the SR object.
+<b class="fc">&nbsp;		boolean bFoundWkid = false;</b>
+<b class="fc">&nbsp;		boolean bFoundLatestWkid = false;</b>
+<b class="fc">&nbsp;		boolean bFoundVcsWkid = false;</b>
+<b class="fc">&nbsp;		boolean bFoundLatestVcsWkid = false;</b>
+<b class="fc">&nbsp;		boolean bFoundWkt = false;</b>
+&nbsp;
+<b class="fc">&nbsp;		int wkid = -1;</b>
+<b class="fc">&nbsp;		int latestWkid = -1;</b>
+<b class="fc">&nbsp;		int vcs_wkid = -1;</b>
+<b class="fc">&nbsp;		int latestVcsWkid = -1;</b>
+<b class="fc">&nbsp;		String wkt = null;</b>
+<b class="fc">&nbsp;		while (parser.nextToken() != JsonReader.Token.END_OBJECT) {</b>
+<b class="fc">&nbsp;			String name = parser.currentString();</b>
+<b class="fc">&nbsp;			parser.nextToken();</b>
+&nbsp;
+<b class="fc">&nbsp;			if (!bFoundWkid &amp;&amp; name.equals(&quot;wkid&quot;)) {</b>
+<b class="fc">&nbsp;				bFoundWkid = true;</b>
+&nbsp;
+<b class="fc">&nbsp;				if (parser.currentToken() == JsonReader.Token.VALUE_NUMBER_INT)</b>
+<b class="fc">&nbsp;					wkid = parser.currentIntValue();</b>
+<b class="fc">&nbsp;			} else if (!bFoundLatestWkid &amp;&amp; name.equals(&quot;latestWkid&quot;)) {</b>
+<b class="fc">&nbsp;				bFoundLatestWkid = true;</b>
+&nbsp;
+<b class="fc">&nbsp;				if (parser.currentToken() == JsonReader.Token.VALUE_NUMBER_INT)</b>
+<b class="fc">&nbsp;					latestWkid = parser.currentIntValue();</b>
+<b class="fc">&nbsp;			} else if (!bFoundWkt &amp;&amp; name.equals(&quot;wkt&quot;)) {</b>
+<b class="fc">&nbsp;				bFoundWkt = true;</b>
+&nbsp;
+<b class="fc">&nbsp;				if (parser.currentToken() == JsonReader.Token.VALUE_STRING)</b>
+<b class="fc">&nbsp;					wkt = parser.currentString();</b>
+<b class="fc">&nbsp;			} else if (!bFoundVcsWkid &amp;&amp; name.equals(&quot;vcsWkid&quot;)) {</b>
+<b class="nc">&nbsp;				bFoundVcsWkid = true;</b>
+&nbsp;
+<b class="nc">&nbsp;				if (parser.currentToken() == JsonReader.Token.VALUE_NUMBER_INT)</b>
+<b class="nc">&nbsp;					vcs_wkid = parser.currentIntValue();</b>
+<b class="fc">&nbsp;			} else if (!bFoundLatestVcsWkid &amp;&amp; name.equals(&quot;latestVcsWkid&quot;)) {</b>
+<b class="nc">&nbsp;				bFoundLatestVcsWkid = true;</b>
+&nbsp;
+<b class="nc">&nbsp;				if (parser.currentToken() == JsonReader.Token.VALUE_NUMBER_INT)</b>
+<b class="nc">&nbsp;					latestVcsWkid = parser.currentIntValue();</b>
+&nbsp;			}
+<b class="fc">&nbsp;		}</b>
+&nbsp;
+<b class="fc">&nbsp;		if (latestVcsWkid &lt;= 0 &amp;&amp; vcs_wkid &gt; 0) {</b>
+<b class="nc">&nbsp;			latestVcsWkid = vcs_wkid;</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		// iter.step_out_after(); do not step out for the spatial reference,
+&nbsp;		// because this method is used standalone
+&nbsp;
+<b class="fc">&nbsp;		SpatialReference spatial_reference = null;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (wkt != null &amp;&amp; wkt.length() != 0) {</b>
+&nbsp;			try {
+<b class="fc">&nbsp;				spatial_reference = SpatialReference.create(wkt);</b>
+<b class="nc">&nbsp;			} catch (Exception e) {</b>
+<b class="fc">&nbsp;			}</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (spatial_reference == null &amp;&amp; latestWkid &gt; 0) {</b>
+&nbsp;			try {
+<b class="fc">&nbsp;				spatial_reference = SpatialReference.create(latestWkid);</b>
+<b class="nc">&nbsp;			} catch (Exception e) {</b>
+<b class="fc">&nbsp;			}</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (spatial_reference == null &amp;&amp; wkid &gt; 0) {</b>
+&nbsp;			try {
+<b class="fc">&nbsp;				spatial_reference = SpatialReference.create(wkid);</b>
+<b class="nc">&nbsp;			} catch (Exception e) {</b>
+<b class="fc">&nbsp;			}</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return spatial_reference;</b>
+&nbsp;	}	
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns the well known ID for the horizontal coordinate system of the
+&nbsp;	 * spatial reference.
+&nbsp;	 * 
+&nbsp;	 * @return wkid The well known ID.
+&nbsp;	 */
+&nbsp;	public abstract int getID();
+&nbsp;
+&nbsp;	public abstract String getText();
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns the oldest value of the well known ID for the horizontal
+&nbsp;	 * coordinate system of the spatial reference. This ID is used for JSON
+&nbsp;	 * serialization. Not public.
+&nbsp;	 */
+&nbsp;	abstract int getOldID();
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns the latest value of the well known ID for the horizontal
+&nbsp;	 * coordinate system of the spatial reference. This ID is used for JSON
+&nbsp;	 * serialization. Not public.
+&nbsp;	 */
+&nbsp;	abstract int getLatestID();
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns the XY tolerance of the spatial reference.
+&nbsp;	 * 
+&nbsp;	 * The tolerance value defines the precision of topological operations, and
+&nbsp;	 * &quot;thickness&quot; of boundaries of geometries for relational operations.
+&nbsp;	 * 
+&nbsp;	 * When two points have xy coordinates closer than the tolerance value, they
+&nbsp;	 * are considered equal. As well as when a point is within tolerance from
+&nbsp;	 * the line, the point is assumed to be on the line.
+&nbsp;	 * 
+&nbsp;	 * During topological operations the tolerance is increased by a factor of
+&nbsp;	 * about 1.41 and any two points within that distance are snapped
+&nbsp;	 * together.
+&nbsp;	 * 
+&nbsp;	 * @return The XY tolerance of the spatial reference.
+&nbsp;	 */
+&nbsp;	public double getTolerance() {
+<b class="fc">&nbsp;		return getTolerance(VertexDescription.Semantics.POSITION);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Get the XY tolerance of the spatial reference
+&nbsp;	 * 
+&nbsp;	 * @return The XY tolerance of the spatial reference as double.
+&nbsp;	 */
+&nbsp;	abstract double getTolerance(int semantics);
+&nbsp;
+&nbsp;	Object writeReplace() throws ObjectStreamException {
+<b class="fc">&nbsp;		SpatialReferenceSerializer srSerializer = new SpatialReferenceSerializer();</b>
+<b class="fc">&nbsp;		srSerializer.setSpatialReferenceByValue(this);</b>
+<b class="fc">&nbsp;		return srSerializer;</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	/**
+&nbsp;	 * Returns string representation of the class for debugging purposes. The
+&nbsp;	 * format and content of the returned string is not part of the contract of
+&nbsp;	 * the method and is subject to change in any future release or patch
+&nbsp;	 * without further notice.
+&nbsp;	 */
+&nbsp;	public String toString() {
+<b class="nc">&nbsp;		return &quot;[ tol: &quot; + getTolerance() + &quot;; wkid: &quot; + getID() + &quot;; wkt: &quot;</b>
+<b class="nc">&nbsp;				+ getText() + &quot;]&quot;;</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-02-21 16:04</div>
+</div>
+</body>
+</html>

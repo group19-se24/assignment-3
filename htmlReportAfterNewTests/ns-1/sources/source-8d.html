@@ -1,0 +1,766 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > OperatorImportFromWktLocal</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.esri.core.geometry</a>
+</div>
+
+<h1>Coverage Summary for Class: OperatorImportFromWktLocal (com.esri.core.geometry)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">OperatorImportFromWktLocal</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (15/15)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    92,6%
+  </span>
+  <span class="absValue">
+    (300/324)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; Copyright 1995-2015 Esri
+&nbsp;
+&nbsp;   Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp;   you may not use this file except in compliance with the License.
+&nbsp;   You may obtain a copy of the License at
+&nbsp;
+&nbsp;       http://www.apache.org/licenses/LICENSE-2.0
+&nbsp;
+&nbsp;   Unless required by applicable law or agreed to in writing, software
+&nbsp;   distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp;   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp;   See the License for the specific language governing permissions and
+&nbsp;   limitations under the License.
+&nbsp;
+&nbsp; For additional information, contact:
+&nbsp; Environmental Systems Research Institute, Inc.
+&nbsp; Attn: Contracts Dept
+&nbsp; 380 New York Street
+&nbsp; Redlands, California, USA 92373
+&nbsp;
+&nbsp; email: contracts@esri.com
+&nbsp; */
+&nbsp;package com.esri.core.geometry;
+&nbsp;
+&nbsp;import java.util.ArrayList;
+&nbsp;
+<b class="fc">&nbsp;class OperatorImportFromWktLocal extends OperatorImportFromWkt {</b>
+&nbsp;	@Override
+&nbsp;	public Geometry execute(int import_flags, Geometry.Type type,
+&nbsp;			String wkt_string, ProgressTracker progress_tracker) {
+<b class="fc">&nbsp;		WktParser wkt_parser = new WktParser(wkt_string);</b>
+<b class="fc">&nbsp;		int current_token = wkt_parser.nextToken();</b>
+<b class="fc">&nbsp;		return importFromWkt(import_flags, type, wkt_parser);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public OGCStructure executeOGC(int import_flags, String wkt_string,
+&nbsp;			ProgressTracker progress_tracker) {
+<b class="fc">&nbsp;		ArrayList&lt;OGCStructure&gt; stack = new ArrayList&lt;OGCStructure&gt;(0);</b>
+<b class="fc">&nbsp;		WktParser wkt_parser = new WktParser(wkt_string);</b>
+&nbsp;
+<b class="fc">&nbsp;		OGCStructure root = new OGCStructure();</b>
+<b class="fc">&nbsp;		root.m_structures = new ArrayList&lt;OGCStructure&gt;(0);</b>
+<b class="fc">&nbsp;		stack.add(root); // add dummy root</b>
+&nbsp;
+<b class="fc">&nbsp;		while (wkt_parser.nextToken() != WktParser.WktToken.not_available) {</b>
+<b class="fc">&nbsp;			int current_token = wkt_parser.currentToken();</b>
+&nbsp;
+<b class="fc">&nbsp;			if (current_token == WktParser.WktToken.right_paren) {</b>
+<b class="fc">&nbsp;				stack.remove(stack.size() - 1);</b>
+<b class="fc">&nbsp;				continue;</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			int ogc_type = current_token;</b>
+<b class="fc">&nbsp;			OGCStructure last = stack.get(stack.size() - 1);</b>
+&nbsp;
+<b class="fc">&nbsp;			if (current_token == WktParser.WktToken.geometrycollection) {</b>
+<b class="fc">&nbsp;				current_token = wkt_parser.nextToken();</b>
+&nbsp;
+<b class="fc">&nbsp;				if (current_token == WktParser.WktToken.attribute_z</b>
+&nbsp;						|| current_token == WktParser.WktToken.attribute_m
+&nbsp;						|| current_token == WktParser.WktToken.attribute_zm)
+<b class="nc">&nbsp;					wkt_parser.nextToken();</b>
+&nbsp;
+<b class="fc">&nbsp;				OGCStructure next = new OGCStructure();</b>
+<b class="fc">&nbsp;				next.m_type = ogc_type;</b>
+<b class="fc">&nbsp;				next.m_structures = new ArrayList&lt;OGCStructure&gt;(0);</b>
+<b class="fc">&nbsp;				last.m_structures.add(next);</b>
+&nbsp;
+<b class="fc">&nbsp;				if (current_token != WktParser.WktToken.empty)</b>
+<b class="fc">&nbsp;					stack.add(next);</b>
+&nbsp;				continue;
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			Geometry geometry = importFromWkt(import_flags,</b>
+&nbsp;					Geometry.Type.Unknown, wkt_parser);
+&nbsp;
+<b class="fc">&nbsp;			OGCStructure leaf = new OGCStructure();</b>
+<b class="fc">&nbsp;			leaf.m_type = ogc_type;</b>
+<b class="fc">&nbsp;			leaf.m_geometry = geometry;</b>
+<b class="fc">&nbsp;			last.m_structures.add(leaf);</b>
+<b class="fc">&nbsp;		}</b>
+&nbsp;
+<b class="fc">&nbsp;		return root;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	static Geometry importFromWkt(int import_flags, Geometry.Type type,
+&nbsp;			WktParser wkt_parser) {
+<b class="fc">&nbsp;		int current_token = wkt_parser.currentToken();</b>
+&nbsp;
+<b class="fc">&nbsp;		switch (current_token) {</b>
+&nbsp;		case WktParser.WktToken.multipolygon:
+<b class="fc">&nbsp;			if (type != Geometry.Type.Polygon &amp;&amp; type != Geometry.Type.Unknown)</b>
+<b class="nc">&nbsp;				throw new IllegalArgumentException(&quot;invalid shapetype&quot;);</b>
+<b class="fc">&nbsp;			return polygonTaggedText(true, import_flags, wkt_parser);</b>
+&nbsp;
+&nbsp;		case WktParser.WktToken.multilinestring:
+<b class="fc">&nbsp;			if (type != Geometry.Type.Polyline &amp;&amp; type != Geometry.Type.Unknown)</b>
+<b class="nc">&nbsp;				throw new IllegalArgumentException(&quot;invalid shapetype&quot;);</b>
+<b class="fc">&nbsp;			return lineStringTaggedText(true, import_flags, wkt_parser);</b>
+&nbsp;
+&nbsp;		case WktParser.WktToken.multipoint:
+<b class="fc">&nbsp;			if (type != Geometry.Type.MultiPoint</b>
+&nbsp;					&amp;&amp; type != Geometry.Type.Unknown)
+<b class="nc">&nbsp;				throw new IllegalArgumentException(&quot;invalid shapetype&quot;);</b>
+<b class="fc">&nbsp;			return multiPointTaggedText(import_flags, wkt_parser);</b>
+&nbsp;
+&nbsp;		case WktParser.WktToken.polygon:
+<b class="fc">&nbsp;			if (type != Geometry.Type.Polygon &amp;&amp; type != Geometry.Type.Unknown)</b>
+<b class="nc">&nbsp;				throw new IllegalArgumentException(&quot;invalid shapetype&quot;);</b>
+<b class="fc">&nbsp;			return polygonTaggedText(false, import_flags, wkt_parser);</b>
+&nbsp;
+&nbsp;		case WktParser.WktToken.linestring:
+<b class="fc">&nbsp;			if (type != Geometry.Type.Polyline &amp;&amp; type != Geometry.Type.Unknown)</b>
+<b class="nc">&nbsp;				throw new IllegalArgumentException(&quot;invalid shapetype&quot;);</b>
+<b class="fc">&nbsp;			return lineStringTaggedText(false, import_flags, wkt_parser);</b>
+&nbsp;
+&nbsp;		case WktParser.WktToken.point:
+<b class="fc">&nbsp;			if (type != Geometry.Type.Point &amp;&amp; type != Geometry.Type.Unknown)</b>
+<b class="nc">&nbsp;				throw new IllegalArgumentException(&quot;invalid shapetype&quot;);</b>
+<b class="fc">&nbsp;			return pointTaggedText(import_flags, wkt_parser);</b>
+&nbsp;
+&nbsp;		default:
+&nbsp;			break; // warning fix
+&nbsp;		}
+&nbsp;
+<b class="nc">&nbsp;		return null;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	static Geometry polygonTaggedText(boolean b_multi_polygon,
+&nbsp;			int import_flags, WktParser wkt_parser) {
+&nbsp;		MultiPath multi_path;
+&nbsp;		MultiPathImpl multi_path_impl;
+<b class="fc">&nbsp;		AttributeStreamOfDbl zs = null;</b>
+<b class="fc">&nbsp;		AttributeStreamOfDbl ms = null;</b>
+&nbsp;		AttributeStreamOfDbl position;
+&nbsp;		AttributeStreamOfInt32 paths;
+&nbsp;		AttributeStreamOfInt8 path_flags;
+&nbsp;
+<b class="fc">&nbsp;		position = (AttributeStreamOfDbl) AttributeStreamBase</b>
+<b class="fc">&nbsp;				.createDoubleStream(0);</b>
+<b class="fc">&nbsp;		paths = (AttributeStreamOfInt32) AttributeStreamBase.createIndexStream(</b>
+&nbsp;				1, 0);
+<b class="fc">&nbsp;		path_flags = (AttributeStreamOfInt8) AttributeStreamBase</b>
+<b class="fc">&nbsp;				.createByteStream(1, (byte) 0);</b>
+&nbsp;
+<b class="fc">&nbsp;		multi_path = new Polygon();</b>
+<b class="fc">&nbsp;		multi_path_impl = (MultiPathImpl) multi_path._getImpl();</b>
+&nbsp;
+<b class="fc">&nbsp;		int current_token = wkt_parser.nextToken();</b>
+&nbsp;
+<b class="fc">&nbsp;		if (current_token == WktParser.WktToken.attribute_z) {</b>
+<b class="fc">&nbsp;			zs = (AttributeStreamOfDbl) AttributeStreamBase.createDoubleStream(</b>
+&nbsp;					0, NumberUtils.TheNaN);
+<b class="fc">&nbsp;			multi_path_impl.addAttribute(VertexDescription.Semantics.Z);</b>
+<b class="fc">&nbsp;			wkt_parser.nextToken();</b>
+<b class="fc">&nbsp;		} else if (current_token == WktParser.WktToken.attribute_m) {</b>
+<b class="fc">&nbsp;			ms = (AttributeStreamOfDbl) AttributeStreamBase.createDoubleStream(</b>
+&nbsp;					0, NumberUtils.TheNaN);
+<b class="fc">&nbsp;			multi_path_impl.addAttribute(VertexDescription.Semantics.M);</b>
+<b class="fc">&nbsp;			wkt_parser.nextToken();</b>
+<b class="fc">&nbsp;		} else if (current_token == WktParser.WktToken.attribute_zm) {</b>
+<b class="fc">&nbsp;			zs = (AttributeStreamOfDbl) AttributeStreamBase.createDoubleStream(</b>
+&nbsp;					0, NumberUtils.TheNaN);
+<b class="fc">&nbsp;			ms = (AttributeStreamOfDbl) AttributeStreamBase.createDoubleStream(</b>
+&nbsp;					0, NumberUtils.TheNaN);
+<b class="fc">&nbsp;			multi_path_impl.addAttribute(VertexDescription.Semantics.Z);</b>
+<b class="fc">&nbsp;			multi_path_impl.addAttribute(VertexDescription.Semantics.M);</b>
+<b class="fc">&nbsp;			wkt_parser.nextToken();</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		int point_count;
+&nbsp;
+<b class="fc">&nbsp;		if (b_multi_polygon)</b>
+<b class="fc">&nbsp;			point_count = multiPolygonText(zs, ms, position, paths, path_flags,</b>
+&nbsp;					wkt_parser);
+&nbsp;		else
+<b class="fc">&nbsp;			point_count = polygonText(zs, ms, position, paths, path_flags, 0,</b>
+&nbsp;					wkt_parser);
+&nbsp;
+<b class="fc">&nbsp;		if (point_count != 0) {</b>
+<b class="fc">&nbsp;			assert (2 * point_count == position.size());</b>
+<b class="fc">&nbsp;			multi_path_impl.setAttributeStreamRef(</b>
+&nbsp;					VertexDescription.Semantics.POSITION, position);
+<b class="fc">&nbsp;			multi_path_impl.setPathStreamRef(paths);</b>
+<b class="fc">&nbsp;			multi_path_impl.setPathFlagsStreamRef(path_flags);</b>
+&nbsp;
+<b class="fc">&nbsp;			if (zs != null)</b>
+<b class="fc">&nbsp;				multi_path_impl.setAttributeStreamRef(</b>
+&nbsp;						VertexDescription.Semantics.Z, zs);
+&nbsp;
+<b class="fc">&nbsp;			if (ms != null)</b>
+<b class="nc">&nbsp;				multi_path_impl.setAttributeStreamRef(</b>
+&nbsp;						VertexDescription.Semantics.M, ms);
+&nbsp;
+<b class="fc">&nbsp;			multi_path_impl.notifyModified(MultiPathImpl.DirtyFlags.DirtyAll);</b>
+&nbsp;
+<b class="fc">&nbsp;			AttributeStreamOfInt8 path_flags_clone = new AttributeStreamOfInt8(</b>
+&nbsp;					path_flags);
+&nbsp;
+<b class="fc">&nbsp;			for (int i = 0; i &lt; path_flags_clone.size() - 1; i++) {</b>
+<b class="fc">&nbsp;				if (((int) path_flags_clone.read(i) &amp; (int) PathFlags.enumOGCStartPolygon) != 0) {// Should</b>
+&nbsp;																									// be
+&nbsp;																									// clockwise
+<b class="fc">&nbsp;					if (!InternalUtils.isClockwiseRing(multi_path_impl, i))</b>
+<b class="fc">&nbsp;						multi_path_impl.reversePath(i); // make clockwise</b>
+&nbsp;				} else {// Should be counter-clockwise
+<b class="fc">&nbsp;					if (InternalUtils.isClockwiseRing(multi_path_impl, i))</b>
+<b class="fc">&nbsp;						multi_path_impl.reversePath(i); // make</b>
+&nbsp;														// counter-clockwise
+&nbsp;				}
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			multi_path_impl.setPathFlagsStreamRef(path_flags_clone);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if ((import_flags &amp; (int) WktImportFlags.wktImportNonTrusted) == 0)</b>
+<b class="fc">&nbsp;			multi_path_impl.setIsSimple(MultiPathImpl.GeometryXSimple.Weak,</b>
+&nbsp;					0.0, false);
+&nbsp;
+<b class="fc">&nbsp;		multi_path_impl.setDirtyOGCFlags(false);</b>
+&nbsp;
+<b class="fc">&nbsp;		return multi_path;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	static Geometry lineStringTaggedText(boolean b_multi_linestring,
+&nbsp;			int import_flags, WktParser wkt_parser) {
+&nbsp;		MultiPath multi_path;
+&nbsp;		MultiPathImpl multi_path_impl;
+<b class="fc">&nbsp;		AttributeStreamOfDbl zs = null;</b>
+<b class="fc">&nbsp;		AttributeStreamOfDbl ms = null;</b>
+&nbsp;		AttributeStreamOfDbl position;
+&nbsp;		AttributeStreamOfInt32 paths;
+&nbsp;		AttributeStreamOfInt8 path_flags;
+&nbsp;
+<b class="fc">&nbsp;		position = (AttributeStreamOfDbl) AttributeStreamBase</b>
+<b class="fc">&nbsp;				.createDoubleStream(0);</b>
+<b class="fc">&nbsp;		paths = (AttributeStreamOfInt32) AttributeStreamBase.createIndexStream(</b>
+&nbsp;				1, 0);
+<b class="fc">&nbsp;		path_flags = (AttributeStreamOfInt8) AttributeStreamBase</b>
+<b class="fc">&nbsp;				.createByteStream(1, (byte) 0);</b>
+&nbsp;
+<b class="fc">&nbsp;		multi_path = new Polyline();</b>
+<b class="fc">&nbsp;		multi_path_impl = (MultiPathImpl) multi_path._getImpl();</b>
+&nbsp;
+<b class="fc">&nbsp;		int current_token = wkt_parser.nextToken();</b>
+&nbsp;
+<b class="fc">&nbsp;		if (current_token == WktParser.WktToken.attribute_z) {</b>
+<b class="fc">&nbsp;			zs = (AttributeStreamOfDbl) AttributeStreamBase.createDoubleStream(</b>
+&nbsp;					0, NumberUtils.TheNaN);
+<b class="fc">&nbsp;			multi_path_impl.addAttribute(VertexDescription.Semantics.Z);</b>
+<b class="fc">&nbsp;			wkt_parser.nextToken();</b>
+<b class="fc">&nbsp;		} else if (current_token == WktParser.WktToken.attribute_m) {</b>
+<b class="fc">&nbsp;			ms = (AttributeStreamOfDbl) AttributeStreamBase.createDoubleStream(</b>
+&nbsp;					0, NumberUtils.TheNaN);
+<b class="fc">&nbsp;			multi_path_impl.addAttribute(VertexDescription.Semantics.M);</b>
+<b class="fc">&nbsp;			wkt_parser.nextToken();</b>
+<b class="fc">&nbsp;		} else if (current_token == WktParser.WktToken.attribute_zm) {</b>
+<b class="fc">&nbsp;			zs = (AttributeStreamOfDbl) AttributeStreamBase.createDoubleStream(</b>
+&nbsp;					0, NumberUtils.TheNaN);
+<b class="fc">&nbsp;			ms = (AttributeStreamOfDbl) AttributeStreamBase.createDoubleStream(</b>
+&nbsp;					0, NumberUtils.TheNaN);
+<b class="fc">&nbsp;			multi_path_impl.addAttribute(VertexDescription.Semantics.Z);</b>
+<b class="fc">&nbsp;			multi_path_impl.addAttribute(VertexDescription.Semantics.M);</b>
+<b class="fc">&nbsp;			wkt_parser.nextToken();</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		int point_count;
+&nbsp;
+<b class="fc">&nbsp;		if (b_multi_linestring)</b>
+<b class="fc">&nbsp;			point_count = multiLineStringText(zs, ms, position, paths,</b>
+&nbsp;					path_flags, wkt_parser);
+&nbsp;		else
+<b class="fc">&nbsp;			point_count = lineStringText(false, zs, ms, position, paths,</b>
+&nbsp;					path_flags, wkt_parser);
+&nbsp;
+<b class="fc">&nbsp;		if (point_count != 0) {</b>
+<b class="fc">&nbsp;			assert (2 * point_count == position.size());</b>
+<b class="fc">&nbsp;			multi_path_impl.setAttributeStreamRef(</b>
+&nbsp;					VertexDescription.Semantics.POSITION, position);
+<b class="fc">&nbsp;			multi_path_impl.setPathStreamRef(paths);</b>
+<b class="fc">&nbsp;			multi_path_impl.setPathFlagsStreamRef(path_flags);</b>
+&nbsp;
+<b class="fc">&nbsp;			if (zs != null)</b>
+<b class="fc">&nbsp;				multi_path_impl.setAttributeStreamRef(</b>
+&nbsp;						VertexDescription.Semantics.Z, zs);
+&nbsp;
+<b class="fc">&nbsp;			if (ms != null)</b>
+<b class="fc">&nbsp;				multi_path_impl.setAttributeStreamRef(</b>
+&nbsp;						VertexDescription.Semantics.M, ms);
+&nbsp;
+<b class="fc">&nbsp;			multi_path_impl.notifyModified(MultiPathImpl.DirtyFlags.DirtyAll);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return multi_path;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	static Geometry multiPointTaggedText(int import_flags, WktParser wkt_parser) {
+&nbsp;		MultiPoint multi_point;
+&nbsp;		MultiPointImpl multi_point_impl;
+<b class="fc">&nbsp;		AttributeStreamOfDbl zs = null;</b>
+<b class="fc">&nbsp;		AttributeStreamOfDbl ms = null;</b>
+&nbsp;		AttributeStreamOfDbl position;
+&nbsp;
+<b class="fc">&nbsp;		position = (AttributeStreamOfDbl) AttributeStreamBase</b>
+<b class="fc">&nbsp;				.createDoubleStream(0);</b>
+&nbsp;
+<b class="fc">&nbsp;		multi_point = new MultiPoint();</b>
+<b class="fc">&nbsp;		multi_point_impl = (MultiPointImpl) multi_point._getImpl();</b>
+&nbsp;
+<b class="fc">&nbsp;		int current_token = wkt_parser.nextToken();</b>
+&nbsp;
+<b class="fc">&nbsp;		if (current_token == WktParser.WktToken.attribute_z) {</b>
+<b class="nc">&nbsp;			zs = (AttributeStreamOfDbl) AttributeStreamBase.createDoubleStream(</b>
+&nbsp;					0, NumberUtils.TheNaN);
+<b class="nc">&nbsp;			multi_point_impl.addAttribute(VertexDescription.Semantics.Z);</b>
+<b class="nc">&nbsp;			wkt_parser.nextToken();</b>
+<b class="fc">&nbsp;		} else if (current_token == WktParser.WktToken.attribute_m) {</b>
+<b class="nc">&nbsp;			ms = (AttributeStreamOfDbl) AttributeStreamBase.createDoubleStream(</b>
+&nbsp;					0, NumberUtils.TheNaN);
+<b class="nc">&nbsp;			multi_point_impl.addAttribute(VertexDescription.Semantics.M);</b>
+<b class="nc">&nbsp;			wkt_parser.nextToken();</b>
+<b class="fc">&nbsp;		} else if (current_token == WktParser.WktToken.attribute_zm) {</b>
+<b class="fc">&nbsp;			zs = (AttributeStreamOfDbl) AttributeStreamBase.createDoubleStream(</b>
+&nbsp;					0, NumberUtils.TheNaN);
+<b class="fc">&nbsp;			ms = (AttributeStreamOfDbl) AttributeStreamBase.createDoubleStream(</b>
+&nbsp;					0, NumberUtils.TheNaN);
+<b class="fc">&nbsp;			multi_point_impl.addAttribute(VertexDescription.Semantics.Z);</b>
+<b class="fc">&nbsp;			multi_point_impl.addAttribute(VertexDescription.Semantics.M);</b>
+<b class="fc">&nbsp;			wkt_parser.nextToken();</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		int point_count = multiPointText(zs, ms, position, wkt_parser);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (point_count != 0) {</b>
+<b class="fc">&nbsp;			assert (2 * point_count == position.size());</b>
+<b class="fc">&nbsp;			multi_point_impl.resize(point_count);</b>
+<b class="fc">&nbsp;			multi_point_impl.setAttributeStreamRef(</b>
+&nbsp;					VertexDescription.Semantics.POSITION, position);
+&nbsp;
+<b class="fc">&nbsp;			if (zs != null)</b>
+<b class="fc">&nbsp;				multi_point_impl.setAttributeStreamRef(</b>
+&nbsp;						VertexDescription.Semantics.Z, zs);
+&nbsp;
+<b class="fc">&nbsp;			if (ms != null)</b>
+<b class="fc">&nbsp;				multi_point_impl.setAttributeStreamRef(</b>
+&nbsp;						VertexDescription.Semantics.M, ms);
+&nbsp;
+<b class="fc">&nbsp;			multi_point_impl.notifyModified(MultiPointImpl.DirtyFlags.DirtyAll);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return multi_point;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	static Geometry pointTaggedText(int import_flags, WktParser wkt_parser) {
+<b class="fc">&nbsp;		Point point = new Point();</b>
+&nbsp;
+<b class="fc">&nbsp;		int current_token = wkt_parser.nextToken();</b>
+&nbsp;
+<b class="fc">&nbsp;		if (current_token == WktParser.WktToken.attribute_z) {</b>
+<b class="nc">&nbsp;			point.addAttribute(VertexDescription.Semantics.Z);</b>
+<b class="nc">&nbsp;			wkt_parser.nextToken();</b>
+<b class="fc">&nbsp;		} else if (current_token == WktParser.WktToken.attribute_m) {</b>
+<b class="nc">&nbsp;			point.addAttribute(VertexDescription.Semantics.M);</b>
+<b class="nc">&nbsp;			wkt_parser.nextToken();</b>
+<b class="fc">&nbsp;		} else if (current_token == WktParser.WktToken.attribute_zm) {</b>
+<b class="fc">&nbsp;			point.addAttribute(VertexDescription.Semantics.Z);</b>
+<b class="fc">&nbsp;			point.addAttribute(VertexDescription.Semantics.M);</b>
+<b class="fc">&nbsp;			wkt_parser.nextToken();</b>
+&nbsp;		}
+&nbsp;		// At start of PointText
+&nbsp;
+<b class="fc">&nbsp;		current_token = wkt_parser.currentToken();</b>
+&nbsp;
+<b class="fc">&nbsp;		if (current_token != WktParser.WktToken.empty) {</b>
+<b class="fc">&nbsp;			wkt_parser.nextToken();</b>
+&nbsp;
+<b class="fc">&nbsp;			double x = wkt_parser.currentNumericLiteral();</b>
+<b class="fc">&nbsp;			wkt_parser.nextToken();</b>
+&nbsp;
+<b class="fc">&nbsp;			double y = wkt_parser.currentNumericLiteral();</b>
+<b class="fc">&nbsp;			wkt_parser.nextToken();</b>
+&nbsp;
+<b class="fc">&nbsp;			point.setXY(x, y);</b>
+&nbsp;
+<b class="fc">&nbsp;			if (wkt_parser.hasZs()) {</b>
+<b class="fc">&nbsp;				double z = wkt_parser.currentNumericLiteral();</b>
+<b class="fc">&nbsp;				wkt_parser.nextToken();</b>
+<b class="fc">&nbsp;				point.setZ(z);</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			if (wkt_parser.hasMs()) {</b>
+<b class="fc">&nbsp;				double m = wkt_parser.currentNumericLiteral();</b>
+<b class="fc">&nbsp;				wkt_parser.nextToken();</b>
+<b class="fc">&nbsp;				point.setM(m);</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return point;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	static int multiPolygonText(AttributeStreamOfDbl zs,
+&nbsp;			AttributeStreamOfDbl ms, AttributeStreamOfDbl position,
+&nbsp;			AttributeStreamOfInt32 paths, AttributeStreamOfInt8 path_flags,
+&nbsp;			WktParser wkt_parser) {
+&nbsp;		// At start of MultiPolygonText
+&nbsp;
+<b class="fc">&nbsp;		int current_token = wkt_parser.currentToken();</b>
+&nbsp;
+<b class="fc">&nbsp;		int total_point_count = 0;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (current_token == WktParser.WktToken.empty)</b>
+<b class="fc">&nbsp;			return total_point_count;</b>
+&nbsp;
+<b class="fc">&nbsp;		current_token = wkt_parser.nextToken();</b>
+&nbsp;
+<b class="fc">&nbsp;		while (current_token != WktParser.WktToken.right_paren) {</b>
+&nbsp;			// At start of PolygonText
+&nbsp;
+<b class="fc">&nbsp;			total_point_count = polygonText(zs, ms, position, paths,</b>
+&nbsp;					path_flags, total_point_count, wkt_parser);
+<b class="fc">&nbsp;			current_token = wkt_parser.nextToken();</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return total_point_count;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	static int multiLineStringText(AttributeStreamOfDbl zs,
+&nbsp;			AttributeStreamOfDbl ms, AttributeStreamOfDbl position,
+&nbsp;			AttributeStreamOfInt32 paths, AttributeStreamOfInt8 path_flags,
+&nbsp;			WktParser wkt_parser) {
+&nbsp;		// At start of MultiLineStringText
+&nbsp;
+<b class="fc">&nbsp;		int current_token = wkt_parser.currentToken();</b>
+&nbsp;
+<b class="fc">&nbsp;		int total_point_count = 0;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (current_token == WktParser.WktToken.empty)</b>
+<b class="fc">&nbsp;			return total_point_count;</b>
+&nbsp;
+<b class="fc">&nbsp;		current_token = wkt_parser.nextToken();</b>
+&nbsp;
+<b class="fc">&nbsp;		while (current_token != WktParser.WktToken.right_paren) {</b>
+&nbsp;			// At start of LineStringText
+&nbsp;
+<b class="fc">&nbsp;			int point_count = lineStringText(false, zs, ms, position, paths,</b>
+&nbsp;					path_flags, wkt_parser);
+<b class="fc">&nbsp;			total_point_count += point_count;</b>
+&nbsp;
+<b class="fc">&nbsp;			current_token = wkt_parser.nextToken();</b>
+<b class="fc">&nbsp;		}</b>
+&nbsp;
+<b class="fc">&nbsp;		return total_point_count;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	static int multiPointText(AttributeStreamOfDbl zs, AttributeStreamOfDbl ms,
+&nbsp;			AttributeStreamOfDbl position, WktParser wkt_parser) {
+&nbsp;		// At start of MultiPointText
+&nbsp;
+<b class="fc">&nbsp;		int current_token = wkt_parser.currentToken();</b>
+&nbsp;
+<b class="fc">&nbsp;		int point_count = 0;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (current_token == WktParser.WktToken.empty)</b>
+<b class="fc">&nbsp;			return point_count;</b>
+&nbsp;
+<b class="fc">&nbsp;		current_token = wkt_parser.nextToken();</b>
+&nbsp;
+<b class="fc">&nbsp;		while (current_token != WktParser.WktToken.right_paren) {</b>
+&nbsp;			// At start of PointText
+&nbsp;
+<b class="fc">&nbsp;			point_count += pointText(zs, ms, position, wkt_parser);</b>
+&nbsp;
+<b class="fc">&nbsp;			if (current_token == WktParser.WktToken.left_paren</b>
+&nbsp;					|| current_token == WktParser.WktToken.empty)
+<b class="fc">&nbsp;				current_token = wkt_parser.nextToken(); // ogc standard</b>
+&nbsp;			else
+<b class="fc">&nbsp;				current_token = wkt_parser.currentToken(); // not ogc standard.</b>
+&nbsp;															// treat as
+&nbsp;															// linestring
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return point_count;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	static int polygonText(AttributeStreamOfDbl zs, AttributeStreamOfDbl ms,
+&nbsp;			AttributeStreamOfDbl position, AttributeStreamOfInt32 paths,
+&nbsp;			AttributeStreamOfInt8 path_flags, int total_point_count,
+&nbsp;			WktParser wkt_parser) {
+&nbsp;		// At start of PolygonText
+&nbsp;
+<b class="fc">&nbsp;		int current_token = wkt_parser.currentToken();</b>
+&nbsp;
+<b class="fc">&nbsp;		if (current_token == WktParser.WktToken.empty)</b>
+<b class="fc">&nbsp;			return total_point_count;</b>
+&nbsp;
+<b class="fc">&nbsp;		boolean b_first_line_string = true;</b>
+&nbsp;
+<b class="fc">&nbsp;		current_token = wkt_parser.nextToken();</b>
+&nbsp;
+<b class="fc">&nbsp;		while (current_token != WktParser.WktToken.right_paren) {</b>
+&nbsp;			// At start of LineStringText
+&nbsp;
+<b class="fc">&nbsp;			int point_count = lineStringText(true, zs, ms, position, paths,</b>
+&nbsp;					path_flags, wkt_parser);
+&nbsp;
+<b class="fc">&nbsp;			if (point_count != 0) {</b>
+<b class="fc">&nbsp;				if (b_first_line_string) {</b>
+<b class="fc">&nbsp;					b_first_line_string = false;</b>
+<b class="fc">&nbsp;					path_flags.setBits(path_flags.size() - 2,</b>
+&nbsp;							(byte) PathFlags.enumOGCStartPolygon);
+&nbsp;				}
+&nbsp;
+<b class="fc">&nbsp;				path_flags.setBits(path_flags.size() - 2,</b>
+&nbsp;						(byte) PathFlags.enumClosed);
+<b class="fc">&nbsp;				total_point_count += point_count;</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			current_token = wkt_parser.nextToken();</b>
+<b class="fc">&nbsp;		}</b>
+&nbsp;
+<b class="fc">&nbsp;		return total_point_count;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	static int lineStringText(boolean b_ring, AttributeStreamOfDbl zs,
+&nbsp;			AttributeStreamOfDbl ms, AttributeStreamOfDbl position,
+&nbsp;			AttributeStreamOfInt32 paths, AttributeStreamOfInt8 path_flags,
+&nbsp;			WktParser wkt_parser) {
+&nbsp;		// At start of LineStringText
+&nbsp;
+<b class="fc">&nbsp;		int current_token = wkt_parser.currentToken();</b>
+&nbsp;
+<b class="fc">&nbsp;		int point_count = 0;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (current_token == WktParser.WktToken.empty)</b>
+<b class="fc">&nbsp;			return point_count;</b>
+&nbsp;
+<b class="fc">&nbsp;		boolean b_start_path = true;</b>
+<b class="fc">&nbsp;		double startx = NumberUtils.TheNaN;</b>
+<b class="fc">&nbsp;		double starty = NumberUtils.TheNaN;</b>
+<b class="fc">&nbsp;		double startz = NumberUtils.TheNaN;</b>
+<b class="fc">&nbsp;		double startm = NumberUtils.TheNaN;</b>
+&nbsp;
+<b class="fc">&nbsp;		current_token = wkt_parser.nextToken();</b>
+&nbsp;
+<b class="fc">&nbsp;		while (current_token != WktParser.WktToken.right_paren) {</b>
+&nbsp;			// At start of x
+&nbsp;
+<b class="fc">&nbsp;			double x = wkt_parser.currentNumericLiteral();</b>
+<b class="fc">&nbsp;			wkt_parser.nextToken();</b>
+&nbsp;
+<b class="fc">&nbsp;			double y = wkt_parser.currentNumericLiteral();</b>
+<b class="fc">&nbsp;			wkt_parser.nextToken();</b>
+&nbsp;
+<b class="fc">&nbsp;			double z = NumberUtils.TheNaN, m = NumberUtils.TheNaN;</b>
+&nbsp;
+<b class="fc">&nbsp;			if (wkt_parser.hasZs()) {</b>
+<b class="fc">&nbsp;				z = wkt_parser.currentNumericLiteral();</b>
+<b class="fc">&nbsp;				wkt_parser.nextToken();</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			if (wkt_parser.hasMs()) {</b>
+<b class="fc">&nbsp;				m = wkt_parser.currentNumericLiteral();</b>
+<b class="fc">&nbsp;				wkt_parser.nextToken();</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			current_token = wkt_parser.currentToken();</b>
+<b class="fc">&nbsp;			boolean b_add_point = true;</b>
+&nbsp;
+<b class="fc">&nbsp;			if (b_ring &amp;&amp; point_count &gt;= 2</b>
+&nbsp;					&amp;&amp; current_token == WktParser.WktToken.right_paren) {
+&nbsp;				// If the last point in the ring is not equal to the start
+&nbsp;				// point, then let&#39;s add it.
+&nbsp;
+<b class="fc">&nbsp;				if ((startx == x || (NumberUtils.isNaN(startx) &amp;&amp; NumberUtils</b>
+<b class="nc">&nbsp;						.isNaN(x)))</b>
+<b class="nc">&nbsp;						&amp;&amp; (starty == y || (NumberUtils.isNaN(starty) &amp;&amp; NumberUtils</b>
+<b class="nc">&nbsp;								.isNaN(y)))</b>
+<b class="fc">&nbsp;						&amp;&amp; (!wkt_parser.hasZs() || startz == z || (NumberUtils</b>
+<b class="nc">&nbsp;								.isNaN(startz) &amp;&amp; NumberUtils.isNaN(z)))</b>
+<b class="fc">&nbsp;						&amp;&amp; (!wkt_parser.hasMs() || startm == m || (NumberUtils</b>
+<b class="nc">&nbsp;								.isNaN(startm) &amp;&amp; NumberUtils.isNaN(m))))</b>
+<b class="fc">&nbsp;					b_add_point = false;</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			if (b_add_point) {</b>
+<b class="fc">&nbsp;				if (b_start_path) {</b>
+<b class="fc">&nbsp;					b_start_path = false;</b>
+<b class="fc">&nbsp;					startx = x;</b>
+<b class="fc">&nbsp;					starty = y;</b>
+<b class="fc">&nbsp;					startz = z;</b>
+<b class="fc">&nbsp;					startm = m;</b>
+&nbsp;				}
+&nbsp;
+<b class="fc">&nbsp;				point_count++;</b>
+<b class="fc">&nbsp;				addToStreams(zs, ms, position, x, y, z, m);</b>
+&nbsp;			}
+<b class="fc">&nbsp;		}</b>
+&nbsp;
+<b class="fc">&nbsp;		if (point_count == 1) {</b>
+<b class="fc">&nbsp;			point_count++;</b>
+<b class="fc">&nbsp;			addToStreams(zs, ms, position, startx, starty, startz, startm);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		paths.add(position.size() / 2);</b>
+<b class="fc">&nbsp;		path_flags.add((byte) 0);</b>
+&nbsp;
+<b class="fc">&nbsp;		return point_count;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	static int pointText(AttributeStreamOfDbl zs, AttributeStreamOfDbl ms,
+&nbsp;			AttributeStreamOfDbl position, WktParser wkt_parser) {
+&nbsp;		// At start of PointText
+&nbsp;
+<b class="fc">&nbsp;		int current_token = wkt_parser.currentToken();</b>
+&nbsp;
+<b class="fc">&nbsp;		if (current_token == WktParser.WktToken.empty)</b>
+<b class="fc">&nbsp;			return 0;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (current_token == WktParser.WktToken.left_paren)</b>
+<b class="fc">&nbsp;			wkt_parser.nextToken(); // ogc standard</b>
+&nbsp;
+&nbsp;		// At start of x
+&nbsp;
+<b class="fc">&nbsp;		double x = wkt_parser.currentNumericLiteral();</b>
+<b class="fc">&nbsp;		wkt_parser.nextToken();</b>
+&nbsp;
+<b class="fc">&nbsp;		double y = wkt_parser.currentNumericLiteral();</b>
+<b class="fc">&nbsp;		wkt_parser.nextToken();</b>
+&nbsp;
+<b class="fc">&nbsp;		double z = NumberUtils.TheNaN;</b>
+<b class="fc">&nbsp;		double m = NumberUtils.TheNaN;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (zs != null) {</b>
+<b class="fc">&nbsp;			z = wkt_parser.currentNumericLiteral();</b>
+<b class="fc">&nbsp;			wkt_parser.nextToken();</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (ms != null) {</b>
+<b class="fc">&nbsp;			m = wkt_parser.currentNumericLiteral();</b>
+<b class="fc">&nbsp;			wkt_parser.nextToken();</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		addToStreams(zs, ms, position, x, y, z, m);</b>
+&nbsp;
+<b class="fc">&nbsp;		return 1;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	static void addToStreams(AttributeStreamOfDbl zs, AttributeStreamOfDbl ms,
+&nbsp;			AttributeStreamOfDbl position, double x, double y, double z,
+&nbsp;			double m) {
+<b class="fc">&nbsp;		position.add(x);</b>
+<b class="fc">&nbsp;		position.add(y);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (zs != null)</b>
+<b class="fc">&nbsp;			zs.add(z);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (ms != null)</b>
+<b class="fc">&nbsp;			ms.add(m);</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-02-21 16:04</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,299 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > Polygon</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.esri.core.geometry</a>
+</div>
+
+<h1>Coverage Summary for Class: Polygon (com.esri.core.geometry)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">Polygon</td>
+<td class="coverageStat">
+  <span class="percent">
+    93,8%
+  </span>
+  <span class="absValue">
+    (15/16)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    83,3%
+  </span>
+  <span class="absValue">
+    (20/24)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">Polygon$FillRule</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    93,8%
+  </span>
+  <span class="absValue">
+    (15/16)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    83,3%
+  </span>
+  <span class="absValue">
+    (20/24)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; Copyright 1995-2018 Esri
+&nbsp;
+&nbsp;   Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp;   you may not use this file except in compliance with the License.
+&nbsp;   You may obtain a copy of the License at
+&nbsp;
+&nbsp;       http://www.apache.org/licenses/LICENSE-2.0
+&nbsp;
+&nbsp;   Unless required by applicable law or agreed to in writing, software
+&nbsp;   distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp;   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp;   See the License for the specific language governing permissions and
+&nbsp;   limitations under the License.
+&nbsp;
+&nbsp; For additional information, contact:
+&nbsp; Environmental Systems Research Institute, Inc.
+&nbsp; Attn: Contracts Dept
+&nbsp; 380 New York Street
+&nbsp; Redlands, California, USA 92373
+&nbsp;
+&nbsp; email: contracts@esri.com
+&nbsp; */
+&nbsp;
+&nbsp;
+&nbsp;package com.esri.core.geometry;
+&nbsp;
+&nbsp;import java.io.Serializable;
+&nbsp;
+&nbsp;import static com.esri.core.geometry.SizeOf.SIZE_OF_POLYGON;
+&nbsp;
+&nbsp;/**
+&nbsp; * A polygon is a collection of one or many interior or exterior rings.
+&nbsp; */
+&nbsp;public class Polygon extends MultiPath implements Serializable {
+&nbsp;	private static final long serialVersionUID = 2L;// TODO:remove as we use
+&nbsp;													// writeReplace and
+&nbsp;													// GeometrySerializer
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Creates a polygon.
+&nbsp;	 */
+<b class="fc">&nbsp;	public Polygon() {</b>
+<b class="fc">&nbsp;		m_impl = new MultiPathImpl(true);</b>
+&nbsp;	}
+&nbsp;
+<b class="fc">&nbsp;	public Polygon(VertexDescription vd) {</b>
+<b class="fc">&nbsp;		m_impl = new MultiPathImpl(true, vd);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public Geometry createInstance() {
+<b class="fc">&nbsp;		return new Polygon(getDescription());</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public int getDimension() {
+<b class="fc">&nbsp;		return 2;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public Geometry.Type getType() {
+<b class="fc">&nbsp;		return Type.Polygon;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public long estimateMemorySize() {
+<b class="fc">&nbsp;		return SIZE_OF_POLYGON + m_impl.estimateMemorySize();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Calculates the ring area for this ring.
+&nbsp;	 * 
+&nbsp;	 * @param ringIndex
+&nbsp;	 *            The index of this ring.
+&nbsp;	 * @return The ring area for this ring.
+&nbsp;	 */
+&nbsp;	public double calculateRingArea2D(int ringIndex) {
+<b class="fc">&nbsp;		return m_impl.calculateRingArea2D(ringIndex);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns TRUE if the ring is an exterior ring. Valid only for simple
+&nbsp;	 * polygons.
+&nbsp;	 */
+&nbsp;	public boolean isExteriorRing(int partIndex) {
+<b class="fc">&nbsp;		return m_impl.isExteriorRing(partIndex);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns TRUE when this geometry has exactly same type, properties, and
+&nbsp;	 * coordinates as the other geometry.
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public boolean equals(Object other) {
+<b class="fc">&nbsp;		if (other == null)</b>
+<b class="nc">&nbsp;			return false;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (other == this)</b>
+<b class="nc">&nbsp;			return true;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (other.getClass() != getClass())</b>
+<b class="nc">&nbsp;			return false;</b>
+&nbsp;
+<b class="fc">&nbsp;		return m_impl.equals(((Polygon) other)._getImpl());</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns a hash code value for this polygon.
+&nbsp;	 */
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public int hashCode() {
+<b class="fc">&nbsp;		return m_impl.hashCode();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Sets a new vertex for the polygon.
+&nbsp;	 * 
+&nbsp;	 * @param i
+&nbsp;	 *            The index of the new vertex.
+&nbsp;	 * @param x
+&nbsp;	 *            The X coordinate for the new vertex.
+&nbsp;	 * @param y
+&nbsp;	 *            The Y coordinate for the new vertex.
+&nbsp;	 */
+&nbsp;	public void setXY(int i, double x, double y) {
+<b class="nc">&nbsp;		m_impl.setXY(i, x, y);</b>
+&nbsp;
+&nbsp;	}
+&nbsp;
+&nbsp;	public void interpolateAttributes(int path_index, int from_point_index,
+&nbsp;			int to_point_index) {
+<b class="fc">&nbsp;		m_impl.interpolateAttributes(path_index, from_point_index,</b>
+&nbsp;				to_point_index);
+&nbsp;	}
+&nbsp;
+&nbsp;	public void interpolateAttributes(int semantics, int path_index,
+&nbsp;			int from_point_index, int to_point_index) {
+<b class="fc">&nbsp;		m_impl.interpolateAttributesForSemantics(semantics, path_index,</b>
+&nbsp;				from_point_index, to_point_index);
+&nbsp;	}
+&nbsp;
+&nbsp;	public int getExteriorRingCount() {
+<b class="fc">&nbsp;		return m_impl.getOGCPolygonCount();</b>
+&nbsp;	}
+&nbsp;	
+&nbsp;	public interface FillRule {
+&nbsp;		/**
+&nbsp;		 * odd-even fill rule. This is the default value. A point is in the polygon
+&nbsp;		 * interior if a ray from this point to infinity crosses odd number of segments
+&nbsp;		 * of the polygon.
+&nbsp;		 */
+&nbsp;		public final static int enumFillRuleOddEven = 0;
+&nbsp;		/**
+&nbsp;		 * winding fill rule (aka non-zero winding rule). A point is in the polygon
+&nbsp;		 * interior if a winding number is not zero. To compute a winding number for a
+&nbsp;		 * point, draw a ray from this point to infinity. If N is the number of times
+&nbsp;		 * the ray crosses segments directed up and the M is the number of times it
+&nbsp;		 * crosses segments directed down, then the winding number is equal to N-M.
+&nbsp;		 */
+&nbsp;		public final static int enumFillRuleWinding = 1;
+&nbsp;	};
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Fill rule for the polygon that defines the interior of the self intersecting
+&nbsp;	 * polygon. It affects the Simplify operation. Can be use by drawing code to
+&nbsp;	 * pass around the fill rule of graphic path. This property is not persisted in
+&nbsp;	 * any format yet. See also Polygon.FillRule.
+&nbsp;	 */
+&nbsp;	public void setFillRule(int rule) {
+<b class="fc">&nbsp;		m_impl.setFillRule(rule);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Fill rule for the polygon that defines the interior of the self intersecting
+&nbsp;	 * polygon. It affects the Simplify operation. Changing the fill rule on the
+&nbsp;	 * polygon that has no self intersections has no physical effect. Can be use by
+&nbsp;	 * drawing code to pass around the fill rule of graphic path. This property is
+&nbsp;	 * not persisted in any format yet. See also Polygon.FillRule.
+&nbsp;	 */
+&nbsp;	public int getFillRule() {
+<b class="fc">&nbsp;		return m_impl.getFillRule();</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-02-21 16:04</div>
+</div>
+</body>
+</html>

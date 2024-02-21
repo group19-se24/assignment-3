@@ -1,0 +1,991 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > OperatorExportToWktLocal</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.esri.core.geometry</a>
+</div>
+
+<h1>Coverage Summary for Class: OperatorExportToWktLocal (com.esri.core.geometry)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">OperatorExportToWktLocal</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (29/29)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    85,4%
+  </span>
+  <span class="absValue">
+    (362/424)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; Copyright 1995-2015 Esri
+&nbsp;
+&nbsp;   Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp;   you may not use this file except in compliance with the License.
+&nbsp;   You may obtain a copy of the License at
+&nbsp;
+&nbsp;       http://www.apache.org/licenses/LICENSE-2.0
+&nbsp;
+&nbsp;   Unless required by applicable law or agreed to in writing, software
+&nbsp;   distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp;   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp;   See the License for the specific language governing permissions and
+&nbsp;   limitations under the License.
+&nbsp;
+&nbsp; For additional information, contact:
+&nbsp; Environmental Systems Research Institute, Inc.
+&nbsp; Attn: Contracts Dept
+&nbsp; 380 New York Street
+&nbsp; Redlands, California, USA 92373
+&nbsp;
+&nbsp; email: contracts@esri.com
+&nbsp; */
+&nbsp;package com.esri.core.geometry;
+&nbsp;
+<b class="fc">&nbsp;class OperatorExportToWktLocal extends OperatorExportToWkt {</b>
+&nbsp;	@Override
+&nbsp;	public String execute(int export_flags, Geometry geometry,
+&nbsp;			ProgressTracker progress_tracker) {
+<b class="fc">&nbsp;		StringBuilder string = new StringBuilder();</b>
+<b class="fc">&nbsp;		exportToWkt(export_flags, geometry, string);</b>
+&nbsp;
+<b class="fc">&nbsp;		return string.toString();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	static void exportToWkt(int export_flags, Geometry geometry,
+&nbsp;			StringBuilder string) {
+<b class="fc">&nbsp;		int type = geometry.getType().value();</b>
+<b class="fc">&nbsp;		switch (type) {</b>
+&nbsp;		case Geometry.GeometryType.Polygon:
+<b class="fc">&nbsp;			if ((export_flags &amp; WktExportFlags.wktExportLineString) != 0</b>
+&nbsp;					|| (export_flags &amp; WktExportFlags.wktExportMultiLineString) != 0
+&nbsp;					|| (export_flags &amp; WktExportFlags.wktExportPoint) != 0
+&nbsp;					|| (export_flags &amp; WktExportFlags.wktExportMultiPoint) != 0)
+<b class="nc">&nbsp;				throw new IllegalArgumentException(&quot;Cannot export a Polygon as (Multi)LineString/(Multi)Point : &quot;+export_flags);</b>
+&nbsp;
+<b class="fc">&nbsp;			exportPolygonToWkt(export_flags, (Polygon) geometry, string);</b>
+&nbsp;			return;
+&nbsp;
+&nbsp;		case Geometry.GeometryType.Polyline:
+<b class="fc">&nbsp;			if ((export_flags &amp; WktExportFlags.wktExportPolygon) != 0</b>
+&nbsp;					|| (export_flags &amp; WktExportFlags.wktExportMultiPolygon) != 0
+&nbsp;					|| (export_flags &amp; WktExportFlags.wktExportPoint) != 0
+&nbsp;					|| (export_flags &amp; WktExportFlags.wktExportMultiPoint) != 0)
+<b class="nc">&nbsp;				throw new IllegalArgumentException(&quot;Cannot export a Polyline as (Multi)Polygon/(Multi)Point : &quot;+export_flags);</b>
+&nbsp;
+<b class="fc">&nbsp;			exportPolylineToWkt(export_flags, (Polyline) geometry, string);</b>
+&nbsp;			return;
+&nbsp;
+&nbsp;		case Geometry.GeometryType.MultiPoint:
+<b class="fc">&nbsp;			if ((export_flags &amp; WktExportFlags.wktExportLineString) != 0</b>
+&nbsp;					|| (export_flags &amp; WktExportFlags.wktExportMultiLineString) != 0
+&nbsp;					|| (export_flags &amp; WktExportFlags.wktExportPolygon) != 0
+&nbsp;					|| (export_flags &amp; WktExportFlags.wktExportMultiPolygon) != 0)
+<b class="nc">&nbsp;				throw new IllegalArgumentException(&quot;Cannot export a MultiPoint as (Multi)LineString/(Multi)Polygon: &quot;+export_flags);</b>
+&nbsp;
+<b class="fc">&nbsp;			exportMultiPointToWkt(export_flags, (MultiPoint) geometry, string);</b>
+&nbsp;			return;
+&nbsp;
+&nbsp;		case Geometry.GeometryType.Point:
+<b class="fc">&nbsp;			if ((export_flags &amp; WktExportFlags.wktExportLineString) != 0</b>
+&nbsp;					|| (export_flags &amp; WktExportFlags.wktExportMultiLineString) != 0
+&nbsp;					|| (export_flags &amp; WktExportFlags.wktExportPolygon) != 0
+&nbsp;					|| (export_flags &amp; WktExportFlags.wktExportMultiPolygon) != 0)
+<b class="nc">&nbsp;				throw new IllegalArgumentException(&quot;Cannot export a Point as (Multi)LineString/(Multi)Polygon: &quot;+export_flags);</b>
+&nbsp;
+<b class="fc">&nbsp;			exportPointToWkt(export_flags, (Point) geometry, string);</b>
+&nbsp;			return;
+&nbsp;
+&nbsp;		case Geometry.GeometryType.Envelope:
+<b class="fc">&nbsp;			if ((export_flags &amp; WktExportFlags.wktExportLineString) != 0</b>
+&nbsp;					|| (export_flags &amp; WktExportFlags.wktExportMultiLineString) != 0
+&nbsp;					|| (export_flags &amp; WktExportFlags.wktExportPoint) != 0
+&nbsp;					|| (export_flags &amp; WktExportFlags.wktExportMultiPoint) != 0)
+<b class="nc">&nbsp;				throw new IllegalArgumentException(&quot;Cannot export an Envelope as (Multi)LineString/(Multi)Point: &quot;+export_flags);</b>
+&nbsp;
+<b class="fc">&nbsp;			exportEnvelopeToWkt(export_flags, (Envelope) geometry, string);</b>
+&nbsp;			return;
+&nbsp;
+&nbsp;		default: {
+<b class="nc">&nbsp;			throw GeometryException.GeometryInternalError();</b>
+&nbsp;		}
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	static void exportPolygonToWkt(int export_flags, Polygon polygon,
+&nbsp;			StringBuilder string) {
+<b class="fc">&nbsp;		MultiPathImpl polygon_impl = (MultiPathImpl) polygon._getImpl();</b>
+&nbsp;
+<b class="fc">&nbsp;		if ((export_flags &amp; WktExportFlags.wktExportFailIfNotSimple) != 0) {</b>
+<b class="nc">&nbsp;			int simple = polygon_impl.getIsSimple(0.0);</b>
+&nbsp;
+<b class="nc">&nbsp;			if (simple != MultiPathImpl.GeometryXSimple.Strong)</b>
+<b class="nc">&nbsp;				throw new GeometryException(&quot;corrupted geometry&quot;);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		int point_count = polygon.getPointCount();</b>
+<b class="fc">&nbsp;		int polygon_count = polygon_impl.getOGCPolygonCount();</b>
+&nbsp;
+<b class="fc">&nbsp;		if (point_count &gt; 0 &amp;&amp; polygon_count == 0)</b>
+<b class="nc">&nbsp;			throw new GeometryException(&quot;corrupted geometry&quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;		int precision = 17 - (7 &amp; (export_flags &gt;&gt; 13));</b>
+<b class="fc">&nbsp;		boolean b_export_zs = polygon_impl</b>
+<b class="fc">&nbsp;				.hasAttribute(VertexDescription.Semantics.Z)</b>
+&nbsp;				&amp;&amp; (export_flags &amp; WktExportFlags.wktExportStripZs) == 0;
+<b class="fc">&nbsp;		boolean b_export_ms = polygon_impl</b>
+<b class="fc">&nbsp;				.hasAttribute(VertexDescription.Semantics.M)</b>
+&nbsp;				&amp;&amp; (export_flags &amp; WktExportFlags.wktExportStripMs) == 0;
+&nbsp;
+<b class="fc">&nbsp;		int path_count = 0;</b>
+<b class="fc">&nbsp;		AttributeStreamOfDbl position = null;</b>
+<b class="fc">&nbsp;		AttributeStreamOfDbl zs = null;</b>
+<b class="fc">&nbsp;		AttributeStreamOfDbl ms = null;</b>
+<b class="fc">&nbsp;		AttributeStreamOfInt8 path_flags = null;</b>
+<b class="fc">&nbsp;		AttributeStreamOfInt32 paths = null;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (point_count &gt; 0) {</b>
+<b class="fc">&nbsp;			position = (AttributeStreamOfDbl) (polygon_impl</b>
+<b class="fc">&nbsp;					.getAttributeStreamRef(VertexDescription.Semantics.POSITION));</b>
+<b class="fc">&nbsp;			path_flags = polygon_impl.getPathFlagsStreamRef();</b>
+<b class="fc">&nbsp;			paths = polygon_impl.getPathStreamRef();</b>
+<b class="fc">&nbsp;			path_count = polygon_impl.getPathCount();</b>
+&nbsp;
+<b class="fc">&nbsp;			if (b_export_zs) {</b>
+<b class="fc">&nbsp;				if (polygon_impl</b>
+<b class="fc">&nbsp;						._attributeStreamIsAllocated(VertexDescription.Semantics.Z))</b>
+<b class="fc">&nbsp;					zs = (AttributeStreamOfDbl) polygon_impl</b>
+<b class="fc">&nbsp;							.getAttributeStreamRef(VertexDescription.Semantics.Z);</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			if (b_export_ms) {</b>
+<b class="nc">&nbsp;				if (polygon_impl</b>
+<b class="nc">&nbsp;						._attributeStreamIsAllocated(VertexDescription.Semantics.M))</b>
+<b class="nc">&nbsp;					ms = (AttributeStreamOfDbl) polygon_impl</b>
+<b class="nc">&nbsp;							.getAttributeStreamRef(VertexDescription.Semantics.M);</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if ((export_flags &amp; WktExportFlags.wktExportPolygon) != 0) {</b>
+<b class="fc">&nbsp;			if (polygon_count &gt; 1)</b>
+<b class="nc">&nbsp;				throw new IllegalArgumentException(&quot;Cannot export a Polygon with specified export flags: &quot;+export_flags);</b>
+&nbsp;
+<b class="fc">&nbsp;			polygonTaggedText_(precision, b_export_zs, b_export_ms, zs, ms,</b>
+&nbsp;					position, path_flags, paths, path_count, string);
+&nbsp;		} else {
+<b class="fc">&nbsp;			multiPolygonTaggedText_(precision, b_export_zs, b_export_ms, zs,</b>
+&nbsp;					ms, position, path_flags, paths, polygon_count, path_count,
+&nbsp;					string);
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	static void exportPolylineToWkt(int export_flags, Polyline polyline,
+&nbsp;			StringBuilder string) {
+<b class="fc">&nbsp;		MultiPathImpl polyline_impl = (MultiPathImpl) polyline._getImpl();</b>
+&nbsp;
+<b class="fc">&nbsp;		int point_count = polyline_impl.getPointCount();</b>
+<b class="fc">&nbsp;		int path_count = polyline_impl.getPathCount();</b>
+&nbsp;
+<b class="fc">&nbsp;		if (point_count &gt; 0 &amp;&amp; path_count == 0)</b>
+<b class="nc">&nbsp;			throw new GeometryException(&quot;corrupted geometry&quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;		int precision = 17 - (7 &amp; (export_flags &gt;&gt; 13));</b>
+<b class="fc">&nbsp;		boolean b_export_zs = polyline_impl</b>
+<b class="fc">&nbsp;				.hasAttribute(VertexDescription.Semantics.Z)</b>
+&nbsp;				&amp;&amp; (export_flags &amp; WktExportFlags.wktExportStripZs) == 0;
+<b class="fc">&nbsp;		boolean b_export_ms = polyline_impl</b>
+<b class="fc">&nbsp;				.hasAttribute(VertexDescription.Semantics.M)</b>
+&nbsp;				&amp;&amp; (export_flags &amp; WktExportFlags.wktExportStripMs) == 0;
+&nbsp;
+<b class="fc">&nbsp;		AttributeStreamOfDbl position = null;</b>
+<b class="fc">&nbsp;		AttributeStreamOfDbl zs = null;</b>
+<b class="fc">&nbsp;		AttributeStreamOfDbl ms = null;</b>
+<b class="fc">&nbsp;		AttributeStreamOfInt8 path_flags = null;</b>
+<b class="fc">&nbsp;		AttributeStreamOfInt32 paths = null;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (point_count &gt; 0) {</b>
+<b class="fc">&nbsp;			position = (AttributeStreamOfDbl) polyline_impl</b>
+<b class="fc">&nbsp;					.getAttributeStreamRef(VertexDescription.Semantics.POSITION);</b>
+<b class="fc">&nbsp;			path_flags = polyline_impl.getPathFlagsStreamRef();</b>
+<b class="fc">&nbsp;			paths = polyline_impl.getPathStreamRef();</b>
+&nbsp;
+<b class="fc">&nbsp;			if (b_export_zs) {</b>
+<b class="fc">&nbsp;				if (polyline_impl</b>
+<b class="fc">&nbsp;						._attributeStreamIsAllocated(VertexDescription.Semantics.Z))</b>
+<b class="fc">&nbsp;					zs = (AttributeStreamOfDbl) (polyline_impl</b>
+<b class="fc">&nbsp;							.getAttributeStreamRef(VertexDescription.Semantics.Z));</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			if (b_export_ms) {</b>
+<b class="fc">&nbsp;				if (polyline_impl</b>
+<b class="fc">&nbsp;						._attributeStreamIsAllocated(VertexDescription.Semantics.M))</b>
+<b class="fc">&nbsp;					ms = (AttributeStreamOfDbl) (polyline_impl</b>
+<b class="fc">&nbsp;							.getAttributeStreamRef(VertexDescription.Semantics.M));</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if ((export_flags &amp; WktExportFlags.wktExportLineString) != 0) {</b>
+<b class="fc">&nbsp;			if (path_count &gt; 1)</b>
+<b class="nc">&nbsp;				throw new IllegalArgumentException(&quot;Cannot export a LineString with specified export flags: &quot;+export_flags);</b>
+&nbsp;
+<b class="fc">&nbsp;			lineStringTaggedText_(precision, b_export_zs, b_export_ms, zs, ms,</b>
+&nbsp;					position, path_flags, paths, string);
+&nbsp;		} else {
+<b class="fc">&nbsp;			multiLineStringTaggedText_(precision, b_export_zs, b_export_ms, zs,</b>
+&nbsp;					ms, position, path_flags, paths, path_count, string);
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	static void exportMultiPointToWkt(int export_flags, MultiPoint multipoint,
+&nbsp;			StringBuilder string) {
+<b class="fc">&nbsp;		MultiPointImpl multipoint_impl = (MultiPointImpl) multipoint._getImpl();</b>
+&nbsp;
+<b class="fc">&nbsp;		int point_count = multipoint_impl.getPointCount();</b>
+&nbsp;
+<b class="fc">&nbsp;		int precision = 17 - (7 &amp; (export_flags &gt;&gt; 13));</b>
+<b class="fc">&nbsp;		boolean b_export_zs = multipoint_impl</b>
+<b class="fc">&nbsp;				.hasAttribute(VertexDescription.Semantics.Z)</b>
+&nbsp;				&amp;&amp; (export_flags &amp; WktExportFlags.wktExportStripZs) == 0;
+<b class="fc">&nbsp;		boolean b_export_ms = multipoint_impl</b>
+<b class="fc">&nbsp;				.hasAttribute(VertexDescription.Semantics.M)</b>
+&nbsp;				&amp;&amp; (export_flags &amp; WktExportFlags.wktExportStripMs) == 0;
+&nbsp;
+<b class="fc">&nbsp;		AttributeStreamOfDbl position = null;</b>
+<b class="fc">&nbsp;		AttributeStreamOfDbl zs = null;</b>
+<b class="fc">&nbsp;		AttributeStreamOfDbl ms = null;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (point_count &gt; 0) {</b>
+<b class="fc">&nbsp;			position = (AttributeStreamOfDbl) (multipoint_impl</b>
+<b class="fc">&nbsp;					.getAttributeStreamRef(VertexDescription.Semantics.POSITION));</b>
+&nbsp;
+<b class="fc">&nbsp;			if (b_export_zs) {</b>
+<b class="fc">&nbsp;				if (multipoint_impl</b>
+<b class="fc">&nbsp;						._attributeStreamIsAllocated(VertexDescription.Semantics.Z))</b>
+<b class="fc">&nbsp;					zs = (AttributeStreamOfDbl) (multipoint_impl</b>
+<b class="fc">&nbsp;							.getAttributeStreamRef(VertexDescription.Semantics.Z));</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			if (b_export_ms) {</b>
+<b class="fc">&nbsp;				if (multipoint_impl</b>
+<b class="fc">&nbsp;						._attributeStreamIsAllocated(VertexDescription.Semantics.M))</b>
+<b class="fc">&nbsp;					ms = (AttributeStreamOfDbl) (multipoint_impl</b>
+<b class="fc">&nbsp;							.getAttributeStreamRef(VertexDescription.Semantics.M));</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if ((export_flags &amp; WktExportFlags.wktExportPoint) != 0) {</b>
+<b class="fc">&nbsp;			if (point_count &gt; 1)</b>
+<b class="nc">&nbsp;				throw new IllegalArgumentException(&quot;Cannot export a Point with specified export flags: &quot;+export_flags);</b>
+&nbsp;
+<b class="fc">&nbsp;			pointTaggedTextFromMultiPoint_(precision, b_export_zs, b_export_ms,</b>
+&nbsp;					zs, ms, position, string);
+&nbsp;		} else {
+<b class="fc">&nbsp;			multiPointTaggedText_(precision, b_export_zs, b_export_ms, zs, ms,</b>
+&nbsp;					position, point_count, string);
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	static void exportPointToWkt(int export_flags, Point point,
+&nbsp;			StringBuilder string) {
+<b class="fc">&nbsp;		int precision = 17 - (7 &amp; (export_flags &gt;&gt; 13));</b>
+<b class="fc">&nbsp;		boolean b_export_zs = point.hasAttribute(VertexDescription.Semantics.Z)</b>
+&nbsp;				&amp;&amp; (export_flags &amp; WktExportFlags.wktExportStripZs) == 0;
+<b class="fc">&nbsp;		boolean b_export_ms = point.hasAttribute(VertexDescription.Semantics.M)</b>
+&nbsp;				&amp;&amp; (export_flags &amp; WktExportFlags.wktExportStripMs) == 0;
+&nbsp;
+<b class="fc">&nbsp;		double x = NumberUtils.TheNaN;</b>
+<b class="fc">&nbsp;		double y = NumberUtils.TheNaN;</b>
+<b class="fc">&nbsp;		double z = NumberUtils.TheNaN;</b>
+<b class="fc">&nbsp;		double m = NumberUtils.TheNaN;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (!point.isEmpty()) {</b>
+<b class="fc">&nbsp;			x = point.getX();</b>
+<b class="fc">&nbsp;			y = point.getY();</b>
+&nbsp;
+<b class="fc">&nbsp;			if (b_export_zs)</b>
+<b class="fc">&nbsp;				z = point.getZ();</b>
+&nbsp;
+<b class="fc">&nbsp;			if (b_export_ms)</b>
+<b class="fc">&nbsp;				m = point.getM();</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if ((export_flags &amp; WktExportFlags.wktExportMultiPoint) != 0) {</b>
+<b class="fc">&nbsp;			multiPointTaggedTextFromPoint_(precision, b_export_zs, b_export_ms,</b>
+&nbsp;					x, y, z, m, string);
+&nbsp;		} else {
+<b class="fc">&nbsp;			pointTaggedText_(precision, b_export_zs, b_export_ms, x, y, z, m,</b>
+&nbsp;					string);
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	static void exportEnvelopeToWkt(int export_flags, Envelope envelope,
+&nbsp;			StringBuilder string) {
+<b class="fc">&nbsp;		int precision = 17 - (7 &amp; (export_flags &gt;&gt; 13));</b>
+<b class="fc">&nbsp;		boolean b_export_zs = envelope</b>
+<b class="fc">&nbsp;				.hasAttribute(VertexDescription.Semantics.Z)</b>
+&nbsp;				&amp;&amp; (export_flags &amp; WktExportFlags.wktExportStripZs) == 0;
+<b class="fc">&nbsp;		boolean b_export_ms = envelope</b>
+<b class="fc">&nbsp;				.hasAttribute(VertexDescription.Semantics.M)</b>
+&nbsp;				&amp;&amp; (export_flags &amp; WktExportFlags.wktExportStripMs) == 0;
+&nbsp;
+<b class="fc">&nbsp;		double xmin = NumberUtils.TheNaN;</b>
+<b class="fc">&nbsp;		double ymin = NumberUtils.TheNaN;</b>
+<b class="fc">&nbsp;		double xmax = NumberUtils.TheNaN;</b>
+<b class="fc">&nbsp;		double ymax = NumberUtils.TheNaN;</b>
+<b class="fc">&nbsp;		double zmin = NumberUtils.TheNaN;</b>
+<b class="fc">&nbsp;		double zmax = NumberUtils.TheNaN;</b>
+<b class="fc">&nbsp;		double mmin = NumberUtils.TheNaN;</b>
+<b class="fc">&nbsp;		double mmax = NumberUtils.TheNaN;</b>
+&nbsp;		Envelope1D interval;
+&nbsp;
+<b class="fc">&nbsp;		if (!envelope.isEmpty()) {</b>
+<b class="fc">&nbsp;			xmin = envelope.getXMin();</b>
+<b class="fc">&nbsp;			ymin = envelope.getYMin();</b>
+<b class="fc">&nbsp;			xmax = envelope.getXMax();</b>
+<b class="fc">&nbsp;			ymax = envelope.getYMax();</b>
+&nbsp;
+<b class="fc">&nbsp;			if (b_export_zs) {</b>
+<b class="fc">&nbsp;				interval = envelope.queryInterval(</b>
+&nbsp;						VertexDescription.Semantics.Z, 0);
+<b class="fc">&nbsp;				zmin = interval.vmin;</b>
+<b class="fc">&nbsp;				zmax = interval.vmax;</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			if (b_export_ms) {</b>
+<b class="nc">&nbsp;				interval = envelope.queryInterval(</b>
+&nbsp;						VertexDescription.Semantics.M, 0);
+<b class="nc">&nbsp;				mmin = interval.vmin;</b>
+<b class="nc">&nbsp;				mmax = interval.vmax;</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if ((export_flags &amp; WktExportFlags.wktExportMultiPolygon) != 0) {</b>
+<b class="fc">&nbsp;			multiPolygonTaggedTextFromEnvelope_(precision, b_export_zs,</b>
+&nbsp;					b_export_ms, xmin, ymin, xmax, ymax, zmin, zmax, mmin,
+&nbsp;					mmax, string);
+&nbsp;		} else {
+<b class="fc">&nbsp;			polygonTaggedTextFromEnvelope_(precision, b_export_zs, b_export_ms,</b>
+&nbsp;					xmin, ymin, xmax, ymax, zmin, zmax, mmin, mmax, string);
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	static void multiPolygonTaggedText_(int precision, boolean b_export_zs,
+&nbsp;			boolean b_export_ms, AttributeStreamOfDbl zs,
+&nbsp;			AttributeStreamOfDbl ms, AttributeStreamOfDbl position,
+&nbsp;			AttributeStreamOfInt8 path_flags, AttributeStreamOfInt32 paths,
+&nbsp;			int polygon_count, int path_count, StringBuilder string) {
+<b class="fc">&nbsp;		string.append(&quot;MULTIPOLYGON &quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (b_export_zs &amp;&amp; b_export_ms)</b>
+<b class="nc">&nbsp;			string.append(&quot;ZM &quot;);</b>
+<b class="fc">&nbsp;		else if (b_export_zs &amp;&amp; !b_export_ms)</b>
+<b class="fc">&nbsp;			string.append(&quot;Z &quot;);</b>
+<b class="fc">&nbsp;		else if (!b_export_zs &amp;&amp; b_export_ms)</b>
+<b class="fc">&nbsp;			string.append(&quot;M &quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (position == null) {</b>
+<b class="fc">&nbsp;			string.append(&quot;EMPTY&quot;);</b>
+&nbsp;			return;
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		string.append(&#39;(&#39;);</b>
+&nbsp;
+<b class="fc">&nbsp;		multiPolygonText_(precision, b_export_zs, b_export_ms, zs, ms,</b>
+&nbsp;				position, path_flags, paths, polygon_count, path_count, string);
+&nbsp;
+<b class="fc">&nbsp;		string.append(&#39;)&#39;);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	static void multiPolygonTaggedTextFromEnvelope_(int precision,
+&nbsp;			boolean b_export_zs, boolean b_export_ms, double xmin, double ymin,
+&nbsp;			double xmax, double ymax, double zmin, double zmax, double mmin,
+&nbsp;			double mmax, StringBuilder string) {
+<b class="fc">&nbsp;		string.append(&quot;MULTIPOLYGON &quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (b_export_zs &amp;&amp; b_export_ms)</b>
+<b class="nc">&nbsp;			string.append(&quot;ZM &quot;);</b>
+<b class="fc">&nbsp;		else if (b_export_zs &amp;&amp; !b_export_ms)</b>
+<b class="fc">&nbsp;			string.append(&quot;Z &quot;);</b>
+<b class="nc">&nbsp;		else if (!b_export_zs &amp;&amp; b_export_ms)</b>
+<b class="nc">&nbsp;			string.append(&quot;M &quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (NumberUtils.isNaN(xmin)) {</b>
+<b class="fc">&nbsp;			string.append(&quot;EMPTY&quot;);</b>
+&nbsp;			return;
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		string.append(&#39;(&#39;);</b>
+&nbsp;
+<b class="fc">&nbsp;		writeEnvelopeAsWktPolygon_(precision, b_export_zs, b_export_ms, xmin,</b>
+&nbsp;				ymin, xmax, ymax, zmin, zmax, mmin, mmax, string);
+&nbsp;
+<b class="fc">&nbsp;		string.append(&#39;)&#39;);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	static void multiLineStringTaggedText_(int precision, boolean b_export_zs,
+&nbsp;			boolean b_export_ms, AttributeStreamOfDbl zs,
+&nbsp;			AttributeStreamOfDbl ms, AttributeStreamOfDbl position,
+&nbsp;			AttributeStreamOfInt8 path_flags, AttributeStreamOfInt32 paths,
+&nbsp;			int path_count, StringBuilder string) {
+<b class="fc">&nbsp;		string.append(&quot;MULTILINESTRING &quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (b_export_zs &amp;&amp; b_export_ms)</b>
+<b class="nc">&nbsp;			string.append(&quot;ZM &quot;);</b>
+<b class="fc">&nbsp;		else if (b_export_zs &amp;&amp; !b_export_ms)</b>
+<b class="fc">&nbsp;			string.append(&quot;Z &quot;);</b>
+<b class="fc">&nbsp;		else if (!b_export_zs &amp;&amp; b_export_ms)</b>
+<b class="fc">&nbsp;			string.append(&quot;M &quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (position == null) {</b>
+<b class="fc">&nbsp;			string.append(&quot;EMPTY&quot;);</b>
+&nbsp;			return;
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		string.append(&#39;(&#39;);</b>
+&nbsp;
+<b class="fc">&nbsp;		multiLineStringText_(precision, b_export_zs, b_export_ms, zs, ms,</b>
+&nbsp;				position, path_flags, paths, path_count, string);
+&nbsp;
+<b class="fc">&nbsp;		string.append(&#39;)&#39;);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	static void multiPointTaggedText_(int precision, boolean b_export_zs,
+&nbsp;			boolean b_export_ms, AttributeStreamOfDbl zs,
+&nbsp;			AttributeStreamOfDbl ms, AttributeStreamOfDbl position,
+&nbsp;			int point_count, StringBuilder string) {
+<b class="fc">&nbsp;		string.append(&quot;MULTIPOINT &quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (b_export_zs &amp;&amp; b_export_ms)</b>
+<b class="fc">&nbsp;			string.append(&quot;ZM &quot;);</b>
+<b class="fc">&nbsp;		else if (b_export_zs &amp;&amp; !b_export_ms)</b>
+<b class="nc">&nbsp;			string.append(&quot;Z &quot;);</b>
+<b class="fc">&nbsp;		else if (!b_export_zs &amp;&amp; b_export_ms)</b>
+<b class="nc">&nbsp;			string.append(&quot;M &quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (position == null) {</b>
+<b class="fc">&nbsp;			string.append(&quot;EMPTY&quot;);</b>
+&nbsp;			return;
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		string.append(&#39;(&#39;);</b>
+&nbsp;
+<b class="fc">&nbsp;		multiPointText_(precision, b_export_zs, b_export_ms, zs, ms, position,</b>
+&nbsp;				point_count, string);
+&nbsp;
+<b class="fc">&nbsp;		string.append(&#39;)&#39;);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	static void multiPointTaggedTextFromPoint_(int precision,
+&nbsp;			boolean b_export_zs, boolean b_export_ms, double x, double y,
+&nbsp;			double z, double m, StringBuilder string) {
+<b class="fc">&nbsp;		string.append(&quot;MULTIPOINT &quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (b_export_zs &amp;&amp; b_export_ms)</b>
+<b class="fc">&nbsp;			string.append(&quot;ZM &quot;);</b>
+<b class="nc">&nbsp;		else if (b_export_zs &amp;&amp; !b_export_ms)</b>
+<b class="nc">&nbsp;			string.append(&quot;Z &quot;);</b>
+<b class="nc">&nbsp;		else if (!b_export_zs &amp;&amp; b_export_ms)</b>
+<b class="nc">&nbsp;			string.append(&quot;M &quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (NumberUtils.isNaN(x)) {</b>
+<b class="fc">&nbsp;			string.append(&quot;EMPTY&quot;);</b>
+&nbsp;			return;
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		string.append(&#39;(&#39;);</b>
+&nbsp;
+<b class="fc">&nbsp;		pointText_(precision, b_export_zs, b_export_ms, x, y, z, m, string);</b>
+&nbsp;
+<b class="fc">&nbsp;		string.append(&#39;)&#39;);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	static void polygonTaggedText_(int precision, boolean b_export_zs,
+&nbsp;			boolean b_export_ms, AttributeStreamOfDbl zs,
+&nbsp;			AttributeStreamOfDbl ms, AttributeStreamOfDbl position,
+&nbsp;			AttributeStreamOfInt8 path_flags, AttributeStreamOfInt32 paths,
+&nbsp;			int path_count, StringBuilder string) {
+<b class="fc">&nbsp;		string.append(&quot;POLYGON &quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (b_export_zs &amp;&amp; b_export_ms)</b>
+<b class="nc">&nbsp;			string.append(&quot;ZM &quot;);</b>
+<b class="fc">&nbsp;		else if (b_export_zs &amp;&amp; !b_export_ms)</b>
+<b class="fc">&nbsp;			string.append(&quot;Z &quot;);</b>
+<b class="fc">&nbsp;		else if (!b_export_zs &amp;&amp; b_export_ms)</b>
+<b class="nc">&nbsp;			string.append(&quot;M &quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (position == null) {</b>
+<b class="fc">&nbsp;			string.append(&quot;EMPTY&quot;);</b>
+&nbsp;			return;
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		polygonText_(precision, b_export_zs, b_export_ms, zs, ms, position,</b>
+&nbsp;				path_flags, paths, 0, path_count, string);
+&nbsp;	}
+&nbsp;
+&nbsp;	static void polygonTaggedTextFromEnvelope_(int precision,
+&nbsp;			boolean b_export_zs, boolean b_export_ms, double xmin, double ymin,
+&nbsp;			double xmax, double ymax, double zmin, double zmax, double mmin,
+&nbsp;			double mmax, StringBuilder string) {
+<b class="fc">&nbsp;		string.append(&quot;POLYGON &quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (b_export_zs &amp;&amp; b_export_ms)</b>
+<b class="nc">&nbsp;			string.append(&quot;ZM &quot;);</b>
+<b class="fc">&nbsp;		else if (b_export_zs &amp;&amp; !b_export_ms)</b>
+<b class="fc">&nbsp;			string.append(&quot;Z &quot;);</b>
+<b class="nc">&nbsp;		else if (!b_export_zs &amp;&amp; b_export_ms)</b>
+<b class="nc">&nbsp;			string.append(&quot;M &quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (NumberUtils.isNaN(xmin)) {</b>
+<b class="fc">&nbsp;			string.append(&quot;EMPTY&quot;);</b>
+&nbsp;			return;
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		writeEnvelopeAsWktPolygon_(precision, b_export_zs, b_export_ms, xmin,</b>
+&nbsp;				ymin, xmax, ymax, zmin, zmax, mmin, mmax, string);
+&nbsp;	}
+&nbsp;
+&nbsp;	static void lineStringTaggedText_(int precision, boolean b_export_zs,
+&nbsp;			boolean b_export_ms, AttributeStreamOfDbl zs,
+&nbsp;			AttributeStreamOfDbl ms, AttributeStreamOfDbl position,
+&nbsp;			AttributeStreamOfInt8 path_flags, AttributeStreamOfInt32 paths,
+&nbsp;			StringBuilder string) {
+<b class="fc">&nbsp;		string.append(&quot;LINESTRING &quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (b_export_zs &amp;&amp; b_export_ms)</b>
+<b class="nc">&nbsp;			string.append(&quot;ZM &quot;);</b>
+<b class="fc">&nbsp;		else if (b_export_zs &amp;&amp; !b_export_ms)</b>
+<b class="fc">&nbsp;			string.append(&quot;Z &quot;);</b>
+<b class="fc">&nbsp;		else if (!b_export_zs &amp;&amp; b_export_ms)</b>
+<b class="nc">&nbsp;			string.append(&quot;M &quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (position == null) {</b>
+<b class="fc">&nbsp;			string.append(&quot;EMPTY&quot;);</b>
+&nbsp;			return;
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		boolean b_closed = ((path_flags.read(0) &amp; PathFlags.enumClosed) != 0);</b>
+&nbsp;
+<b class="fc">&nbsp;		lineStringText_(false, b_closed, precision, b_export_zs, b_export_ms,</b>
+&nbsp;				zs, ms, position, paths, 0, string);
+&nbsp;	}
+&nbsp;
+&nbsp;	static void pointTaggedText_(int precision, boolean b_export_zs,
+&nbsp;			boolean b_export_ms, double x, double y, double z, double m,
+&nbsp;			StringBuilder string) {
+<b class="fc">&nbsp;		string.append(&quot;POINT &quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (b_export_zs &amp;&amp; b_export_ms)</b>
+<b class="fc">&nbsp;			string.append(&quot;ZM &quot;);</b>
+<b class="fc">&nbsp;		else if (b_export_zs &amp;&amp; !b_export_ms)</b>
+<b class="nc">&nbsp;			string.append(&quot;Z &quot;);</b>
+<b class="fc">&nbsp;		else if (!b_export_zs &amp;&amp; b_export_ms)</b>
+<b class="nc">&nbsp;			string.append(&quot;M &quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (NumberUtils.isNaN(x)) {</b>
+<b class="fc">&nbsp;			string.append(&quot;EMPTY&quot;);</b>
+&nbsp;			return;
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		pointText_(precision, b_export_zs, b_export_ms, x, y, z, m, string);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	static void pointTaggedTextFromMultiPoint_(int precision,
+&nbsp;			boolean b_export_zs, boolean b_export_ms, AttributeStreamOfDbl zs,
+&nbsp;			AttributeStreamOfDbl ms, AttributeStreamOfDbl position,
+&nbsp;			StringBuilder string) {
+<b class="fc">&nbsp;		string.append(&quot;POINT &quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (b_export_zs &amp;&amp; b_export_ms)</b>
+<b class="fc">&nbsp;			string.append(&quot;ZM &quot;);</b>
+<b class="nc">&nbsp;		else if (b_export_zs &amp;&amp; !b_export_ms)</b>
+<b class="nc">&nbsp;			string.append(&quot;Z &quot;);</b>
+<b class="nc">&nbsp;		else if (!b_export_zs &amp;&amp; b_export_ms)</b>
+<b class="nc">&nbsp;			string.append(&quot;M &quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (position == null) {</b>
+<b class="fc">&nbsp;			string.append(&quot;EMPTY&quot;);</b>
+&nbsp;			return;
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		pointText_(precision, b_export_zs, b_export_ms, zs, ms, position, 0,</b>
+&nbsp;				string);
+&nbsp;	}
+&nbsp;
+&nbsp;	static void multiPolygonText_(int precision, boolean b_export_zs,
+&nbsp;			boolean b_export_ms, AttributeStreamOfDbl zs,
+&nbsp;			AttributeStreamOfDbl ms, AttributeStreamOfDbl position,
+&nbsp;			AttributeStreamOfInt8 path_flags, AttributeStreamOfInt32 paths,
+&nbsp;			int polygon_count, int path_count, StringBuilder string) {
+<b class="fc">&nbsp;		int polygon_start = 0;</b>
+<b class="fc">&nbsp;		int polygon_end = 1;</b>
+&nbsp;
+<b class="fc">&nbsp;		while (polygon_end &lt; path_count</b>
+<b class="fc">&nbsp;				&amp;&amp; (path_flags.read(polygon_end) &amp; PathFlags.enumOGCStartPolygon) == 0)</b>
+<b class="fc">&nbsp;			polygon_end++;</b>
+&nbsp;
+<b class="fc">&nbsp;		polygonText_(precision, b_export_zs, b_export_ms, zs, ms, position,</b>
+&nbsp;				path_flags, paths, polygon_start, polygon_end, string);
+&nbsp;
+<b class="fc">&nbsp;		for (int ipolygon = 1; ipolygon &lt; polygon_count; ipolygon++) {</b>
+<b class="fc">&nbsp;			polygon_start = polygon_end;</b>
+<b class="fc">&nbsp;			polygon_end++;</b>
+&nbsp;
+<b class="fc">&nbsp;			while (polygon_end &lt; path_count</b>
+<b class="fc">&nbsp;					&amp;&amp; (path_flags.read(polygon_end) &amp; PathFlags.enumOGCStartPolygon) == 0)</b>
+<b class="fc">&nbsp;				polygon_end++;</b>
+&nbsp;
+<b class="fc">&nbsp;			string.append(&quot;, &quot;);</b>
+<b class="fc">&nbsp;			polygonText_(precision, b_export_zs, b_export_ms, zs, ms, position,</b>
+&nbsp;					path_flags, paths, polygon_start, polygon_end, string);
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	static void multiLineStringText_(int precision, boolean b_export_zs,
+&nbsp;			boolean b_export_ms, AttributeStreamOfDbl zs,
+&nbsp;			AttributeStreamOfDbl ms, AttributeStreamOfDbl position,
+&nbsp;			AttributeStreamOfInt8 path_flags, AttributeStreamOfInt32 paths,
+&nbsp;			int path_count, StringBuilder string) {
+<b class="fc">&nbsp;		boolean b_closed = ((path_flags.read(0) &amp; PathFlags.enumClosed) != 0);</b>
+&nbsp;
+<b class="fc">&nbsp;		lineStringText_(false, b_closed, precision, b_export_zs, b_export_ms,</b>
+&nbsp;				zs, ms, position, paths, 0, string);
+&nbsp;
+<b class="fc">&nbsp;		for (int path = 1; path &lt; path_count; path++) {</b>
+<b class="fc">&nbsp;			string.append(&quot;, &quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;			b_closed = ((path_flags.read(path) &amp; PathFlags.enumClosed) != 0);</b>
+&nbsp;
+<b class="fc">&nbsp;			lineStringText_(false, b_closed, precision, b_export_zs,</b>
+&nbsp;					b_export_ms, zs, ms, position, paths, path, string);
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	static void multiPointText_(int precision, boolean b_export_zs,
+&nbsp;			boolean b_export_ms, AttributeStreamOfDbl zs,
+&nbsp;			AttributeStreamOfDbl ms, AttributeStreamOfDbl position,
+&nbsp;			int point_count, StringBuilder string) {
+<b class="fc">&nbsp;		pointText_(precision, b_export_zs, b_export_ms, zs, ms, position, 0,</b>
+&nbsp;				string);
+&nbsp;
+<b class="fc">&nbsp;		for (int point = 1; point &lt; point_count; point++) {</b>
+<b class="fc">&nbsp;			string.append(&quot;, &quot;);</b>
+<b class="fc">&nbsp;			pointText_(precision, b_export_zs, b_export_ms, zs, ms, position,</b>
+&nbsp;					point, string);
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	static void polygonText_(int precision, boolean b_export_zs,
+&nbsp;			boolean b_export_ms, AttributeStreamOfDbl zs,
+&nbsp;			AttributeStreamOfDbl ms, AttributeStreamOfDbl position,
+&nbsp;			AttributeStreamOfInt8 path_flags, AttributeStreamOfInt32 paths,
+&nbsp;			int polygon_start, int polygon_end, StringBuilder string) {
+<b class="fc">&nbsp;		string.append(&#39;(&#39;);</b>
+&nbsp;
+<b class="fc">&nbsp;		lineStringText_(true, true, precision, b_export_zs, b_export_ms, zs,</b>
+&nbsp;				ms, position, paths, polygon_start, string);
+&nbsp;
+<b class="fc">&nbsp;		for (int path = polygon_start + 1; path &lt; polygon_end; path++) {</b>
+<b class="fc">&nbsp;			string.append(&quot;, &quot;);</b>
+<b class="fc">&nbsp;			lineStringText_(true, true, precision, b_export_zs, b_export_ms,</b>
+&nbsp;					zs, ms, position, paths, path, string);
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		string.append(&#39;)&#39;);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	static void lineStringText_(boolean bRing, boolean b_closed, int precision,
+&nbsp;			boolean b_export_zs, boolean b_export_ms, AttributeStreamOfDbl zs,
+&nbsp;			AttributeStreamOfDbl ms, AttributeStreamOfDbl position,
+&nbsp;			AttributeStreamOfInt32 paths, int path, StringBuilder string) {
+<b class="fc">&nbsp;		int istart = paths.read(path);</b>
+<b class="fc">&nbsp;		int iend = paths.read(path + 1);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (istart == iend) {</b>
+<b class="nc">&nbsp;			string.append(&quot;EMPTY&quot;);</b>
+&nbsp;			return;
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		string.append(&#39;(&#39;);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (bRing) {</b>
+<b class="fc">&nbsp;			point_(precision, b_export_zs, b_export_ms, zs, ms, position,</b>
+&nbsp;					istart, string);
+<b class="fc">&nbsp;			string.append(&quot;, &quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;			for (int point = iend - 1; point &gt;= istart + 1; point--) {</b>
+<b class="fc">&nbsp;				point_(precision, b_export_zs, b_export_ms, zs, ms, position,</b>
+&nbsp;						point, string);
+<b class="fc">&nbsp;				string.append(&quot;, &quot;);</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			point_(precision, b_export_zs, b_export_ms, zs, ms, position,</b>
+&nbsp;					istart, string);
+&nbsp;		} else {
+<b class="fc">&nbsp;			for (int point = istart; point &lt; iend - 1; point++) {</b>
+<b class="fc">&nbsp;				point_(precision, b_export_zs, b_export_ms, zs, ms, position,</b>
+&nbsp;						point, string);
+<b class="fc">&nbsp;				string.append(&quot;, &quot;);</b>
+&nbsp;			}
+&nbsp;
+<b class="fc">&nbsp;			point_(precision, b_export_zs, b_export_ms, zs, ms, position,</b>
+&nbsp;					iend - 1, string);
+&nbsp;
+<b class="fc">&nbsp;			if (b_closed) {</b>
+<b class="fc">&nbsp;				string.append(&quot;, &quot;);</b>
+<b class="fc">&nbsp;				point_(precision, b_export_zs, b_export_ms, zs, ms, position,</b>
+&nbsp;						istart, string);
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		string.append(&#39;)&#39;);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	static int pointText_(int precision, boolean b_export_zs,
+&nbsp;			boolean b_export_ms, double x, double y, double z, double m,
+&nbsp;			StringBuilder string) {
+<b class="fc">&nbsp;		string.append(&#39;(&#39;);</b>
+<b class="fc">&nbsp;		point_(precision, b_export_zs, b_export_ms, x, y, z, m, string);</b>
+<b class="fc">&nbsp;		string.append(&#39;)&#39;);</b>
+&nbsp;
+<b class="fc">&nbsp;		return 1;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	static void pointText_(int precision, boolean b_export_zs,
+&nbsp;			boolean b_export_ms, AttributeStreamOfDbl zs,
+&nbsp;			AttributeStreamOfDbl ms, AttributeStreamOfDbl position, int point,
+&nbsp;			StringBuilder string) {
+<b class="fc">&nbsp;		double x = position.read(2 * point);</b>
+<b class="fc">&nbsp;		double y = position.read(2 * point + 1);</b>
+<b class="fc">&nbsp;		double z = NumberUtils.TheNaN;</b>
+<b class="fc">&nbsp;		double m = NumberUtils.TheNaN;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (b_export_zs)</b>
+<b class="fc">&nbsp;			z = (zs != null ? zs.read(point) : VertexDescription</b>
+<b class="nc">&nbsp;					.getDefaultValue(VertexDescription.Semantics.Z));</b>
+&nbsp;
+<b class="fc">&nbsp;		if (b_export_ms)</b>
+<b class="fc">&nbsp;			m = (ms != null ? ms.read(point) : VertexDescription</b>
+<b class="nc">&nbsp;					.getDefaultValue(VertexDescription.Semantics.M));</b>
+&nbsp;
+<b class="fc">&nbsp;		pointText_(precision, b_export_zs, b_export_ms, x, y, z, m, string);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	static void point_(int precision, boolean b_export_zs, boolean b_export_ms,
+&nbsp;			double x, double y, double z, double m, StringBuilder string) {
+<b class="fc">&nbsp;		writeSignedNumericLiteral_(x, precision, string);</b>
+<b class="fc">&nbsp;		string.append(&#39; &#39;);</b>
+<b class="fc">&nbsp;		writeSignedNumericLiteral_(y, precision, string);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (b_export_zs) {</b>
+<b class="fc">&nbsp;			string.append(&#39; &#39;);</b>
+<b class="fc">&nbsp;			writeSignedNumericLiteral_(z, precision, string);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (b_export_ms) {</b>
+<b class="fc">&nbsp;			string.append(&#39; &#39;);</b>
+<b class="fc">&nbsp;			writeSignedNumericLiteral_(m, precision, string);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	static void point_(int precision, boolean b_export_zs, boolean b_export_ms,
+&nbsp;			AttributeStreamOfDbl zs, AttributeStreamOfDbl ms,
+&nbsp;			AttributeStreamOfDbl position, int point, StringBuilder string) {
+<b class="fc">&nbsp;		double x = position.read(2 * point);</b>
+<b class="fc">&nbsp;		double y = position.read(2 * point + 1);</b>
+<b class="fc">&nbsp;		double z = NumberUtils.TheNaN;</b>
+<b class="fc">&nbsp;		double m = NumberUtils.TheNaN;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (b_export_zs)</b>
+<b class="fc">&nbsp;			z = (zs != null ? zs.read(point) : VertexDescription</b>
+<b class="nc">&nbsp;					.getDefaultValue(VertexDescription.Semantics.Z));</b>
+&nbsp;
+<b class="fc">&nbsp;		if (b_export_ms)</b>
+<b class="fc">&nbsp;			m = (ms != null ? ms.read(point) : VertexDescription</b>
+<b class="nc">&nbsp;					.getDefaultValue(VertexDescription.Semantics.M));</b>
+&nbsp;
+<b class="fc">&nbsp;		point_(precision, b_export_zs, b_export_ms, x, y, z, m, string);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	static boolean writeSignedNumericLiteral_(double v, int precision,
+&nbsp;			StringBuilder string) {
+<b class="fc">&nbsp;		if (NumberUtils.isNaN(v)) {</b>
+<b class="nc">&nbsp;			string.append(&quot;NAN&quot;);</b>
+<b class="nc">&nbsp;			return false;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		StringUtils.appendDouble(v, precision, string);</b>
+<b class="fc">&nbsp;		return true;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	static void writeEnvelopeAsWktPolygon_(int precision, boolean b_export_zs,
+&nbsp;			boolean b_export_ms, double xmin, double ymin, double xmax,
+&nbsp;			double ymax, double zmin, double zmax, double mmin, double mmax,
+&nbsp;			StringBuilder string) {
+<b class="fc">&nbsp;		string.append(&quot;((&quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;		writeSignedNumericLiteral_(xmin, precision, string);</b>
+<b class="fc">&nbsp;		string.append(&#39; &#39;);</b>
+<b class="fc">&nbsp;		writeSignedNumericLiteral_(ymin, precision, string);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (b_export_zs) {</b>
+<b class="fc">&nbsp;			string.append(&#39; &#39;);</b>
+<b class="fc">&nbsp;			writeSignedNumericLiteral_(zmin, precision, string);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (b_export_ms) {</b>
+<b class="nc">&nbsp;			string.append(&#39; &#39;);</b>
+<b class="nc">&nbsp;			writeSignedNumericLiteral_(mmin, precision, string);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		string.append(&quot;, &quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;		writeSignedNumericLiteral_(xmax, precision, string);</b>
+<b class="fc">&nbsp;		string.append(&#39; &#39;);</b>
+<b class="fc">&nbsp;		writeSignedNumericLiteral_(ymin, precision, string);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (b_export_zs) {</b>
+<b class="fc">&nbsp;			string.append(&#39; &#39;);</b>
+<b class="fc">&nbsp;			writeSignedNumericLiteral_(zmax, precision, string);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (b_export_ms) {</b>
+<b class="nc">&nbsp;			string.append(&#39; &#39;);</b>
+<b class="nc">&nbsp;			writeSignedNumericLiteral_(mmax, precision, string);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		string.append(&quot;, &quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;		writeSignedNumericLiteral_(xmax, precision, string);</b>
+<b class="fc">&nbsp;		string.append(&#39; &#39;);</b>
+<b class="fc">&nbsp;		writeSignedNumericLiteral_(ymax, precision, string);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (b_export_zs) {</b>
+<b class="fc">&nbsp;			string.append(&#39; &#39;);</b>
+<b class="fc">&nbsp;			writeSignedNumericLiteral_(zmin, precision, string);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (b_export_ms) {</b>
+<b class="nc">&nbsp;			string.append(&#39; &#39;);</b>
+<b class="nc">&nbsp;			writeSignedNumericLiteral_(mmin, precision, string);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		string.append(&quot;, &quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;		writeSignedNumericLiteral_(xmin, precision, string);</b>
+<b class="fc">&nbsp;		string.append(&#39; &#39;);</b>
+<b class="fc">&nbsp;		writeSignedNumericLiteral_(ymax, precision, string);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (b_export_zs) {</b>
+<b class="fc">&nbsp;			string.append(&#39; &#39;);</b>
+<b class="fc">&nbsp;			writeSignedNumericLiteral_(zmax, precision, string);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (b_export_ms) {</b>
+<b class="nc">&nbsp;			string.append(&#39; &#39;);</b>
+<b class="nc">&nbsp;			writeSignedNumericLiteral_(mmax, precision, string);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		string.append(&quot;, &quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;		writeSignedNumericLiteral_(xmin, precision, string);</b>
+<b class="fc">&nbsp;		string.append(&#39; &#39;);</b>
+<b class="fc">&nbsp;		writeSignedNumericLiteral_(ymin, precision, string);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (b_export_zs) {</b>
+<b class="fc">&nbsp;			string.append(&#39; &#39;);</b>
+<b class="fc">&nbsp;			writeSignedNumericLiteral_(zmin, precision, string);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (b_export_ms) {</b>
+<b class="nc">&nbsp;			string.append(&#39; &#39;);</b>
+<b class="nc">&nbsp;			writeSignedNumericLiteral_(mmin, precision, string);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		string.append(&quot;))&quot;);</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-02-21 16:04</div>
+</div>
+</body>
+</html>

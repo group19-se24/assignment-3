@@ -1,0 +1,458 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > PolygonUtils</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.esri.core.geometry</a>
+</div>
+
+<h1>Coverage Summary for Class: PolygonUtils (com.esri.core.geometry)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">PolygonUtils</td>
+<td class="coverageStat">
+  <span class="percent">
+    46,7%
+  </span>
+  <span class="absValue">
+    (7/15)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    37,6%
+  </span>
+  <span class="absValue">
+    (47/125)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">PolygonUtils$PiPResult</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    52,9%
+  </span>
+  <span class="absValue">
+    (9/17)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    38,6%
+  </span>
+  <span class="absValue">
+    (49/127)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; Copyright 1995-2015 Esri
+&nbsp;
+&nbsp;   Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp;   you may not use this file except in compliance with the License.
+&nbsp;   You may obtain a copy of the License at
+&nbsp;
+&nbsp;       http://www.apache.org/licenses/LICENSE-2.0
+&nbsp;
+&nbsp;   Unless required by applicable law or agreed to in writing, software
+&nbsp;   distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp;   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp;   See the License for the specific language governing permissions and
+&nbsp;   limitations under the License.
+&nbsp;
+&nbsp; For additional information, contact:
+&nbsp; Environmental Systems Research Institute, Inc.
+&nbsp; Attn: Contracts Dept
+&nbsp; 380 New York Street
+&nbsp; Redlands, California, USA 92373
+&nbsp;
+&nbsp; email: contracts@esri.com
+&nbsp; */
+&nbsp;
+&nbsp;package com.esri.core.geometry;
+&nbsp;
+<b class="nc">&nbsp;final class PolygonUtils {</b>
+&nbsp;
+<b class="fc">&nbsp;	public enum PiPResult {</b>
+<b class="fc">&nbsp;		PiPOutside, PiPInside, PiPBoundary</b>
+&nbsp;	};
+&nbsp;
+&nbsp;	// enum_class PiPResult { PiPOutside = 0, PiPInside = 1, PiPBoundary = 2};
+&nbsp;	/**
+&nbsp;	 * Tests if Point is inside the Polygon. Returns PiPOutside if not in
+&nbsp;	 * polygon, PiPInside if in the polygon, PiPBoundary is if on the border. It
+&nbsp;	 * tests border only if the tolerance is greater than 0, otherwise PiPBoundary cannot
+&nbsp;	 * be returned. Note: If the tolerance is not 0, the test is more expensive
+&nbsp;	 * because it calculates closest distance from a point to each segment.
+&nbsp;	 * 
+&nbsp;	 * O(n) complexity, where n is the number of polygon segments.
+&nbsp;	 */
+&nbsp;	public static PiPResult isPointInPolygon2D(Polygon polygon,
+&nbsp;			Point inputPoint, double tolerance) {
+<b class="fc">&nbsp;		int res = PointInPolygonHelper.isPointInPolygon(polygon, inputPoint,</b>
+&nbsp;				tolerance);
+<b class="fc">&nbsp;		if (res == 0)</b>
+<b class="fc">&nbsp;			return PiPResult.PiPOutside;</b>
+<b class="fc">&nbsp;		if (res == 1)</b>
+<b class="fc">&nbsp;			return PiPResult.PiPInside;</b>
+&nbsp;
+<b class="fc">&nbsp;		return PiPResult.PiPBoundary;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public static PiPResult isPointInPolygon2D(Polygon polygon,
+&nbsp;			Point2D inputPoint, double tolerance) {
+<b class="fc">&nbsp;		int res = PointInPolygonHelper.isPointInPolygon(polygon, inputPoint,</b>
+&nbsp;				tolerance);
+<b class="fc">&nbsp;		if (res == 0)</b>
+<b class="fc">&nbsp;			return PiPResult.PiPOutside;</b>
+<b class="fc">&nbsp;		if (res == 1)</b>
+<b class="fc">&nbsp;			return PiPResult.PiPInside;</b>
+&nbsp;
+<b class="fc">&nbsp;		return PiPResult.PiPBoundary;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	static PiPResult isPointInPolygon2D(Polygon polygon, double inputPointXVal,
+&nbsp;			double inputPointYVal, double tolerance) {
+<b class="nc">&nbsp;		int res = PointInPolygonHelper.isPointInPolygon(polygon,</b>
+&nbsp;				inputPointXVal, inputPointYVal, tolerance);
+<b class="nc">&nbsp;		if (res == 0)</b>
+<b class="nc">&nbsp;			return PiPResult.PiPOutside;</b>
+<b class="nc">&nbsp;		if (res == 1)</b>
+<b class="nc">&nbsp;			return PiPResult.PiPInside;</b>
+&nbsp;
+<b class="nc">&nbsp;		return PiPResult.PiPBoundary;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Tests if Point is inside the Polygon&#39;s ring. Returns PiPOutside if not in
+&nbsp;	 * ring, PiPInside if in the ring, PiPBoundary is if on the border. It tests
+&nbsp;	 * border only if the tolerance is greater than 0, otherwise PiPBoundary cannot be
+&nbsp;	 * returned. Note: If the tolerance is not 0, the test is more expensive
+&nbsp;	 * because it calculates closest distance from a point to each segment.
+&nbsp;	 * 
+&nbsp;	 * O(n) complexity, where n is the number of ring segments.
+&nbsp;	 */
+&nbsp;	public static PiPResult isPointInRing2D(Polygon polygon, int iRing,
+&nbsp;			Point2D inputPoint, double tolerance) {
+<b class="nc">&nbsp;		MultiPathImpl polygonImpl = (MultiPathImpl) polygon._getImpl();</b>
+<b class="nc">&nbsp;		int res = PointInPolygonHelper.isPointInRing(polygonImpl, iRing,</b>
+&nbsp;				inputPoint, tolerance, null);
+<b class="nc">&nbsp;		if (res == 0)</b>
+<b class="nc">&nbsp;			return PiPResult.PiPOutside;</b>
+<b class="nc">&nbsp;		if (res == 1)</b>
+<b class="nc">&nbsp;			return PiPResult.PiPInside;</b>
+&nbsp;
+&nbsp;		// return PiPResult.PiPBoundary;
+<b class="nc">&nbsp;		return PiPResult.PiPInside; // we do not return PiPBoundary. Overwise,</b>
+&nbsp;									// we would have to do more complex
+&nbsp;									// calculations to differentiat between
+&nbsp;									// internal and external boundaries.
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Tests if Point is inside of the any outer ring of a Polygon. Returns
+&nbsp;	 * PiPOutside if not in any outer ring, PiPInside if in the any outer ring,
+&nbsp;	 * or on the boundary. PiPBoundary is never returned. Note: If the tolerance
+&nbsp;	 * is not 0, the test is more expensive because it calculates closest
+&nbsp;	 * distance from a point to each segment.
+&nbsp;	 * 
+&nbsp;	 * O(n) complexity, where n is the number of polygon segments.
+&nbsp;	 */
+&nbsp;	public static PiPResult isPointInAnyOuterRing(Polygon polygon,
+&nbsp;			Point2D inputPoint, double tolerance) {
+<b class="fc">&nbsp;		int res = PointInPolygonHelper.isPointInAnyOuterRing(polygon,</b>
+&nbsp;				inputPoint, tolerance);
+<b class="fc">&nbsp;		if (res == 0)</b>
+<b class="fc">&nbsp;			return PiPResult.PiPOutside;</b>
+<b class="fc">&nbsp;		if (res == 1)</b>
+<b class="fc">&nbsp;			return PiPResult.PiPInside;</b>
+&nbsp;
+&nbsp;		// return PiPResult.PiPBoundary;
+<b class="nc">&nbsp;		return PiPResult.PiPInside; // we do not return PiPBoundary. Overwise,</b>
+&nbsp;									// we would have to do more complex
+&nbsp;									// calculations to differentiat between
+&nbsp;									// internal and external boundaries.
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Tests point is inside the Polygon for an array of points. Returns
+&nbsp;	 * PiPOutside if not in polygon, PiPInside if in the polygon, PiPBoundary is
+&nbsp;	 * if on the border. It tests border only if the tolerance is greater than 0, otherwise
+&nbsp;	 * PiPBoundary cannot be returned. Note: If the tolerance is not 0, the test
+&nbsp;	 * is more expensive.
+&nbsp;	 * 
+&nbsp;	 * O(n*m) complexity, where n is the number of polygon segments, m is the
+&nbsp;	 * number of input points.
+&nbsp;	 */
+&nbsp;	public static void testPointsInPolygon2D(Polygon polygon,
+&nbsp;			Point2D[] inputPoints, int count, double tolerance,
+&nbsp;			PiPResult[] testResults) {
+<b class="fc">&nbsp;		if (inputPoints.length &lt; count || testResults.length &lt; count)</b>
+<b class="nc">&nbsp;			throw new IllegalArgumentException();// GEOMTHROW(invalid_argument);</b>
+&nbsp;
+<b class="fc">&nbsp;		for (int i = 0; i &lt; count; i++)</b>
+<b class="fc">&nbsp;			testResults[i] = isPointInPolygon2D(polygon, inputPoints[i],</b>
+&nbsp;					tolerance);
+&nbsp;	}
+&nbsp;
+&nbsp;	static void testPointsInPolygon2D(Polygon polygon, double[] xyStreamBuffer,
+&nbsp;			int pointCount, double tolerance, PiPResult[] testResults) {
+<b class="nc">&nbsp;		if (xyStreamBuffer.length / 2 &lt; pointCount</b>
+&nbsp;				|| testResults.length &lt; pointCount)
+<b class="nc">&nbsp;			throw new IllegalArgumentException();// GEOMTHROW(invalid_argument);</b>
+&nbsp;
+<b class="nc">&nbsp;		for (int i = 0; i &lt; pointCount; i++)</b>
+<b class="nc">&nbsp;			testResults[i] = isPointInPolygon2D(polygon, xyStreamBuffer[i * 2],</b>
+&nbsp;					xyStreamBuffer[i * 2 + 1], tolerance);
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Tests point is inside an Area Geometry (Envelope, Polygon) for an array
+&nbsp;	 * of points. Returns PiPOutside if not in area, PiPInside if in the area,
+&nbsp;	 * PiPBoundary is if on the border. It tests border only if the tolerance is
+&nbsp;	 * greater than 0, otherwise PiPBoundary cannot be returned. Note: If the tolerance is
+&nbsp;	 * not 0, the test is more expensive.
+&nbsp;	 * 
+&nbsp;	 * O(n*m) complexity, where n is the number of polygon segments, m is the
+&nbsp;	 * number of input points.
+&nbsp;	 */
+&nbsp;	public static void testPointsInArea2D(Geometry polygon,
+&nbsp;			Point2D[] inputPoints, int count, double tolerance,
+&nbsp;			PiPResult[] testResults) {
+<b class="fc">&nbsp;		if (polygon.getType() == Geometry.Type.Polygon)</b>
+<b class="fc">&nbsp;			testPointsInPolygon2D((Polygon) polygon, inputPoints, count,</b>
+&nbsp;					tolerance, testResults);
+<b class="nc">&nbsp;		else if (polygon.getType() == Geometry.Type.Envelope) {</b>
+<b class="nc">&nbsp;			Envelope2D env2D = new Envelope2D();</b>
+<b class="nc">&nbsp;			((Envelope) polygon).queryEnvelope2D(env2D);</b>
+<b class="nc">&nbsp;			_testPointsInEnvelope2D(env2D, inputPoints, count, tolerance,</b>
+&nbsp;					testResults);
+<b class="nc">&nbsp;		} else</b>
+<b class="nc">&nbsp;			throw new GeometryException(&quot;invalid_call&quot;);// GEOMTHROW(invalid_call);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public static void testPointsInArea2D(Geometry polygon,
+&nbsp;			double[] xyStreamBuffer, int count, double tolerance,
+&nbsp;			PiPResult[] testResults) {
+<b class="nc">&nbsp;		if (polygon.getType() == Geometry.Type.Polygon)</b>
+<b class="nc">&nbsp;			testPointsInPolygon2D((Polygon) polygon, xyStreamBuffer, count,</b>
+&nbsp;					tolerance, testResults);
+<b class="nc">&nbsp;		else if (polygon.getType() == Geometry.Type.Envelope) {</b>
+<b class="nc">&nbsp;			Envelope2D env2D = new Envelope2D();</b>
+<b class="nc">&nbsp;			((Envelope) polygon).queryEnvelope2D(env2D);</b>
+<b class="nc">&nbsp;			_testPointsInEnvelope2D(env2D, xyStreamBuffer, count, tolerance,</b>
+&nbsp;					testResults);
+<b class="nc">&nbsp;		} else</b>
+<b class="nc">&nbsp;			throw new GeometryException(&quot;invalid_call&quot;);// GEOMTHROW(invalid_call);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private static void _testPointsInEnvelope2D(Envelope2D env2D,
+&nbsp;			Point2D[] inputPoints, int count, double tolerance,
+&nbsp;			PiPResult[] testResults) {
+<b class="nc">&nbsp;		if (inputPoints.length &lt; count || testResults.length &lt; count)</b>
+<b class="nc">&nbsp;			throw new IllegalArgumentException();</b>
+&nbsp;
+<b class="nc">&nbsp;		if (env2D.isEmpty()) {</b>
+<b class="nc">&nbsp;			for (int i = 0; i &lt; count; i++)</b>
+<b class="nc">&nbsp;				testResults[i] = PiPResult.PiPOutside;</b>
+&nbsp;			return;
+&nbsp;		}
+&nbsp;
+<b class="nc">&nbsp;		Envelope2D envIn = env2D; // note for java port - assignement by value</b>
+<b class="nc">&nbsp;		envIn.inflate(-tolerance * 0.5, -tolerance * 0.5);</b>
+<b class="nc">&nbsp;		Envelope2D envOut = env2D;// note for java port - assignement by value</b>
+<b class="nc">&nbsp;		envOut.inflate(tolerance * 0.5, tolerance * 0.5);</b>
+<b class="nc">&nbsp;		for (int i = 0; i &lt; count; i++) {</b>
+<b class="nc">&nbsp;			if (envIn.contains(inputPoints[i]))</b>
+<b class="nc">&nbsp;				testResults[i] = PiPResult.PiPInside;</b>
+<b class="nc">&nbsp;			else if (!envOut.contains(inputPoints[i]))</b>
+<b class="nc">&nbsp;				testResults[i] = PiPResult.PiPOutside;</b>
+&nbsp;			else
+<b class="nc">&nbsp;				testResults[i] = PiPResult.PiPBoundary;</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	private static void _testPointsInEnvelope2D(Envelope2D env2D,
+&nbsp;			double[] xyStreamBuffer, int pointCount, double tolerance,
+&nbsp;			PiPResult[] testResults) {
+<b class="nc">&nbsp;		if (xyStreamBuffer.length / 2 &lt; pointCount</b>
+&nbsp;				|| testResults.length &lt; pointCount)
+<b class="nc">&nbsp;			throw new IllegalArgumentException();</b>
+&nbsp;
+<b class="nc">&nbsp;		if (env2D.isEmpty()) {</b>
+<b class="nc">&nbsp;			for (int i = 0; i &lt; pointCount; i++)</b>
+<b class="nc">&nbsp;				testResults[i] = PiPResult.PiPOutside;</b>
+&nbsp;			return;
+&nbsp;		}
+&nbsp;
+<b class="nc">&nbsp;		Envelope2D envIn = env2D; // note for java port - assignement by value</b>
+<b class="nc">&nbsp;		envIn.inflate(-tolerance * 0.5, -tolerance * 0.5);</b>
+<b class="nc">&nbsp;		Envelope2D envOut = env2D;// note for java port - assignement by value</b>
+<b class="nc">&nbsp;		envOut.inflate(tolerance * 0.5, tolerance * 0.5);</b>
+<b class="nc">&nbsp;		for (int i = 0; i &lt; pointCount; i++) {</b>
+<b class="nc">&nbsp;			if (envIn</b>
+<b class="nc">&nbsp;					.contains(xyStreamBuffer[i * 2], xyStreamBuffer[i * 2 + 1]))</b>
+<b class="nc">&nbsp;				testResults[i] = PiPResult.PiPInside;</b>
+<b class="nc">&nbsp;			else if (!envIn.contains(xyStreamBuffer[i * 2],</b>
+&nbsp;					xyStreamBuffer[i * 2 + 1]))
+<b class="nc">&nbsp;				testResults[i] = PiPResult.PiPOutside;</b>
+&nbsp;			else
+<b class="nc">&nbsp;				testResults[i] = PiPResult.PiPBoundary;</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	static void testPointsOnSegment_(Segment seg, Point2D[] input_points,
+&nbsp;			int count, double tolerance, PolygonUtils.PiPResult[] test_results) {
+<b class="nc">&nbsp;		for (int i = 0; i &lt; count; i++) {</b>
+<b class="nc">&nbsp;			if (seg.isIntersecting(input_points[i], tolerance))</b>
+<b class="nc">&nbsp;				test_results[i] = PiPResult.PiPBoundary;</b>
+&nbsp;			else
+<b class="nc">&nbsp;				test_results[i] = PiPResult.PiPOutside;</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	static void testPointsOnPolyline2D_(Polyline poly, Point2D[] input_points,
+&nbsp;			int count, double tolerance, PolygonUtils.PiPResult[] test_results) {
+<b class="fc">&nbsp;		MultiPathImpl mp_impl = (MultiPathImpl) poly._getImpl();</b>
+<b class="fc">&nbsp;		GeometryAccelerators accel = mp_impl._getAccelerators();</b>
+<b class="fc">&nbsp;		RasterizedGeometry2D rgeom = null;</b>
+<b class="fc">&nbsp;		if (accel != null) {</b>
+<b class="nc">&nbsp;			rgeom = accel.getRasterizedGeometry();</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		int pointsLeft = count;</b>
+<b class="fc">&nbsp;		for (int i = 0; i &lt; count; i++) {</b>
+<b class="fc">&nbsp;			test_results[i] = PiPResult.PiPInside;// set to impossible value</b>
+&nbsp;
+<b class="fc">&nbsp;			if (rgeom != null) {</b>
+<b class="nc">&nbsp;				Point2D input_point = input_points[i];</b>
+<b class="nc">&nbsp;				RasterizedGeometry2D.HitType hit = rgeom.queryPointInGeometry(</b>
+&nbsp;						input_point.x, input_point.y);
+<b class="nc">&nbsp;				if (hit == RasterizedGeometry2D.HitType.Outside) {</b>
+<b class="nc">&nbsp;					test_results[i] = PiPResult.PiPOutside;</b>
+<b class="nc">&nbsp;					pointsLeft--;</b>
+&nbsp;				}
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (pointsLeft != 0) {</b>
+<b class="fc">&nbsp;			SegmentIteratorImpl iter = mp_impl.querySegmentIterator();</b>
+<b class="fc">&nbsp;			while (iter.nextPath() &amp;&amp; pointsLeft != 0) {</b>
+<b class="fc">&nbsp;				while (iter.hasNextSegment() &amp;&amp; pointsLeft != 0) {</b>
+<b class="fc">&nbsp;					Segment segment = iter.nextSegment();</b>
+<b class="fc">&nbsp;					for (int i = 0; i &lt; count &amp;&amp; pointsLeft != 0; i++) {</b>
+<b class="fc">&nbsp;						if (test_results[i] == PiPResult.PiPInside) {</b>
+<b class="fc">&nbsp;							if (segment.isIntersecting(input_points[i],</b>
+&nbsp;									tolerance)) {
+<b class="fc">&nbsp;								test_results[i] = PiPResult.PiPBoundary;</b>
+<b class="fc">&nbsp;								pointsLeft--;</b>
+&nbsp;							}
+&nbsp;						}
+&nbsp;					}
+<b class="fc">&nbsp;				}</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		for (int i = 0; i &lt; count; i++) {</b>
+<b class="fc">&nbsp;			if (test_results[i] == PiPResult.PiPInside)</b>
+<b class="fc">&nbsp;				test_results[i] = PiPResult.PiPOutside;</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	static void testPointsOnLine2D(Geometry line, Point2D[] input_points,
+&nbsp;			int count, double tolerance, PolygonUtils.PiPResult[] test_results) {
+<b class="fc">&nbsp;		Geometry.Type gt = line.getType();</b>
+<b class="fc">&nbsp;		if (gt == Geometry.Type.Polyline)</b>
+<b class="fc">&nbsp;			testPointsOnPolyline2D_((Polyline) line, input_points, count,</b>
+&nbsp;					tolerance, test_results);
+<b class="nc">&nbsp;		else if (Geometry.isSegment(gt.value())) {</b>
+<b class="nc">&nbsp;			testPointsOnSegment_((Segment) line, input_points, count,</b>
+&nbsp;					tolerance, test_results);
+&nbsp;		} else
+<b class="nc">&nbsp;			throw new GeometryException(&quot;Invalid call.&quot;);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-02-21 16:04</div>
+</div>
+</body>
+</html>

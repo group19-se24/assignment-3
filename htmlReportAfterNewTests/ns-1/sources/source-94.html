@@ -1,0 +1,254 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > OperatorOffset</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.esri.core.geometry</a>
+</div>
+
+<h1>Coverage Summary for Class: OperatorOffset (com.esri.core.geometry)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">OperatorOffset</td>
+<td class="coverageStat">
+  <span class="percent">
+    33,3%
+  </span>
+  <span class="absValue">
+    (1/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    33,3%
+  </span>
+  <span class="absValue">
+    (1/3)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">OperatorOffset$JoinType</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    60%
+  </span>
+  <span class="absValue">
+    (3/5)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    60%
+  </span>
+  <span class="absValue">
+    (3/5)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; Copyright 1995-2015 Esri
+&nbsp;
+&nbsp;   Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp;   you may not use this file except in compliance with the License.
+&nbsp;   You may obtain a copy of the License at
+&nbsp;
+&nbsp;       http://www.apache.org/licenses/LICENSE-2.0
+&nbsp;
+&nbsp;   Unless required by applicable law or agreed to in writing, software
+&nbsp;   distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp;   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp;   See the License for the specific language governing permissions and
+&nbsp;   limitations under the License.
+&nbsp;
+&nbsp; For additional information, contact:
+&nbsp; Environmental Systems Research Institute, Inc.
+&nbsp; Attn: Contracts Dept
+&nbsp; 380 New York Street
+&nbsp; Redlands, California, USA 92373
+&nbsp;
+&nbsp; email: contracts@esri.com
+&nbsp; */
+&nbsp;package com.esri.core.geometry;
+&nbsp;
+&nbsp;import com.esri.core.geometry.Operator.Type;
+&nbsp;
+<b class="fc">&nbsp;public abstract class OperatorOffset extends Operator {</b>
+&nbsp;	@Override
+&nbsp;	public Operator.Type getType() {
+<b class="nc">&nbsp;		return Operator.Type.Offset;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Join types for the offset operation.
+&nbsp;	 */
+<b class="fc">&nbsp;	public enum JoinType {</b>
+<b class="fc">&nbsp;		Round, Bevel, Miter, Square,</b>
+&nbsp;	};
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Creates offset version of the input geometries.
+&nbsp;	 * 
+&nbsp;	 * The offset operation creates a geometry that is a constant distance from
+&nbsp;	 * an input polyline or polygon. It is similar to buffering, but produces a
+&nbsp;	 * one sided result. If offsetDistance greater than 0, then the offset geometry is
+&nbsp;	 * constructed to the right of the oriented input geometry, otherwise it is
+&nbsp;	 * constructed to the left. For a simple polygon, the orientation of outer
+&nbsp;	 * rings is clockwise and for inner rings it is counter clockwise. So the
+&nbsp;	 * &quot;right side&quot; of a simple polygon is always its inside. The bevelRatio is
+&nbsp;	 * multiplied by the offset distance and the result determines how far a
+&nbsp;	 * mitered offset intersection can be from the input curve before it is
+&nbsp;	 * beveled.
+&nbsp;	 * 
+&nbsp;	 * @param inputGeometries
+&nbsp;	 *            The geometries to calculate offset for. Point and MultiPoint
+&nbsp;	 *            are not supported.
+&nbsp;	 * @param sr
+&nbsp;	 *            The SpatialReference of the Geometries.
+&nbsp;	 * @param distance
+&nbsp;	 *            The offset distance for the Geometries.
+&nbsp;	 * @param joins
+&nbsp;	 *            The join type of the offset geometry.
+&nbsp;	 * @param bevelRatio
+&nbsp;	 *            The ratio used to produce a bevel join instead of a miter join
+&nbsp;	 *            (used only when joins is Miter)
+&nbsp;	 * @param flattenError
+&nbsp;	 *            The maximum distance of the resulting segments compared to the
+&nbsp;	 *            true circular arc (used only when joins is Round). If
+&nbsp;	 *            flattenError is 0, tolerance value is used. Also, the
+&nbsp;	 *            algorithm never produces more than around 180 vertices for
+&nbsp;	 *            each round join.
+&nbsp;	 * @return Returns the result of the offset operation.
+&nbsp;	 */
+&nbsp;	public abstract GeometryCursor execute(GeometryCursor inputGeometries,
+&nbsp;			SpatialReference sr, double distance, JoinType joins,
+&nbsp;			double bevelRatio, double flattenError,
+&nbsp;			ProgressTracker progressTracker);
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Creates offset version of the input geometry.
+&nbsp;	 * 
+&nbsp;	 * The offset operation creates a geometry that is a constant distance from
+&nbsp;	 * an input polyline or polygon. It is similar to buffering, but produces a
+&nbsp;	 * one sided result. If offsetDistance greater than 0, then the offset geometry is
+&nbsp;	 * constructed to the right of the oriented input geometry, otherwise it is
+&nbsp;	 * constructed to the left. For a simple polygon, the orientation of outer
+&nbsp;	 * rings is clockwise and for inner rings it is counter clockwise. So the
+&nbsp;	 * &quot;right side&quot; of a simple polygon is always its inside. The bevelRatio is
+&nbsp;	 * multiplied by the offset distance and the result determines how far a
+&nbsp;	 * mitered offset intersection can be from the input curve before it is
+&nbsp;	 * beveled.
+&nbsp;	 * 
+&nbsp;	 * @param inputGeometry
+&nbsp;	 *            The geometry to calculate offset for. Point and MultiPoint are
+&nbsp;	 *            not supported.
+&nbsp;	 * @param sr
+&nbsp;	 *            The SpatialReference of the Geometries.
+&nbsp;	 * @param distance
+&nbsp;	 *            The offset distance for the Geometries.
+&nbsp;	 * @param joins
+&nbsp;	 *            The join type of the offset geometry.
+&nbsp;	 * @param bevelRatio
+&nbsp;	 *            The ratio used to produce a bevel join instead of a miter join
+&nbsp;	 *            (used only when joins is Miter)
+&nbsp;	 * @param flattenError
+&nbsp;	 *            The maximum distance of the resulting segments compared to the
+&nbsp;	 *            true circular arc (used only when joins is Round). If
+&nbsp;	 *            flattenError is 0, tolerance value is used. Also, the
+&nbsp;	 *            algorithm never produces more than around 180 vetices for each
+&nbsp;	 *            round join.
+&nbsp;	 * @return Returns the result of the offset operation.
+&nbsp;	 */
+&nbsp;	public abstract Geometry execute(Geometry inputGeometry,
+&nbsp;			SpatialReference sr, double distance, JoinType joins,
+&nbsp;			double bevelRatio, double flattenError,
+&nbsp;			ProgressTracker progressTracker);
+&nbsp;
+&nbsp;	public static OperatorOffset local() {
+<b class="nc">&nbsp;		return (OperatorOffset) OperatorFactoryLocal.getInstance().getOperator(</b>
+&nbsp;				Type.Offset);
+&nbsp;	}
+&nbsp;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-02-21 16:04</div>
+</div>
+</body>
+</html>

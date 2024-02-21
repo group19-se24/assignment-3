@@ -1,0 +1,229 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > Polyline</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.esri.core.geometry</a>
+</div>
+
+<h1>Coverage Summary for Class: Polyline (com.esri.core.geometry)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">Polyline</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (12/12)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    87%
+  </span>
+  <span class="absValue">
+    (20/23)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; Copyright 1995-2018 Esri
+&nbsp;
+&nbsp;   Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp;   you may not use this file except in compliance with the License.
+&nbsp;   You may obtain a copy of the License at
+&nbsp;
+&nbsp;       http://www.apache.org/licenses/LICENSE-2.0
+&nbsp;
+&nbsp;   Unless required by applicable law or agreed to in writing, software
+&nbsp;   distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp;   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp;   See the License for the specific language governing permissions and
+&nbsp;   limitations under the License.
+&nbsp;
+&nbsp; For additional information, contact:
+&nbsp; Environmental Systems Research Institute, Inc.
+&nbsp; Attn: Contracts Dept
+&nbsp; 380 New York Street
+&nbsp; Redlands, California, USA 92373
+&nbsp;
+&nbsp; email: contracts@esri.com
+&nbsp; */
+&nbsp;
+&nbsp;
+&nbsp;package com.esri.core.geometry;
+&nbsp;
+&nbsp;import java.io.Serializable;
+&nbsp;
+&nbsp;import static com.esri.core.geometry.SizeOf.SIZE_OF_POLYLINE;
+&nbsp;
+&nbsp;/**
+&nbsp; * A polyline is a collection of one or many paths.
+&nbsp; * 
+&nbsp; */
+&nbsp;public class Polyline extends MultiPath implements Serializable {
+&nbsp;
+&nbsp;	private static final long serialVersionUID = 2L;// TODO:remove as we use
+&nbsp;													// writeReplace and
+&nbsp;													// GeometrySerializer
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Creates an empty polyline.
+&nbsp;	 */
+<b class="fc">&nbsp;	public Polyline() {</b>
+<b class="fc">&nbsp;		m_impl = new MultiPathImpl(false);</b>
+&nbsp;	}
+&nbsp;
+<b class="fc">&nbsp;	public Polyline(VertexDescription vd) {</b>
+<b class="fc">&nbsp;		m_impl = new MultiPathImpl(false, vd);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Creates a polyline with one line segment.
+&nbsp;	 */
+<b class="fc">&nbsp;	public Polyline(Point start, Point end) {</b>
+<b class="fc">&nbsp;		m_impl = new MultiPathImpl(false, start.getDescription());</b>
+<b class="fc">&nbsp;		startPath(start);</b>
+<b class="fc">&nbsp;		lineTo(end);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public Geometry createInstance() {
+<b class="fc">&nbsp;		return new Polyline(getDescription());</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public int getDimension() {
+<b class="fc">&nbsp;		return 1;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public Geometry.Type getType() {
+<b class="fc">&nbsp;		return Type.Polyline;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public long estimateMemorySize() {
+<b class="fc">&nbsp;		return SIZE_OF_POLYLINE + m_impl.estimateMemorySize();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns TRUE when this geometry has exactly same type, properties, and
+&nbsp;	 * coordinates as the other geometry.
+&nbsp;	 */
+&nbsp;	@Override
+&nbsp;	public boolean equals(Object other) {
+<b class="fc">&nbsp;		if (other == null)</b>
+<b class="nc">&nbsp;			return false;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (other == this)</b>
+<b class="nc">&nbsp;			return true;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (other.getClass() != getClass())</b>
+<b class="nc">&nbsp;			return false;</b>
+&nbsp;
+<b class="fc">&nbsp;		return m_impl.equals(((Polyline) other)._getImpl());</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns the hash code for the polyline.
+&nbsp;	 */
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public int hashCode() {
+<b class="fc">&nbsp;		return m_impl.hashCode();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public void addSegment(Segment segment, boolean bStartNewPath) {
+<b class="fc">&nbsp;		m_impl.addSegment(segment, bStartNewPath);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public void interpolateAttributes(int from_path_index,
+&nbsp;			int from_point_index, int to_path_index, int to_point_index) {
+<b class="fc">&nbsp;		m_impl.interpolateAttributes(from_path_index, from_point_index,</b>
+&nbsp;				to_path_index, to_point_index);
+&nbsp;	}
+&nbsp;
+&nbsp;	public void interpolateAttributes(int semantics, int from_path_index,
+&nbsp;			int from_point_index, int to_path_index, int to_point_index) {
+<b class="fc">&nbsp;		m_impl.interpolateAttributesForSemantics(semantics, from_path_index,</b>
+&nbsp;				from_point_index, to_path_index, to_point_index);
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-02-21 16:04</div>
+</div>
+</body>
+</html>

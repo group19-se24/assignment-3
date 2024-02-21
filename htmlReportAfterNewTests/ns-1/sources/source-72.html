@@ -1,0 +1,1353 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > OperatorExportToWkbLocal</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.esri.core.geometry</a>
+</div>
+
+<h1>Coverage Summary for Class: OperatorExportToWkbLocal (com.esri.core.geometry)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">OperatorExportToWkbLocal</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    88,9%
+  </span>
+  <span class="absValue">
+    (8/9)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    63%
+  </span>
+  <span class="absValue">
+    (503/798)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; Copyright 1995-2015 Esri
+&nbsp;
+&nbsp;   Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp;   you may not use this file except in compliance with the License.
+&nbsp;   You may obtain a copy of the License at
+&nbsp;
+&nbsp;       http://www.apache.org/licenses/LICENSE-2.0
+&nbsp;
+&nbsp;   Unless required by applicable law or agreed to in writing, software
+&nbsp;   distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp;   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp;   See the License for the specific language governing permissions and
+&nbsp;   limitations under the License.
+&nbsp;
+&nbsp; For additional information, contact:
+&nbsp; Environmental Systems Research Institute, Inc.
+&nbsp; Attn: Contracts Dept
+&nbsp; 380 New York Street
+&nbsp; Redlands, California, USA 92373
+&nbsp;
+&nbsp; email: contracts@esri.com
+&nbsp; */
+&nbsp;
+&nbsp;package com.esri.core.geometry;
+&nbsp;
+&nbsp;import java.nio.ByteBuffer;
+&nbsp;import java.nio.ByteOrder;
+&nbsp;
+<b class="fc">&nbsp;class OperatorExportToWkbLocal extends OperatorExportToWkb {</b>
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public ByteBuffer execute(int exportFlags, Geometry geometry,
+&nbsp;			ProgressTracker progressTracker) {
+<b class="fc">&nbsp;		int size = exportToWKB(exportFlags, geometry, null);</b>
+<b class="fc">&nbsp;		ByteBuffer wkbBuffer = ByteBuffer.allocate(size).order(</b>
+<b class="fc">&nbsp;				ByteOrder.nativeOrder());</b>
+<b class="fc">&nbsp;		exportToWKB(exportFlags, geometry, wkbBuffer);</b>
+<b class="fc">&nbsp;		return wkbBuffer;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public int execute(int exportFlags, Geometry geometry,
+&nbsp;			ByteBuffer wkbBuffer, ProgressTracker progressTracker) {
+<b class="nc">&nbsp;		return exportToWKB(exportFlags, geometry, wkbBuffer);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private static int exportToWKB(int exportFlags, Geometry geometry,
+&nbsp;			ByteBuffer wkbBuffer) {
+<b class="fc">&nbsp;		if (geometry == null)</b>
+<b class="nc">&nbsp;			return 0;</b>
+&nbsp;
+<b class="fc">&nbsp;		int type = geometry.getType().value();</b>
+<b class="fc">&nbsp;		switch (type) {</b>
+&nbsp;		case Geometry.GeometryType.Polygon:
+<b class="fc">&nbsp;			if ((exportFlags &amp; WkbExportFlags.wkbExportLineString) != 0</b>
+&nbsp;					|| (exportFlags &amp; WkbExportFlags.wkbExportMultiLineString) != 0
+&nbsp;					|| (exportFlags &amp; WkbExportFlags.wkbExportPoint) != 0
+&nbsp;					|| (exportFlags &amp; WkbExportFlags.wkbExportMultiPoint) != 0)
+<b class="nc">&nbsp;				throw new GeometryException(&quot;invalid argument&quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;			return exportPolygonToWKB(exportFlags, (Polygon) geometry,</b>
+&nbsp;					wkbBuffer);
+&nbsp;		case Geometry.GeometryType.Polyline:
+<b class="fc">&nbsp;			if ((exportFlags &amp; WkbExportFlags.wkbExportPolygon) != 0</b>
+&nbsp;					|| (exportFlags &amp; WkbExportFlags.wkbExportMultiPolygon) != 0
+&nbsp;					|| (exportFlags &amp; WkbExportFlags.wkbExportPoint) != 0
+&nbsp;					|| (exportFlags &amp; WkbExportFlags.wkbExportMultiPoint) != 0)
+<b class="nc">&nbsp;				throw new GeometryException(&quot;invalid argument&quot;);</b>
+<b class="fc">&nbsp;			return exportPolylineToWKB(exportFlags, (Polyline) geometry,</b>
+&nbsp;					wkbBuffer);
+&nbsp;
+&nbsp;		case Geometry.GeometryType.MultiPoint:
+<b class="fc">&nbsp;			if ((exportFlags &amp; WkbExportFlags.wkbExportLineString) != 0</b>
+&nbsp;					|| (exportFlags &amp; WkbExportFlags.wkbExportMultiLineString) != 0
+&nbsp;					|| (exportFlags &amp; WkbExportFlags.wkbExportPolygon) != 0
+&nbsp;					|| (exportFlags &amp; WkbExportFlags.wkbExportMultiPolygon) != 0)
+<b class="nc">&nbsp;				throw new GeometryException(&quot;invalid argument&quot;);</b>
+<b class="fc">&nbsp;			return exportMultiPointToWKB(exportFlags, (MultiPoint) geometry,</b>
+&nbsp;					wkbBuffer);
+&nbsp;
+&nbsp;		case Geometry.GeometryType.Point:
+<b class="fc">&nbsp;			if ((exportFlags &amp; WkbExportFlags.wkbExportLineString) != 0</b>
+&nbsp;					|| (exportFlags &amp; WkbExportFlags.wkbExportMultiLineString) != 0
+&nbsp;					|| (exportFlags &amp; WkbExportFlags.wkbExportPolygon) != 0
+&nbsp;					|| (exportFlags &amp; WkbExportFlags.wkbExportMultiPolygon) != 0)
+<b class="nc">&nbsp;				throw new GeometryException(&quot;invalid argument&quot;);</b>
+<b class="fc">&nbsp;			return exportPointToWKB(exportFlags, (Point) geometry, wkbBuffer);</b>
+&nbsp;
+&nbsp;		case Geometry.GeometryType.Envelope:
+<b class="fc">&nbsp;			if ((exportFlags &amp; WkbExportFlags.wkbExportLineString) != 0</b>
+&nbsp;					|| (exportFlags &amp; WkbExportFlags.wkbExportMultiLineString) != 0
+&nbsp;					|| (exportFlags &amp; WkbExportFlags.wkbExportPoint) != 0
+&nbsp;					|| (exportFlags &amp; WkbExportFlags.wkbExportMultiPoint) != 0)
+<b class="nc">&nbsp;				throw new GeometryException(&quot;invalid argument&quot;);</b>
+<b class="fc">&nbsp;			return exportEnvelopeToWKB(exportFlags, (Envelope) geometry,</b>
+&nbsp;					wkbBuffer);
+&nbsp;
+&nbsp;		default: {
+<b class="nc">&nbsp;			throw GeometryException.GeometryInternalError();</b>
+&nbsp;			// return -1;
+&nbsp;		}
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	private static int exportPolygonToWKB(int exportFlags, Polygon _polygon,
+&nbsp;			ByteBuffer wkbBuffer) {
+<b class="fc">&nbsp;		MultiPathImpl polygon = (MultiPathImpl) _polygon._getImpl();</b>
+&nbsp;
+<b class="fc">&nbsp;		if ((exportFlags &amp; (int) WkbExportFlags.wkbExportFailIfNotSimple) != 0) {</b>
+<b class="nc">&nbsp;			int simple = polygon.getIsSimple(0.0);</b>
+&nbsp;
+<b class="nc">&nbsp;			if (simple != MultiVertexGeometryImpl.GeometryXSimple.Strong)</b>
+<b class="nc">&nbsp;				throw new GeometryException(&quot;non simple geometry&quot;);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		boolean bExportZs = polygon.hasAttribute(VertexDescription.Semantics.Z)</b>
+&nbsp;				&amp;&amp; (exportFlags &amp; (int) WkbExportFlags.wkbExportStripZs) == 0;
+<b class="fc">&nbsp;		boolean bExportMs = polygon.hasAttribute(VertexDescription.Semantics.M)</b>
+&nbsp;				&amp;&amp; (exportFlags &amp; (int) WkbExportFlags.wkbExportStripMs) == 0;
+&nbsp;
+<b class="fc">&nbsp;		int polygonCount = polygon.getOGCPolygonCount();</b>
+<b class="fc">&nbsp;		if ((exportFlags &amp; (int) WkbExportFlags.wkbExportPolygon) != 0</b>
+&nbsp;				&amp;&amp; polygonCount &gt; 1)
+<b class="nc">&nbsp;			throw new IllegalArgumentException();</b>
+&nbsp;
+<b class="fc">&nbsp;		int partCount = polygon.getPathCount();</b>
+<b class="fc">&nbsp;		int point_count = polygon.getPointCount();</b>
+<b class="fc">&nbsp;		point_count += partCount; // add 1 point per part</b>
+&nbsp;
+<b class="fc">&nbsp;		if (point_count &gt; 0 &amp;&amp; polygonCount == 0)</b>
+<b class="nc">&nbsp;			throw new GeometryException(&quot;corrupted geometry&quot;);</b>
+&nbsp;
+&nbsp;		// In the WKB_export_defaults case, polygons gets exported as a
+&nbsp;		// WKB_multi_polygon.
+&nbsp;
+&nbsp;		// get size for buffer
+<b class="fc">&nbsp;		int size = 0;</b>
+<b class="fc">&nbsp;		if ((exportFlags &amp; (int) WkbExportFlags.wkbExportPolygon) == 0</b>
+&nbsp;				|| polygonCount == 0)
+<b class="fc">&nbsp;			size += 1 /* byte order */+ 4 /* wkbType */+ 4 /* numPolygons */;</b>
+&nbsp;
+<b class="fc">&nbsp;		size += polygonCount</b>
+&nbsp;				* (1 /* byte order */+ 4 /* wkbType */+ 4/* numRings */)
+&nbsp;				+ partCount * (4 /* num_points */) + point_count * (2 * 8 /*
+&nbsp;																		 * xy
+&nbsp;																		 * coordinates
+&nbsp;																		 */);
+&nbsp;
+<b class="fc">&nbsp;		if (bExportZs)</b>
+<b class="fc">&nbsp;			size += (point_count * 8 /* zs */);</b>
+<b class="fc">&nbsp;		if (bExportMs)</b>
+<b class="fc">&nbsp;			size += (point_count * 8 /* ms */);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (size &gt;= NumberUtils.intMax())</b>
+<b class="nc">&nbsp;			throw new GeometryException(&quot;invalid call&quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (wkbBuffer == null)</b>
+<b class="fc">&nbsp;			return (int) size;</b>
+<b class="fc">&nbsp;		else if (wkbBuffer.capacity() &lt; size)</b>
+<b class="nc">&nbsp;			throw new GeometryException(&quot;buffer is too small&quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;		int offset = 0;</b>
+&nbsp;
+<b class="fc">&nbsp;		byte byteOrder = (byte) (wkbBuffer.order() == ByteOrder.LITTLE_ENDIAN ? WkbByteOrder.wkbNDR</b>
+<b class="nc">&nbsp;				: WkbByteOrder.wkbXDR);</b>
+&nbsp;
+&nbsp;		// Determine the wkb type
+&nbsp;		int type;
+<b class="fc">&nbsp;		if (!bExportZs &amp;&amp; !bExportMs) {</b>
+<b class="fc">&nbsp;			type = WkbGeometryType.wkbPolygon;</b>
+&nbsp;
+<b class="fc">&nbsp;			if ((exportFlags &amp; WkbExportFlags.wkbExportPolygon) == 0) {</b>
+<b class="fc">&nbsp;				wkbBuffer.put(offset, byteOrder);</b>
+<b class="fc">&nbsp;				offset += 1;</b>
+<b class="fc">&nbsp;				wkbBuffer.putInt(offset, WkbGeometryType.wkbMultiPolygon);</b>
+<b class="fc">&nbsp;				offset += 4;</b>
+<b class="fc">&nbsp;				wkbBuffer.putInt(offset, polygonCount);</b>
+<b class="fc">&nbsp;				offset += 4;</b>
+<b class="fc">&nbsp;			} else if (polygonCount == 0) {</b>
+<b class="fc">&nbsp;				wkbBuffer.put(offset, byteOrder);</b>
+<b class="fc">&nbsp;				offset += 1;</b>
+<b class="fc">&nbsp;				wkbBuffer.putInt(offset, WkbGeometryType.wkbPolygon);</b>
+<b class="fc">&nbsp;				offset += 4;</b>
+<b class="fc">&nbsp;				wkbBuffer.putInt(offset, 0);</b>
+<b class="fc">&nbsp;				offset += 4;</b>
+&nbsp;			}
+<b class="fc">&nbsp;		} else if (bExportZs &amp;&amp; !bExportMs) {</b>
+<b class="nc">&nbsp;			type = WkbGeometryType.wkbPolygonZ;</b>
+&nbsp;
+<b class="nc">&nbsp;			if ((exportFlags &amp; WkbExportFlags.wkbExportPolygon) == 0) {</b>
+<b class="nc">&nbsp;				wkbBuffer.put(offset, byteOrder);</b>
+<b class="nc">&nbsp;				offset += 1;</b>
+<b class="nc">&nbsp;				wkbBuffer.putInt(offset, WkbGeometryType.wkbMultiPolygonZ);</b>
+<b class="nc">&nbsp;				offset += 4;</b>
+<b class="nc">&nbsp;				wkbBuffer.putInt(offset, polygonCount);</b>
+<b class="nc">&nbsp;				offset += 4;</b>
+<b class="nc">&nbsp;			} else if (polygonCount == 0) {</b>
+<b class="nc">&nbsp;				wkbBuffer.put(offset, byteOrder);</b>
+<b class="nc">&nbsp;				offset += 1;</b>
+<b class="nc">&nbsp;				wkbBuffer.putInt(offset, WkbGeometryType.wkbPolygonZ);</b>
+<b class="nc">&nbsp;				offset += 4;</b>
+<b class="nc">&nbsp;				wkbBuffer.putInt(offset, 0);</b>
+<b class="nc">&nbsp;				offset += 4;</b>
+&nbsp;			}
+<b class="fc">&nbsp;		} else if (bExportMs &amp;&amp; !bExportZs) {</b>
+<b class="nc">&nbsp;			type = WkbGeometryType.wkbPolygonM;</b>
+&nbsp;
+<b class="nc">&nbsp;			if ((exportFlags &amp; WkbExportFlags.wkbExportPolygon) == 0) {</b>
+<b class="nc">&nbsp;				wkbBuffer.put(offset, byteOrder);</b>
+<b class="nc">&nbsp;				offset += 1;</b>
+<b class="nc">&nbsp;				wkbBuffer.putInt(offset, WkbGeometryType.wkbMultiPolygonM);</b>
+<b class="nc">&nbsp;				offset += 4;</b>
+<b class="nc">&nbsp;				wkbBuffer.putInt(offset, (int) polygonCount);</b>
+<b class="nc">&nbsp;				offset += 4;</b>
+<b class="nc">&nbsp;			} else if (polygonCount == 0) {</b>
+<b class="nc">&nbsp;				wkbBuffer.put(offset, byteOrder);</b>
+<b class="nc">&nbsp;				offset += 1;</b>
+<b class="nc">&nbsp;				wkbBuffer.putInt(offset, WkbGeometryType.wkbPolygonM);</b>
+<b class="nc">&nbsp;				offset += 4;</b>
+<b class="nc">&nbsp;				wkbBuffer.putInt(offset, 0);</b>
+<b class="nc">&nbsp;				offset += 4;</b>
+&nbsp;			}
+&nbsp;		} else {
+<b class="fc">&nbsp;			type = WkbGeometryType.wkbPolygonZM;</b>
+&nbsp;
+<b class="fc">&nbsp;			if ((exportFlags &amp; WkbExportFlags.wkbExportPolygon) == 0) {</b>
+<b class="fc">&nbsp;				wkbBuffer.put(offset, byteOrder);</b>
+<b class="fc">&nbsp;				offset += 1;</b>
+<b class="fc">&nbsp;				wkbBuffer.putInt(offset, WkbGeometryType.wkbMultiPolygonZM);</b>
+<b class="fc">&nbsp;				offset += 4;</b>
+<b class="fc">&nbsp;				wkbBuffer.putInt(offset, polygonCount);</b>
+<b class="fc">&nbsp;				offset += 4;</b>
+<b class="fc">&nbsp;			} else if (polygonCount == 0) {</b>
+<b class="nc">&nbsp;				wkbBuffer.put(offset, byteOrder);</b>
+<b class="nc">&nbsp;				offset += 1;</b>
+<b class="nc">&nbsp;				wkbBuffer.putInt(offset, WkbGeometryType.wkbPolygonZM);</b>
+<b class="nc">&nbsp;				offset += 4;</b>
+<b class="nc">&nbsp;				wkbBuffer.putInt(offset, 0);</b>
+<b class="nc">&nbsp;				offset += 4;</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (polygonCount == 0)</b>
+<b class="fc">&nbsp;			return offset;</b>
+&nbsp;
+<b class="fc">&nbsp;		AttributeStreamOfDbl position = (AttributeStreamOfDbl) (polygon</b>
+<b class="fc">&nbsp;				.getAttributeStreamRef(VertexDescription.Semantics.POSITION));</b>
+&nbsp;
+<b class="fc">&nbsp;		AttributeStreamOfDbl zs = null;</b>
+<b class="fc">&nbsp;		if (bExportZs) {</b>
+<b class="fc">&nbsp;			if (polygon</b>
+<b class="fc">&nbsp;					._attributeStreamIsAllocated(VertexDescription.Semantics.Z))</b>
+<b class="fc">&nbsp;				zs = (AttributeStreamOfDbl) (polygon</b>
+<b class="fc">&nbsp;						.getAttributeStreamRef(VertexDescription.Semantics.Z));</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		AttributeStreamOfDbl ms = null;</b>
+<b class="fc">&nbsp;		if (bExportMs) {</b>
+<b class="fc">&nbsp;			if (polygon</b>
+<b class="fc">&nbsp;					._attributeStreamIsAllocated(VertexDescription.Semantics.M))</b>
+<b class="fc">&nbsp;				ms = (AttributeStreamOfDbl) (polygon</b>
+<b class="fc">&nbsp;						.getAttributeStreamRef(VertexDescription.Semantics.M));</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		int ipartend = 0;</b>
+<b class="fc">&nbsp;		int ipolygonend = 0;</b>
+&nbsp;
+<b class="fc">&nbsp;		for (int ipolygon = 0; ipolygon &lt; (int) polygonCount; ipolygon++) {</b>
+&nbsp;			// write byte order
+<b class="fc">&nbsp;			wkbBuffer.put(offset, byteOrder);</b>
+<b class="fc">&nbsp;			offset += 1;</b>
+&nbsp;
+&nbsp;			// write type
+<b class="fc">&nbsp;			wkbBuffer.putInt(offset, type);</b>
+<b class="fc">&nbsp;			offset += 4;</b>
+&nbsp;
+&nbsp;			// get partcount for the ith polygon
+<b class="fc">&nbsp;			AttributeStreamOfInt8 pathFlags = polygon.getPathFlagsStreamRef();</b>
+&nbsp;
+<b class="fc">&nbsp;			int ipolygonstart = ipolygonend;</b>
+<b class="fc">&nbsp;			ipolygonend++;</b>
+&nbsp;
+<b class="fc">&nbsp;			while (ipolygonend &lt; partCount</b>
+<b class="fc">&nbsp;					&amp;&amp; (pathFlags.read(ipolygonend) &amp; PathFlags.enumOGCStartPolygon) == 0)</b>
+<b class="fc">&nbsp;				ipolygonend++;</b>
+&nbsp;
+&nbsp;			// write numRings
+<b class="fc">&nbsp;			wkbBuffer.putInt(offset, ipolygonend - ipolygonstart);</b>
+<b class="fc">&nbsp;			offset += 4;</b>
+&nbsp;
+<b class="fc">&nbsp;			for (int ipart = ipolygonstart; ipart &lt; ipolygonend; ipart++) {</b>
+&nbsp;				// get num_points
+<b class="fc">&nbsp;				int ipartstart = ipartend;</b>
+<b class="fc">&nbsp;				ipartend = (int) polygon.getPathEnd(ipart);</b>
+&nbsp;
+&nbsp;				// write num_points
+<b class="fc">&nbsp;				wkbBuffer.putInt(offset, ipartend - ipartstart + 1);</b>
+<b class="fc">&nbsp;				offset += 4;</b>
+&nbsp;
+&nbsp;				// duplicate the start point
+<b class="fc">&nbsp;				double x = position.read(2 * ipartstart);</b>
+<b class="fc">&nbsp;				double y = position.read(2 * ipartstart + 1);</b>
+&nbsp;
+<b class="fc">&nbsp;				wkbBuffer.putDouble(offset, x);</b>
+<b class="fc">&nbsp;				offset += 8;</b>
+<b class="fc">&nbsp;				wkbBuffer.putDouble(offset, y);</b>
+<b class="fc">&nbsp;				offset += 8;</b>
+&nbsp;
+<b class="fc">&nbsp;				if (bExportZs) {</b>
+&nbsp;					double z;
+<b class="fc">&nbsp;					if (zs != null)</b>
+<b class="fc">&nbsp;						z = zs.read(ipartstart);</b>
+&nbsp;					else
+<b class="nc">&nbsp;						z = VertexDescription</b>
+<b class="nc">&nbsp;								.getDefaultValue(VertexDescription.Semantics.Z);</b>
+&nbsp;
+<b class="fc">&nbsp;					wkbBuffer.putDouble(offset, z);</b>
+<b class="fc">&nbsp;					offset += 8;</b>
+&nbsp;				}
+&nbsp;
+<b class="fc">&nbsp;				if (bExportMs) {</b>
+&nbsp;					double m;
+<b class="fc">&nbsp;					if (ms != null)</b>
+<b class="fc">&nbsp;						m = ms.read(ipartstart);</b>
+&nbsp;					else
+<b class="nc">&nbsp;						m = VertexDescription</b>
+<b class="nc">&nbsp;								.getDefaultValue(VertexDescription.Semantics.M);</b>
+&nbsp;
+<b class="fc">&nbsp;					wkbBuffer.putDouble(offset, m);</b>
+<b class="fc">&nbsp;					offset += 8;</b>
+&nbsp;				}
+&nbsp;
+&nbsp;				// We must write to the buffer backwards - ogc polygon format is
+&nbsp;				// opposite of shapefile format
+<b class="fc">&nbsp;				for (int i = ipartend - 1; i &gt;= ipartstart; i--) {</b>
+<b class="fc">&nbsp;					x = position.read(2 * i);</b>
+<b class="fc">&nbsp;					y = position.read(2 * i + 1);</b>
+&nbsp;
+<b class="fc">&nbsp;					wkbBuffer.putDouble(offset, x);</b>
+<b class="fc">&nbsp;					offset += 8;</b>
+<b class="fc">&nbsp;					wkbBuffer.putDouble(offset, y);</b>
+<b class="fc">&nbsp;					offset += 8;</b>
+&nbsp;
+<b class="fc">&nbsp;					if (bExportZs) {</b>
+&nbsp;						double z;
+<b class="fc">&nbsp;						if (zs != null)</b>
+<b class="fc">&nbsp;							z = zs.read(i);</b>
+&nbsp;						else
+<b class="nc">&nbsp;							z = VertexDescription</b>
+<b class="nc">&nbsp;									.getDefaultValue(VertexDescription.Semantics.Z);</b>
+&nbsp;
+<b class="fc">&nbsp;						wkbBuffer.putDouble(offset, z);</b>
+<b class="fc">&nbsp;						offset += 8;</b>
+&nbsp;					}
+&nbsp;
+<b class="fc">&nbsp;					if (bExportMs) {</b>
+&nbsp;						double m;
+<b class="fc">&nbsp;						if (ms != null)</b>
+<b class="fc">&nbsp;							m = ms.read(i);</b>
+&nbsp;						else
+<b class="nc">&nbsp;							m = VertexDescription</b>
+<b class="nc">&nbsp;									.getDefaultValue(VertexDescription.Semantics.M);</b>
+&nbsp;
+<b class="fc">&nbsp;						wkbBuffer.putDouble(offset, m);</b>
+<b class="fc">&nbsp;						offset += 8;</b>
+&nbsp;					}
+&nbsp;				}
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return offset;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private static int exportPolylineToWKB(int exportFlags, Polyline _polyline,
+&nbsp;			ByteBuffer wkbBuffer) {
+<b class="fc">&nbsp;		MultiPathImpl polyline = (MultiPathImpl) _polyline._getImpl();</b>
+&nbsp;
+<b class="fc">&nbsp;		if ((exportFlags &amp; WkbExportFlags.wkbExportFailIfNotSimple) != 0) {</b>
+<b class="nc">&nbsp;			int simple = polyline.getIsSimple(0.0);</b>
+&nbsp;
+<b class="nc">&nbsp;			if (simple &lt; 1)</b>
+<b class="nc">&nbsp;				throw new GeometryException(&quot;corrupted geometry&quot;);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		boolean bExportZs = polyline</b>
+<b class="fc">&nbsp;				.hasAttribute(VertexDescription.Semantics.Z)</b>
+&nbsp;				&amp;&amp; (exportFlags &amp; WkbExportFlags.wkbExportStripZs) == 0;
+<b class="fc">&nbsp;		boolean bExportMs = polyline</b>
+<b class="fc">&nbsp;				.hasAttribute(VertexDescription.Semantics.M)</b>
+&nbsp;				&amp;&amp; (exportFlags &amp; WkbExportFlags.wkbExportStripMs) == 0;
+&nbsp;
+<b class="fc">&nbsp;		int partCount = polyline.getPathCount();</b>
+<b class="fc">&nbsp;		if ((exportFlags &amp; WkbExportFlags.wkbExportLineString) != 0</b>
+&nbsp;				&amp;&amp; partCount &gt; 1)
+<b class="nc">&nbsp;			throw new IllegalArgumentException();</b>
+&nbsp;
+<b class="fc">&nbsp;		int point_count = polyline.getPointCount();</b>
+&nbsp;
+<b class="fc">&nbsp;		for (int ipart = 0; ipart &lt; partCount; ipart++)</b>
+<b class="fc">&nbsp;			if (polyline.isClosedPath(ipart))</b>
+<b class="nc">&nbsp;				point_count++;</b>
+&nbsp;
+&nbsp;		// In the WKB_export_defaults case, polylines gets exported as a
+&nbsp;		// WKB_multi_line_string
+&nbsp;
+&nbsp;		// get size for buffer
+<b class="fc">&nbsp;		int size = 0;</b>
+<b class="fc">&nbsp;		if ((exportFlags &amp; WkbExportFlags.wkbExportLineString) == 0</b>
+&nbsp;				|| partCount == 0)
+<b class="fc">&nbsp;			size += 1 /* byte order */+ 4 /* wkbType */+ 4 /* numLineStrings */;</b>
+&nbsp;
+<b class="fc">&nbsp;		size += partCount</b>
+&nbsp;				* (1 /* byte order */+ 4 /* wkbType */+ 4/* num_points */)
+&nbsp;				+ point_count * (2 * 8 /* xy coordinates */);
+&nbsp;
+<b class="fc">&nbsp;		if (bExportZs)</b>
+<b class="fc">&nbsp;			size += (point_count * 8 /* zs */);</b>
+<b class="fc">&nbsp;		if (bExportMs)</b>
+<b class="fc">&nbsp;			size += (point_count * 8 /* ms */);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (size &gt;= NumberUtils.intMax())</b>
+<b class="nc">&nbsp;			throw new GeometryException(&quot;invalid call&quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (wkbBuffer == null)</b>
+<b class="fc">&nbsp;			return (int) size;</b>
+<b class="fc">&nbsp;		else if (wkbBuffer.capacity() &lt; (int) size)</b>
+<b class="nc">&nbsp;			throw new GeometryException(&quot;buffer is too small&quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;		int offset = 0;</b>
+&nbsp;
+<b class="fc">&nbsp;		byte byteOrder = (byte) (wkbBuffer.order() == ByteOrder.LITTLE_ENDIAN ? WkbByteOrder.wkbNDR</b>
+<b class="nc">&nbsp;				: WkbByteOrder.wkbXDR);</b>
+&nbsp;
+&nbsp;		// Determine the wkb type
+&nbsp;		int type;
+<b class="fc">&nbsp;		if (!bExportZs &amp;&amp; !bExportMs) {</b>
+<b class="fc">&nbsp;			type = WkbGeometryType.wkbLineString;</b>
+&nbsp;
+<b class="fc">&nbsp;			if ((exportFlags &amp; WkbExportFlags.wkbExportLineString) == 0) {</b>
+<b class="fc">&nbsp;				wkbBuffer.put(offset, byteOrder);</b>
+<b class="fc">&nbsp;				offset += 1;</b>
+<b class="fc">&nbsp;				wkbBuffer.putInt(offset, WkbGeometryType.wkbMultiLineString);</b>
+<b class="fc">&nbsp;				offset += 4;</b>
+<b class="fc">&nbsp;				wkbBuffer.putInt(offset, (int) partCount);</b>
+<b class="fc">&nbsp;				offset += 4;</b>
+<b class="fc">&nbsp;			} else if (partCount == 0) {</b>
+<b class="fc">&nbsp;				wkbBuffer.put(offset, byteOrder);</b>
+<b class="fc">&nbsp;				offset += 1;</b>
+<b class="fc">&nbsp;				wkbBuffer.putInt(offset, WkbGeometryType.wkbLineString);</b>
+<b class="fc">&nbsp;				offset += 4;</b>
+<b class="fc">&nbsp;				wkbBuffer.putInt(offset, 0);</b>
+<b class="fc">&nbsp;				offset += 4;</b>
+&nbsp;			}
+<b class="fc">&nbsp;		} else if (bExportZs &amp;&amp; !bExportMs) {</b>
+<b class="nc">&nbsp;			type = WkbGeometryType.wkbLineStringZ;</b>
+&nbsp;
+<b class="nc">&nbsp;			if ((exportFlags &amp; WkbExportFlags.wkbExportLineString) == 0) {</b>
+<b class="nc">&nbsp;				wkbBuffer.put(offset, byteOrder);</b>
+<b class="nc">&nbsp;				offset += 1;</b>
+<b class="nc">&nbsp;				wkbBuffer.putInt(offset, WkbGeometryType.wkbMultiLineStringZ);</b>
+<b class="nc">&nbsp;				offset += 4;</b>
+<b class="nc">&nbsp;				wkbBuffer.putInt(offset, (int) partCount);</b>
+<b class="nc">&nbsp;				offset += 4;</b>
+<b class="nc">&nbsp;			} else if (partCount == 0) {</b>
+<b class="nc">&nbsp;				wkbBuffer.put(offset, byteOrder);</b>
+<b class="nc">&nbsp;				offset += 1;</b>
+<b class="nc">&nbsp;				wkbBuffer.putInt(offset, WkbGeometryType.wkbLineStringZ);</b>
+<b class="nc">&nbsp;				offset += 4;</b>
+<b class="nc">&nbsp;				wkbBuffer.putInt(offset, 0);</b>
+<b class="nc">&nbsp;				offset += 4;</b>
+&nbsp;			}
+<b class="fc">&nbsp;		} else if (bExportMs &amp;&amp; !bExportZs) {</b>
+<b class="nc">&nbsp;			type = WkbGeometryType.wkbLineStringM;</b>
+&nbsp;
+<b class="nc">&nbsp;			if ((exportFlags &amp; WkbExportFlags.wkbExportLineString) == 0) {</b>
+<b class="nc">&nbsp;				wkbBuffer.put(offset, byteOrder);</b>
+<b class="nc">&nbsp;				offset += 1;</b>
+<b class="nc">&nbsp;				wkbBuffer.putInt(offset, WkbGeometryType.wkbMultiLineStringM);</b>
+<b class="nc">&nbsp;				offset += 4;</b>
+<b class="nc">&nbsp;				wkbBuffer.putInt(offset, (int) partCount);</b>
+<b class="nc">&nbsp;				offset += 4;</b>
+<b class="nc">&nbsp;			} else if (partCount == 0) {</b>
+<b class="nc">&nbsp;				wkbBuffer.put(offset, byteOrder);</b>
+<b class="nc">&nbsp;				offset += 1;</b>
+<b class="nc">&nbsp;				wkbBuffer.putInt(offset, WkbGeometryType.wkbLineStringM);</b>
+<b class="nc">&nbsp;				offset += 4;</b>
+<b class="nc">&nbsp;				wkbBuffer.putInt(offset, 0);</b>
+<b class="nc">&nbsp;				offset += 4;</b>
+&nbsp;			}
+&nbsp;		} else {
+<b class="fc">&nbsp;			type = WkbGeometryType.wkbLineStringZM;</b>
+&nbsp;
+<b class="fc">&nbsp;			if ((exportFlags &amp; WkbExportFlags.wkbExportLineString) == 0) {</b>
+<b class="fc">&nbsp;				wkbBuffer.put(offset, byteOrder);</b>
+<b class="fc">&nbsp;				offset += 1;</b>
+<b class="fc">&nbsp;				wkbBuffer.putInt(offset, WkbGeometryType.wkbMultiLineStringZM);</b>
+<b class="fc">&nbsp;				offset += 4;</b>
+<b class="fc">&nbsp;				wkbBuffer.putInt(offset, partCount);</b>
+<b class="fc">&nbsp;				offset += 4;</b>
+<b class="fc">&nbsp;			} else if (partCount == 0) {</b>
+<b class="nc">&nbsp;				wkbBuffer.put(offset, byteOrder);</b>
+<b class="nc">&nbsp;				offset += 1;</b>
+<b class="nc">&nbsp;				wkbBuffer.putInt(offset, WkbGeometryType.wkbLineStringZM);</b>
+<b class="nc">&nbsp;				offset += 4;</b>
+<b class="nc">&nbsp;				wkbBuffer.putInt(offset, 0);</b>
+<b class="nc">&nbsp;				offset += 4;</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (partCount == 0)</b>
+<b class="fc">&nbsp;			return offset;</b>
+&nbsp;
+<b class="fc">&nbsp;		AttributeStreamOfDbl position = (AttributeStreamOfDbl) (polyline</b>
+<b class="fc">&nbsp;				.getAttributeStreamRef(VertexDescription.Semantics.POSITION));</b>
+&nbsp;
+<b class="fc">&nbsp;		AttributeStreamOfDbl zs = null;</b>
+<b class="fc">&nbsp;		if (bExportZs) {</b>
+<b class="fc">&nbsp;			if (polyline</b>
+<b class="fc">&nbsp;					._attributeStreamIsAllocated(VertexDescription.Semantics.Z))</b>
+<b class="fc">&nbsp;				zs = (AttributeStreamOfDbl) (polyline</b>
+<b class="fc">&nbsp;						.getAttributeStreamRef(VertexDescription.Semantics.Z));</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		AttributeStreamOfDbl ms = null;</b>
+<b class="fc">&nbsp;		if (bExportMs) {</b>
+<b class="fc">&nbsp;			if (polyline</b>
+<b class="fc">&nbsp;					._attributeStreamIsAllocated(VertexDescription.Semantics.M))</b>
+<b class="fc">&nbsp;				ms = (AttributeStreamOfDbl) (polyline</b>
+<b class="fc">&nbsp;						.getAttributeStreamRef(VertexDescription.Semantics.M));</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		int ipartend = 0;</b>
+<b class="fc">&nbsp;		for (int ipart = 0; ipart &lt; (int) partCount; ipart++) {</b>
+&nbsp;			// write byte order
+<b class="fc">&nbsp;			wkbBuffer.put(offset, byteOrder);</b>
+<b class="fc">&nbsp;			offset += 1;</b>
+&nbsp;
+&nbsp;			// write type
+<b class="fc">&nbsp;			wkbBuffer.putInt(offset, type);</b>
+<b class="fc">&nbsp;			offset += 4;</b>
+&nbsp;
+&nbsp;			// get start and end indices
+<b class="fc">&nbsp;			int ipartstart = ipartend;</b>
+<b class="fc">&nbsp;			ipartend = (int) polyline.getPathEnd(ipart);</b>
+&nbsp;
+&nbsp;			// write num_points
+<b class="fc">&nbsp;			int num_points = ipartend - ipartstart;</b>
+<b class="fc">&nbsp;			if (polyline.isClosedPath(ipart))</b>
+<b class="nc">&nbsp;				num_points++;</b>
+&nbsp;
+<b class="fc">&nbsp;			wkbBuffer.putInt(offset, num_points);</b>
+<b class="fc">&nbsp;			offset += 4;</b>
+&nbsp;
+&nbsp;			// write points
+<b class="fc">&nbsp;			for (int i = ipartstart; i &lt; ipartend; i++) {</b>
+<b class="fc">&nbsp;				double x = position.read(2 * i);</b>
+<b class="fc">&nbsp;				double y = position.read(2 * i + 1);</b>
+&nbsp;
+<b class="fc">&nbsp;				wkbBuffer.putDouble(offset, x);</b>
+<b class="fc">&nbsp;				offset += 8;</b>
+<b class="fc">&nbsp;				wkbBuffer.putDouble(offset, y);</b>
+<b class="fc">&nbsp;				offset += 8;</b>
+&nbsp;
+<b class="fc">&nbsp;				if (bExportZs) {</b>
+&nbsp;					double z;
+<b class="fc">&nbsp;					if (zs != null)</b>
+<b class="fc">&nbsp;						z = zs.read(i);</b>
+&nbsp;					else
+<b class="nc">&nbsp;						z = VertexDescription</b>
+<b class="nc">&nbsp;								.getDefaultValue(VertexDescription.Semantics.Z);</b>
+&nbsp;
+<b class="fc">&nbsp;					wkbBuffer.putDouble(offset, z);</b>
+<b class="fc">&nbsp;					offset += 8;</b>
+&nbsp;				}
+&nbsp;
+<b class="fc">&nbsp;				if (bExportMs) {</b>
+&nbsp;					double m;
+<b class="fc">&nbsp;					if (ms != null)</b>
+<b class="fc">&nbsp;						m = ms.read(i);</b>
+&nbsp;					else
+<b class="nc">&nbsp;						m = VertexDescription</b>
+<b class="nc">&nbsp;								.getDefaultValue(VertexDescription.Semantics.M);</b>
+&nbsp;
+<b class="fc">&nbsp;					wkbBuffer.putDouble(offset, m);</b>
+<b class="fc">&nbsp;					offset += 8;</b>
+&nbsp;				}
+&nbsp;			}
+&nbsp;
+&nbsp;			// duplicate the start point if the Polyline is closed
+<b class="fc">&nbsp;			if (polyline.isClosedPath(ipart)) {</b>
+<b class="nc">&nbsp;				double x = position.read(2 * ipartstart);</b>
+<b class="nc">&nbsp;				double y = position.read(2 * ipartstart + 1);</b>
+&nbsp;
+<b class="nc">&nbsp;				wkbBuffer.putDouble(offset, x);</b>
+<b class="nc">&nbsp;				offset += 8;</b>
+<b class="nc">&nbsp;				wkbBuffer.putDouble(offset, y);</b>
+<b class="nc">&nbsp;				offset += 8;</b>
+&nbsp;
+<b class="nc">&nbsp;				if (bExportZs) {</b>
+&nbsp;					double z;
+<b class="nc">&nbsp;					if (zs != null)</b>
+<b class="nc">&nbsp;						z = zs.read(ipartstart);</b>
+&nbsp;					else
+<b class="nc">&nbsp;						z = VertexDescription</b>
+<b class="nc">&nbsp;								.getDefaultValue(VertexDescription.Semantics.Z);</b>
+&nbsp;
+<b class="nc">&nbsp;					wkbBuffer.putDouble(offset, z);</b>
+<b class="nc">&nbsp;					offset += 8;</b>
+&nbsp;				}
+&nbsp;
+<b class="nc">&nbsp;				if (bExportMs) {</b>
+&nbsp;					double m;
+<b class="nc">&nbsp;					if (ms != null)</b>
+<b class="nc">&nbsp;						m = ms.read(ipartstart);</b>
+&nbsp;					else
+<b class="nc">&nbsp;						m = VertexDescription</b>
+<b class="nc">&nbsp;								.getDefaultValue(VertexDescription.Semantics.M);</b>
+&nbsp;
+<b class="nc">&nbsp;					wkbBuffer.putDouble(offset, m);</b>
+<b class="nc">&nbsp;					offset += 8;</b>
+&nbsp;				}
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return offset;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private static int exportMultiPointToWKB(int exportFlags,
+&nbsp;			MultiPoint _multipoint, ByteBuffer wkbBuffer) {
+<b class="fc">&nbsp;		MultiPointImpl multipoint = (MultiPointImpl) _multipoint._getImpl();</b>
+&nbsp;
+<b class="fc">&nbsp;		boolean bExportZs = multipoint</b>
+<b class="fc">&nbsp;				.hasAttribute(VertexDescription.Semantics.Z)</b>
+&nbsp;				&amp;&amp; (exportFlags &amp; WkbExportFlags.wkbExportStripZs) == 0;
+<b class="fc">&nbsp;		boolean bExportMs = multipoint</b>
+<b class="fc">&nbsp;				.hasAttribute(VertexDescription.Semantics.M)</b>
+&nbsp;				&amp;&amp; (exportFlags &amp; WkbExportFlags.wkbExportStripMs) == 0;
+&nbsp;
+<b class="fc">&nbsp;		int point_count = multipoint.getPointCount();</b>
+<b class="fc">&nbsp;		if ((exportFlags &amp; WkbExportFlags.wkbExportPoint) != 0</b>
+&nbsp;				&amp;&amp; point_count &gt; 1)
+<b class="nc">&nbsp;			throw new IllegalArgumentException();</b>
+&nbsp;
+&nbsp;		// get size for buffer
+&nbsp;		int size;
+<b class="fc">&nbsp;		if ((exportFlags &amp; WkbExportFlags.wkbExportPoint) == 0) {</b>
+<b class="fc">&nbsp;			size = 1 /* byte order */+ 4 /* wkbType */+ 4 /* num_points */</b>
+&nbsp;					+ point_count
+&nbsp;					* (1 /* byte order */+ 4 /* wkbType */+ 2 * 8 /*
+&nbsp;																 * xy
+&nbsp;																 * coordinates
+&nbsp;																 */);
+&nbsp;
+<b class="fc">&nbsp;			if (bExportZs)</b>
+<b class="fc">&nbsp;				size += (point_count * 8 /* zs */);</b>
+<b class="fc">&nbsp;			if (bExportMs)</b>
+<b class="fc">&nbsp;				size += (point_count * 8 /* ms */);</b>
+&nbsp;		} else {
+<b class="fc">&nbsp;			size = 1 /* byte order */+ 4 /* wkbType */+ 2 * 8 /* xy coordinates */;</b>
+&nbsp;
+<b class="fc">&nbsp;			if (bExportZs)</b>
+<b class="fc">&nbsp;				size += 8 /* z */;</b>
+<b class="fc">&nbsp;			if (bExportMs)</b>
+<b class="nc">&nbsp;				size += 8 /* m */;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (size &gt;= NumberUtils.intMax())</b>
+<b class="nc">&nbsp;			throw new GeometryException(&quot;invalid call&quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (wkbBuffer == null)</b>
+<b class="fc">&nbsp;			return (int) size;</b>
+<b class="fc">&nbsp;		else if (wkbBuffer.capacity() &lt; (int) size)</b>
+<b class="nc">&nbsp;			throw new GeometryException(&quot;buffer is too small&quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;		int offset = 0;</b>
+&nbsp;
+<b class="fc">&nbsp;		byte byteOrder = (byte) (wkbBuffer.order() == ByteOrder.LITTLE_ENDIAN ? WkbByteOrder.wkbNDR</b>
+<b class="nc">&nbsp;				: WkbByteOrder.wkbXDR);</b>
+&nbsp;
+&nbsp;		// Determine the wkb type
+&nbsp;		int type;
+<b class="fc">&nbsp;		if (!bExportZs &amp;&amp; !bExportMs) {</b>
+<b class="fc">&nbsp;			type = WkbGeometryType.wkbPoint;</b>
+&nbsp;
+<b class="fc">&nbsp;			if ((exportFlags &amp; WkbExportFlags.wkbExportPoint) == 0) {</b>
+<b class="fc">&nbsp;				wkbBuffer.put(offset, byteOrder);</b>
+<b class="fc">&nbsp;				offset += 1;</b>
+<b class="fc">&nbsp;				wkbBuffer.putInt(offset, WkbGeometryType.wkbMultiPoint);</b>
+<b class="fc">&nbsp;				offset += 4;</b>
+<b class="fc">&nbsp;				wkbBuffer.putInt(offset, (int) point_count);</b>
+<b class="fc">&nbsp;				offset += 4;</b>
+<b class="fc">&nbsp;			} else if (point_count == 0) {</b>
+<b class="fc">&nbsp;				wkbBuffer.put(offset, byteOrder);</b>
+<b class="fc">&nbsp;				offset += 1;</b>
+<b class="fc">&nbsp;				wkbBuffer.putInt(offset, type);</b>
+<b class="fc">&nbsp;				offset += 4;</b>
+<b class="fc">&nbsp;				wkbBuffer.putDouble(offset, NumberUtils.TheNaN);</b>
+<b class="fc">&nbsp;				offset += 8;</b>
+<b class="fc">&nbsp;				wkbBuffer.putDouble(offset, NumberUtils.TheNaN);</b>
+<b class="fc">&nbsp;				offset += 8;</b>
+&nbsp;			}
+<b class="fc">&nbsp;		} else if (bExportZs &amp;&amp; !bExportMs) {</b>
+<b class="fc">&nbsp;			type = WkbGeometryType.wkbPointZ;</b>
+&nbsp;
+<b class="fc">&nbsp;			if ((exportFlags &amp; WkbExportFlags.wkbExportPoint) == 0) {</b>
+<b class="fc">&nbsp;				wkbBuffer.put(offset, byteOrder);</b>
+<b class="fc">&nbsp;				offset += 1;</b>
+<b class="fc">&nbsp;				wkbBuffer.putInt(offset, WkbGeometryType.wkbMultiPointZ);</b>
+<b class="fc">&nbsp;				offset += 4;</b>
+<b class="fc">&nbsp;				wkbBuffer.putInt(offset, (int) point_count);</b>
+<b class="fc">&nbsp;				offset += 4;</b>
+<b class="fc">&nbsp;			} else if (point_count == 0) {</b>
+<b class="nc">&nbsp;				wkbBuffer.put(offset, byteOrder);</b>
+<b class="nc">&nbsp;				offset += 1;</b>
+<b class="nc">&nbsp;				wkbBuffer.putInt(offset, type);</b>
+<b class="nc">&nbsp;				offset += 4;</b>
+<b class="nc">&nbsp;				wkbBuffer.putDouble(offset, NumberUtils.TheNaN);</b>
+<b class="nc">&nbsp;				offset += 8;</b>
+<b class="nc">&nbsp;				wkbBuffer.putDouble(offset, NumberUtils.TheNaN);</b>
+<b class="nc">&nbsp;				offset += 8;</b>
+<b class="nc">&nbsp;				wkbBuffer.putDouble(offset, NumberUtils.TheNaN);</b>
+<b class="nc">&nbsp;				offset += 8;</b>
+&nbsp;			}
+<b class="fc">&nbsp;		} else if (bExportMs &amp;&amp; !bExportZs) {</b>
+<b class="nc">&nbsp;			type = WkbGeometryType.wkbPointM;</b>
+&nbsp;
+<b class="nc">&nbsp;			if ((exportFlags &amp; WkbExportFlags.wkbExportPoint) == 0) {</b>
+<b class="nc">&nbsp;				wkbBuffer.put(offset, byteOrder);</b>
+<b class="nc">&nbsp;				offset += 1;</b>
+<b class="nc">&nbsp;				wkbBuffer.putInt(offset, WkbGeometryType.wkbMultiPointM);</b>
+<b class="nc">&nbsp;				offset += 4;</b>
+<b class="nc">&nbsp;				wkbBuffer.putInt(offset, (int) point_count);</b>
+<b class="nc">&nbsp;				offset += 4;</b>
+<b class="nc">&nbsp;			} else if (point_count == 0) {</b>
+<b class="nc">&nbsp;				wkbBuffer.put(offset, byteOrder);</b>
+<b class="nc">&nbsp;				offset += 1;</b>
+<b class="nc">&nbsp;				wkbBuffer.putInt(offset, type);</b>
+<b class="nc">&nbsp;				offset += 4;</b>
+<b class="nc">&nbsp;				wkbBuffer.putDouble(offset, NumberUtils.TheNaN);</b>
+<b class="nc">&nbsp;				offset += 8;</b>
+<b class="nc">&nbsp;				wkbBuffer.putDouble(offset, NumberUtils.TheNaN);</b>
+<b class="nc">&nbsp;				offset += 8;</b>
+<b class="nc">&nbsp;				wkbBuffer.putDouble(offset, NumberUtils.TheNaN);</b>
+<b class="nc">&nbsp;				offset += 8;</b>
+&nbsp;			}
+&nbsp;		} else {
+<b class="fc">&nbsp;			type = WkbGeometryType.wkbPointZM;</b>
+&nbsp;
+<b class="fc">&nbsp;			if ((exportFlags &amp; WkbExportFlags.wkbExportPoint) == 0) {</b>
+<b class="fc">&nbsp;				wkbBuffer.put(offset, byteOrder);</b>
+<b class="fc">&nbsp;				offset += 1;</b>
+<b class="fc">&nbsp;				wkbBuffer.putInt(offset, WkbGeometryType.wkbMultiPointZM);</b>
+<b class="fc">&nbsp;				offset += 4;</b>
+<b class="fc">&nbsp;				wkbBuffer.putInt(offset, point_count);</b>
+<b class="fc">&nbsp;				offset += 4;</b>
+<b class="nc">&nbsp;			} else if (point_count == 0) {</b>
+<b class="nc">&nbsp;				wkbBuffer.put(offset, byteOrder);</b>
+<b class="nc">&nbsp;				offset += 1;</b>
+<b class="nc">&nbsp;				wkbBuffer.putInt(offset, type);</b>
+<b class="nc">&nbsp;				offset += 4;</b>
+<b class="nc">&nbsp;				wkbBuffer.putDouble(offset, NumberUtils.TheNaN);</b>
+<b class="nc">&nbsp;				offset += 8;</b>
+<b class="nc">&nbsp;				wkbBuffer.putDouble(offset, NumberUtils.TheNaN);</b>
+<b class="nc">&nbsp;				offset += 8;</b>
+<b class="nc">&nbsp;				wkbBuffer.putDouble(offset, NumberUtils.TheNaN);</b>
+<b class="nc">&nbsp;				offset += 8;</b>
+<b class="nc">&nbsp;				wkbBuffer.putDouble(offset, NumberUtils.TheNaN);</b>
+<b class="nc">&nbsp;				offset += 8;</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (point_count == 0)</b>
+<b class="fc">&nbsp;			return offset;</b>
+&nbsp;
+<b class="fc">&nbsp;		AttributeStreamOfDbl position = (AttributeStreamOfDbl) (multipoint</b>
+<b class="fc">&nbsp;				.getAttributeStreamRef(VertexDescription.Semantics.POSITION));</b>
+&nbsp;
+<b class="fc">&nbsp;		AttributeStreamOfDbl zs = null;</b>
+<b class="fc">&nbsp;		if (bExportZs) {</b>
+<b class="fc">&nbsp;			if (multipoint</b>
+<b class="fc">&nbsp;					._attributeStreamIsAllocated(VertexDescription.Semantics.Z))</b>
+<b class="fc">&nbsp;				zs = (AttributeStreamOfDbl) (multipoint</b>
+<b class="fc">&nbsp;						.getAttributeStreamRef(VertexDescription.Semantics.Z));</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		AttributeStreamOfDbl ms = null;</b>
+<b class="fc">&nbsp;		if (bExportMs) {</b>
+<b class="fc">&nbsp;			if (multipoint</b>
+<b class="fc">&nbsp;					._attributeStreamIsAllocated(VertexDescription.Semantics.M))</b>
+<b class="fc">&nbsp;				ms = (AttributeStreamOfDbl) (multipoint</b>
+<b class="fc">&nbsp;						.getAttributeStreamRef(VertexDescription.Semantics.M));</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		for (int i = 0; i &lt; (int) point_count; i++) {</b>
+&nbsp;			// write byte order
+<b class="fc">&nbsp;			wkbBuffer.put(offset, byteOrder);</b>
+<b class="fc">&nbsp;			offset += 1;</b>
+&nbsp;
+&nbsp;			// write type
+<b class="fc">&nbsp;			wkbBuffer.putInt(offset, type);</b>
+<b class="fc">&nbsp;			offset += 4;</b>
+&nbsp;
+&nbsp;			// write xy coordinates
+<b class="fc">&nbsp;			double x = position.read(2 * i);</b>
+<b class="fc">&nbsp;			double y = position.read(2 * i + 1);</b>
+&nbsp;
+<b class="fc">&nbsp;			wkbBuffer.putDouble(offset, x);</b>
+<b class="fc">&nbsp;			offset += 8;</b>
+<b class="fc">&nbsp;			wkbBuffer.putDouble(offset, y);</b>
+<b class="fc">&nbsp;			offset += 8;</b>
+&nbsp;
+&nbsp;			// write Z
+<b class="fc">&nbsp;			if (bExportZs) {</b>
+&nbsp;				double z;
+<b class="fc">&nbsp;				if (zs != null)</b>
+<b class="fc">&nbsp;					z = zs.read(i);</b>
+&nbsp;				else
+<b class="nc">&nbsp;					z = VertexDescription</b>
+<b class="nc">&nbsp;							.getDefaultValue(VertexDescription.Semantics.Z);</b>
+&nbsp;
+<b class="fc">&nbsp;				wkbBuffer.putDouble(offset, z);</b>
+<b class="fc">&nbsp;				offset += 8;</b>
+&nbsp;			}
+&nbsp;
+&nbsp;			// write M
+<b class="fc">&nbsp;			if (bExportMs) {</b>
+&nbsp;				double m;
+<b class="fc">&nbsp;				if (ms != null)</b>
+<b class="fc">&nbsp;					m = ms.read(i);</b>
+&nbsp;				else
+<b class="nc">&nbsp;					m = VertexDescription</b>
+<b class="nc">&nbsp;							.getDefaultValue(VertexDescription.Semantics.M);</b>
+&nbsp;
+<b class="fc">&nbsp;				wkbBuffer.putDouble(offset, m);</b>
+<b class="fc">&nbsp;				offset += 8;</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return offset;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private static int exportPointToWKB(int exportFlags, Point point,
+&nbsp;			ByteBuffer wkbBuffer) {
+<b class="fc">&nbsp;		boolean bExportZs = point.hasAttribute(VertexDescription.Semantics.Z)</b>
+&nbsp;				&amp;&amp; (exportFlags &amp; WkbExportFlags.wkbExportStripZs) == 0;
+<b class="fc">&nbsp;		boolean bExportMs = point.hasAttribute(VertexDescription.Semantics.M)</b>
+&nbsp;				&amp;&amp; (exportFlags &amp; WkbExportFlags.wkbExportStripMs) == 0;
+&nbsp;
+<b class="fc">&nbsp;		boolean bEmpty = point.isEmpty();</b>
+<b class="fc">&nbsp;		int point_count = bEmpty ? 0 : 1;</b>
+&nbsp;
+&nbsp;		// get size for buffer
+&nbsp;		int size;
+<b class="fc">&nbsp;		if ((exportFlags &amp; WkbExportFlags.wkbExportMultiPoint) != 0) {</b>
+<b class="nc">&nbsp;			size = 1 /* byte order */+ 4 /* wkbType */+ 4 /* num_points */</b>
+&nbsp;					+ point_count
+&nbsp;					* (1 /* byte order */+ 4 /* wkbType */+ 2 * 8 /*
+&nbsp;																 * xy
+&nbsp;																 * coordinates
+&nbsp;																 */);
+&nbsp;
+<b class="nc">&nbsp;			if (bExportZs)</b>
+<b class="nc">&nbsp;				size += (point_count * 8 /* zs */);</b>
+<b class="nc">&nbsp;			if (bExportMs)</b>
+<b class="nc">&nbsp;				size += (point_count * 8 /* ms */);</b>
+&nbsp;		} else {
+<b class="fc">&nbsp;			size = 1 /* byte order */+ 4 /* wkbType */+ 2 * 8 /* xy coordinates */;</b>
+&nbsp;
+<b class="fc">&nbsp;			if (bExportZs)</b>
+<b class="fc">&nbsp;				size += 8 /* z */;</b>
+<b class="fc">&nbsp;			if (bExportMs)</b>
+<b class="fc">&nbsp;				size += 8 /* m */;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (size &gt;= NumberUtils.intMax())</b>
+<b class="nc">&nbsp;			throw new GeometryException(&quot;invalid call&quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (wkbBuffer == null)</b>
+<b class="fc">&nbsp;			return size;</b>
+<b class="fc">&nbsp;		else if (wkbBuffer.capacity() &lt; size)</b>
+<b class="nc">&nbsp;			throw new GeometryException(&quot;buffer is too small&quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;		int offset = 0;</b>
+&nbsp;
+<b class="fc">&nbsp;		byte byteOrder = (byte) (wkbBuffer.order() == ByteOrder.LITTLE_ENDIAN ? WkbByteOrder.wkbNDR</b>
+<b class="nc">&nbsp;				: WkbByteOrder.wkbXDR);</b>
+&nbsp;
+&nbsp;		// Determine the wkb type
+&nbsp;		int type;
+<b class="fc">&nbsp;		if (!bExportZs &amp;&amp; !bExportMs) {</b>
+<b class="fc">&nbsp;			type = WkbGeometryType.wkbPoint;</b>
+&nbsp;
+<b class="fc">&nbsp;			if ((exportFlags &amp; WkbExportFlags.wkbExportMultiPoint) != 0) {</b>
+<b class="nc">&nbsp;				wkbBuffer.put(offset, byteOrder);</b>
+<b class="nc">&nbsp;				offset += 1;</b>
+<b class="nc">&nbsp;				wkbBuffer.putInt(offset, WkbGeometryType.wkbMultiPoint);</b>
+<b class="nc">&nbsp;				offset += 4;</b>
+<b class="nc">&nbsp;				wkbBuffer.putInt(offset, (int) point_count);</b>
+<b class="nc">&nbsp;				offset += 4;</b>
+<b class="fc">&nbsp;			} else if (point_count == 0) {</b>
+<b class="fc">&nbsp;				wkbBuffer.put(offset, byteOrder);</b>
+<b class="fc">&nbsp;				offset += 1;</b>
+<b class="fc">&nbsp;				wkbBuffer.putInt(offset, type);</b>
+<b class="fc">&nbsp;				offset += 4;</b>
+<b class="fc">&nbsp;				wkbBuffer.putDouble(offset, NumberUtils.TheNaN);</b>
+<b class="fc">&nbsp;				offset += 8;</b>
+<b class="fc">&nbsp;				wkbBuffer.putDouble(offset, NumberUtils.TheNaN);</b>
+<b class="fc">&nbsp;				offset += 8;</b>
+&nbsp;			}
+<b class="fc">&nbsp;		} else if (bExportZs &amp;&amp; !bExportMs) {</b>
+<b class="nc">&nbsp;			type = WkbGeometryType.wkbPointZ;</b>
+&nbsp;
+<b class="nc">&nbsp;			if ((exportFlags &amp; WkbExportFlags.wkbExportMultiPoint) != 0) {</b>
+<b class="nc">&nbsp;				wkbBuffer.put(offset, byteOrder);</b>
+<b class="nc">&nbsp;				offset += 1;</b>
+<b class="nc">&nbsp;				wkbBuffer.putInt(offset, WkbGeometryType.wkbMultiPointZ);</b>
+<b class="nc">&nbsp;				offset += 4;</b>
+<b class="nc">&nbsp;				wkbBuffer.putInt(offset, (int) point_count);</b>
+<b class="nc">&nbsp;				offset += 4;</b>
+<b class="nc">&nbsp;			} else if (point_count == 0) {</b>
+<b class="nc">&nbsp;				wkbBuffer.put(offset, byteOrder);</b>
+<b class="nc">&nbsp;				offset += 1;</b>
+<b class="nc">&nbsp;				wkbBuffer.putInt(offset, type);</b>
+<b class="nc">&nbsp;				offset += 4;</b>
+<b class="nc">&nbsp;				wkbBuffer.putDouble(offset, NumberUtils.TheNaN);</b>
+<b class="nc">&nbsp;				offset += 8;</b>
+<b class="nc">&nbsp;				wkbBuffer.putDouble(offset, NumberUtils.TheNaN);</b>
+<b class="nc">&nbsp;				offset += 8;</b>
+<b class="nc">&nbsp;				wkbBuffer.putDouble(offset, NumberUtils.TheNaN);</b>
+<b class="nc">&nbsp;				offset += 8;</b>
+&nbsp;			}
+<b class="fc">&nbsp;		} else if (bExportMs &amp;&amp; !bExportZs) {</b>
+<b class="nc">&nbsp;			type = WkbGeometryType.wkbPointM;</b>
+&nbsp;
+<b class="nc">&nbsp;			if ((exportFlags &amp; WkbExportFlags.wkbExportMultiPoint) != 0) {</b>
+<b class="nc">&nbsp;				wkbBuffer.put(offset, byteOrder);</b>
+<b class="nc">&nbsp;				offset += 1;</b>
+<b class="nc">&nbsp;				wkbBuffer.putInt(offset, WkbGeometryType.wkbMultiPointM);</b>
+<b class="nc">&nbsp;				offset += 4;</b>
+<b class="nc">&nbsp;				wkbBuffer.putInt(offset, (int) point_count);</b>
+<b class="nc">&nbsp;				offset += 4;</b>
+<b class="nc">&nbsp;			} else if (point_count == 0) {</b>
+<b class="nc">&nbsp;				wkbBuffer.put(offset, byteOrder);</b>
+<b class="nc">&nbsp;				offset += 1;</b>
+<b class="nc">&nbsp;				wkbBuffer.putInt(offset, type);</b>
+<b class="nc">&nbsp;				offset += 4;</b>
+<b class="nc">&nbsp;				wkbBuffer.putDouble(offset, NumberUtils.TheNaN);</b>
+<b class="nc">&nbsp;				offset += 8;</b>
+<b class="nc">&nbsp;				wkbBuffer.putDouble(offset, NumberUtils.TheNaN);</b>
+<b class="nc">&nbsp;				offset += 8;</b>
+<b class="nc">&nbsp;				wkbBuffer.putDouble(offset, NumberUtils.TheNaN);</b>
+<b class="nc">&nbsp;				offset += 8;</b>
+&nbsp;			}
+&nbsp;		} else {
+<b class="fc">&nbsp;			type = WkbGeometryType.wkbPointZM;</b>
+&nbsp;
+<b class="fc">&nbsp;			if ((exportFlags &amp; WkbExportFlags.wkbExportMultiPoint) != 0) {</b>
+<b class="nc">&nbsp;				wkbBuffer.put(offset, byteOrder);</b>
+<b class="nc">&nbsp;				offset += 1;</b>
+<b class="nc">&nbsp;				wkbBuffer.putInt(offset, WkbGeometryType.wkbMultiPointZM);</b>
+<b class="nc">&nbsp;				offset += 4;</b>
+<b class="nc">&nbsp;				wkbBuffer.putInt(offset, (int) point_count);</b>
+<b class="nc">&nbsp;				offset += 4;</b>
+<b class="fc">&nbsp;			} else if (point_count == 0) {</b>
+<b class="nc">&nbsp;				wkbBuffer.put(offset, byteOrder);</b>
+<b class="nc">&nbsp;				offset += 1;</b>
+<b class="nc">&nbsp;				wkbBuffer.putInt(offset, type);</b>
+<b class="nc">&nbsp;				offset += 4;</b>
+<b class="nc">&nbsp;				wkbBuffer.putDouble(offset, NumberUtils.TheNaN);</b>
+<b class="nc">&nbsp;				offset += 8;</b>
+<b class="nc">&nbsp;				wkbBuffer.putDouble(offset, NumberUtils.TheNaN);</b>
+<b class="nc">&nbsp;				offset += 8;</b>
+<b class="nc">&nbsp;				wkbBuffer.putDouble(offset, NumberUtils.TheNaN);</b>
+<b class="nc">&nbsp;				offset += 8;</b>
+<b class="nc">&nbsp;				wkbBuffer.putDouble(offset, NumberUtils.TheNaN);</b>
+<b class="nc">&nbsp;				offset += 8;</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (point_count == 0)</b>
+<b class="fc">&nbsp;			return offset;</b>
+&nbsp;
+&nbsp;		// write byte order
+<b class="fc">&nbsp;		wkbBuffer.put(offset, byteOrder);</b>
+<b class="fc">&nbsp;		offset += 1;</b>
+&nbsp;
+&nbsp;		// write type
+<b class="fc">&nbsp;		wkbBuffer.putInt(offset, type);</b>
+<b class="fc">&nbsp;		offset += 4;</b>
+&nbsp;
+&nbsp;		// write xy coordinate
+<b class="fc">&nbsp;		double x = point.getX();</b>
+<b class="fc">&nbsp;		double y = point.getY();</b>
+<b class="fc">&nbsp;		wkbBuffer.putDouble(offset, x);</b>
+<b class="fc">&nbsp;		offset += 8;</b>
+<b class="fc">&nbsp;		wkbBuffer.putDouble(offset, y);</b>
+<b class="fc">&nbsp;		offset += 8;</b>
+&nbsp;
+&nbsp;		// write Z
+<b class="fc">&nbsp;		if (bExportZs) {</b>
+<b class="fc">&nbsp;			double z = point.getZ();</b>
+<b class="fc">&nbsp;			wkbBuffer.putDouble(offset, z);</b>
+<b class="fc">&nbsp;			offset += 8;</b>
+&nbsp;		}
+&nbsp;
+&nbsp;		// write M
+<b class="fc">&nbsp;		if (bExportMs) {</b>
+<b class="fc">&nbsp;			double m = point.getM();</b>
+<b class="fc">&nbsp;			wkbBuffer.putDouble(offset, m);</b>
+<b class="fc">&nbsp;			offset += 8;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return offset;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	private static int exportEnvelopeToWKB(int exportFlags, Envelope envelope,
+&nbsp;			ByteBuffer wkbBuffer) {
+<b class="fc">&nbsp;		boolean bExportZs = envelope</b>
+<b class="fc">&nbsp;				.hasAttribute(VertexDescription.Semantics.Z)</b>
+&nbsp;				&amp;&amp; (exportFlags &amp; WkbExportFlags.wkbExportStripZs) == 0;
+<b class="fc">&nbsp;		boolean bExportMs = envelope</b>
+<b class="fc">&nbsp;				.hasAttribute(VertexDescription.Semantics.M)</b>
+&nbsp;				&amp;&amp; (exportFlags &amp; WkbExportFlags.wkbExportStripMs) == 0;
+<b class="fc">&nbsp;		boolean bEmpty = envelope.isEmpty();</b>
+&nbsp;
+<b class="fc">&nbsp;		int partCount = bEmpty ? 0 : 1;</b>
+<b class="fc">&nbsp;		int point_count = bEmpty ? 0 : 5;</b>
+&nbsp;
+&nbsp;		// Envelope by default is exported as a WKB_polygon
+&nbsp;
+&nbsp;		// get size for buffer
+<b class="fc">&nbsp;		int size = 0;</b>
+<b class="fc">&nbsp;		if ((exportFlags &amp; WkbExportFlags.wkbExportMultiPolygon) != 0</b>
+&nbsp;				|| partCount == 0)
+<b class="fc">&nbsp;			size += 1 /* byte order */+ 4 /* wkbType */+ 4 /* numPolygons */;</b>
+&nbsp;
+<b class="fc">&nbsp;		size += partCount</b>
+&nbsp;				* (1 /* byte order */+ 4 /* wkbType */+ 4/* numRings */)
+&nbsp;				+ partCount * (4 /* num_points */) + point_count * (2 * 8 /*
+&nbsp;																		 * xy
+&nbsp;																		 * coordinates
+&nbsp;																		 */);
+&nbsp;
+<b class="fc">&nbsp;		if (bExportZs)</b>
+<b class="fc">&nbsp;			size += (point_count * 8 /* zs */);</b>
+<b class="fc">&nbsp;		if (bExportMs)</b>
+<b class="fc">&nbsp;			size += (point_count * 8 /* ms */);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (size &gt;= NumberUtils.intMax())</b>
+<b class="nc">&nbsp;			throw new GeometryException(&quot;invalid call&quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;		if (wkbBuffer == null)</b>
+<b class="fc">&nbsp;			return size;</b>
+<b class="fc">&nbsp;		else if (wkbBuffer.capacity() &lt; size)</b>
+<b class="nc">&nbsp;			throw new GeometryException(&quot;buffer is too small&quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;		int offset = 0;</b>
+&nbsp;
+<b class="fc">&nbsp;		byte byteOrder = (byte) (wkbBuffer.order() == ByteOrder.LITTLE_ENDIAN ? WkbByteOrder.wkbNDR</b>
+<b class="nc">&nbsp;				: WkbByteOrder.wkbXDR);</b>
+&nbsp;
+&nbsp;		// Determine the wkb type
+&nbsp;		int type;
+<b class="fc">&nbsp;		if (!bExportZs &amp;&amp; !bExportMs) {</b>
+<b class="fc">&nbsp;			type = WkbGeometryType.wkbPolygon;</b>
+&nbsp;
+<b class="fc">&nbsp;			if ((exportFlags &amp; WkbExportFlags.wkbExportMultiPolygon) != 0) {</b>
+<b class="nc">&nbsp;				wkbBuffer.put(offset, byteOrder);</b>
+<b class="nc">&nbsp;				offset += 1;</b>
+<b class="nc">&nbsp;				wkbBuffer.putInt(offset, WkbGeometryType.wkbMultiPolygon);</b>
+<b class="nc">&nbsp;				offset += 4;</b>
+<b class="nc">&nbsp;				wkbBuffer.putInt(offset, (int) partCount);</b>
+<b class="nc">&nbsp;				offset += 4;</b>
+<b class="fc">&nbsp;			} else if (partCount == 0) {</b>
+<b class="fc">&nbsp;				wkbBuffer.put(offset, byteOrder);</b>
+<b class="fc">&nbsp;				offset += 1;</b>
+<b class="fc">&nbsp;				wkbBuffer.putInt(offset, WkbGeometryType.wkbPolygon);</b>
+<b class="fc">&nbsp;				offset += 4;</b>
+<b class="fc">&nbsp;				wkbBuffer.putInt(offset, 0);</b>
+<b class="fc">&nbsp;				offset += 4;</b>
+&nbsp;			}
+<b class="fc">&nbsp;		} else if (bExportZs &amp;&amp; !bExportMs) {</b>
+<b class="nc">&nbsp;			type = WkbGeometryType.wkbPolygonZ;</b>
+&nbsp;
+<b class="nc">&nbsp;			if ((exportFlags &amp; WkbExportFlags.wkbExportPolygon) != 0) {</b>
+<b class="nc">&nbsp;				wkbBuffer.put(offset, byteOrder);</b>
+<b class="nc">&nbsp;				offset += 1;</b>
+<b class="nc">&nbsp;				wkbBuffer.putInt(offset, WkbGeometryType.wkbMultiPolygonZ);</b>
+<b class="nc">&nbsp;				offset += 4;</b>
+<b class="nc">&nbsp;				wkbBuffer.putInt(offset, partCount);</b>
+<b class="nc">&nbsp;				offset += 4;</b>
+<b class="nc">&nbsp;			} else if (partCount == 0) {</b>
+<b class="nc">&nbsp;				wkbBuffer.put(offset, byteOrder);</b>
+<b class="nc">&nbsp;				offset += 1;</b>
+<b class="nc">&nbsp;				wkbBuffer.putInt(offset, WkbGeometryType.wkbPolygonZ);</b>
+<b class="nc">&nbsp;				offset += 4;</b>
+<b class="nc">&nbsp;				wkbBuffer.putInt(offset, 0);</b>
+<b class="nc">&nbsp;				offset += 4;</b>
+&nbsp;			}
+<b class="fc">&nbsp;		} else if (bExportMs &amp;&amp; !bExportZs) {</b>
+<b class="nc">&nbsp;			type = WkbGeometryType.wkbPolygonM;</b>
+&nbsp;
+<b class="nc">&nbsp;			if ((exportFlags &amp; WkbExportFlags.wkbExportMultiPolygon) != 0) {</b>
+<b class="nc">&nbsp;				wkbBuffer.put(offset, byteOrder);</b>
+<b class="nc">&nbsp;				offset += 1;</b>
+<b class="nc">&nbsp;				wkbBuffer.putInt(offset, WkbGeometryType.wkbMultiPolygonM);</b>
+<b class="nc">&nbsp;				offset += 4;</b>
+<b class="nc">&nbsp;				wkbBuffer.putInt(offset, partCount);</b>
+<b class="nc">&nbsp;				offset += 4;</b>
+<b class="nc">&nbsp;			} else if (partCount == 0) {</b>
+<b class="nc">&nbsp;				wkbBuffer.put(offset, byteOrder);</b>
+<b class="nc">&nbsp;				offset += 1;</b>
+<b class="nc">&nbsp;				wkbBuffer.putInt(offset, WkbGeometryType.wkbPolygonM);</b>
+<b class="nc">&nbsp;				offset += 4;</b>
+<b class="nc">&nbsp;				wkbBuffer.putInt(offset, 0);</b>
+<b class="nc">&nbsp;				offset += 4;</b>
+&nbsp;			}
+&nbsp;		} else {
+<b class="fc">&nbsp;			type = WkbGeometryType.wkbPolygonZM;</b>
+&nbsp;
+<b class="fc">&nbsp;			if ((exportFlags &amp; WkbExportFlags.wkbExportMultiPolygon) != 0) {</b>
+<b class="fc">&nbsp;				wkbBuffer.put(offset, byteOrder);</b>
+<b class="fc">&nbsp;				offset += 1;</b>
+<b class="fc">&nbsp;				wkbBuffer.putInt(offset, WkbGeometryType.wkbMultiPolygonZM);</b>
+<b class="fc">&nbsp;				offset += 4;</b>
+<b class="fc">&nbsp;				wkbBuffer.putInt(offset, partCount);</b>
+<b class="fc">&nbsp;				offset += 4;</b>
+<b class="fc">&nbsp;			} else if (partCount == 0) {</b>
+<b class="nc">&nbsp;				wkbBuffer.put(offset, byteOrder);</b>
+<b class="nc">&nbsp;				offset += 1;</b>
+<b class="nc">&nbsp;				wkbBuffer.putInt(offset, WkbGeometryType.wkbPolygonZM);</b>
+<b class="nc">&nbsp;				offset += 4;</b>
+<b class="nc">&nbsp;				wkbBuffer.putInt(offset, 0);</b>
+<b class="nc">&nbsp;				offset += 4;</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (partCount == 0)</b>
+<b class="fc">&nbsp;			return offset;</b>
+&nbsp;
+&nbsp;		// write byte order
+<b class="fc">&nbsp;		wkbBuffer.put(offset, byteOrder);</b>
+<b class="fc">&nbsp;		offset += 1;</b>
+&nbsp;
+&nbsp;		// write type
+<b class="fc">&nbsp;		wkbBuffer.putInt(offset, type);</b>
+<b class="fc">&nbsp;		offset += 4;</b>
+&nbsp;
+&nbsp;		// write numRings
+<b class="fc">&nbsp;		wkbBuffer.putInt(offset, 1);</b>
+<b class="fc">&nbsp;		offset += 4;</b>
+&nbsp;
+&nbsp;		// write num_points
+<b class="fc">&nbsp;		wkbBuffer.putInt(offset, 5);</b>
+<b class="fc">&nbsp;		offset += 4;</b>
+&nbsp;
+<b class="fc">&nbsp;		Envelope2D env = new Envelope2D();</b>
+<b class="fc">&nbsp;		envelope.queryEnvelope2D(env);</b>
+&nbsp;
+<b class="fc">&nbsp;		Envelope1D z_interval = null;</b>
+<b class="fc">&nbsp;		if (bExportZs)</b>
+<b class="fc">&nbsp;			z_interval = envelope.queryInterval(VertexDescription.Semantics.Z,</b>
+&nbsp;					0);
+&nbsp;
+<b class="fc">&nbsp;		Envelope1D mInterval = null;</b>
+<b class="fc">&nbsp;		if (bExportMs)</b>
+<b class="fc">&nbsp;			mInterval = envelope</b>
+<b class="fc">&nbsp;					.queryInterval(VertexDescription.Semantics.M, 0);</b>
+&nbsp;
+<b class="fc">&nbsp;		wkbBuffer.putDouble(offset, env.xmin);</b>
+<b class="fc">&nbsp;		offset += 8;</b>
+<b class="fc">&nbsp;		wkbBuffer.putDouble(offset, env.ymin);</b>
+<b class="fc">&nbsp;		offset += 8;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (bExportZs) {</b>
+<b class="fc">&nbsp;			wkbBuffer.putDouble(offset, z_interval.vmin);</b>
+<b class="fc">&nbsp;			offset += 8;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (bExportMs) {</b>
+<b class="fc">&nbsp;			wkbBuffer.putDouble(offset, mInterval.vmin);</b>
+<b class="fc">&nbsp;			offset += 8;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		wkbBuffer.putDouble(offset, env.xmax);</b>
+<b class="fc">&nbsp;		offset += 8;</b>
+<b class="fc">&nbsp;		wkbBuffer.putDouble(offset, env.ymin);</b>
+<b class="fc">&nbsp;		offset += 8;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (bExportZs) {</b>
+<b class="fc">&nbsp;			wkbBuffer.putDouble(offset, z_interval.vmax);</b>
+<b class="fc">&nbsp;			offset += 8;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (bExportMs) {</b>
+<b class="fc">&nbsp;			wkbBuffer.putDouble(offset, mInterval.vmax);</b>
+<b class="fc">&nbsp;			offset += 8;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		wkbBuffer.putDouble(offset, env.xmax);</b>
+<b class="fc">&nbsp;		offset += 8;</b>
+<b class="fc">&nbsp;		wkbBuffer.putDouble(offset, env.ymax);</b>
+<b class="fc">&nbsp;		offset += 8;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (bExportZs) {</b>
+<b class="fc">&nbsp;			wkbBuffer.putDouble(offset, z_interval.vmin);</b>
+<b class="fc">&nbsp;			offset += 8;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (bExportMs) {</b>
+<b class="fc">&nbsp;			wkbBuffer.putDouble(offset, mInterval.vmin);</b>
+<b class="fc">&nbsp;			offset += 8;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		wkbBuffer.putDouble(offset, env.xmin);</b>
+<b class="fc">&nbsp;		offset += 8;</b>
+<b class="fc">&nbsp;		wkbBuffer.putDouble(offset, env.ymax);</b>
+<b class="fc">&nbsp;		offset += 8;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (bExportZs) {</b>
+<b class="fc">&nbsp;			wkbBuffer.putDouble(offset, z_interval.vmax);</b>
+<b class="fc">&nbsp;			offset += 8;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (bExportMs) {</b>
+<b class="fc">&nbsp;			wkbBuffer.putDouble(offset, mInterval.vmax);</b>
+<b class="fc">&nbsp;			offset += 8;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		wkbBuffer.putDouble(offset, env.xmin);</b>
+<b class="fc">&nbsp;		offset += 8;</b>
+<b class="fc">&nbsp;		wkbBuffer.putDouble(offset, env.ymin);</b>
+<b class="fc">&nbsp;		offset += 8;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (bExportZs) {</b>
+<b class="fc">&nbsp;			wkbBuffer.putDouble(offset, z_interval.vmin);</b>
+<b class="fc">&nbsp;			offset += 8;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (bExportMs) {</b>
+<b class="fc">&nbsp;			wkbBuffer.putDouble(offset, mInterval.vmin);</b>
+<b class="fc">&nbsp;			offset += 8;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return offset;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-02-21 16:04</div>
+</div>
+</body>
+</html>

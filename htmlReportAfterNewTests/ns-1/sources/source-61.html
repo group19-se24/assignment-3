@@ -1,0 +1,461 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > OperatorDifferenceLocal</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.esri.core.geometry</a>
+</div>
+
+<h1>Coverage Summary for Class: OperatorDifferenceLocal (com.esri.core.geometry)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">OperatorDifferenceLocal</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (11/11)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    92,4%
+  </span>
+  <span class="absValue">
+    (159/172)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; Copyright 1995-2015 Esri
+&nbsp;
+&nbsp;   Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp;   you may not use this file except in compliance with the License.
+&nbsp;   You may obtain a copy of the License at
+&nbsp;
+&nbsp;       http://www.apache.org/licenses/LICENSE-2.0
+&nbsp;
+&nbsp;   Unless required by applicable law or agreed to in writing, software
+&nbsp;   distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp;   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp;   See the License for the specific language governing permissions and
+&nbsp;   limitations under the License.
+&nbsp;
+&nbsp; For additional information, contact:
+&nbsp; Environmental Systems Research Institute, Inc.
+&nbsp; Attn: Contracts Dept
+&nbsp; 380 New York Street
+&nbsp; Redlands, California, USA 92373
+&nbsp;
+&nbsp; email: contracts@esri.com
+&nbsp; */
+&nbsp;
+&nbsp;package com.esri.core.geometry;
+&nbsp;
+<b class="fc">&nbsp;class OperatorDifferenceLocal extends OperatorDifference {</b>
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public GeometryCursor execute(GeometryCursor inputGeometries,
+&nbsp;			GeometryCursor subtractor, SpatialReference sr,
+&nbsp;			ProgressTracker progressTracker) {
+<b class="fc">&nbsp;		return new OperatorDifferenceCursor(inputGeometries, subtractor, sr,</b>
+&nbsp;				progressTracker);
+&nbsp;	}
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public Geometry execute(Geometry inputGeometry, Geometry subtractor,
+&nbsp;			SpatialReference sr, ProgressTracker progressTracker) {
+<b class="fc">&nbsp;		SimpleGeometryCursor inputGeomCurs = new SimpleGeometryCursor(</b>
+&nbsp;				inputGeometry);
+<b class="fc">&nbsp;		SimpleGeometryCursor subractorCurs = new SimpleGeometryCursor(</b>
+&nbsp;				subtractor);
+<b class="fc">&nbsp;		GeometryCursor geometryCursor = execute(inputGeomCurs, subractorCurs,</b>
+&nbsp;				sr, progressTracker);
+&nbsp;
+<b class="fc">&nbsp;		return geometryCursor.next();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	static Geometry difference(Geometry geometry_a, Geometry geometry_b,
+&nbsp;			SpatialReference spatial_reference, ProgressTracker progress_tracker) {
+<b class="fc">&nbsp;		if (geometry_a.isEmpty() || geometry_b.isEmpty())</b>
+<b class="fc">&nbsp;			return geometry_a;</b>
+&nbsp;
+<b class="fc">&nbsp;		int dimension_a = geometry_a.getDimension();</b>
+<b class="fc">&nbsp;		int dimension_b = geometry_b.getDimension();</b>
+&nbsp;
+<b class="fc">&nbsp;		if (dimension_a &gt; dimension_b)</b>
+<b class="fc">&nbsp;			return geometry_a;</b>
+&nbsp;
+<b class="fc">&nbsp;		int type_a = geometry_a.getType().value();</b>
+<b class="fc">&nbsp;		int type_b = geometry_b.getType().value();</b>
+&nbsp;
+<b class="fc">&nbsp;		Envelope2D env_a = new Envelope2D(), env_b = new Envelope2D(), env_merged = new Envelope2D();</b>
+<b class="fc">&nbsp;		geometry_a.queryEnvelope2D(env_a);</b>
+<b class="fc">&nbsp;		geometry_b.queryEnvelope2D(env_b);</b>
+<b class="fc">&nbsp;		env_merged.setCoords(env_a);</b>
+<b class="fc">&nbsp;		env_merged.merge(env_b);</b>
+&nbsp;
+<b class="fc">&nbsp;		double tolerance = InternalUtils.calculateToleranceFromGeometry(</b>
+&nbsp;				spatial_reference, env_merged, false);
+<b class="fc">&nbsp;		double tolerance_cluster = tolerance * Math.sqrt(2.0) * 1.00001;</b>
+&nbsp;
+<b class="fc">&nbsp;		Envelope2D env_a_inflated = new Envelope2D();</b>
+<b class="fc">&nbsp;		env_a_inflated.setCoords(env_a);</b>
+<b class="fc">&nbsp;		env_a_inflated.inflate(tolerance_cluster, tolerance_cluster); // inflate</b>
+&nbsp;																		// by
+&nbsp;																		// cluster
+&nbsp;																		// tolerance
+&nbsp;
+<b class="fc">&nbsp;		if (!env_a_inflated.isIntersecting(env_b))</b>
+<b class="fc">&nbsp;			return geometry_a;</b>
+&nbsp;
+<b class="fc">&nbsp;		if (type_a == Geometry.GeometryType.Point) {</b>
+&nbsp;			Geometry geometry_b_;
+<b class="fc">&nbsp;			if (MultiPath.isSegment(type_b)) {</b>
+<b class="nc">&nbsp;				geometry_b_ = new Polyline(geometry_b.getDescription());</b>
+<b class="nc">&nbsp;				((Polyline) (geometry_b_)).addSegment((Segment) (geometry_b),</b>
+&nbsp;						true);
+&nbsp;			} else {
+<b class="fc">&nbsp;				geometry_b_ = geometry_b;</b>
+&nbsp;			}
+<b class="fc">&nbsp;			switch (type_b) {</b>
+&nbsp;			case Geometry.GeometryType.Polygon:
+<b class="fc">&nbsp;				return pointMinusPolygon_((Point) (geometry_a),</b>
+&nbsp;						(Polygon) (geometry_b_), tolerance, progress_tracker);
+&nbsp;			case Geometry.GeometryType.Polyline:
+<b class="fc">&nbsp;				return pointMinusPolyline_((Point) (geometry_a),</b>
+&nbsp;						(Polyline) (geometry_b_), tolerance, progress_tracker);
+&nbsp;			case Geometry.GeometryType.MultiPoint:
+<b class="fc">&nbsp;				return pointMinusMultiPoint_((Point) (geometry_a),</b>
+&nbsp;						(MultiPoint) (geometry_b_), tolerance, progress_tracker);
+&nbsp;			case Geometry.GeometryType.Envelope:
+<b class="fc">&nbsp;				return pointMinusEnvelope_((Point) (geometry_a),</b>
+&nbsp;						(Envelope) (geometry_b_), tolerance, progress_tracker);
+&nbsp;			case Geometry.GeometryType.Point:
+<b class="fc">&nbsp;				return pointMinusPoint_((Point) (geometry_a),</b>
+&nbsp;						(Point) (geometry_b_), tolerance, progress_tracker);
+&nbsp;			default:
+<b class="nc">&nbsp;				throw new IllegalArgumentException();</b>
+&nbsp;			}
+<b class="fc">&nbsp;		} else if (type_a == Geometry.GeometryType.MultiPoint) {</b>
+<b class="fc">&nbsp;			switch (type_b) {</b>
+&nbsp;			case Geometry.GeometryType.Polygon:
+<b class="fc">&nbsp;				return multiPointMinusPolygon_((MultiPoint) (geometry_a),</b>
+&nbsp;						(Polygon) (geometry_b), tolerance, progress_tracker);
+&nbsp;			case Geometry.GeometryType.Envelope:
+<b class="fc">&nbsp;				return multiPointMinusEnvelope_((MultiPoint) (geometry_a),</b>
+&nbsp;						(Envelope) (geometry_b), tolerance, progress_tracker);
+&nbsp;			case Geometry.GeometryType.Point:
+<b class="fc">&nbsp;				return multiPointMinusPoint_((MultiPoint) (geometry_a),</b>
+&nbsp;						(Point) (geometry_b), tolerance, progress_tracker);
+&nbsp;			default:
+&nbsp;				break;
+&nbsp;			}
+&nbsp;		}
+<b class="fc">&nbsp;		return TopologicalOperations.difference(geometry_a, geometry_b,</b>
+&nbsp;				spatial_reference, progress_tracker);
+&nbsp;	}
+&nbsp;
+&nbsp;	// these are special implementations, all others delegate to the topo-graph.
+&nbsp;	static Geometry pointMinusPolygon_(Point point, Polygon polygon,
+&nbsp;			double tolerance, ProgressTracker progress_tracker) {
+<b class="fc">&nbsp;		PolygonUtils.PiPResult result = PolygonUtils.isPointInPolygon2D(</b>
+&nbsp;				polygon, point, tolerance);
+&nbsp;
+<b class="fc">&nbsp;		if (result == PolygonUtils.PiPResult.PiPOutside)</b>
+<b class="fc">&nbsp;			return point;</b>
+&nbsp;
+<b class="fc">&nbsp;		return point.createInstance();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	static Geometry pointMinusPolyline_(Point point, Polyline polyline,
+&nbsp;			double tolerance, ProgressTracker progress_tracker) {
+<b class="fc">&nbsp;		Point2D pt = point.getXY();</b>
+<b class="fc">&nbsp;		SegmentIterator seg_iter = polyline.querySegmentIterator();</b>
+&nbsp;
+<b class="fc">&nbsp;		double tolerance_cluster = tolerance * Math.sqrt(2.0) * 1.00001;</b>
+<b class="fc">&nbsp;		double tolerance_cluster_sq = tolerance_cluster * tolerance_cluster;</b>
+<b class="fc">&nbsp;		Envelope2D env = new Envelope2D();</b>
+&nbsp;
+<b class="fc">&nbsp;		while (seg_iter.nextPath()) {</b>
+<b class="fc">&nbsp;			while (seg_iter.hasNextSegment()) {</b>
+<b class="fc">&nbsp;				Segment segment = seg_iter.nextSegment();</b>
+&nbsp;
+<b class="fc">&nbsp;				segment.queryEnvelope2D(env);</b>
+<b class="fc">&nbsp;				env.inflate(tolerance_cluster, tolerance_cluster);</b>
+&nbsp;
+<b class="fc">&nbsp;				if (!env.contains(pt))</b>
+<b class="fc">&nbsp;					continue;</b>
+&nbsp;
+<b class="fc">&nbsp;				if (segment.isIntersecting(pt, tolerance))</b>
+<b class="fc">&nbsp;					return point.createInstance();</b>
+&nbsp;
+&nbsp;				// check segment end points to the cluster tolerance
+<b class="nc">&nbsp;				Point2D end_point = segment.getStartXY();</b>
+&nbsp;
+<b class="nc">&nbsp;				if (Point2D.sqrDistance(pt, end_point) &lt;= tolerance_cluster_sq)</b>
+<b class="nc">&nbsp;					return point.createInstance();</b>
+&nbsp;
+<b class="nc">&nbsp;				end_point = segment.getEndXY();</b>
+&nbsp;
+<b class="nc">&nbsp;				if (Point2D.sqrDistance(pt, end_point) &lt;= tolerance_cluster_sq)</b>
+<b class="nc">&nbsp;					return point.createInstance();</b>
+<b class="nc">&nbsp;			}</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return point;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	static Geometry pointMinusMultiPoint_(Point point, MultiPoint multi_point,
+&nbsp;			double tolerance, ProgressTracker progress_tracker) {
+<b class="fc">&nbsp;		MultiPointImpl multipointImpl = (MultiPointImpl) (multi_point</b>
+<b class="fc">&nbsp;				._getImpl());</b>
+<b class="fc">&nbsp;		AttributeStreamOfDbl position = (AttributeStreamOfDbl) multipointImpl</b>
+<b class="fc">&nbsp;				.getAttributeStreamRef(VertexDescription.Semantics.POSITION);</b>
+<b class="fc">&nbsp;		int point_count = multi_point.getPointCount();</b>
+<b class="fc">&nbsp;		Point2D point2D = point.getXY();</b>
+<b class="fc">&nbsp;		Point2D pt = new Point2D();</b>
+&nbsp;
+<b class="fc">&nbsp;		double tolerance_cluster = tolerance * Math.sqrt(2.0) * 1.00001;</b>
+<b class="fc">&nbsp;		double tolerance_cluster_sq = tolerance_cluster * tolerance_cluster;</b>
+&nbsp;
+<b class="fc">&nbsp;		for (int i = 0; i &lt; point_count; i++) {</b>
+<b class="fc">&nbsp;			position.read(2 * i, pt);</b>
+<b class="fc">&nbsp;			double sqr_dist = Point2D.sqrDistance(pt, point2D);</b>
+<b class="fc">&nbsp;			if (sqr_dist &lt;= tolerance_cluster_sq)</b>
+<b class="fc">&nbsp;				return point.createInstance();// return an empty point.</b>
+&nbsp;		}
+&nbsp;
+<b class="nc">&nbsp;		return point;// return the input point</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	static Geometry pointMinusEnvelope_(Point point, Envelope envelope,
+&nbsp;			double tolerance, ProgressTracker progress_tracker) {
+<b class="fc">&nbsp;		Envelope2D env = new Envelope2D();</b>
+<b class="fc">&nbsp;		envelope.queryEnvelope2D(env);</b>
+<b class="fc">&nbsp;		env.inflate(tolerance, tolerance);</b>
+&nbsp;
+<b class="fc">&nbsp;		Point2D pt = point.getXY();</b>
+&nbsp;
+<b class="fc">&nbsp;		if (!env.contains(pt))</b>
+<b class="nc">&nbsp;			return point;</b>
+&nbsp;
+<b class="fc">&nbsp;		return point.createInstance();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	static Geometry pointMinusPoint_(Point point_a, Point point_b,
+&nbsp;			double tolerance, ProgressTracker progress_tracker) {
+<b class="fc">&nbsp;		double tolerance_cluster = tolerance * Math.sqrt(2.0) * 1.00001;</b>
+<b class="fc">&nbsp;		double tolerance_cluster_sq = tolerance_cluster * tolerance_cluster;</b>
+&nbsp;
+<b class="fc">&nbsp;		Point2D pt_a = point_a.getXY();</b>
+<b class="fc">&nbsp;		Point2D pt_b = point_b.getXY();</b>
+&nbsp;
+<b class="fc">&nbsp;		if (Point2D.sqrDistance(pt_a, pt_b) &lt;= tolerance_cluster_sq)</b>
+<b class="fc">&nbsp;			return point_a.createInstance(); // return empty point</b>
+&nbsp;
+<b class="nc">&nbsp;		return point_a;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	static Geometry multiPointMinusPolygon_(MultiPoint multi_point,
+&nbsp;			Polygon polygon, double tolerance, ProgressTracker progress_tracker) {
+<b class="fc">&nbsp;		Envelope2D env = new Envelope2D();</b>
+<b class="fc">&nbsp;		polygon.queryEnvelope2D(env);</b>
+<b class="fc">&nbsp;		env.inflate(tolerance, tolerance);</b>
+&nbsp;
+<b class="fc">&nbsp;		int point_count = multi_point.getPointCount();</b>
+&nbsp;
+<b class="fc">&nbsp;		boolean b_found_covered = false;</b>
+<b class="fc">&nbsp;		boolean[] covered = new boolean[point_count];</b>
+<b class="fc">&nbsp;		for (int i = 0; i &lt; point_count; i++)</b>
+<b class="fc">&nbsp;			covered[i] = false;</b>
+&nbsp;
+<b class="fc">&nbsp;		Point2D pt = new Point2D();</b>
+&nbsp;
+<b class="fc">&nbsp;		for (int i = 0; i &lt; point_count; i++) {</b>
+<b class="fc">&nbsp;			multi_point.getXY(i, pt);</b>
+&nbsp;
+<b class="fc">&nbsp;			if (!env.contains(pt))</b>
+<b class="fc">&nbsp;				continue;</b>
+&nbsp;
+<b class="fc">&nbsp;			PolygonUtils.PiPResult result = PolygonUtils.isPointInPolygon2D(</b>
+&nbsp;					polygon, pt, tolerance);
+&nbsp;
+<b class="fc">&nbsp;			if (result == PolygonUtils.PiPResult.PiPOutside)</b>
+<b class="fc">&nbsp;				continue;</b>
+&nbsp;
+<b class="fc">&nbsp;			b_found_covered = true;</b>
+<b class="fc">&nbsp;			covered[i] = true;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (!b_found_covered)</b>
+<b class="fc">&nbsp;			return multi_point;</b>
+&nbsp;
+<b class="fc">&nbsp;		MultiPoint new_multipoint = (MultiPoint) multi_point.createInstance();</b>
+&nbsp;
+<b class="fc">&nbsp;		for (int i = 0; i &lt; point_count; i++) {</b>
+<b class="fc">&nbsp;			if (!covered[i])</b>
+<b class="fc">&nbsp;				new_multipoint.add(multi_point, i, i + 1);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return new_multipoint;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	static Geometry multiPointMinusEnvelope_(MultiPoint multi_point,
+&nbsp;			Envelope envelope, double tolerance,
+&nbsp;			ProgressTracker progress_tracker) {
+<b class="fc">&nbsp;		Envelope2D env = new Envelope2D();</b>
+<b class="fc">&nbsp;		envelope.queryEnvelope2D(env);</b>
+<b class="fc">&nbsp;		env.inflate(tolerance, tolerance);</b>
+&nbsp;
+<b class="fc">&nbsp;		int point_count = multi_point.getPointCount();</b>
+&nbsp;
+<b class="fc">&nbsp;		boolean b_found_covered = false;</b>
+<b class="fc">&nbsp;		boolean[] covered = new boolean[point_count];</b>
+<b class="fc">&nbsp;		for (int i = 0; i &lt; point_count; i++)</b>
+<b class="fc">&nbsp;			covered[i] = false;</b>
+&nbsp;
+<b class="fc">&nbsp;		Point2D pt = new Point2D();</b>
+&nbsp;
+<b class="fc">&nbsp;		for (int i = 0; i &lt; point_count; i++) {</b>
+<b class="fc">&nbsp;			multi_point.getXY(i, pt);</b>
+&nbsp;
+<b class="fc">&nbsp;			if (!env.contains(pt))</b>
+<b class="fc">&nbsp;				continue;</b>
+&nbsp;
+<b class="fc">&nbsp;			b_found_covered = true;</b>
+<b class="fc">&nbsp;			covered[i] = true;</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (!b_found_covered)</b>
+<b class="fc">&nbsp;			return multi_point;</b>
+&nbsp;
+<b class="fc">&nbsp;		MultiPoint new_multipoint = (MultiPoint) multi_point.createInstance();</b>
+&nbsp;
+<b class="fc">&nbsp;		for (int i = 0; i &lt; point_count; i++) {</b>
+<b class="fc">&nbsp;			if (!covered[i])</b>
+<b class="fc">&nbsp;				new_multipoint.add(multi_point, i, i + 1);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return new_multipoint;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	static Geometry multiPointMinusPoint_(MultiPoint multi_point, Point point,
+&nbsp;			double tolerance, ProgressTracker progress_tracker) {
+<b class="fc">&nbsp;		MultiPointImpl multipointImpl = (MultiPointImpl) (multi_point</b>
+<b class="fc">&nbsp;				._getImpl());</b>
+<b class="fc">&nbsp;		AttributeStreamOfDbl position = (AttributeStreamOfDbl) (multipointImpl</b>
+<b class="fc">&nbsp;				.getAttributeStreamRef(VertexDescription.Semantics.POSITION));</b>
+<b class="fc">&nbsp;		int point_count = multi_point.getPointCount();</b>
+<b class="fc">&nbsp;		Point2D point2D = point.getXY();</b>
+<b class="fc">&nbsp;		Point2D pt = new Point2D();</b>
+&nbsp;
+<b class="fc">&nbsp;		boolean b_found_covered = false;</b>
+<b class="fc">&nbsp;		boolean[] covered = new boolean[point_count];</b>
+<b class="fc">&nbsp;		for (int i = 0; i &lt; point_count; i++)</b>
+<b class="fc">&nbsp;			covered[i] = false;</b>
+&nbsp;
+<b class="fc">&nbsp;		double tolerance_cluster = tolerance * Math.sqrt(2.0) * 1.00001;</b>
+<b class="fc">&nbsp;		double tolerance_cluster_sq = tolerance_cluster * tolerance_cluster;</b>
+&nbsp;
+<b class="fc">&nbsp;		for (int i = 0; i &lt; point_count; i++) {</b>
+<b class="fc">&nbsp;			position.read(2 * i, pt);</b>
+&nbsp;
+<b class="fc">&nbsp;			double sqr_dist = Point2D.sqrDistance(pt, point2D);</b>
+&nbsp;
+<b class="fc">&nbsp;			if (sqr_dist &lt;= tolerance_cluster_sq) {</b>
+<b class="fc">&nbsp;				b_found_covered = true;</b>
+<b class="fc">&nbsp;				covered[i] = true;</b>
+&nbsp;			}
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		if (!b_found_covered)</b>
+<b class="fc">&nbsp;			return multi_point;</b>
+&nbsp;
+<b class="fc">&nbsp;		MultiPoint new_multipoint = (MultiPoint) (multi_point.createInstance());</b>
+&nbsp;
+<b class="fc">&nbsp;		for (int i = 0; i &lt; point_count; i++) {</b>
+<b class="fc">&nbsp;			if (!covered[i])</b>
+<b class="fc">&nbsp;				new_multipoint.add(multi_point, i, i + 1);</b>
+&nbsp;		}
+&nbsp;
+<b class="fc">&nbsp;		return new_multipoint;</b>
+&nbsp;	}
+&nbsp;}
+&nbsp;
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-02-21 16:04</div>
+</div>
+</body>
+</html>

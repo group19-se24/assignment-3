@@ -1,0 +1,1034 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > Transformation2D</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.esri.core.geometry</a>
+</div>
+
+<h1>Coverage Summary for Class: Transformation2D (com.esri.core.geometry)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">Transformation2D</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    16,1%
+  </span>
+  <span class="absValue">
+    (9/56)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    16,9%
+  </span>
+  <span class="absValue">
+    (45/266)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*
+&nbsp; Copyright 1995-2015 Esri
+&nbsp;
+&nbsp;   Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp;   you may not use this file except in compliance with the License.
+&nbsp;   You may obtain a copy of the License at
+&nbsp;
+&nbsp;       http://www.apache.org/licenses/LICENSE-2.0
+&nbsp;
+&nbsp;   Unless required by applicable law or agreed to in writing, software
+&nbsp;   distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp;   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp;   See the License for the specific language governing permissions and
+&nbsp;   limitations under the License.
+&nbsp;
+&nbsp; For additional information, contact:
+&nbsp; Environmental Systems Research Institute, Inc.
+&nbsp; Attn: Contracts Dept
+&nbsp; 380 New York Street
+&nbsp; Redlands, California, USA 92373
+&nbsp;
+&nbsp; email: contracts@esri.com
+&nbsp; */
+&nbsp;
+&nbsp;package com.esri.core.geometry;
+&nbsp;
+&nbsp;import static com.esri.core.geometry.SizeOf.SIZE_OF_TRANSFORMATION_2D;
+&nbsp;
+&nbsp;/**
+&nbsp; * The affine transformation class for 2D.
+&nbsp; * 
+&nbsp; * Vector is a row: 
+&nbsp; * &lt;code&gt;
+&nbsp; * &lt;br&gt;           |m11 m12 0|
+&nbsp; * &lt;br&gt;| x y 1| * |m21 m22 0| = |m11 * x + m21 * y + m31   m12 * x + m22 * y + m32   1|
+&nbsp; * &lt;br&gt;           |m31 m32 1|
+&nbsp; * &lt;br&gt;Then elements of the Transformation2D are as follows:
+&nbsp; * &lt;br&gt;           |xx  yx  0|
+&nbsp; * &lt;br&gt;| x y 1| * |xy  yy  0| = |xx * x + xy * y + xd   yx * x + yy * y + yd    1|
+&nbsp; * &lt;br&gt;           |xd  yd  1|
+&nbsp; * &lt;br&gt;
+&nbsp; * &lt;/code&gt; Matrices are used for transformations of the vectors as rows (case
+&nbsp; * 2). That means the math expressions on the Geometry matrix operations should
+&nbsp; * be writen like this: &lt;br&gt;
+&nbsp; * v&#39; = v * M1 * M2 * M3 = ( (v * M1) * M2 ) * M3, where v is a vector, Mn are
+&nbsp; * the matrices. &lt;br&gt;
+&nbsp; * This is equivalent to the following line of code: &lt;br&gt;
+&nbsp; * ResultVector = (M1.mul(M2).mul(M3)).transform(Vector)
+&nbsp; */
+&nbsp;public final class Transformation2D {
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Matrix coefficient XX of the transformation.
+&nbsp;	 */
+&nbsp;	public double xx;
+&nbsp;	/**
+&nbsp;	 * Matrix coefficient XY of the transformation.
+&nbsp;	 */
+&nbsp;	public double xy;
+&nbsp;	/**
+&nbsp;	 * X translation component of the transformation.
+&nbsp;	 */
+&nbsp;	public double xd;
+&nbsp;	/**
+&nbsp;	 * Matrix coefficient YX of the transformation.
+&nbsp;	 */
+&nbsp;
+&nbsp;	public double yx;
+&nbsp;	/**
+&nbsp;	 * Matrix coefficient YY of the transformation.
+&nbsp;	 */
+&nbsp;	public double yy;
+&nbsp;	/**
+&nbsp;	 * Y translation component of the transformation.
+&nbsp;	 */
+&nbsp;
+&nbsp;	public double yd;
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Creates a 2D affine transformation with identity transformation.
+&nbsp;	 */
+<b class="fc">&nbsp;	public Transformation2D() {</b>
+<b class="fc">&nbsp;		setIdentity();</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Creates a 2D affine transformation with a specified scale.
+&nbsp;	 * 
+&nbsp;	 * @param scale
+&nbsp;	 *            The scale to use for the transformation.
+&nbsp;	 */
+<b class="nc">&nbsp;	public Transformation2D(double scale) {</b>
+<b class="nc">&nbsp;		setScale(scale);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Initializes a zero transformation. Transforms any coordinate to (0, 0).
+&nbsp;	 */
+&nbsp;	public void setZero() {
+<b class="nc">&nbsp;		xx = 0;</b>
+<b class="nc">&nbsp;		yy = 0;</b>
+<b class="nc">&nbsp;		xy = 0;</b>
+<b class="nc">&nbsp;		yx = 0;</b>
+<b class="nc">&nbsp;		xd = 0;</b>
+<b class="nc">&nbsp;		yd = 0;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void transform(Point2D psrc, Point2D pdst) {
+<b class="fc">&nbsp;		double x = xx * psrc.x + xy * psrc.y + xd;</b>
+<b class="fc">&nbsp;		double y = yx * psrc.x + yy * psrc.y + yd;</b>
+<b class="fc">&nbsp;		pdst.x = x;</b>
+<b class="fc">&nbsp;		pdst.y = y;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns True when all members of this transformation are equal to the
+&nbsp;	 * corresponding members of the other.
+&nbsp;	 */
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public boolean equals(Object other) {
+<b class="nc">&nbsp;		if (this == other)</b>
+<b class="nc">&nbsp;			return true;</b>
+<b class="nc">&nbsp;		if (!(other instanceof Transformation2D))</b>
+<b class="nc">&nbsp;			return false;</b>
+<b class="nc">&nbsp;		Transformation2D that = (Transformation2D) other;</b>
+&nbsp;
+<b class="nc">&nbsp;		return (xx == that.xx &amp;&amp; xy == that.xy &amp;&amp; xd == that.xd</b>
+&nbsp;				&amp;&amp; yx == that.yx &amp;&amp; yy == that.yy &amp;&amp; yd == that.yd);
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns the hash code for the 2D transformation.
+&nbsp;	 */
+&nbsp;
+&nbsp;	@Override
+&nbsp;	public int hashCode() {
+<b class="nc">&nbsp;		int hash = NumberUtils.hash(xx);</b>
+<b class="nc">&nbsp;		hash = NumberUtils.hash(hash, xy);</b>
+<b class="nc">&nbsp;		hash = NumberUtils.hash(hash, xd);</b>
+<b class="nc">&nbsp;		hash = NumberUtils.hash(hash, yx);</b>
+<b class="nc">&nbsp;		hash = NumberUtils.hash(hash, yy);</b>
+<b class="nc">&nbsp;		hash = NumberUtils.hash(hash, yd);</b>
+<b class="nc">&nbsp;		return hash;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void transform(Point2D[] points, int start, int count) {
+<b class="nc">&nbsp;		int n = Math.min(points.length, start + count);</b>
+<b class="nc">&nbsp;		for (int i = count; i &lt; n; i++) {</b>
+<b class="nc">&nbsp;			transform(points[i], points[i]);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Transforms an array of points.
+&nbsp;	 * 
+&nbsp;	 * @param pointsIn
+&nbsp;	 *            The points to be transformed.
+&nbsp;	 * @param count
+&nbsp;	 *            The number of points to transform.
+&nbsp;	 * @param pointsOut
+&nbsp;	 *            The transformed points are returned using this array. It
+&nbsp;	 *            should have the same or greater size as the input array.
+&nbsp;	 */
+&nbsp;	public void transform(Point[] pointsIn, int count, Point[] pointsOut) {
+<b class="nc">&nbsp;		Point2D res = new Point2D();</b>
+<b class="nc">&nbsp;		for (int i = 0; i &lt; count; i++) {</b>
+<b class="nc">&nbsp;			Point2D p = pointsIn[i].getXY();</b>
+<b class="nc">&nbsp;			res.x = xx * p.x + xy * p.y + xd;</b>
+<b class="nc">&nbsp;			res.y = yx * p.x + yy * p.y + yd;</b>
+<b class="nc">&nbsp;			pointsOut[i] = new Point(res.x, res.y);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Transforms an array of points stored in an array of doubles as
+&nbsp;	 * interleaved XY coordinates.
+&nbsp;	 * 
+&nbsp;	 * @param pointsXYInterleaved
+&nbsp;	 *            The array of points with interleaved X, Y values to be
+&nbsp;	 *            transformed.
+&nbsp;	 * @param start
+&nbsp;	 *            The start point index to transform from (the actual element
+&nbsp;	 *            index is 2 * start).
+&nbsp;	 * @param count
+&nbsp;	 *            The number of points to transform (the actual element count is
+&nbsp;	 *            2 * count).
+&nbsp;	 */
+&nbsp;	public void transform(double[] pointsXYInterleaved, int start, int count) {
+<b class="nc">&nbsp;		int n = Math.min(pointsXYInterleaved.length, (start + count) * 2) / 2;</b>
+<b class="nc">&nbsp;		for (int i = count; i &lt; n; i++) {</b>
+<b class="nc">&nbsp;			double px = pointsXYInterleaved[2 * i];</b>
+<b class="nc">&nbsp;			double py = pointsXYInterleaved[2 * i + 1];</b>
+<b class="nc">&nbsp;			pointsXYInterleaved[2 * i] = xx * px + xy * py + xd;</b>
+<b class="nc">&nbsp;			pointsXYInterleaved[2 * i + 1] = yx * px + yy * py + yd;</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Multiplies this matrix on the right with the &quot;right&quot; matrix. Stores the
+&nbsp;	 * result into this matrix and returns a reference to it. &lt;br&gt;
+&nbsp;	 * Equivalent to this *= right.
+&nbsp;	 * 
+&nbsp;	 * @param right
+&nbsp;	 *            The matrix to be multiplied with.
+&nbsp;	 */
+&nbsp;	public void multiply(Transformation2D right) {
+<b class="nc">&nbsp;		multiply(this, right, this);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Multiplies this matrix on the left with the &quot;left&quot; matrix. Stores the
+&nbsp;	 * result into this matrix and returns a reference to it. &lt;br&gt;
+&nbsp;	 * Equivalent to this = left * this.
+&nbsp;	 * 
+&nbsp;	 * @param left
+&nbsp;	 *            The matrix to be multiplied with.
+&nbsp;	 */
+&nbsp;	public void mulLeft(Transformation2D left) {
+<b class="nc">&nbsp;		multiply(left, this, this);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Performs multiplication of matrices a and b and places the result into
+&nbsp;	 * this matrix. The a, b, and result could point to same objects. &lt;br&gt;
+&nbsp;	 * Equivalent to result = a * b.
+&nbsp;	 * 
+&nbsp;	 * @param a
+&nbsp;	 *            The 2D transformation to be multiplied.
+&nbsp;	 * @param b
+&nbsp;	 *            The 2D transformation to be multiplied.
+&nbsp;	 * @param result
+&nbsp;	 *            The 2D transformation created by multiplication of matrices.
+&nbsp;	 */
+&nbsp;	public static void multiply(Transformation2D a, Transformation2D b,
+&nbsp;			Transformation2D result) {
+&nbsp;		double xx, xy, xd, yx, yy, yd;
+&nbsp;
+<b class="nc">&nbsp;		xx = a.xx * b.xx + a.yx * b.xy;</b>
+<b class="nc">&nbsp;		xy = a.xy * b.xx + a.yy * b.xy;</b>
+<b class="nc">&nbsp;		xd = a.xd * b.xx + a.yd * b.xy + b.xd;</b>
+<b class="nc">&nbsp;		yx = a.xx * b.yx + a.yx * b.yy;</b>
+<b class="nc">&nbsp;		yy = a.xy * b.yx + a.yy * b.yy;</b>
+<b class="nc">&nbsp;		yd = a.xd * b.yx + a.yd * b.yy + b.yd;</b>
+&nbsp;
+<b class="nc">&nbsp;		result.xx = xx;</b>
+<b class="nc">&nbsp;		result.xy = xy;</b>
+<b class="nc">&nbsp;		result.xd = xd;</b>
+<b class="nc">&nbsp;		result.yx = yx;</b>
+<b class="nc">&nbsp;		result.yy = yy;</b>
+<b class="nc">&nbsp;		result.yd = yd;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns a copy of the Transformation2D object.
+&nbsp;	 * 
+&nbsp;	 * @return A copy of this object.
+&nbsp;	 */
+&nbsp;	public Transformation2D copy() {
+<b class="nc">&nbsp;		Transformation2D result = new Transformation2D();</b>
+<b class="nc">&nbsp;		result.xx = xx;</b>
+<b class="nc">&nbsp;		result.xy = xy;</b>
+<b class="nc">&nbsp;		result.xd = xd;</b>
+<b class="nc">&nbsp;		result.yx = yx;</b>
+<b class="nc">&nbsp;		result.yy = yy;</b>
+<b class="nc">&nbsp;		result.yd = yd;</b>
+<b class="nc">&nbsp;		return result;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Writes the matrix coefficients in the order XX, XY, XD, YX, YY, YD into
+&nbsp;	 * the given array.
+&nbsp;	 * 
+&nbsp;	 * @param coefs
+&nbsp;	 *            The array into which the coefficients are returned. Should be
+&nbsp;	 *            of size 6 elements.
+&nbsp;	 */
+&nbsp;	public void getCoefficients(double[] coefs) {
+<b class="nc">&nbsp;		if (coefs.length &lt; 6)</b>
+<b class="nc">&nbsp;			throw new GeometryException(</b>
+&nbsp;					&quot;Buffer is too small. coefs needs 6 members&quot;);
+&nbsp;
+<b class="nc">&nbsp;		coefs[0] = xx;</b>
+<b class="nc">&nbsp;		coefs[1] = xy;</b>
+<b class="nc">&nbsp;		coefs[2] = xd;</b>
+<b class="nc">&nbsp;		coefs[3] = yx;</b>
+<b class="nc">&nbsp;		coefs[4] = yy;</b>
+<b class="nc">&nbsp;		coefs[5] = yd;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Transforms envelope
+&nbsp;	 * 
+&nbsp;	 * @param env
+&nbsp;	 *            The envelope that is to be transformed
+&nbsp;	 */
+&nbsp;	void transform(Envelope2D env) {
+&nbsp;
+<b class="nc">&nbsp;		if (env.isEmpty())</b>
+&nbsp;			return;
+&nbsp;
+<b class="nc">&nbsp;		Point2D[] buf = new Point2D[4];</b>
+<b class="nc">&nbsp;		env.queryCorners(buf);</b>
+<b class="nc">&nbsp;		transform(buf, buf);</b>
+<b class="nc">&nbsp;		env.setFromPoints(buf, 4);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	void transform(Point2D[] pointsIn, Point2D[] pointsOut) {
+<b class="nc">&nbsp;		for (int i = 0; i &lt; pointsIn.length; i++) {</b>
+<b class="nc">&nbsp;			Point2D res = new Point2D();</b>
+<b class="nc">&nbsp;			Point2D p = pointsIn[i];</b>
+<b class="nc">&nbsp;			res.x = xx * p.x + xy * p.y + xd;</b>
+<b class="nc">&nbsp;			res.y = yx * p.x + yy * p.y + yd;</b>
+<b class="nc">&nbsp;			pointsOut[i] = res;</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Initialize transformation from two rectangles.
+&nbsp;	 */
+&nbsp;	void initializeFromRect(Envelope2D src, Envelope2D dest) {
+<b class="fc">&nbsp;		if (src.isEmpty() || dest.isEmpty() || 0 == src.getWidth()</b>
+<b class="fc">&nbsp;				|| 0 == src.getHeight())</b>
+<b class="nc">&nbsp;			setZero();</b>
+&nbsp;		else {
+<b class="fc">&nbsp;			xy = yx = 0;</b>
+<b class="fc">&nbsp;			xx = dest.getWidth() / src.getWidth();</b>
+<b class="fc">&nbsp;			yy = dest.getHeight() / src.getHeight();</b>
+<b class="fc">&nbsp;			xd = dest.xmin - src.xmin * xx;</b>
+<b class="fc">&nbsp;			yd = dest.ymin - src.ymin * yy;</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Initializes an orhtonormal transformation from the Src and Dest
+&nbsp;	 * rectangles.
+&nbsp;	 * 
+&nbsp;	 * The result transformation proportionally fits the Src into the Dest. The
+&nbsp;	 * center of the Src will be in the center of the Dest.
+&nbsp;	 */
+&nbsp;	void initializeFromRectIsotropic(Envelope2D src, Envelope2D dest) {
+&nbsp;
+<b class="nc">&nbsp;		if (src.isEmpty() || dest.isEmpty() || 0 == src.getWidth()</b>
+<b class="nc">&nbsp;				|| 0 == src.getHeight())</b>
+<b class="nc">&nbsp;			setZero();</b>
+&nbsp;		else {
+<b class="nc">&nbsp;			yx = 0;</b>
+<b class="nc">&nbsp;			xy = 0;</b>
+<b class="nc">&nbsp;			xx = dest.getWidth() / src.getWidth();</b>
+<b class="nc">&nbsp;			yy = dest.getHeight() / src.getHeight();</b>
+<b class="nc">&nbsp;			if (xx &gt; yy)</b>
+<b class="nc">&nbsp;				xx = yy;</b>
+&nbsp;			else
+<b class="nc">&nbsp;				yy = xx;</b>
+&nbsp;
+<b class="nc">&nbsp;			Point2D destCenter = dest.getCenter();</b>
+<b class="nc">&nbsp;			Point2D srcCenter = src.getCenter();</b>
+<b class="nc">&nbsp;			xd = destCenter.x - srcCenter.x * xx;</b>
+<b class="nc">&nbsp;			yd = destCenter.y - srcCenter.y * yy;</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Initializes transformation from Position, Tangent vector and offset
+&nbsp;	 * value. Tangent vector must have unity length
+&nbsp;	 */
+&nbsp;	void initializeFromCurveParameters(Point2D Position, Point2D Tangent,
+&nbsp;			double Offset) {
+&nbsp;		// TODO
+<b class="nc">&nbsp;	}</b>
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Transforms size.
+&nbsp;	 * 
+&nbsp;	 * Creates an AABB with width of SizeSrc.x and height of SizeSrc.y.
+&nbsp;	 * Transforms that AABB and gets a quadrangle in new coordinate system. The
+&nbsp;	 * result x contains the length of the quadrangle edge, which were parallel
+&nbsp;	 * to X in the original system, and y contains the length of the edge, that
+&nbsp;	 * were parallel to the Y axis in the original system.
+&nbsp;	 */
+&nbsp;	Point2D transformSize(Point2D SizeSrc) {
+<b class="nc">&nbsp;		Point2D pt = new Point2D();</b>
+<b class="nc">&nbsp;		pt.x = Math.sqrt(xx * xx + yx * yx) * SizeSrc.x;</b>
+<b class="nc">&nbsp;		pt.y = Math.sqrt(xy * xy + yy * yy) * SizeSrc.y;</b>
+<b class="nc">&nbsp;		return pt;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Transforms a tolerance value.
+&nbsp;	 * 
+&nbsp;	 * @param tolerance
+&nbsp;	 *            The tolerance value.
+&nbsp;	 */
+&nbsp;	public double transform(double tolerance) {
+&nbsp;		// the function should be implemented as follows: find encompassing
+&nbsp;		// circle for the transformed circle of radius = Tolerance.
+&nbsp;
+&nbsp;		// this is approximation.
+<b class="fc">&nbsp;		Point2D pt1 = new Point2D();</b>
+<b class="fc">&nbsp;		Point2D pt2 = new Point2D();</b>
+&nbsp;		/*
+&nbsp;		 * pt[0].Set(0, 0); pt[1].Set(1, 0); pt[2].Set(0, 1); Transform(pt);
+&nbsp;		 * pt[1] -= pt[0]; pt[2] -= pt[0];
+&nbsp;		 */
+&nbsp;
+<b class="fc">&nbsp;		pt1.setCoords(xx, yx);</b>
+<b class="fc">&nbsp;		pt2.setCoords(xy, yy);</b>
+<b class="fc">&nbsp;		pt1.sub(pt1);</b>
+<b class="fc">&nbsp;		double d1 = pt1.sqrLength() * 0.5;</b>
+<b class="fc">&nbsp;		pt1.setCoords(xx, yx);</b>
+<b class="fc">&nbsp;		pt2.setCoords(xy, yy);</b>
+<b class="fc">&nbsp;		pt1.add(pt2);</b>
+<b class="fc">&nbsp;		double d2 = pt1.sqrLength() * 0.5;</b>
+<b class="fc">&nbsp;		return tolerance * ((d1 &gt; d2) ? Math.sqrt(d1) : Math.sqrt(d2));</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	// Performs linear part of the transformation only. Same as if xd, yd would
+&nbsp;	// be zeroed.
+&nbsp;	void transformWithoutShift(Point2D[] pointsIn, int from, int count,
+&nbsp;			Point2D[] pointsOut) {
+<b class="nc">&nbsp;		for (int i = from, n = from + count; i &lt; n; i++) {</b>
+<b class="nc">&nbsp;			Point2D p = pointsIn[i];</b>
+<b class="nc">&nbsp;			double new_x = xx * p.x + xy * p.y;</b>
+<b class="nc">&nbsp;			double new_y = yx * p.x + yy * p.y;</b>
+<b class="nc">&nbsp;			pointsOut[i].setCoords(new_x, new_y);</b>
+&nbsp;		}
+&nbsp;	}
+&nbsp;
+&nbsp;	Point2D transformWithoutShift(Point2D srcPoint) {
+<b class="nc">&nbsp;		double new_x = xx * srcPoint.x + xy * srcPoint.y;</b>
+<b class="nc">&nbsp;		double new_y = yx * srcPoint.x + yy * srcPoint.y;</b>
+<b class="nc">&nbsp;		return Point2D.construct(new_x, new_y);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Sets this matrix to be the identity matrix.
+&nbsp;	 */
+&nbsp;	public void setIdentity() {
+<b class="fc">&nbsp;		xx = 1.0;</b>
+<b class="fc">&nbsp;		xy = 0;</b>
+<b class="fc">&nbsp;		xd = 0;</b>
+<b class="fc">&nbsp;		yx = 0;</b>
+<b class="fc">&nbsp;		yy = 1.0;</b>
+<b class="fc">&nbsp;		yd = 0;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns TRUE if this matrix is the identity matrix.
+&nbsp;	 */
+&nbsp;	public boolean isIdentity() {
+<b class="fc">&nbsp;		return xx == 1.0 &amp;&amp; yy == 1.0</b>
+&nbsp;				&amp;&amp; (0 == xy &amp;&amp; 0 == xd &amp;&amp; 0 == yx &amp;&amp; 0 == yd);
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns TRUE if this matrix is an identity matrix within the given
+&nbsp;	 * tolerance.
+&nbsp;	 * 
+&nbsp;	 * @param tol
+&nbsp;	 *            The tolerance value.
+&nbsp;	 */
+&nbsp;	public boolean isIdentity(double tol) {
+<b class="nc">&nbsp;		Point2D pt = Point2D.construct(0., 1.);</b>
+<b class="nc">&nbsp;		transform(pt, pt);</b>
+<b class="nc">&nbsp;		pt.sub(Point2D.construct(0., 1.));</b>
+<b class="nc">&nbsp;		if (pt.sqrLength() &gt; tol * tol)</b>
+<b class="nc">&nbsp;			return false;</b>
+&nbsp;
+<b class="nc">&nbsp;		pt.setCoords(0, 0);</b>
+<b class="nc">&nbsp;		transform(pt, pt);</b>
+<b class="nc">&nbsp;		if (pt.sqrLength() &gt; tol * tol)</b>
+<b class="nc">&nbsp;			return false;</b>
+&nbsp;
+<b class="nc">&nbsp;		pt.setCoords(1.0, 0.0);</b>
+<b class="nc">&nbsp;		transform(pt, pt);</b>
+<b class="nc">&nbsp;		pt.sub(Point2D.construct(1.0, 0.0));</b>
+<b class="nc">&nbsp;		return pt.sqrLength() &lt;= tol * tol;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns TRUE for reflective transformations. It inverts the sign of
+&nbsp;	 * vector cross product.
+&nbsp;	 */
+&nbsp;	public boolean isReflective() {
+<b class="nc">&nbsp;		return xx * yy - yx * xy &lt; 0;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns TRUE if this transformation is a uniform transformation.
+&nbsp;	 * 
+&nbsp;	 * The uniform transformation is a transformation, which transforms a square
+&nbsp;	 * to a square.
+&nbsp;	 */
+&nbsp;	public boolean isUniform(double eps) {
+<b class="nc">&nbsp;		double v1 = xx * xx + yx * yx;</b>
+<b class="nc">&nbsp;		double v2 = xy * xy + yy * yy;</b>
+<b class="nc">&nbsp;		double e = (v1 + v2) * eps;</b>
+<b class="nc">&nbsp;		return Math.abs(v1 - v2) &lt;= e &amp;&amp; Math.abs(xx * xy + yx * yy) &lt;= e;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns TRUE if this transformation is a shift transformation. The shift
+&nbsp;	 * transformation performs shift only.
+&nbsp;	 */
+&nbsp;	public boolean isShift() {
+<b class="nc">&nbsp;		return xx == 1.0 &amp;&amp; yy == 1.0 &amp;&amp; 0 == xy &amp;&amp; 0 == yx;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns TRUE if this transformation is a shift transformation within the
+&nbsp;	 * given tolerance.
+&nbsp;	 * 
+&nbsp;	 * @param tol
+&nbsp;	 *            The tolerance value.
+&nbsp;	 */
+&nbsp;	public boolean isShift(double tol) {
+<b class="nc">&nbsp;		Point2D pt = transformWithoutShift(Point2D.construct(0.0, 1.0));</b>
+<b class="nc">&nbsp;		pt.y -= 1.0;</b>
+<b class="nc">&nbsp;		if (pt.sqrLength() &gt; tol * tol)</b>
+<b class="nc">&nbsp;			return false;</b>
+&nbsp;
+<b class="nc">&nbsp;		pt = transformWithoutShift(Point2D.construct(1.0, 0.0));</b>
+<b class="nc">&nbsp;		pt.x -= 1.0;</b>
+<b class="nc">&nbsp;		return pt.sqrLength() &lt;= tol * tol;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns TRUE if this is an orthonormal transformation with the given
+&nbsp;	 * tolerance. The orthonormal: Rotation or rotoinversion and shift
+&nbsp;	 * (preserves lengths of vectors and angles between vectors).
+&nbsp;	 * 
+&nbsp;	 * @param tol
+&nbsp;	 *            The tolerance value.
+&nbsp;	 */
+&nbsp;	public boolean isOrthonormal(double tol) {
+<b class="nc">&nbsp;		Transformation2D r = new Transformation2D();</b>
+<b class="nc">&nbsp;		r.xx = xx * xx + xy * xy;</b>
+<b class="nc">&nbsp;		r.xy = xx * yx + xy * yy;</b>
+<b class="nc">&nbsp;		r.yx = yx * xx + yy * xy;</b>
+<b class="nc">&nbsp;		r.yy = yx * yx + yy * yy;</b>
+<b class="nc">&nbsp;		r.xd = 0;</b>
+<b class="nc">&nbsp;		r.yd = 0;</b>
+&nbsp;
+<b class="nc">&nbsp;		return r.isIdentity(tol);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns TRUE if this matrix is degenerated (does not have an inverse)
+&nbsp;	 * within the given tolerance.
+&nbsp;	 * 
+&nbsp;	 * @param tol
+&nbsp;	 *            The tolerance value.
+&nbsp;	 */
+&nbsp;	public boolean isDegenerate(double tol) {
+<b class="nc">&nbsp;		return Math.abs(xx * yy - yx * xy) &lt;= 2 * tol</b>
+<b class="nc">&nbsp;				* (Math.abs(xx * yy) + Math.abs(yx * xy));</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Returns TRUE, if this transformation does not have rotation and shear
+&nbsp;	 * within the given tolerance.
+&nbsp;	 * 
+&nbsp;	 * @param tol
+&nbsp;	 *            The tolerance value.
+&nbsp;	 */
+&nbsp;	public boolean isScaleAndShift(double tol) {
+<b class="nc">&nbsp;		return xy * xy + yx * yx &lt; (xx * xx + yy * yy) * tol;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Set this transformation to be a shift.
+&nbsp;	 * 
+&nbsp;	 * @param x
+&nbsp;	 *            The X coordinate to shift to.
+&nbsp;	 * @param y
+&nbsp;	 *            The Y coordinate to shift to.
+&nbsp;	 */
+&nbsp;	public void setShift(double x, double y) {
+<b class="fc">&nbsp;		xx = 1;</b>
+<b class="fc">&nbsp;		xy = 0;</b>
+<b class="fc">&nbsp;		xd = x;</b>
+<b class="fc">&nbsp;		yx = 0;</b>
+<b class="fc">&nbsp;		yy = 1;</b>
+<b class="fc">&nbsp;		yd = y;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Set this transformation to be a scale.
+&nbsp;	 * 
+&nbsp;	 * @param x
+&nbsp;	 *            The X coordinate to scale to.
+&nbsp;	 * @param y
+&nbsp;	 *            The Y coordinate to scale to.
+&nbsp;	 */
+&nbsp;	public void setScale(double x, double y) {
+<b class="nc">&nbsp;		xx = x;</b>
+<b class="nc">&nbsp;		xy = 0;</b>
+<b class="nc">&nbsp;		xd = 0;</b>
+<b class="nc">&nbsp;		yx = 0;</b>
+<b class="nc">&nbsp;		yy = y;</b>
+<b class="nc">&nbsp;		yd = 0;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Set transformation to be a uniform scale.
+&nbsp;	 * 
+&nbsp;	 * @param _scale
+&nbsp;	 *            The scale of the transformation.
+&nbsp;	 */
+&nbsp;	public void setScale(double _scale) {
+<b class="nc">&nbsp;		setScale(_scale, _scale);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Sets the transformation to be a flip around the X axis. Flips the X
+&nbsp;	 * coordinates so that the x0 becomes x1 and vice verse.
+&nbsp;	 * 
+&nbsp;	 * @param x0
+&nbsp;	 *            The X coordinate to flip.
+&nbsp;	 * @param x1
+&nbsp;	 *            The X coordinate to flip to.
+&nbsp;	 */
+&nbsp;	public void setFlipX(double x0, double x1) {
+<b class="nc">&nbsp;		xx = -1;</b>
+<b class="nc">&nbsp;		xy = 0;</b>
+<b class="nc">&nbsp;		xd = x0 + x1;</b>
+<b class="nc">&nbsp;		yx = 0;</b>
+<b class="nc">&nbsp;		yy = 1;</b>
+<b class="nc">&nbsp;		yd = 0;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Sets the transformation to be a flip around the Y axis. Flips the Y
+&nbsp;	 * coordinates so that the y0 becomes y1 and vice verse.
+&nbsp;	 * 
+&nbsp;	 * @param y0
+&nbsp;	 *            The Y coordinate to flip.
+&nbsp;	 * @param y1
+&nbsp;	 *            The Y coordinate to flip to.
+&nbsp;	 */
+&nbsp;	public void setFlipY(double y0, double y1) {
+<b class="nc">&nbsp;		xx = 1;</b>
+<b class="nc">&nbsp;		xy = 0;</b>
+<b class="nc">&nbsp;		xd = 0;</b>
+<b class="nc">&nbsp;		yx = 0;</b>
+<b class="nc">&nbsp;		yy = -1;</b>
+<b class="nc">&nbsp;		yd = y0 + y1;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Set transformation to a shear.
+&nbsp;	 * 
+&nbsp;	 * @param proportionX
+&nbsp;	 *            The proportion of shearing in x direction.
+&nbsp;	 * @param proportionY
+&nbsp;	 *            The proportion of shearing in y direction.
+&nbsp;	 */
+&nbsp;	public void setShear(double proportionX, double proportionY) {
+<b class="nc">&nbsp;		xx = 1;</b>
+<b class="nc">&nbsp;		xy = proportionX;</b>
+<b class="nc">&nbsp;		xd = 0;</b>
+<b class="nc">&nbsp;		yx = proportionY;</b>
+<b class="nc">&nbsp;		yy = 1;</b>
+<b class="nc">&nbsp;		yd = 0;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Sets this transformation to be a rotation around point (0, 0).
+&nbsp;	 * 
+&nbsp;	 * When the axis Y is directed up and X is directed to the right, the
+&nbsp;	 * positive angle corresponds to the anti-clockwise rotation. When the axis
+&nbsp;	 * Y is directed down and X is directed to the right, the positive angle
+&nbsp;	 * corresponds to the clockwise rotation.
+&nbsp;	 * 
+&nbsp;	 * @param angle_in_Radians
+&nbsp;	 *            The rotation angle in radian.
+&nbsp;	 */
+&nbsp;	public void setRotate(double angle_in_Radians) {
+<b class="nc">&nbsp;		setRotate(Math.cos(angle_in_Radians), Math.sin(angle_in_Radians));</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Produces a transformation that swaps x and y coordinate values. xx = 0.0;
+&nbsp;	 * xy = 1.0; xd = 0; yx = 1.0; yy = 0.0; yd = 0;
+&nbsp;	 */
+&nbsp;	Transformation2D setSwapCoordinates() {
+<b class="fc">&nbsp;		xx = 0.0;</b>
+<b class="fc">&nbsp;		xy = 1.0;</b>
+<b class="fc">&nbsp;		xd = 0;</b>
+<b class="fc">&nbsp;		yx = 1.0;</b>
+<b class="fc">&nbsp;		yy = 0.0;</b>
+<b class="fc">&nbsp;		yd = 0;</b>
+<b class="fc">&nbsp;		return this;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Sets this transformation to be a rotation around point rotationCenter.
+&nbsp;	 * 
+&nbsp;	 * When the axis Y is directed up and X is directed to the right, the
+&nbsp;	 * positive angle corresponds to the anti-clockwise rotation. When the axis
+&nbsp;	 * Y is directed down and X is directed to the right, the positive angle
+&nbsp;	 * corresponds to the clockwise rotation.
+&nbsp;	 * 
+&nbsp;	 * @param angle_in_Radians
+&nbsp;	 *            The rotation angle in radian.
+&nbsp;	 * @param rotationCenter
+&nbsp;	 *            The center point of the rotation.
+&nbsp;	 */
+&nbsp;	void setRotate(double angle_in_Radians, Point2D rotationCenter) {
+<b class="nc">&nbsp;		setRotate(Math.cos(angle_in_Radians), Math.sin(angle_in_Radians),</b>
+&nbsp;				rotationCenter);
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Sets rotation for this transformation.
+&nbsp;	 * 
+&nbsp;	 * When the axis Y is directed up and X is directed to the right, the
+&nbsp;	 * positive angle corresponds to the anti-clockwise rotation. When the axis
+&nbsp;	 * Y is directed down and X is directed to the right, the positive angle
+&nbsp;	 * corresponds to the clockwise rotation.
+&nbsp;	 * 
+&nbsp;	 * @param cosA
+&nbsp;	 *            The rotation angle.
+&nbsp;	 * @param sinA
+&nbsp;	 *            The rotation angle.
+&nbsp;	 */
+&nbsp;
+&nbsp;	public void setRotate(double cosA, double sinA) {
+<b class="nc">&nbsp;		xx = cosA;</b>
+<b class="nc">&nbsp;		xy = -sinA;</b>
+<b class="nc">&nbsp;		xd = 0;</b>
+<b class="nc">&nbsp;		yx = sinA;</b>
+<b class="nc">&nbsp;		yy = cosA;</b>
+<b class="nc">&nbsp;		yd = 0;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Sets this transformation to be a rotation around point rotationCenter.
+&nbsp;	 * 
+&nbsp;	 * When the axis Y is directed up and X is directed to the right, the
+&nbsp;	 * positive angle corresponds to the anti-clockwise rotation. When the axis
+&nbsp;	 * Y is directed down and X is directed to the right, the positive angle
+&nbsp;	 * corresponds to the clockwise rotation.
+&nbsp;	 * 
+&nbsp;	 * @param cosA
+&nbsp;	 *            The cos of the rotation angle.
+&nbsp;	 * @param sinA
+&nbsp;	 *            The sin of the rotation angle.
+&nbsp;	 * @param rotationCenter
+&nbsp;	 *            The center point of the rotation.
+&nbsp;	 */
+&nbsp;	void setRotate(double cosA, double sinA, Point2D rotationCenter) {
+<b class="nc">&nbsp;		setShift(-rotationCenter.x, -rotationCenter.y);</b>
+<b class="nc">&nbsp;		Transformation2D temp = new Transformation2D();</b>
+<b class="nc">&nbsp;		temp.setRotate(cosA, sinA);</b>
+<b class="nc">&nbsp;		multiply(temp);</b>
+<b class="nc">&nbsp;		shift(rotationCenter.x, rotationCenter.y);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Shifts the transformation.
+&nbsp;	 * 
+&nbsp;	 * @param x
+&nbsp;	 *            The shift factor in X direction.
+&nbsp;	 * @param y
+&nbsp;	 *            The shift factor in Y direction.
+&nbsp;	 */
+&nbsp;	public void shift(double x, double y) {
+<b class="nc">&nbsp;		xd += x;</b>
+<b class="nc">&nbsp;		yd += y;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Scales the transformation.
+&nbsp;	 * 
+&nbsp;	 * @param x
+&nbsp;	 *            The scale factor in X direction.
+&nbsp;	 * @param y
+&nbsp;	 *            The scale factor in Y direction.
+&nbsp;	 */
+&nbsp;	public void scale(double x, double y) {
+<b class="nc">&nbsp;		xx *= x;</b>
+<b class="nc">&nbsp;		xy *= x;</b>
+<b class="nc">&nbsp;		xd *= x;</b>
+<b class="nc">&nbsp;		yx *= y;</b>
+<b class="nc">&nbsp;		yy *= y;</b>
+<b class="nc">&nbsp;		yd *= y;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Flips the transformation around the X axis.
+&nbsp;	 * 
+&nbsp;	 * @param x0
+&nbsp;	 *            The X coordinate to flip.
+&nbsp;	 * @param x1
+&nbsp;	 *            The X coordinate to flip to.
+&nbsp;	 */
+&nbsp;	public void flipX(double x0, double x1) {
+<b class="nc">&nbsp;		xx = -xx;</b>
+<b class="nc">&nbsp;		xy = -xy;</b>
+<b class="nc">&nbsp;		xd = x0 + x1 - xd;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Flips the transformation around the Y axis.
+&nbsp;	 * 
+&nbsp;	 * @param y0
+&nbsp;	 *            The Y coordinate to flip.
+&nbsp;	 * @param y1
+&nbsp;	 *            The Y coordinate to flip to.
+&nbsp;	 */
+&nbsp;	public void flipY(double y0, double y1) {
+<b class="nc">&nbsp;		yx = -yx;</b>
+<b class="nc">&nbsp;		yy = -yy;</b>
+<b class="nc">&nbsp;		yd = y0 + y1 - yd;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Shears the transformation.
+&nbsp;	 * 
+&nbsp;	 * @param proportionX
+&nbsp;	 *            The proportion of shearing in x direction.
+&nbsp;	 * @param proportionY
+&nbsp;	 *            The proportion of shearing in y direction.
+&nbsp;	 */
+&nbsp;	public void shear(double proportionX, double proportionY) {
+<b class="nc">&nbsp;		Transformation2D temp = new Transformation2D();</b>
+<b class="nc">&nbsp;		temp.setShear(proportionX, proportionY);</b>
+<b class="nc">&nbsp;		multiply(temp);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Rotates the transformation.
+&nbsp;	 * 
+&nbsp;	 * @param angle_in_Radians
+&nbsp;	 *            The rotation angle in radian.
+&nbsp;	 */
+&nbsp;	public void rotate(double angle_in_Radians) {
+<b class="nc">&nbsp;		Transformation2D temp = new Transformation2D();</b>
+<b class="nc">&nbsp;		temp.setRotate(angle_in_Radians);</b>
+<b class="nc">&nbsp;		multiply(temp);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Rotates the transformation.
+&nbsp;	 * 
+&nbsp;	 * @param cos
+&nbsp;	 *            The cos angle of the rotation.
+&nbsp;	 * @param sin
+&nbsp;	 *            The sin angle of the rotation.
+&nbsp;	 */
+&nbsp;	public void rotate(double cos, double sin) {
+<b class="nc">&nbsp;		Transformation2D temp = new Transformation2D();</b>
+<b class="nc">&nbsp;		temp.setRotate(cos, sin);</b>
+<b class="nc">&nbsp;		multiply(temp);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Rotates the transformation aroung a center point.
+&nbsp;	 * 
+&nbsp;	 * @param cos
+&nbsp;	 *            The cos angle of the rotation.
+&nbsp;	 * @param sin
+&nbsp;	 *            sin angle of the rotation.
+&nbsp;	 * @param rotationCenter
+&nbsp;	 *            The center point of the rotation.
+&nbsp;	 */
+&nbsp;	public void rotate(double cos, double sin, Point2D rotationCenter) {
+<b class="nc">&nbsp;		Transformation2D temp = new Transformation2D();</b>
+<b class="nc">&nbsp;		temp.setRotate(cos, sin, rotationCenter);</b>
+<b class="nc">&nbsp;		multiply(temp);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Produces inverse matrix for this matrix and puts result into the inverse
+&nbsp;	 * parameter.
+&nbsp;	 * 
+&nbsp;	 * @param inverse
+&nbsp;	 *            The result inverse matrix.
+&nbsp;	 */
+&nbsp;	public void inverse(Transformation2D inverse) {
+<b class="nc">&nbsp;		double det = xx * yy - xy * yx;</b>
+&nbsp;
+<b class="nc">&nbsp;		if (det == 0) {</b>
+<b class="nc">&nbsp;			inverse.setZero();</b>
+&nbsp;			return;
+&nbsp;		}
+&nbsp;
+<b class="nc">&nbsp;		det = 1 / det;</b>
+&nbsp;
+<b class="nc">&nbsp;		inverse.xd = (xy * yd - xd * yy) * det;</b>
+<b class="nc">&nbsp;		inverse.yd = (xd * yx - xx * yd) * det;</b>
+<b class="nc">&nbsp;		inverse.xx = yy * det;</b>
+<b class="nc">&nbsp;		inverse.xy = -xy * det;</b>
+<b class="nc">&nbsp;		inverse.yx = -yx * det;</b>
+<b class="nc">&nbsp;		inverse.yy = xx * det;</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Inverses the matrix.
+&nbsp;	 * 
+&nbsp;	 */
+&nbsp;	public void inverse() {
+<b class="nc">&nbsp;		inverse(this);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Extracts scaling part of the transformation. this == scale *
+&nbsp;	 * rotateNshearNshift.
+&nbsp;	 * 
+&nbsp;	 * @param scale
+&nbsp;	 *            The destination matrix where the scale part is copied.
+&nbsp;	 * @param rotateNshearNshift
+&nbsp;	 *            The destination matrix where the part excluding rotation is
+&nbsp;	 *            copied.
+&nbsp;	 */
+&nbsp;	public void extractScaleTransform(Transformation2D scale,
+&nbsp;			Transformation2D rotateNshearNshift) {
+&nbsp;
+<b class="nc">&nbsp;		scale.setScale(Math.sqrt(xx * xx + xy * xy),</b>
+<b class="nc">&nbsp;				Math.sqrt(yx * yx + yy * yy));</b>
+<b class="nc">&nbsp;		rotateNshearNshift.setScale(1.0 / scale.xx, 1.0 / scale.yy);</b>
+<b class="nc">&nbsp;		rotateNshearNshift.multiply(this);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;	public long estimateMemorySize()
+&nbsp;	{
+<b class="fc">&nbsp;		return SIZE_OF_TRANSFORMATION_2D;</b>
+&nbsp;	}
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-02-21 16:04</div>
+</div>
+</body>
+</html>
