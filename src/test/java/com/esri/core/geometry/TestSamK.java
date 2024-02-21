@@ -34,7 +34,7 @@ import org.junit.Test;
 //import org.junit.jupiter.api.AfterAll;
 //import org.junit.jupiter.api.BeforeAll;
 
-public class TestClipNEW {
+public class TestSamK {
         // This static initialization ensures it's only done once.
         // static {
         // BranchCC.visitedBranch = new boolean[36];
